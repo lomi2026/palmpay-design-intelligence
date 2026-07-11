@@ -1,0 +1,26 @@
+/* One brand treatment everywhere: the same circular navigation logo, no outer stroke. */
+.pp-unified-nav-logo,
+.brand-mark.pp-unified-nav-logo{
+  width:32px !important;
+  height:32px !important;
+  min-width:32px !important;
+  display:grid !important;
+  place-items:center !important;
+  overflow:hidden !important;
+  border:0 !important;
+  border-radius:50% !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.pp-unified-nav-logo img,
+.brand-mark.pp-unified-nav-logo img{
+  width:32px !important;
+  height:32px !important;
+  display:block !important;
+  border-radius:50% !important;
+  object-fit:cover !important;
+  filter:none !important;
+}
+.brand .pp-unified-nav-logo{margin-right:0}
+.logo.pp-unified-nav-logo,
+.pp-platform-logo.pp-unified-nav-logo{width:32px !important;height:32px !important;min-width:32px !important;border:0 !important;border-radius:50% !important;background:transparent !important;box-shadow:none !important}

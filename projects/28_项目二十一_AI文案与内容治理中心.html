@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>AI 文案与内容治理中心｜项目二十一</title>
+  <style>
+    :root{
+      --bg:#080808;--panel:#111;--panel-2:#171717;--panel-3:#202020;
+      --text:#f5f5f5;--muted:#9c9c9c;--line:#2b2b2b;--strong:#fff;
+      --soft:#242424;--good:#dff7df;--warn:#fff0bc;--risk:#ffd9d9;
+      --shadow:0 28px 90px rgba(0,0,0,.34);--radius:24px;
+    }
+    [data-theme="light"]{
+      --bg:#f4f4f1;--panel:#fff;--panel-2:#f8f8f5;--panel-3:#ecece8;
+      --text:#151515;--muted:#6b6b67;--line:#deded8;--strong:#111;
+      --soft:#ecece7;--good:#e8f7e6;--warn:#fff3c7;--risk:#ffe5e5;
+      --shadow:0 28px 90px rgba(40,40,20,.11);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.065),transparent 30%),var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.55;
+    }
+    button,input,textarea{font:inherit}
+    .shell{max-width:1460px;margin:auto;padding:22px}
+    .topbar{
+      position:sticky;top:14px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px 12px 18px;border:1px solid var(--line);border-radius:18px;
+      background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--strong);color:var(--bg);font-weight:900;font-size:12px}
+    .brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:8px 12px;cursor:pointer;transition:.2s ease;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .btn.primary{background:var(--strong);color:var(--bg);border-color:var(--strong);font-weight:760}
+
+    .hero{margin-top:26px;border:1px solid var(--line);border-radius:30px;overflow:hidden;background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:var(--shadow)}
+    .hero-grid{display:grid;grid-template-columns:1.35fr .65fr;min-height:610px}
+    .hero-copy{padding:68px 58px 48px}
+    .eyebrow{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:850}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--strong)}
+    h1{margin:22px 0 20px;font-size:clamp(46px,6.2vw,86px);line-height:.98;letter-spacing:-.065em;max-width:1120px}
+    .hero-copy>p{font-size:18px;color:var(--muted);max-width:930px;margin:0}
+    .hero-summary{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .summary-chip{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+    .summary-chip small{display:block;color:var(--muted);font-weight:800;margin-bottom:6px}
+    .summary-chip strong{font-size:16px;line-height:1.35;display:block}
+    .hero-side{
+      border-left:1px solid var(--line);padding:34px 28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+      repeating-linear-gradient(90deg,transparent 0 49px,var(--line) 50px),
+      repeating-linear-gradient(0deg,transparent 0 49px,var(--line) 50px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .hero-side-title{font-size:12px;color:var(--muted);letter-spacing:.13em;font-weight:850}
+    .outcome-stack{display:grid;gap:12px;margin-top:18px}
+    .outcome-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:color-mix(in srgb,var(--panel) 88%,transparent)}
+    .outcome-card strong{display:block;font-size:14px;margin-bottom:4px}
+    .outcome-card span{font-size:12px;color:var(--muted)}
+    .hero-note{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+
+    .section{margin-top:58px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:20px}
+    .section-kicker{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:850}
+    h2{font-size:clamp(30px,3.4vw,50px);line-height:1.04;letter-spacing:-.045em;margin:6px 0 0}
+    .section-desc{max-width:720px;color:var(--muted);font-size:14px}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px}
+
+    .exec-summary{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .signal-board{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .signal{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .signal-label{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.08em}
+    .signal-value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:12px 0 6px}
+    .signal-desc{font-size:12px;color:var(--muted)}
+    .summary-story{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+    .summary-story small{font-size:11px;letter-spacing:.12em;font-weight:850;opacity:.55}
+    .summary-story h3{font-size:30px;line-height:1.05;letter-spacing:-.045em;margin:18px 0 14px}
+    .summary-story p{margin:0;font-size:14px;opacity:.68}
+    .summary-story .formula{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:13px;font-weight:760}
+
+    .library-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .library-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:235px;position:relative;overflow:hidden}
+    .library-card::after{content:"";position:absolute;right:-46px;bottom:-54px;width:130px;height:130px;border:1px solid var(--line);border-radius:50%}
+    .library-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .library-card strong{display:block;font-size:20px;margin:22px 0 8px}
+    .library-card p{font-size:12px;color:var(--muted);margin:0}
+    .library-meta{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;font-weight:760;position:relative;z-index:1}
+
+    .pipeline{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:clamp(16px,1.55vw,26px);overflow-x:auto;overflow-y:hidden;scrollbar-gutter:stable}
+    .pipeline-grid{
+      display:grid;
+      grid-template-columns:minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr);
+      gap:6px;min-width:1150px;align-items:stretch;
+    }
+    .pipe-step{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--panel-2);padding:18px;min-height:190px}
+    .pipe-step small{display:block;color:var(--muted);font-size:11px;font-weight:850}
+    .pipe-step strong{display:block;font-size:15px;line-height:1.42;margin:12px 0 8px;text-wrap:balance}
+    .pipe-step p{font-size:11px;line-height:1.68;color:var(--muted);margin:0}
+    .pipe-badge{margin-top:14px;display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800}
+    .pipe-link{display:grid;place-items:center;color:var(--muted);font-size:21px}
+
+    .principle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .principle-card{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:22px;min-height:245px}
+    .principle-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .principle-card strong{display:block;font-size:20px;margin:22px 0 8px}
+    .principle-card p{font-size:12px;color:var(--muted);margin:0}
+    .principle-list{display:grid;gap:8px;margin-top:16px}
+    .principle-list span{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:9px 10px;font-size:11px}
+
+    .preview-shell{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}
+    .preview-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .preview-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .app-frame{border:1px solid var(--line);border-radius:24px;background:var(--bg);padding:20px}
+    .app-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .app-head strong{font-size:14px}.app-head span{font-size:11px;color:var(--muted)}
+    .content-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .summary-box{border:1px solid var(--line);border-radius:13px;background:var(--panel-2);padding:12px}
+    .summary-box small{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}
+    .summary-box strong{font-size:18px}
+    .content-item{border:1px solid var(--line);border-radius:17px;background:var(--panel-2);padding:15px;margin-bottom:10px}
+    .content-top{display:flex;align-items:start;justify-content:space-between;gap:12px}
+    .content-copy small{display:block;font-size:9px;color:var(--muted);margin-bottom:5px}
+    .content-copy strong{display:block;font-size:13px}
+    .content-copy p{font-size:10px;color:var(--muted);margin:5px 0 0}
+    .content-risk{font-size:9px;padding:5px 7px;border-radius:999px;font-weight:800;white-space:nowrap}
+    .content-risk.high{background:var(--risk);color:#421a1a}.content-risk.medium{background:var(--warn);color:#3d3210}.content-risk.good{background:var(--good);color:#173617}
+    .rewrite-box{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
+    .rewrite-box div{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg)}
+    .rewrite-box small{display:block;font-size:8px;color:var(--muted);margin-bottom:4px}
+    .rewrite-box strong{font-size:10px;line-height:1.45;display:block}
+    .cta-row{display:flex;gap:9px;margin-top:14px}
+    .cta{flex:1;border-radius:11px;padding:11px 13px;text-align:center;font-size:12px;font-weight:800}
+    .cta.primary{background:var(--strong);color:var(--bg)}.cta.secondary{border:1px solid var(--line)}
+    .anatomy-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .anatomy-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .anatomy-list{display:grid;gap:10px}
+    .anatomy-item{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px;display:grid;grid-template-columns:34px 1fr;gap:11px}
+    .anatomy-no{width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:10px;font-weight:850}
+    .anatomy-item strong{display:block;font-size:13px}.anatomy-item span{font-size:11px;color:var(--muted)}
+
+    .example-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .example-card{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:22px;min-height:270px}
+    .example-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .example-card strong{display:block;font-size:20px;margin:22px 0 12px}
+    .copy-before,.copy-after{padding:12px;border-radius:12px;font-size:11px;line-height:1.6}
+    .copy-before{background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+    .copy-after{margin-top:8px;background:var(--strong);color:var(--bg)}
+    .copy-label{display:block;font-size:8px;font-weight:850;letter-spacing:.08em;margin-bottom:5px;opacity:.58}
+
+    .governance-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}
+    .governance-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;overflow:auto}
+    .governance-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .governance-table{min-width:850px;display:grid;gap:9px}
+    .governance-head,.governance-row{display:grid;grid-template-columns:1.05fr 1.2fr 1fr;gap:12px;align-items:center}
+    .governance-head{padding:0 14px 9px;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.08em}
+    .governance-row{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px}
+    .governance-row strong{font-size:12px}.governance-row span{font-size:11px;color:var(--muted)}
+    .governance-result{border:1px solid var(--line);border-radius:999px;padding:7px 10px;text-align:center;font-size:10px;font-weight:800;white-space:nowrap}
+    .governance-side{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:26px;display:flex;flex-direction:column;justify-content:space-between}
+    .governance-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .governance-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .governance-side p{font-size:13px;opacity:.65;margin:0}
+    .governance-factors{display:grid;gap:8px;margin-top:20px}
+    .governance-factors span{padding:10px 0;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:11px}
+    .governance-side .note{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:12px;font-weight:760}
+
+    .mvp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .week-card{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .week-card.primary{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .week-card small{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.1em}
+    .week-card.primary small{color:color-mix(in srgb,var(--bg) 55%,transparent)}
+    .week-card h3{font-size:28px;letter-spacing:-.04em;margin:17px 0 8px}
+    .week-card p{font-size:12px;color:var(--muted);margin:0}
+    .week-card.primary p{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+    .mvp-list{display:grid;gap:9px;margin-top:20px}
+    .mvp-item{display:grid;grid-template-columns:34px 1fr;gap:11px;padding:12px 0;border-top:1px solid var(--line)}
+    .week-card.primary .mvp-item{border-color:color-mix(in srgb,var(--bg) 18%,transparent)}
+    .mvp-no{width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:10px;font-weight:850}
+    .week-card.primary .mvp-no{background:var(--bg);color:var(--strong)}
+    .mvp-item strong{display:block;font-size:13px}.mvp-item span{font-size:11px;color:var(--muted)}
+    .week-card.primary .mvp-item span{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+
+    .metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    .metric-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:215px}
+    .metric-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .metric-card strong{display:block;font-size:20px;margin:24px 0 8px;letter-spacing:-.04em}
+    .metric-card p{font-size:12px;color:var(--muted);margin:0}
+    .metric-card .formula{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .score-shell{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .score-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .score-summary{display:flex;align-items:baseline;gap:10px}
+    .score-number{font-size:34px;font-weight:850;letter-spacing:-.05em}
+    .score-label{font-size:13px;color:var(--muted)}
+    .table-scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1120px}
+    th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--panel-2)}
+    td{font-size:13px}
+    .metric-name{font-weight:750}.metric-help{display:block;color:var(--muted);font-size:11px;margin-top:3px;max-width:360px}
+    .tag{display:inline-flex;align-items:center;justify-content:center;min-width:max-content;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;line-height:1.2;font-weight:750;white-space:nowrap;word-break:keep-all}
+    #scoreTable th:first-child,#scoreTable td:first-child{min-width:76px;white-space:nowrap}
+    #scoreTable th:nth-child(6),#scoreTable td:nth-child(6){min-width:72px;width:72px;white-space:nowrap;word-break:keep-all}
+    .input{width:100%;min-width:74px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:8px 9px;outline:none}
+    .input:focus{border-color:var(--muted)}
+    .progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;min-width:120px}
+    .progress>span{display:block;height:100%;background:var(--strong);width:0;border-radius:inherit;transition:.35s ease}
+    .progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+    .status{font-size:11px;font-weight:850;padding:5px 8px;border-radius:999px;display:inline-flex;white-space:nowrap}
+    .status.good{background:var(--good);color:#173617}.status.warn{background:var(--warn);color:#3d3210}.status.risk{background:var(--risk);color:#421a1a}
+
+    .action-grid{display:grid;grid-template-columns:1fr .9fr;gap:16px}
+    .checklist{display:grid;gap:9px}
+    .check-row{display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2)}
+    .check-row input{width:18px;height:18px;margin-top:2px;accent-color:var(--strong)}
+    .check-row strong{font-size:13px;display:block}.check-row span{font-size:11px;color:var(--muted)}
+    textarea{width:100%;min-height:300px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);padding:14px;resize:vertical;outline:none}
+    textarea:focus{border-color:var(--muted)}
+    footer{margin:56px 0 28px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:18px}
+
+    @media(max-width:1200px){
+      .library-grid{grid-template-columns:repeat(3,1fr)}
+      .metric-grid{grid-template-columns:repeat(3,1fr)}
+    }
+    @media(max-width:1100px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-side{border-left:none;border-top:1px solid var(--line);min-height:430px}
+      .exec-summary,.preview-shell,.governance-grid,.action-grid{grid-template-columns:1fr}
+      .mvp-grid{grid-template-columns:1fr}
+      .principle-grid,.example-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:860px){
+      .pipeline{overflow:visible;padding:16px}
+      .pipeline-grid{min-width:0;grid-template-columns:1fr;gap:8px}
+      .pipe-link{min-height:28px;transform:rotate(90deg)}
+      .pipe-step{min-height:auto;padding:20px}
+    }
+    @media(max-width:720px){
+      .shell{padding:12px}.topbar{top:8px;align-items:flex-start}
+      .brand-sub{display:none}.actions .btn:not(.primary){display:none}
+      .hero-copy{padding:44px 22px 32px}h1{font-size:44px}.hero-side{padding:22px}
+      .hero-summary,.signal-board,.library-grid,.principle-grid,.example-grid,.metric-grid{grid-template-columns:1fr}
+      .section-head{align-items:start;flex-direction:column}
+      .content-summary,.rewrite-box{grid-template-columns:repeat(2,1fr)}
+      .cta-row{flex-direction:column}
+      footer{flex-direction:column}
+    }
+    @media print{
+      .topbar,.actions{display:none!important}
+      body{background:#fff;color:#111}.shell{max-width:none;padding:0}
+      .hero,.panel,.signal-board,.summary-story,.library-card,.pipeline,.principle-card,.preview-panel,.anatomy-panel,
+      .example-card,.governance-panel,.governance-side,.week-card,.metric-card,.score-shell{box-shadow:none;break-inside:avoid}
+      .hero{margin-top:0}.section{margin-top:30px}
+      .input,textarea{border:none;background:transparent;color:#111;padding:0}
+    }
+  </style>
+<style id="pp-platform-nav-style">
+    body{padding-top:58px!important}
+    .topbar{top:72px!important}
+    .pp-platform-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;border-bottom:1px solid var(--line,#292929);background:color-mix(in srgb,var(--bg,#080808) 90%,transparent);backdrop-filter:blur(18px);font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .pp-platform-inner{max-width:1460px;height:100%;margin:auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+    .pp-platform-brand{display:flex;align-items:center;gap:10px;min-width:0;color:var(--text,#f5f5f5);text-decoration:none}
+    .pp-platform-logo{width:38px;height:32px;border:1px solid var(--line,#2b2b2b);border-radius:13px;display:grid;place-items:center;background:var(--panel,#111);flex:0 0 auto}
+    .pp-platform-logo img{width:20px;height:20px;object-fit:contain}
+    [data-theme="light"] .pp-platform-logo img{filter:invert(1)}
+    .pp-platform-title{font-size:12px;font-weight:720;white-space:nowrap}.pp-platform-crumb{font-size:11px;color:var(--muted,#999);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pp-platform-links{margin-left:auto;display:flex;align-items:center;gap:7px}.pp-platform-links a,.pp-platform-links span{height:34px;padding:0 10px;border:1px solid var(--line,#2b2b2b);border-radius:9px;display:inline-flex;align-items:center;color:var(--text,#f5f5f5);text-decoration:none;font-size:11px;background:var(--panel-2,#171717)}.pp-platform-links a:hover{border-color:var(--muted,#999)}.pp-platform-links .disabled{opacity:.35}
+    @media(max-width:720px){body{padding-top:54px!important}.topbar{top:62px!important}.pp-platform-nav{height:54px}.pp-platform-inner{padding:0 12px}.pp-platform-title,.pp-platform-links a:first-child,.pp-platform-links .disabled:first-child{display:none}.pp-platform-crumb{max-width:150px}.pp-platform-links a,.pp-platform-links span{padding:0 8px}}
+    @media print{.pp-platform-nav{display:none!important}body{padding-top:0!important}.topbar{top:0!important}}
+    </style></head>
+<body><nav class="pp-platform-nav"><div class="pp-platform-inner"><a class="pp-platform-brand" href="index.html"><span class="pp-platform-logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHYAAACCCAYAAACTpDweAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAACG9JREFUeAHtnY1x2zgQhVepICUoHfg60FVgXwViKjhfBUIqsFOBmAqSVEBdBU4HdAdJB++wBnmhbf2Q4gOwovnNYKxEM+KSnwiI2AW5kAkCYOn/XPt21TT99/vm7V++PTbtm2//LhaLR5mxiZf53reNbxWG8+DbuvlCzFjAy1j59hU8trPgjDRCK8Sj0m3ITBoSCH3JFvMZHA89uL6VyMcWs2Ae+P2j6CdscIdZ8Dj8AfwbdoR2qX1by8wwEMbRB9in9u1aZo6DMI5WuDy2mLvn18DeOHouG9/ey8yT1BuELm0q1DAw/i4kEwgX/xvfVjJNfvj2V6556HeSGIRu986/rGS6UhVNPujZu8XUx1/YvXyJTY3E3XOSrhih29Wz9EreNo++3fru+btEJqpYhC5oK9Pucs+h9O1TzPE3iliEn/x/+3YrvxPcM69xvn32gn8JGbpYL/VGQre7lJk+PPrmvNwvQoQm1gvV8VOFrsQOeiboAds1rxXtQfTLdy22epOdbx/NlOmguXyBPe5xZBYI+dOAh9BjmfcLB7uzRsWAfXCwR40cs1ewPVlfyEBgU66yRarJDdieZCjkTGBXbo2YZy/CWFrBLoWMBHblKluwz16ExHcNuxRCArbl1mBVTiJ0vZYphAxsy1U2MgbYvIzpUkgkMFW5CH26ZW4lMrAvdzt0hzawjZNEwL7cu747Yn1MdZIY2Jd7e2oHlrCNk0zAtlydV1geC76CXZxkBrblVoeCXsEuTowA23JX+wKuYBMnxoBdudXLQK2OrU6MArtyn1J+bfnpSuyhNUFOSCB8eWl5zia2T2KP4v9XsNcNOyGB19moGsRsCWydubqfV93gLKXhnJDA8dmzcfOtz7djQe4rqVewgxMS6DclypR7j3w8l9oEZOUyxwkJDJvnZsotkZ7XUptgbpEfJyRwXvLiUuXul9oEknt8cEIC4zJSlyb3sNSEQRzCCQlw0oyXIve41CaACnlwQgLc3PElyD29uA15xDohgTgFAZblFn03nPruLE5IIG6VB1NuBQ7FkI3WSIcTEkhT5TFaLsJdVRkUQ7abUqwTEkhbunO2XOSS2my8RnyckECeeqzBcpFTahNAbJyQQN4iu95ykVtqE0RMnJCAjcrJk3JhQWoTSCyckICtctjNkTjX4FDIWBAHJyRgs8Z5syfONTgUwgB8SiEBrtQtuM8O2HTiZKU+CyEArRQBl1JIgCu16HyuA48NglRGoUIhBBCWuz4wxZZCApGkdj6fKdecVP1AlthSSCCy1M52mHLHQFlcho5UhSG2FBJIJLWzvUnkovFCqjJWbCkkkFhqZ7u55DohgD1SlTFiSyGBTFI7208t1wkBHJCqnCu2FBLILLUTRyq5TgjgiFTlHLGlkIARqZ14Yst1QgAnpCpDxZZCAsakduKKJdcJCfSYaBkithQS4EqthAz4qUwnJNCzaqSv2FJIgD/3a12sExIYUArUR+xXIYF4E/rM+qQNeDghgYH1XafE6gBNWXqI+FkaRn3SBjyckMAZRXvHxF6S1Jazl0diQlKVQ2IvUWrLYLmYmFRln9hLltrSWy4mKFV5KXYKUltOysVEpSpdsUypVu7utj4S4wY8nJAAaXVDK5YpdY3xMG+dsN4T4wY8nJAAcclKu3bHmlQtN3Hgse7EuAEPJyRAXocUCp84ga3B4arzmUy5Or9agYcTEoiwuEwYIGLpJWzeKMsJCUT6kSljQYJ6WtiS64QEIl45yBiQsEgaNuQ6IYHIl4NyLshQ+Y68cp2QQIJrfDkHZFzOgDxynZBAmombWoYCA2tUkFauExJINxs3TCwMLTxCGrlOSCDtFGt/seBJdUICceWWQgLp580f+ga2Bo8axGe0IY7cUkggTzLkdLkQ4twdtYZduaWQQL4MV3UqMNYSwX3UsCe3FBLIm7bcHgssptSWGnbklkIC+XPR7lBgKaS21Ohzb8D+B/UcuaWQgI1bK9zuCyyl1JbTd/McdnCHyC2FBOzcL2P1MrAcUltyyC2FBGzdBOXVswFyP/QhpdxSSMCW1J/dwCxIbWHLLfB8yYZ+Pu3Zs7B3u6KqG5yF5wJ0ocpt9lGXHi6FCGzeg+qpDGjR7rT/81Ns8cu3PxeLxQ8xCMKSEif2+OCP2ePTI9D8Cz2IO7GFftkqkM9cBoal7lTqs/+B7ceM0h5ZNhbYfsz56lDQFeySXS5sS302P7x4EfjS/9GUD+2pjWQK39V8kQzAbvfb8qHbDb/rvtO8YfHRmS0lMpy5FyD1n1dj6z5gs5a3SzK5sN39Km7I/ugOlbBNdLmwL7WUc8AbPnPBrRqJwb2MAW9QLuxL5UyJIlzj1rAL864xa9ilxqFr1RE7vITtcdfSU61iUIG0MvLQzr/MlljCwlOt2FCzUacOguWzN+dTrdhUIGek+h4Qq2dvjqdaMal9u5GcIOQ572GPLY582xHivoM99FiOHksXQgLhIOp9Fy2l2TQd+c23781rbUvfVr7pZZKlOfGdhKlBSv6ZJrYFYcGVdoVLmenDowSh34QIXazSdCX6S452fTlBtPf47Nt9U+hAJYrYlqZ7dhK6vZnf7Hz72CsjcyZRxbYg/MK7k7l71vFTu92dROadJEDHD98++JcfJYwpbw3talXoHymkZgH2pybZUC5fhpKkK94HbF4eMdn59mmyZ+gpYHvu+Rxq5J41sgLCLJD1vO8pdLJe98FqIWA+cLnjb4Uck/WXhj9IN7iM7llvCbySmWHA7vibLkc6VRC6ZyvZo3kcZYP84+8W8zgaj0bwyacxEqkwj6PpQKicrBCPahaaEfC76K+zUEM0gvVX9MMZMitM7EdRtrnimCD8yFn5di0hVaitlaaZlkcJKTRt32PmRXPxHwKDoGu5jyzSAAAAAElFTkSuQmCC" alt="PalmPay"></span><span class="pp-platform-title">PalmPay Design</span><span class="pp-platform-crumb">AI 项目库 / P21 AI 文案与内容治理中心</span></a><div class="pp-platform-links"><a href="index.html">返回项目库</a><a href="27_项目二十_AI原型批量生成工作流.html" title="上一个项目">← 上一个</a><a href="14_项目七_AI核心漏斗诊断中心.html" title="下一个项目">下一个 →</a></div></div></nav>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P21</div>
+      <div>
+        <div class="brand-title">AI 文案与内容治理中心</div>
+        <div class="brand-sub">让产品语言统一、清晰、可执行并适配不同国家与地区</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeBtn">切换亮色</button>
+      <button class="btn" id="resetBtn">重置记录</button>
+      <button class="btn primary" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="dot"></span> Project 21 · AI Content Governance Center</div>
+          <h1>从“逐页面临时写文案”，<br>升级为“统一规则、术语、状态表达与多语言治理”。</h1>
+          <p>
+            产品文案并不是页面装饰，而是用户理解规则、判断状态、完成任务和建立信任的重要界面。
+            当同一状态使用不同表达、错误提示缺少原因和下一步、金融术语复杂、英文语法与大小写不统一、
+            风险文案过度恐吓、合规说明过长、多语言翻译脱离当地语境时，
+            用户咨询、误操作、流程中断和品牌不信任都会增加。
+            AI 文案与内容治理中心通过企业内容规范库、术语库、状态模板和自动检查，
+            将分散文案转化为可复用、可评审、可追踪的产品内容资产。
+          </p>
+          <div class="hero-summary">
+            <div class="summary-chip"><small>现状</small><strong>文案分散在页面、需求、代码和个人经验中</strong></div>
+            <div class="summary-chip"><small>升级</small><strong>规范库 + 术语库 + 自动检查 + 多语言治理</strong></div>
+            <div class="summary-chip"><small>结果</small><strong>减少咨询与误解，提高任务完成、品牌一致性和国际化质量</strong></div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div>
+            <div class="hero-side-title">内容治理必须持续回答四个问题</div>
+            <div class="outcome-stack">
+              <div class="outcome-card"><strong>产品应该使用什么表达</strong><span>明确语气、术语、大小写、句式和不同组件的内容规则。</span></div>
+              <div class="outcome-card"><strong>用户能否理解当前发生了什么</strong><span>状态、错误、风险、审核与交易结果必须清晰具体。</span></div>
+              <div class="outcome-card"><strong>用户是否知道下一步做什么</strong><span>提示必须提供可执行动作、恢复路径与必要条件。</span></div>
+              <div class="outcome-card"><strong>不同语言和地区是否表达正确</strong><span>兼顾语法、文化、金融术语、法规和本地使用习惯。</span></div>
+            </div>
+          </div>
+          <div class="hero-note">内容治理的目标不是让文案更“好听”，而是让用户更准确地理解状态、规则、风险与下一步行动。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">01 · MANAGEMENT SUMMARY</div>
+          <h2>为什么文案问题容易被低估，却持续制造体验成本</h2>
+        </div>
+        <div class="section-desc">文案问题往往不影响页面能否打开，却会影响用户是否理解、是否敢操作、是否需要咨询和是否愿意信任产品。</div>
+      </div>
+      <div class="exec-summary">
+        <div class="signal-board">
+          <div class="signal"><div class="signal-label">内容生产</div><div class="signal-value">逐项目临时写</div><div class="signal-desc">相同状态在不同页面被重复创作，表达逐渐分裂。</div></div>
+          <div class="signal"><div class="signal-label">错误提示</div><div class="signal-value">只说明失败</div><div class="signal-desc">缺少具体原因、影响范围、修正方式和恢复动作。</div></div>
+          <div class="signal"><div class="signal-label">国际化</div><div class="signal-value">逐字翻译</div><div class="signal-desc">忽略金融术语、语法、文化语境和当地表达习惯。</div></div>
+          <div class="signal"><div class="signal-label">治理机制</div><div class="signal-value">缺少 Owner</div><div class="signal-desc">文案散落在设计、产品、运营、客服和研发中，难以维护。</div></div>
+        </div>
+        <div class="summary-story">
+          <div>
+            <small>CONTENT OPERATING STRATEGY</small>
+            <h3>把“页面里的句子”，升级为“能够降低理解成本和运营成本的产品能力”。</h3>
+            <p>内容治理需要连接用户任务、业务规则、组件、状态、国家地区和产品指标，而不是独立维护一份写作手册。</p>
+          </div>
+          <div class="formula">统一语言 × 清晰状态 × 可执行动作 × 本地化表达 × 持续维护 = 可规模化产品内容</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">02 · ENTERPRISE CONTENT LIBRARY</div>
+          <h2>企业内容规范库的十二类核心资产</h2>
+        </div>
+        <div class="section-desc">内容规范应与组件、状态和业务规则绑定，让设计、产品、研发、客服和翻译团队使用同一套语言资产。</div>
+      </div>
+      <div class="library-grid">
+        <article class="library-card"><small>01</small><strong>按钮规则</strong><p>动词选择、主次动作、确认、取消、不可逆操作与长度限制。</p><div class="library-meta">示例：Submit、Save、Continue、Confirm</div></article>
+        <article class="library-card"><small>02</small><strong>表单提示</strong><p>标签、占位、帮助说明、格式要求、必填与输入示例。</p><div class="library-meta">原则：在输入前解释要求</div></article>
+        <article class="library-card"><small>03</small><strong>错误提示</strong><p>明确发生什么、为什么、影响什么、用户如何恢复。</p><div class="library-meta">禁止：Something went wrong</div></article>
+        <article class="library-card"><small>04</small><strong>成功提示</strong><p>说明完成结果、影响范围、后续状态与下一步。</p><div class="library-meta">避免只写 Success</div></article>
+        <article class="library-card"><small>05</small><strong>风险提示</strong><p>按照风险等级说明后果、不可逆性、确认条件与替代方案。</p><div class="library-meta">避免过度恐吓和责任转移</div></article>
+        <article class="library-card"><small>06</small><strong>交易状态</strong><p>Pending、Processing、Successful、Failed、Cancelled 等统一定义。</p><div class="library-meta">绑定资金与到账含义</div></article>
+        <article class="library-card"><small>07</small><strong>审核状态</strong><p>未提交、审核中、补充材料、通过、拒绝、过期等表达。</p><div class="library-meta">明确预计时间与补救动作</div></article>
+        <article class="library-card"><small>08</small><strong>空状态</strong><p>区分首次使用、无权限、筛选无结果、数据延迟与真实无数据。</p><div class="library-meta">提供与原因匹配的行动</div></article>
+        <article class="library-card"><small>09</small><strong>帮助文本</strong><p>解释复杂规则、字段、费用、流程和操作后果。</p><div class="library-meta">分层呈现，避免一次性堆叠</div></article>
+        <article class="library-card"><small>10</small><strong>中英文术语</strong><p>金融、交易、账户、认证、权限与合规术语的统一映射。</p><div class="library-meta">包含禁用词与上下文示例</div></article>
+        <article class="library-card"><small>11</small><strong>国家和地区差异</strong><p>地址、身份、货币、日期、电话、税务与合规表达差异。</p><div class="library-meta">不是单纯替换语言</div></article>
+        <article class="library-card"><small>12</small><strong>语气与品牌原则</strong><p>清晰、克制、可信、尊重，不推责、不责备、不制造恐慌。</p><div class="library-meta">适配金融产品信任要求</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">03 · GOVERNANCE PIPELINE</div>
+          <h2>从页面文案到企业内容资产的完整链路</h2>
+        </div>
+        <div class="section-desc">AI 负责扫描、分类和候选改写；设计、产品、合规和本地化团队确认业务正确性、风险与最终表达。</div>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-grid">
+          <div class="pipe-step"><small>01</small><strong>扫描现有产品内容</strong><p>收集设计稿、线上页面、帮助中心、错误码、客服话术和翻译。</p><span class="pipe-badge">建立内容基线</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>02</small><strong>识别重复与不一致</strong><p>发现同义多写、术语冲突、大小写差异和状态表达分裂。</p><span class="pipe-badge">形成问题池</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>03</small><strong>绑定组件、状态与场景</strong><p>明确文案出现在哪类组件、用户任务、业务结果和国家地区。</p><span class="pipe-badge">建立使用规则</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>04</small><strong>生成候选改写</strong><p>检查语气、术语、长度、行动、歧义与本地化适配。</p><span class="pipe-badge">辅助内容设计</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>05</small><strong>人工评审与验证</strong><p>由业务、合规、设计和本地用户确认准确性与理解度。</p><span class="pipe-badge">形成标准内容</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>06</small><strong>发布规范并持续监测</strong><p>进入设计系统、代码词条库、翻译平台和自动质量检查。</p><span class="pipe-badge">形成治理闭环</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">04 · AI CONTENT CHECK</div>
+          <h2>AI 自动检查的九类问题</h2>
+        </div>
+        <div class="section-desc">检查结果必须说明问题类型、影响、依据和建议，而不是简单给出好坏分数。</div>
+      </div>
+      <div class="principle-grid">
+        <article class="principle-card"><small>01</small><strong>语气是否符合品牌</strong><p>检查是否清晰、克制、尊重、可信，是否带有责备和推责。</p><div class="principle-list"><span>品牌语气</span><span>金融信任感</span><span>情绪强度</span></div></article>
+        <article class="principle-card"><small>02</small><strong>术语是否统一</strong><p>检查交易、账户、审核、认证、退款和权限术语是否一致。</p><div class="principle-list"><span>同义词冲突</span><span>缩写与全称</span><span>中英文映射</span></div></article>
+        <article class="principle-card"><small>03</small><strong>文案是否过长</strong><p>检查按钮、标签、提示、弹窗和移动端中的长度与信息层级。</p><div class="principle-list"><span>组件长度限制</span><span>分层呈现</span><span>扫描效率</span></div></article>
+        <article class="principle-card"><small>04</small><strong>是否缺少下一步行动</strong><p>检查用户能否理解如何修复、继续、返回、重试或获取支持。</p><div class="principle-list"><span>行动动词</span><span>恢复路径</span><span>操作入口</span></div></article>
+        <article class="principle-card"><small>05</small><strong>是否存在歧义</strong><p>检查代词、时间、范围、金额、状态和操作后果是否明确。</p><div class="principle-list"><span>对象不明确</span><span>状态边界模糊</span><span>后果不清晰</span></div></article>
+        <article class="principle-card"><small>06</small><strong>是否符合当地语言习惯</strong><p>检查语法、表达顺序、文化、货币、地址、日期与法规差异。</p><div class="principle-list"><span>本地化而非直译</span><span>国家地区规则</span><span>真实用户验证</span></div></article>
+        <article class="principle-card"><small>07</small><strong>大小写与标点是否一致</strong><p>检查标题、按钮、状态、字段和句末标点的统一规则。</p><div class="principle-list"><span>Sentence case</span><span>Title case</span><span>符号与空格</span></div></article>
+        <article class="principle-card"><small>08</small><strong>风险表达是否适度</strong><p>检查风险是否具体、真实、可理解，避免恐吓或弱化重要风险。</p><div class="principle-list"><span>风险等级</span><span>后果说明</span><span>确认强度</span></div></article>
+        <article class="principle-card"><small>09</small><strong>合规内容是否可理解</strong><p>在保持法律准确性的前提下分层表达，避免长段落阻塞任务。</p><div class="principle-list"><span>摘要 + 详情</span><span>关键义务</span><span>证据与版本</span></div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">05 · CONTENT WORKSPACE</div>
+          <h2>内容治理中心不应只是术语表</h2>
+        </div>
+        <div class="section-desc">工作台需要同时呈现产品中的真实问题、影响、候选改写、规则依据、适用地区和审核状态。</div>
+      </div>
+      <div class="preview-shell">
+        <div class="preview-panel">
+          <h3>内容治理工作台示例</h3>
+          <div class="app-frame">
+            <div class="app-head"><strong>Content Governance Review</strong><span>本周扫描 · 386 条产品文案</span></div>
+            <div class="content-summary">
+              <div class="summary-box"><small>不一致文案</small><strong>42</strong></div>
+              <div class="summary-box"><small>高风险问题</small><strong>9</strong></div>
+              <div class="summary-box"><small>待本地化</small><strong>28</strong></div>
+              <div class="summary-box"><small>规范覆盖率</small><strong>74%</strong></div>
+            </div>
+
+            <div class="content-item">
+              <div class="content-top">
+                <div class="content-copy"><small>ERROR · BUSINESS VERIFICATION</small><strong>错误提示缺少具体原因与下一步行动</strong><p>用户上传地址证明后仅看到 “Document invalid”，无法判断文件、清晰度、日期还是信息不一致。</p></div>
+                <span class="content-risk high">高风险</span>
+              </div>
+              <div class="rewrite-box">
+                <div><small>当前文案</small><strong>Document invalid.</strong></div>
+                <div><small>建议文案</small><strong>This document is not accepted because the issue date is older than 3 months. Upload a more recent proof of address.</strong></div>
+              </div>
+            </div>
+
+            <div class="content-item">
+              <div class="content-top">
+                <div class="content-copy"><small>STATUS · TRANSACTION</small><strong>相同交易状态存在三种英文表达</strong><p>Pending、In progress 和 Processing 在不同页面表达同一后台状态，导致用户误判处理阶段。</p></div>
+                <span class="content-risk medium">需统一</span>
+              </div>
+              <div class="rewrite-box">
+                <div><small>当前表达</small><strong>Pending / In progress / Processing</strong></div>
+                <div><small>标准规则</small><strong>Processing：系统已接受任务并正在处理；Pending 仅用于等待外部条件。</strong></div>
+              </div>
+            </div>
+
+            <div class="content-item">
+              <div class="content-top">
+                <div class="content-copy"><small>RISK · DELETE BENEFICIARY</small><strong>风险提示过度恐吓但未说明实际后果</strong><p>文案使用 “This action is extremely dangerous”，但没有解释删除范围和是否可以恢复。</p></div>
+                <span class="content-risk good">可快速修复</span>
+              </div>
+              <div class="rewrite-box">
+                <div><small>当前文案</small><strong>This action is extremely dangerous and cannot be undone.</strong></div>
+                <div><small>建议文案</small><strong>Delete this beneficiary? Existing transactions will not be affected. You will need to add the beneficiary again before making a new payment.</strong></div>
+              </div>
+            </div>
+
+            <div class="cta-row">
+              <div class="cta primary">发布到内容规范库</div>
+              <div class="cta secondary">发送业务与合规评审</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy-panel">
+          <h3>工作台六个核心模块</h3>
+          <div class="anatomy-list">
+            <div class="anatomy-item"><div class="anatomy-no">1</div><div><strong>内容质量全景</strong><span>展示不一致、高风险、本地化、待评审和规范覆盖趋势。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">2</div><div><strong>真实页面与上下文</strong><span>保留页面、组件、状态、用户角色和业务规则。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">3</div><div><strong>问题类型与影响</strong><span>说明术语、语气、长度、歧义、行动和地区适配问题。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">4</div><div><strong>候选改写与理由</strong><span>提供可比较方案，并说明适用规则和设计依据。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">5</div><div><strong>审核与责任路由</strong><span>按业务、设计、合规、客服和本地化团队分配确认。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">6</div><div><strong>规范发布与影响范围</strong><span>同步设计系统、代码词条、翻译平台与现有页面。</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">06 · COPY TRANSFORMATION</div>
+          <h2>从“系统视角”改为“用户可理解、可行动的表达”</h2>
+        </div>
+        <div class="section-desc">优质文案需要解释状态与后果，并在合适的时机提供最直接的下一步行动。</div>
+      </div>
+      <div class="example-grid">
+        <article class="example-card">
+          <small>ERROR MESSAGE</small><strong>错误提示</strong>
+          <div class="copy-before"><span class="copy-label">BEFORE</span>Transaction failed. Please try again.</div>
+          <div class="copy-after"><span class="copy-label">AFTER</span>The payment was not sent because the beneficiary account is inactive. Choose another beneficiary or contact the recipient.</div>
+        </article>
+        <article class="example-card">
+          <small>PROCESSING STATUS</small><strong>处理中状态</strong>
+          <div class="copy-before"><span class="copy-label">BEFORE</span>Your transaction is pending.</div>
+          <div class="copy-after"><span class="copy-label">AFTER</span>Your transfer is being processed. Most transfers complete within 10 minutes. You can leave this page—we’ll notify you when the status changes.</div>
+        </article>
+        <article class="example-card">
+          <small>EMPTY STATE</small><strong>空状态</strong>
+          <div class="copy-before"><span class="copy-label">BEFORE</span>No data.</div>
+          <div class="copy-after"><span class="copy-label">AFTER</span>No transactions match these filters. Clear the filters or choose a wider date range.</div>
+        </article>
+        <article class="example-card">
+          <small>PERMISSION</small><strong>权限提示</strong>
+          <div class="copy-before"><span class="copy-label">BEFORE</span>Access denied.</div>
+          <div class="copy-after"><span class="copy-label">AFTER</span>You don’t have permission to export transactions. Ask an account administrator to enable the Export permission for your role.</div>
+        </article>
+        <article class="example-card">
+          <small>SUCCESS MESSAGE</small><strong>成功提示</strong>
+          <div class="copy-before"><span class="copy-label">BEFORE</span>Success!</div>
+          <div class="copy-after"><span class="copy-label">AFTER</span>Your refund request has been submitted. We’ll update the transaction when the refund is completed.</div>
+        </article>
+        <article class="example-card">
+          <small>RISK CONFIRMATION</small><strong>风险确认</strong>
+          <div class="copy-before"><span class="copy-label">BEFORE</span>Are you sure you want to continue?</div>
+          <div class="copy-after"><span class="copy-label">AFTER</span>Submit this exchange order? The quoted rate will be locked, and the order cannot be edited after submission.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">07 · GOVERNANCE OWNERSHIP</div>
+          <h2>内容治理不是设计团队单独维护一份文档</h2>
+        </div>
+        <div class="section-desc">不同内容类型需要明确责任人、评审角色、版本、适用范围和更新触发条件。</div>
+      </div>
+      <div class="governance-grid">
+        <div class="governance-panel">
+          <h3>内容类型与责任分配</h3>
+          <div class="governance-table">
+            <div class="governance-head"><span>内容类型</span><span>主要责任</span><span>必须参与评审</span></div>
+            <div class="governance-row"><strong>按钮、表单、状态与帮助文本</strong><span>内容设计 / 体验设计维护组件与使用规则</span><div class="governance-result">产品 + 设计</div></div>
+            <div class="governance-row"><strong>交易、金额与费用表达</strong><span>产品确认业务含义，内容设计保证用户可理解</span><div class="governance-result">产品 + 财务</div></div>
+            <div class="governance-row"><strong>审核、认证与风险提示</strong><span>产品、风控和合规确认规则、后果与证据</span><div class="governance-result">风控 + 合规</div></div>
+            <div class="governance-row"><strong>错误码与系统异常</strong><span>技术提供真实原因，设计转化为用户可恢复表达</span><div class="governance-result">技术 + 设计</div></div>
+            <div class="governance-row"><strong>客服与帮助中心内容</strong><span>客服汇总用户问题，产品与设计判断产品化机会</span><div class="governance-result">客服 + 产品</div></div>
+            <div class="governance-row"><strong>多语言与地区适配</strong><span>本地化团队维护语言，业务与当地用户验证含义</span><div class="governance-result">本地化 + 市场</div></div>
+          </div>
+        </div>
+
+        <div class="governance-side">
+          <div>
+            <small>CONTENT PRINCIPLE</small>
+            <h3>每条标准文案都需要知道：用于哪里、对谁表达、在什么状态下出现。</h3>
+            <p>脱离组件、状态和业务规则的文案库，很快会变成难以使用和难以维护的句子集合。</p>
+            <div class="governance-factors">
+              <span>每条内容绑定组件、状态和用户任务</span>
+              <span>记录适用语言、国家、产品线和版本</span>
+              <span>金融与合规内容必须保留审核证据</span>
+              <span>规范更新后能够识别受影响页面与词条</span>
+            </div>
+          </div>
+          <div class="note">AI 可以检查和生成候选内容，但涉及资金、费用、合规、风险与法律义务的文案必须人工确认。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">08 · TWO-WEEK MVP</div>
+          <h2>两周 MVP：先治理一个核心流程的高频文案</h2>
+        </div>
+        <div class="section-desc">建议从商户认证、交易失败、退款或权限流程开始，优先治理错误、状态、风险和下一步行动文案。</div>
+      </div>
+      <div class="mvp-grid">
+        <article class="week-card">
+          <small>WEEK 01</small>
+          <h3>建立内容基线与首版规范</h3>
+          <p>扫描真实产品内容，识别不一致、高咨询和高风险文案，形成首批内容规则。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>选择一个核心业务流程</strong><span>认证、交易失败、退款或权限均适合作为试点。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>收集页面、设计稿与客服问题</strong><span>同步线上文案、错误码、帮助中心和翻译内容。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>AI 扫描不一致与理解风险</strong><span>检查术语、语气、长度、行动、歧义和本地化。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>形成 Top 30 问题清单</strong><span>按用户影响、咨询量、业务风险和修改成本排序。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>建立首版内容规范</strong><span>优先覆盖错误、成功、状态、风险、按钮和术语。</span></div></div>
+          </div>
+        </article>
+
+        <article class="week-card primary">
+          <small>WEEK 02</small>
+          <h3>改写、验证并发布治理机制</h3>
+          <p>完成高价值文案改写，通过业务和用户验证，并接入后续设计与开发流程。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>生成候选改写并人工评审</strong><span>设计、产品、客服、合规和本地化按内容类型参与。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>验证关键文案理解度</strong><span>使用快速测试、客服反馈或灰度数据验证。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>发布到设计与开发资产</strong><span>同步组件库、代码词条、翻译平台和帮助中心。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>建立自动检查规则</strong><span>在设计评审、PRD、代码和翻译阶段识别问题。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>建立更新与版本机制</strong><span>记录 Owner、适用范围、审核状态和受影响页面。</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">09 · KEY METRICS</div>
+          <h2>五个关键指标</h2>
+        </div>
+        <div class="section-desc">需要同时衡量一致性、用户理解、运营影响、评审效率和国际化质量。</div>
+      </div>
+      <div class="metric-grid">
+        <article class="metric-card"><small>01</small><strong>文案不一致数量</strong><p>同一术语、状态、组件和业务结果存在不同表达的数量。</p><div class="formula">目标：持续下降</div></article>
+        <article class="metric-card"><small>02</small><strong>用户因文案产生的咨询量</strong><p>因状态、错误、费用、流程或下一步不清楚产生的客服咨询。</p><div class="formula">连接客服问题分类</div></article>
+        <article class="metric-card"><small>03</small><strong>错误提示理解率</strong><p>用户能够正确理解错误原因和下一步操作的比例。</p><div class="formula">通过任务测试或问卷验证</div></article>
+        <article class="metric-card"><small>04</small><strong>文案评审时间</strong><p>从文案提交到完成设计、业务、合规或本地化确认的时间。</p><div class="formula">建议使用中位数</div></article>
+        <article class="metric-card"><small>05</small><strong>多语言翻译返工率</strong><p>因术语、语境、长度或本地表达错误而重新翻译的比例。</p><div class="formula">返工词条 ÷ 已翻译词条</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">10 · KPI SCORECARD</div>
+          <h2>可编辑的内容治理指标看板</h2>
+        </div>
+        <div class="section-desc">示例值可直接修改，页面会自动保存到当前浏览器并计算目标完成度。</div>
+      </div>
+      <div class="score-shell">
+        <div class="score-toolbar">
+          <div class="score-summary"><div class="score-number" id="overallScore">0%</div><div class="score-label">整体目标完成度</div></div>
+          <div style="font-size:12px;color:var(--muted)">建议按产品线、组件、状态、语言和国家地区分别观察。</div>
+        </div>
+        <div class="table-scroll">
+          <table id="scoreTable">
+            <thead><tr><th>维度</th><th>指标</th><th>方向</th><th>当前值</th><th>目标值</th><th>单位</th><th>负责人</th><th>完成度</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr data-direction="down" data-default-current="126" data-default-target="35">
+                <td><span class="tag">北极星</span></td>
+                <td><span class="metric-name">产品文案不一致数量</span><span class="metric-help">同一术语、状态、组件和业务结果存在不同表达的数量</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>个</td>
+                <td><input class="input owner" value="内容治理负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="420" data-default-target="160">
+                <td><span class="tag">咨询</span></td>
+                <td><span class="metric-name">月度文案相关咨询量</span><span class="metric-help">因状态、错误、费用、流程或下一步不清楚产生的咨询</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>次</td>
+                <td><input class="input owner" value="客服体验负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="61" data-default-target="88">
+                <td><span class="tag">理解</span></td>
+                <td><span class="metric-name">错误提示理解率</span><span class="metric-help">用户正确理解错误原因和下一步操作的比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="内容设计负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="3.5" data-default-target="1">
+                <td><span class="tag">评审</span></td>
+                <td><span class="metric-name">文案评审中位时间</span><span class="metric-help">从内容提交到完成必要业务、合规和本地化确认的时间</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.5"></td><td><input class="input target" type="number" step="0.5"></td><td>天</td>
+                <td><input class="input owner" value="内容运营 Owner"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="24" data-default-target="8">
+                <td><span class="tag">翻译</span></td>
+                <td><span class="metric-name">多语言翻译返工率</span><span class="metric-help">因术语、语境、长度或当地表达问题重新翻译的比例</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="本地化负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="56" data-default-target="90">
+                <td><span class="tag">覆盖</span></td>
+                <td><span class="metric-name">标准内容规范覆盖率</span><span class="metric-help">使用标准术语、组件文案和状态规则的产品内容比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="设计系统负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">11 · EXECUTION BOARD</div>
+          <h2>项目实施记录</h2>
+        </div>
+        <div class="section-desc">用于记录试点流程、内容问题、规范、改写、评审与用户验证结果，内容只保存在当前浏览器。</div>
+      </div>
+      <div class="action-grid">
+        <div class="panel">
+          <h3 style="margin:0 0 18px;font-size:23px">两周 MVP 检查清单</h3>
+          <div class="checklist" id="checklist">
+            <label class="check-row"><input type="checkbox"><span><strong>选择一个核心业务流程</strong><span>建议从认证、交易失败、退款或权限流程开始。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>收集页面、客服、错误码和翻译内容</strong><span>建立该流程完整的内容基线和问题来源。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>AI 扫描内容不一致与理解风险</strong><span>检查术语、语气、长度、行动、歧义和本地化。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>形成 Top 30 内容治理清单</strong><span>按用户影响、咨询、风险和修改成本排序。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成改写、业务评审与理解验证</strong><span>重点验证错误、状态、风险和下一步行动文案。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>发布规范并建立自动检查</strong><span>同步设计系统、代码词条、翻译平台和帮助中心。</span></span></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin:0 0 8px;font-size:23px">试点说明</h3>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:12px">建议记录问题、改写、审核责任、适用地区和验证结果。</p>
+          <textarea id="notes" placeholder="试点流程：
+产品页面：
+目标用户：
+目标国家 / 地区：
+当前语言：
+业务规则：
+高频客服问题：
+
+主要文案问题：
+1.
+2.
+3.
+
+术语不一致：
+错误提示问题：
+风险提示问题：
+缺少下一步行动：
+多语言 / 本地化问题：
+
+改写规则：
+业务评审：
+合规评审：
+本地用户验证：
+项目 Owner：
+两周 MVP 结论：
+发布到哪些资产："></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AI 体验设计项目 · Project 21</span>
+    <span>治理目标：产品语言更统一、状态更易理解、用户更知道下一步、跨语言与地区表达更可靠。</span>
+  </footer>
+</div>
+
+<script>
+  const DATA_KEY="project21_ai_content_governance_v1";
+  const THEME_KEY="project21_ai_content_governance_theme_v1";
+  const rows=[...document.querySelectorAll("#scoreTable tbody tr")];
+  const checks=[...document.querySelectorAll("#checklist input")];
+  const notes=document.getElementById("notes");
+  const themeBtn=document.getElementById("themeBtn");
+
+  function setTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    themeBtn.textContent=theme==="light"?"切换暗黑":"切换亮色";
+    localStorage.setItem(THEME_KEY,theme);
+  }
+  function calcProgress(current,target,direction){
+    if(!isFinite(current)||!isFinite(target)||target===0)return 0;
+    if(direction==="up")return Math.max(0,Math.min(130,current/target*100));
+    if(current<=0)return 130;
+    return Math.max(0,Math.min(130,target/current*100));
+  }
+  function statusFor(progress){
+    return progress>=100?["已达成","good"]:progress>=75?["接近目标","warn"]:["需关注","risk"];
+  }
+  function updateScore(save=true){
+    let total=0;
+    rows.forEach(row=>{
+      const current=parseFloat(row.querySelector(".current").value);
+      const target=parseFloat(row.querySelector(".target").value);
+      const p=calcProgress(current,target,row.dataset.direction);
+      const normalized=Math.min(100,p);
+      total+=normalized;
+      row.querySelector(".progress>span").style.width=normalized+"%";
+      row.querySelector(".progress-text").textContent=Math.round(p)+"%";
+      const [label,cls]=statusFor(p);
+      const status=row.querySelector(".status");
+      status.textContent=label;
+      status.className="status "+cls;
+    });
+    document.getElementById("overallScore").textContent=Math.round(total/rows.length)+"%";
+    if(save)saveData();
+  }
+  function saveData(){
+    localStorage.setItem(DATA_KEY,JSON.stringify({
+      rows:rows.map(row=>({
+        current:row.querySelector(".current").value,
+        target:row.querySelector(".target").value,
+        owner:row.querySelector(".owner").value
+      })),
+      checks:checks.map(c=>c.checked),
+      notes:notes.value
+    }));
+  }
+  function loadData(){
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){}
+    rows.forEach((row,i)=>{
+      const data=saved.rows?.[i];
+      row.querySelector(".current").value=data?.current??row.dataset.defaultCurrent;
+      row.querySelector(".target").value=data?.target??row.dataset.defaultTarget;
+      if(data?.owner)row.querySelector(".owner").value=data.owner;
+    });
+    checks.forEach((c,i)=>c.checked=Boolean(saved.checks?.[i]));
+    notes.value=saved.notes||"";
+    updateScore(false);
+  }
+
+  document.querySelectorAll("#scoreTable input").forEach(el=>el.addEventListener("input",()=>updateScore(true)));
+  checks.forEach(c=>c.addEventListener("change",saveData));
+  notes.addEventListener("input",saveData);
+  themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+  document.getElementById("resetBtn").addEventListener("click",()=>{
+    if(confirm("确认清空本页面的指标与实施记录吗？")){
+      localStorage.removeItem(DATA_KEY);
+      loadData();
+    }
+  });
+
+  setTheme(localStorage.getItem(THEME_KEY)||"dark");
+  loadData();
+</script>
+<script id="pp-theme-sync">(function(){try{var t=localStorage.getItem('ppux-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);var o=new MutationObserver(function(){var v=document.documentElement.getAttribute('data-theme')||'dark';localStorage.setItem('ppux-theme',v)});o.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();</script></body>
+</html>

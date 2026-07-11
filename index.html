@@ -1,0 +1,1280 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="PalmPay Design Intelligence Hub — 优化版可点击首页原型" />
+<meta name="theme-color" content="#090909" />
+<title>PalmPay Design Intelligence Hub · 官方展示首页</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#090909;
+  --bg-elevated:#0f0f10;
+  --surface:#121214;
+  --surface-2:#171719;
+  --surface-3:#1d1d20;
+  --surface-hover:#232326;
+  --text:#f4f4f5;
+  --text-2:#d0d0d4;
+  --muted:#94949d;
+  --muted-2:#686871;
+  --line:rgba(255,255,255,.09);
+  --line-strong:rgba(255,255,255,.17);
+  --inverted:#090909;
+  --inverted-text:#fff;
+  --soft:rgba(255,255,255,.055);
+  --soft-strong:rgba(255,255,255,.09);
+  --shadow:0 26px 80px rgba(0,0,0,.38);
+  --shadow-soft:0 12px 40px rgba(0,0,0,.2);
+  --radius-xs:8px;
+  --radius-sm:12px;
+  --radius-md:18px;
+  --radius-lg:26px;
+  --radius-xl:34px;
+  --shell:min(1240px, calc(100vw - 48px));
+  --header:72px;
+}
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f5f5f4;
+  --bg-elevated:#fbfbfa;
+  --surface:#fff;
+  --surface-2:#f0f0ef;
+  --surface-3:#e9e9e7;
+  --surface-hover:#e2e2df;
+  --text:#151515;
+  --text-2:#38383b;
+  --muted:#696970;
+  --muted-2:#8e8e94;
+  --line:rgba(0,0,0,.09);
+  --line-strong:rgba(0,0,0,.17);
+  --inverted:#fff;
+  --inverted-text:#0c0c0d;
+  --soft:rgba(0,0,0,.04);
+  --soft-strong:rgba(0,0,0,.075);
+  --shadow:0 30px 90px rgba(24,24,27,.12);
+  --shadow-soft:0 12px 35px rgba(24,24,27,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 72% -10%, var(--soft-strong), transparent 31%),
+    radial-gradient(circle at 5% 24%, var(--soft), transparent 24%),
+    var(--bg);
+  font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  line-height:1.55;
+}
+body.locked{overflow:hidden}
+button,input{font:inherit}
+button{color:inherit}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+.shell{width:var(--shell);margin:0 auto}
+.section{padding:112px 0}
+.section.compact{padding:80px 0}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:9px;
+  color:var(--muted);font-size:11px;font-weight:760;
+  letter-spacing:.18em;text-transform:uppercase;
+}
+.eyebrow::before{
+  content:"";width:18px;height:1px;background:currentColor;opacity:.7
+}
+.section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:32px;margin-bottom:38px;
+}
+.section-copy{max-width:690px}
+.section-copy h2{
+  margin:12px 0 12px;font-size:clamp(32px,4vw,52px);
+  line-height:1.08;letter-spacing:-.045em;font-weight:680;
+}
+.section-copy p{
+  margin:0;color:var(--muted);font-size:15px;max-width:650px
+}
+.text-link{
+  border:0;background:transparent;padding:8px 0;cursor:pointer;
+  color:var(--text-2);display:inline-flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:650;
+}
+.text-link:hover{color:var(--text)}
+.icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon.sm{width:15px;height:15px}
+.icon.lg{width:22px;height:22px}
+.btn{
+  min-height:46px;padding:0 18px;border-radius:12px;border:1px solid transparent;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  cursor:pointer;font-size:13px;font-weight:700;transition:.2s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:var(--text);color:var(--inverted);box-shadow:var(--shadow-soft)}
+.btn.primary:hover{opacity:.88}
+.btn.secondary{background:var(--soft);border-color:var(--line);color:var(--text)}
+.btn.secondary:hover{background:var(--soft-strong);border-color:var(--line-strong)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--soft);color:var(--text)}
+.icon-btn{
+  width:40px;height:40px;border-radius:11px;border:1px solid var(--line);
+  background:var(--soft);display:grid;place-items:center;cursor:pointer;
+  transition:.18s ease;
+}
+.icon-btn:hover{background:var(--soft-strong);border-color:var(--line-strong)}
+.badge{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 10px;
+  border:1px solid var(--line);border-radius:999px;background:var(--soft);
+  color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase
+}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 0 5px var(--soft-strong)}
+
+/* Header */
+.header{
+  position:sticky;top:0;z-index:80;height:var(--header);
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(20px) saturate(130%);
+}
+.header-inner{height:100%;display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:10px;min-width:max-content}
+.brand-mark{
+  width:36px;height:36px;border:1px solid var(--line-strong);
+  border-radius:11px;display:grid;place-items:center;background:var(--surface);
+  box-shadow:inset 0 1px rgba(255,255,255,.06);overflow:hidden;flex:0 0 auto
+}
+.brand-mark img{width:21px;height:23px;display:block;object-fit:contain}
+html[data-theme="light"] .brand-mark img{filter:invert(1)}
+.brand-copy{line-height:1.05}
+.brand-copy strong{display:block;font-size:13px;font-weight:650;letter-spacing:-.015em}
+.brand-copy span{display:block;margin-top:4px;font-size:9px;font-weight:560;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}
+.nav{display:flex;align-items:center;gap:5px;margin-left:18px}
+.nav a{
+  padding:9px 13px;border-radius:9px;font-size:12px;color:var(--muted);
+  font-weight:560;letter-spacing:.005em;transition:.18s ease
+}
+.nav a:hover,.nav a.active{color:var(--text);background:var(--soft)}
+.header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.header-search{
+  width:180px;height:40px;border:1px solid var(--line);border-radius:11px;
+  background:var(--soft);display:flex;align-items:center;gap:9px;padding:0 11px;
+  color:var(--muted);cursor:pointer
+}
+.header-search span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-search kbd{
+  margin-left:auto;padding:2px 5px;border:1px solid var(--line);border-radius:5px;
+  color:var(--muted-2);font-size:9px;background:var(--surface)
+}
+.mobile-menu{display:none}
+
+/* Hero */
+.hero{padding:72px 0 54px;position:relative;overflow:hidden}
+.hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 72%);
+  opacity:.28;
+}
+.hero-grid{
+  position:relative;display:grid;grid-template-columns:minmax(0,.88fr) minmax(520px,1.12fr);
+  align-items:center;gap:72px;min-height:650px
+}
+.hero-copy{padding:40px 0}
+.hero-copy h1{
+  margin:20px 0 22px;max-width:700px;font-size:clamp(50px,5vw,64px);
+  line-height:1.1;letter-spacing:-.065em;font-weight:670;color:var(--text)
+}
+.hero-copy h1 span{display:block;margin-top:8px;color:var(--text)}
+.hero-copy>p{
+  margin:0;max-width:610px;color:var(--text-2);font-size:17px;line-height:1.72
+}
+.hero-actions{display:flex;gap:11px;margin-top:34px;flex-wrap:wrap}
+.hero-meta{
+  margin-top:27px;display:flex;align-items:center;gap:13px;color:var(--muted);
+  font-size:11px
+}
+.hero-meta .divider{width:1px;height:14px;background:var(--line-strong)}
+
+/* Product preview */
+.product-preview{position:relative}
+.preview-glow{
+  position:absolute;inset:15% -8% -10% 8%;background:var(--soft-strong);
+  filter:blur(80px);opacity:.68;border-radius:50%
+}
+.app-window{
+  position:relative;border:1px solid var(--line-strong);border-radius:22px;
+  background:var(--bg-elevated);box-shadow:var(--shadow);overflow:hidden;
+  transform:perspective(1200px) rotateY(-2deg) rotateX(1deg);
+}
+.window-top{
+  height:48px;border-bottom:1px solid var(--line);display:flex;align-items:center;
+  padding:0 15px;gap:12px;background:var(--surface)
+}
+.traffic{display:flex;gap:5px}.traffic i{width:7px;height:7px;border-radius:50%;background:var(--muted-2)}
+.window-title{font-size:9px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase}
+.window-live{margin-left:auto;font-size:9px;color:var(--text-2);display:flex;align-items:center;gap:6px}
+.window-body{display:grid;grid-template-columns:144px 1fr;min-height:460px}
+.mock-side{border-right:1px solid var(--line);padding:16px 11px;background:var(--surface)}
+.mock-brand{display:flex;align-items:center;gap:8px;padding:2px 6px 16px;font-size:9px;font-weight:700}
+.mock-logo{width:22px;height:22px;border-radius:7px;border:1px solid var(--line-strong);display:grid;place-items:center;background:var(--text);color:var(--inverted);font-size:9px}
+.mock-label{padding:12px 7px 5px;font-size:7px;color:var(--muted-2);letter-spacing:.13em;text-transform:uppercase}
+.mock-nav{display:flex;align-items:center;gap:8px;padding:8px;border-radius:7px;color:var(--muted);font-size:8px;margin:2px 0}
+.mock-nav.active{background:var(--soft-strong);color:var(--text)}
+.mock-nav i{width:9px;height:9px;border:1px solid currentColor;border-radius:2px;opacity:.7}
+.mock-main{padding:22px 22px 26px;min-width:0}
+.mock-head{display:flex;align-items:center;justify-content:space-between}
+.mock-head h3{margin:0;font-size:15px;letter-spacing:-.02em}
+.mock-head p{margin:4px 0 0;color:var(--muted);font-size:8px}
+.mock-avatar{width:28px;height:28px;border-radius:50%;background:var(--surface-3);border:1px solid var(--line)}
+.mock-search{
+  height:30px;border:1px solid var(--line);background:var(--surface);border-radius:8px;
+  display:flex;align-items:center;gap:7px;padding:0 9px;margin:18px 0 13px;color:var(--muted);
+  font-size:8px
+}
+.mock-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mock-kpi{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:11px}
+.mock-kpi span{font-size:6px;color:var(--muted);letter-spacing:.12em}
+.mock-kpi strong{display:block;font-size:20px;margin-top:5px;letter-spacing:-.05em}
+.mock-kpi em{display:block;font-style:normal;font-size:6px;color:var(--muted);margin-top:2px}
+.mock-row-head{display:flex;align-items:center;justify-content:space-between;margin:18px 0 9px}
+.mock-row-head b{font-size:8px}.mock-row-head span{font-size:6px;color:var(--muted)}
+.mock-cards{display:grid;grid-template-columns:1.1fr .9fr;gap:8px}
+.mock-card{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:11px;min-height:93px}
+.mock-card small{font-size:6px;color:var(--muted);letter-spacing:.12em}
+.mock-card b{display:block;font-size:9px;margin-top:9px}
+.mock-card p{font-size:6px;color:var(--muted);margin:4px 0 0;line-height:1.5}
+.mock-chart{height:80px;position:relative;overflow:hidden;margin-top:9px}
+.mock-chart::before{
+  content:"";position:absolute;inset:8px 0 0;
+  background:
+    linear-gradient(var(--line) 1px,transparent 1px);
+  background-size:100% 20px;opacity:.6
+}
+.chart-line{position:absolute;inset:15px 3px 8px}
+.chart-line svg{width:100%;height:100%}
+.preview-note{
+  position:absolute;right:-28px;bottom:28px;width:190px;padding:14px;
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;
+  box-shadow:var(--shadow-soft)
+}
+.preview-note small{color:var(--muted);font-size:8px;letter-spacing:.1em}
+.preview-note strong{display:block;margin-top:5px;font-size:12px}
+.note-progress{height:4px;background:var(--surface-3);border-radius:999px;margin-top:11px;overflow:hidden}
+.note-progress i{display:block;width:72%;height:100%;background:var(--text);border-radius:inherit}
+
+/* Metrics */
+.metrics-wrap{padding:0 0 34px}
+.metrics{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden
+}
+.metric{padding:26px 28px;border-right:1px solid var(--line)}
+.metric:last-child{border-right:0}
+.metric-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:10px}
+.metric strong{display:block;margin-top:12px;font-size:34px;letter-spacing:-.055em;line-height:1}
+.metric p{margin:8px 0 0;color:var(--muted);font-size:10px}
+
+/* Path cards */
+.path-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.path-card{
+  min-height:300px;padding:28px;border:1px solid var(--line);border-radius:20px;
+  background:var(--surface);position:relative;overflow:hidden;cursor:pointer;transition:.25s ease
+}
+.path-card:hover{transform:translateY(-4px);border-color:var(--line-strong);background:var(--surface-2)}
+.path-index{font-size:11px;color:var(--muted);letter-spacing:.16em}
+.path-icon{
+  width:50px;height:50px;border:1px solid var(--line-strong);border-radius:14px;
+  display:grid;place-items:center;margin:52px 0 24px;background:var(--soft)
+}
+.path-card h3{margin:0;font-size:24px;letter-spacing:-.035em}
+.path-card p{margin:10px 0 0;color:var(--muted);font-size:13px;max-width:320px}
+.path-arrow{position:absolute;right:24px;bottom:24px;color:var(--muted);transition:.2s}
+.path-card:hover .path-arrow{color:var(--text);transform:translate(3px,-3px)}
+.path-decor{position:absolute;right:-55px;top:-55px;width:150px;height:150px;border:1px solid var(--line);border-radius:50%}
+.path-decor::after{content:"";position:absolute;inset:25px;border:1px solid var(--line);border-radius:50%}
+
+/* Toolbar */
+.toolbar{
+  display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);
+  background:var(--surface);border-radius:15px;margin-bottom:18px
+}
+.asset-search{
+  min-width:260px;flex:1;display:flex;align-items:center;gap:9px;height:40px;
+  padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elevated);
+  color:var(--muted)
+}
+.asset-search input{border:0;outline:0;background:transparent;color:var(--text);width:100%;font-size:12px}
+.asset-search input::placeholder{color:var(--muted-2)}
+.filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.filter{
+  height:34px;padding:0 11px;border:1px solid transparent;background:transparent;
+  border-radius:9px;color:var(--muted);font-size:10px;font-weight:650;cursor:pointer
+}
+.filter:hover,.filter.active{background:var(--soft-strong);border-color:var(--line);color:var(--text)}
+
+/* Assets */
+.asset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.asset-card{
+  border:1px solid var(--line);border-radius:18px;background:var(--surface);
+  overflow:hidden;cursor:pointer;transition:.23s ease;min-width:0
+}
+.asset-card:hover{transform:translateY(-4px);border-color:var(--line-strong);box-shadow:var(--shadow-soft)}
+.asset-visual{
+  height:176px;border-bottom:1px solid var(--line);background:var(--bg-elevated);
+  padding:18px;position:relative;overflow:hidden
+}
+.asset-chip{
+  display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--surface);
+  border:1px solid var(--line);font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase
+}
+.asset-mini-window{
+  position:absolute;left:28px;right:28px;bottom:-12px;height:125px;border:1px solid var(--line-strong);
+  border-radius:12px 12px 0 0;background:var(--surface);box-shadow:var(--shadow-soft);overflow:hidden
+}
+.asset-mini-bar{height:23px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 8px;gap:4px}
+.asset-mini-bar i{width:4px;height:4px;border-radius:50%;background:var(--muted-2)}
+.asset-mini-body{display:grid;grid-template-columns:30% 1fr;height:102px}
+.asset-mini-side{border-right:1px solid var(--line);padding:8px}
+.asset-mini-side i,.asset-lines i{display:block;height:4px;border-radius:9px;background:var(--soft-strong);margin-bottom:6px}
+.asset-mini-side i:nth-child(2){width:75%}
+.asset-lines{padding:11px}
+.asset-lines i:nth-child(1){height:7px;width:55%;background:var(--line-strong)}
+.asset-lines i:nth-child(2){width:94%;margin-top:12px}
+.asset-lines i:nth-child(3){width:82%}
+.asset-lines i:nth-child(4){width:90%}
+.asset-chart-visual{position:absolute;inset:48px 20px 14px}
+.asset-chart-visual svg{width:100%;height:100%}
+.asset-process{position:absolute;left:22px;right:22px;bottom:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.asset-process i{height:58px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.asset-process i:nth-child(2){transform:translateY(-10px);background:var(--surface-2)}
+.asset-checks{position:absolute;inset:54px 24px 22px;display:grid;gap:7px}
+.asset-checks i{border:1px solid var(--line);border-radius:7px;background:var(--surface);position:relative}
+.asset-checks i::before{content:"";position:absolute;left:8px;top:8px;width:8px;height:8px;border-radius:3px;border:1px solid var(--line-strong)}
+.asset-checks i::after{content:"";position:absolute;left:24px;top:10px;width:54%;height:4px;border-radius:8px;background:var(--soft-strong)}
+.asset-body{padding:19px}
+.asset-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:9px}
+.asset-card h3{margin:12px 0 8px;font-size:16px;line-height:1.35;letter-spacing:-.025em}
+.asset-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.62;min-height:52px}
+.asset-footer{display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:9px;color:var(--muted)}
+.asset-footer b{color:var(--text-2);font-weight:650}
+.empty{display:none;padding:54px;border:1px dashed var(--line-strong);border-radius:18px;text-align:center;color:var(--muted)}
+
+/* Case */
+.case-card{
+  display:grid;grid-template-columns:1.08fr .92fr;border:1px solid var(--line);
+  border-radius:24px;background:var(--surface);overflow:hidden
+}
+.case-visual{padding:36px;border-right:1px solid var(--line);background:var(--bg-elevated)}
+.case-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.case-head small{color:var(--muted);font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+.case-canvas{display:grid;grid-template-columns:1fr 36px 1fr;align-items:center}
+.case-stage{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:16px}
+.case-stage-label{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:8px}
+.stage-screen{height:205px;margin-top:12px;border:1px solid var(--line);border-radius:11px;background:var(--bg-elevated);padding:12px}
+.stage-screen .s-head{height:18px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.s-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.s-grid i{height:67px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.s-grid i:nth-child(3){grid-column:1/3;height:48px}
+.stage-screen.after{padding:0;overflow:hidden;display:grid;grid-template-columns:40px 1fr}
+.after-side{border-right:1px solid var(--line);background:var(--surface);padding:8px 6px}
+.after-side i{display:block;height:6px;background:var(--soft-strong);border-radius:4px;margin:8px 0}
+.after-main{padding:12px}
+.after-main>i{display:block;height:9px;width:45%;background:var(--line-strong);border-radius:5px;margin-bottom:12px}
+.after-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.after-cards i{height:56px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.case-arrow{display:grid;place-items:center;color:var(--muted)}
+.case-copy{padding:42px}
+.case-copy h3{margin:18px 0 12px;font-size:34px;line-height:1.12;letter-spacing:-.045em}
+.case-copy>p{margin:0;color:var(--muted);font-size:13px;line-height:1.75}
+.case-steps{margin:28px 0;display:grid;gap:12px}
+.case-step{display:grid;grid-template-columns:28px 1fr;gap:11px;align-items:flex-start}
+.case-step span{
+  width:28px;height:28px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;
+  color:var(--muted);font-size:9px;background:var(--soft)
+}
+.case-step b{display:block;font-size:11px;margin:2px 0 3px}
+.case-step p{margin:0;color:var(--muted);font-size:10px}
+.case-results{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);padding-top:23px;gap:16px}
+.case-results strong{display:block;font-size:22px;letter-spacing:-.04em}
+.case-results span{display:block;margin-top:4px;color:var(--muted);font-size:8px}
+
+/* Governance */
+.governance{
+  display:grid;grid-template-columns:1fr 76px 1fr 76px 1fr;align-items:stretch
+}
+.gov-card{
+  border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:27px;
+  min-height:210px;position:relative
+}
+.gov-num{font-size:10px;color:var(--muted);letter-spacing:.14em}
+.gov-card h3{margin:50px 0 9px;font-size:21px;letter-spacing:-.03em}
+.gov-card p{margin:0;color:var(--muted);font-size:11px}
+.gov-card footer{position:absolute;left:27px;right:27px;bottom:22px;padding-top:12px;border-top:1px solid var(--line);font-size:9px;color:var(--muted)}
+.gov-connector{display:grid;place-items:center;color:var(--muted)}
+.gov-connector i{height:1px;width:100%;background:var(--line-strong);position:relative}
+.gov-connector i::after{content:"";position:absolute;right:-1px;top:-3px;width:6px;height:6px;border-top:1px solid var(--muted);border-right:1px solid var(--muted);transform:rotate(45deg)}
+
+.governance-section .section-copy{max-width:none}
+.governance-section .section-copy h2{white-space:nowrap}
+@media(max-width:900px){.governance-section .section-copy h2{white-space:normal}}
+
+/* CTA */
+.cta{
+  border:1px solid var(--line-strong);border-radius:28px;background:var(--surface);
+  padding:54px;display:flex;align-items:center;justify-content:space-between;gap:36px;
+  position:relative;overflow:hidden
+}
+.cta::after{
+  content:"";position:absolute;right:-80px;top:-120px;width:320px;height:320px;
+  border:1px solid var(--line);border-radius:50%;box-shadow:0 0 0 40px var(--soft),0 0 0 80px transparent
+}
+.cta-copy{position:relative;z-index:1;max-width:720px}
+.cta h2{margin:0;font-size:clamp(32px,4vw,54px);line-height:1.08;letter-spacing:-.05em}
+.cta p{margin:15px 0 0;color:var(--muted);font-size:13px}
+.cta .btn{position:relative;z-index:1;min-width:154px}
+
+/* Footer */
+.footer{padding:38px 0;border-top:1px solid var(--line)}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:30px}
+.footer-left{display:flex;align-items:center;gap:14px}
+.footer-left p{margin:0;color:var(--muted);font-size:10px}
+.footer-meta{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:9px}
+
+/* Modal + search */
+.overlay{
+  position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.58);
+  backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:.2s ease
+}
+.overlay.open{opacity:1;pointer-events:auto}
+.modal{
+  position:fixed;z-index:140;left:50%;top:50%;transform:translate(-50%,-46%) scale(.98);
+  width:min(620px,calc(100vw - 32px));max-height:82vh;overflow:auto;
+  border:1px solid var(--line-strong);border-radius:20px;background:var(--surface);
+  box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.22s ease
+}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.modal-top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.modal-top small{color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.modal-close{border:0;background:var(--soft);width:34px;height:34px;border-radius:9px;display:grid;place-items:center;cursor:pointer}
+.modal-body{padding:30px}
+.modal-body h2{margin:0 0 11px;font-size:30px;letter-spacing:-.04em}
+.modal-body>p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+.modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px}
+.modal-item{padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--bg-elevated)}
+.modal-item span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.1em}
+.modal-item b{display:block;margin-top:7px;font-size:11px}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:26px}
+
+.search-modal{
+  position:fixed;z-index:150;left:50%;top:96px;transform:translateX(-50%) translateY(-10px);
+  width:min(680px,calc(100vw - 32px));border:1px solid var(--line-strong);border-radius:18px;
+  background:var(--surface);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.22s ease
+}
+.search-modal.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.search-field{height:62px;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--line)}
+.search-field input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}
+.search-results{padding:10px;max-height:420px;overflow:auto}
+.search-result{
+  width:100%;border:0;background:transparent;border-radius:11px;padding:13px;
+  display:flex;align-items:center;gap:13px;text-align:left;cursor:pointer
+}
+.search-result:hover{background:var(--soft-strong)}
+.result-icon{width:36px;height:36px;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;background:var(--bg-elevated)}
+.result-copy b{display:block;font-size:11px}.result-copy span{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.search-empty{padding:40px;text-align:center;color:var(--muted);font-size:11px}
+.toast{
+  position:fixed;z-index:200;left:50%;bottom:28px;transform:translate(-50%,14px);
+  padding:11px 15px;border-radius:999px;border:1px solid var(--line-strong);
+  background:var(--text);color:var(--inverted);font-size:11px;font-weight:650;
+  opacity:0;pointer-events:none;transition:.2s ease;box-shadow:var(--shadow-soft)
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.mobile-nav{
+  display:none;position:fixed;z-index:90;left:16px;right:16px;top:78px;padding:8px;
+  border:1px solid var(--line-strong);border-radius:15px;background:var(--surface);box-shadow:var(--shadow)
+}
+.mobile-nav.open{display:grid}
+.mobile-nav a{padding:12px;border-radius:10px;font-size:12px;color:var(--muted)}
+.mobile-nav a:hover{background:var(--soft);color:var(--text)}
+
+
+/* AI exploration portfolio */
+.project-showcase{padding:96px 0 40px}
+.project-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden;margin-bottom:18px}
+.project-stat{padding:22px 24px;border-right:1px solid var(--line)}.project-stat:last-child{border-right:0}.project-stat strong{display:block;font-size:30px;letter-spacing:-.05em}.project-stat span{display:block;margin-top:6px;color:var(--muted);font-size:10px}
+.project-preview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.project-preview-card{min-height:260px;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--surface);display:flex;flex-direction:column;transition:.22s ease;cursor:pointer}.project-preview-card:hover{transform:translateY(-3px);border-color:var(--line-strong);background:var(--surface-2)}.project-preview-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:9px;letter-spacing:.1em}.project-preview-card h3{margin:44px 0 10px;font-size:18px;line-height:1.34;letter-spacing:-.025em}.project-preview-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.65}.project-preview-foot{margin-top:auto;padding-top:18px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:9px}.project-actions{display:flex;gap:10px;margin-top:18px}
+@media(max-width:1100px){.project-preview-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:820px){.project-stats{grid-template-columns:repeat(2,1fr)}.project-stat:nth-child(2){border-right:0}.project-stat:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(max-width:560px){.project-preview-grid,.project-stats{grid-template-columns:1fr}.project-stat{border-right:0;border-bottom:1px solid var(--line)}.project-stat:last-child{border-bottom:0}.project-actions{display:grid}}
+
+/* Responsive */
+@media(max-width:1100px){
+  .nav{display:none}.header-search{display:none}.mobile-menu{display:grid}
+  .hero-grid{grid-template-columns:1fr;gap:36px;min-height:auto}
+  .hero-copy{padding:28px 0 0}.hero-copy h1{max-width:850px}
+  .product-preview{max-width:760px}
+  .preview-note{right:18px}
+  .asset-grid{grid-template-columns:repeat(2,1fr)}
+  .case-card{grid-template-columns:1fr}
+  .case-visual{border-right:0;border-bottom:1px solid var(--line)}
+}
+@media(max-width:820px){
+  :root{--shell:min(100% - 30px,1240px)}
+  .section{padding:80px 0}.section.compact{padding:58px 0}
+  .hero{padding-top:42px}.hero-copy h1{font-size:clamp(46px,13vw,72px)}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .metric:nth-child(2){border-right:0}.metric:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .path-grid{grid-template-columns:1fr}
+  .path-card{min-height:250px}.path-icon{margin-top:38px}
+  .section-head{align-items:flex-start;flex-direction:column}
+  .toolbar{align-items:stretch;flex-direction:column}
+  .asset-search{min-width:100%}
+  .governance{grid-template-columns:1fr}
+  .gov-connector{height:56px}.gov-connector i{width:1px;height:100%}
+  .gov-connector i::after{right:-3px;top:auto;bottom:-1px;transform:rotate(135deg)}
+  .cta{align-items:flex-start;flex-direction:column;padding:38px}
+  .footer-inner{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:560px){
+  :root{--shell:calc(100vw - 24px)}
+  .brand-copy span{display:none}.header-actions .btn{display:none}
+  .hero-grid{gap:25px}.hero-copy h1{font-size:44px}
+  .hero-copy>p{font-size:14px}.hero-actions{display:grid}
+  .btn{width:100%}.hero-meta{align-items:flex-start;flex-wrap:wrap}
+  .window-body{grid-template-columns:1fr}.mock-side{display:none}
+  .mock-main{padding:18px 14px}.mock-kpis{grid-template-columns:repeat(3,1fr)}
+  .preview-note{display:none}.app-window{transform:none}
+  .metrics{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)}
+  .metric:last-child{border-bottom:0}
+  .asset-grid{grid-template-columns:1fr}
+  .case-visual,.case-copy{padding:24px}.case-canvas{grid-template-columns:1fr}
+  .case-arrow{height:34px;transform:rotate(90deg)}
+  .case-results{grid-template-columns:1fr}
+  .modal-grid{grid-template-columns:1fr}
+  .footer-meta{align-items:flex-start;flex-direction:column;gap:6px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="shell header-inner">
+    <a class="brand" href="#home" aria-label="返回首页">
+      <span class="brand-mark" aria-hidden="true">
+        <img src="data:image/png;base64,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" alt="PalmPay Logo" />
+      </span>
+      <span class="brand-copy">
+        <strong>PalmPay Design</strong>
+        <span>Intelligence Hub</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="主导航">
+      <a class="active" href="#home">首页</a>
+      <a href="#assets">设计资产</a>
+      <a href="#skills">AI Skill</a>
+      <a href="#projects">探索项目</a>
+      <a href="#cases">AI 案例</a>
+      <a href="#impact">业务影响</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="header-search" type="button" data-open-search>
+        <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+        <span>搜索资产、Skill 或案例</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="icon-btn" type="button" id="themeToggle" aria-label="切换明暗主题">
+        <svg class="icon theme-icon-moon" viewBox="0 0 24 24"><path d="M20 15.2A8.3 8.3 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"/></svg>
+      </button>
+      <button class="btn primary" type="button" data-workspace>进入工作台
+        <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+      </button>
+      <button class="icon-btn mobile-menu" id="mobileMenuBtn" type="button" aria-label="打开导航">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#home">首页</a>
+  <a href="#assets">设计资产</a>
+  <a href="#skills">AI Skill</a>
+  <a href="#projects">探索项目</a>
+  <a href="#cases">AI 案例</a>
+  <a href="#impact">业务影响</a>
+</nav>
+
+<main id="home">
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow">Internal Beta · Updated July 2026</div>
+        <h1>让设计资产被复用<span>让设计价值被衡量</span></h1>
+        <p>汇聚设计资产、AI Skill 与经过验证的实践案例，让团队成员可以更快发现、调用、贡献并衡量设计能力。</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#assets">浏览设计资产
+            <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+          </a>
+          <button class="btn secondary" type="button" data-open-search>
+            <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+            搜索团队能力
+          </button>
+        </div>
+        <div class="hero-meta">
+          <span class="badge"><i class="status-dot"></i> 内部试运行</span>
+          <span>本页数据为原型演示数据</span>
+          <span class="divider"></span>
+          <span>设计师判断 · AI 辅助执行</span>
+        </div>
+      </div>
+
+      <div class="product-preview" aria-label="平台工作台预览">
+        <div class="preview-glow"></div>
+        <div class="app-window">
+          <div class="window-top">
+            <span class="traffic"><i></i><i></i><i></i></span>
+            <span class="window-title">Design Intelligence / Workspace</span>
+            <span class="window-live"><i class="status-dot"></i> Beta online</span>
+          </div>
+          <div class="window-body">
+            <aside class="mock-side">
+              <div class="mock-brand"><span class="mock-logo">P</span>PalmPay UX</div>
+              <div class="mock-label">Workspace</div>
+              <div class="mock-nav active"><i></i>Overview</div>
+              <div class="mock-nav"><i></i>Design Assets</div>
+              <div class="mock-nav"><i></i>AI Skills</div>
+              <div class="mock-nav"><i></i>Cases</div>
+              <div class="mock-label">Operations</div>
+              <div class="mock-nav"><i></i>Contributions</div>
+              <div class="mock-nav"><i></i>Impact</div>
+            </aside>
+            <div class="mock-main">
+              <div class="mock-head">
+                <div><h3>Design intelligence overview</h3><p>Team assets, methods and verified practices</p></div>
+                <span class="mock-avatar"></span>
+              </div>
+              <div class="mock-search">
+                <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+                Search assets, skills or cases
+              </div>
+              <div class="mock-kpis">
+                <div class="mock-kpi"><span>ASSETS</span><strong>128</strong><em>Structured</em></div>
+                <div class="mock-kpi"><span>AI SKILLS</span><strong>36</strong><em>Reusable</em></div>
+                <div class="mock-kpi"><span>REUSE</span><strong>72%</strong><em>Last 90 days</em></div>
+              </div>
+              <div class="mock-row-head"><b>Featured knowledge</b><span>View all →</span></div>
+              <div class="mock-cards">
+                <div class="mock-card">
+                  <small>DESIGN ASSET</small>
+                  <b>Web 数据表格组件规范</b>
+                  <p>统一复杂业务表格的布局、状态与交付标准。</p>
+                </div>
+                <div class="mock-card">
+                  <small>AI SKILL</small>
+                  <b>UI 视觉走查 Skill</b>
+                  <p>辅助识别设计与实现的视觉偏差。</p>
+                </div>
+              </div>
+              <div class="mock-row-head"><b>Reuse trend</b><span>Past 12 weeks</span></div>
+              <div class="mock-chart">
+                <span class="chart-line">
+                  <svg viewBox="0 0 300 90" preserveAspectRatio="none">
+                    <path d="M0,77 C35,68 46,70 72,57 C102,42 121,49 150,38 C181,26 197,34 225,19 C250,8 270,12 300,5" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M0,77 C35,68 46,70 72,57 C102,42 121,49 150,38 C181,26 197,34 225,19 C250,8 270,12 300,5 L300,90 L0,90Z" fill="currentColor" opacity=".06"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-note">
+          <small>ASSET REUSE RATE</small>
+          <strong>72% of verified assets reused</strong>
+          <div class="note-progress"><i></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="metrics-wrap" id="impact">
+    <div class="shell">
+      <div class="metrics">
+        <article class="metric">
+          <div class="metric-top"><span>设计资产</span><span>Demo Data</span></div>
+          <strong>128</strong><p>已完成结构化归档</p>
+        </article>
+        <article class="metric">
+          <div class="metric-top"><span>AI Skill</span><span>Demo Data</span></div>
+          <strong>36</strong><p>可复制、可持续维护</p>
+        </article>
+        <article class="metric">
+          <div class="metric-top"><span>资产复用率</span><span>近 90 天</span></div>
+          <strong>72%</strong><p>已验证资产的团队复用情况</p>
+        </article>
+        <article class="metric">
+          <div class="metric-top"><span>节省工时</span><span>近 90 天</span></div>
+          <strong>240h</strong><p>基于项目负责人确认的估算</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact" id="skills">
+    <div class="shell">
+      <div class="section-head">
+        <div class="section-copy">
+          <div class="eyebrow">Start with a task</div>
+          <h2>不从栏目开始，从任务开始</h2>
+          <p>首页只保留三个高频入口，让设计师、产品经理和业务伙伴快速进入正确路径。</p>
+        </div>
+      </div>
+
+      <div class="path-grid">
+        <article class="path-card" data-scroll-target="assets">
+          <span class="path-index">01 / FIND</span>
+          <span class="path-decor"></span>
+          <div class="path-icon">
+            <svg class="icon lg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+          </div>
+          <h3>找设计资产</h3>
+          <p>搜索组件、页面模板、规范和交付机制，减少重复设计与沟通成本。</p>
+          <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
+        </article>
+
+        <article class="path-card" data-skill-card>
+          <span class="path-index">02 / APPLY</span>
+          <span class="path-decor"></span>
+          <div class="path-icon">
+            <svg class="icon lg" viewBox="0 0 24 24"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z"/><path d="m18.5 16 .7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3Z"/></svg>
+          </div>
+          <h3>用 AI Skill</h3>
+          <p>调用经过设计师验证的输入约束、分析维度、输出结构和判断标准。</p>
+          <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
+        </article>
+
+        <article class="path-card" data-scroll-target="cases">
+          <span class="path-index">03 / PROVE</span>
+          <span class="path-decor"></span>
+          <div class="path-icon">
+            <svg class="icon lg" viewBox="0 0 24 24"><path d="M5 19V9M12 19V5M19 19v-7"/></svg>
+          </div>
+          <h3>看业务影响</h3>
+          <p>查看设计方法如何被应用、验证与复用，而不只是观看静态作品。</p>
+          <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="project-showcase" id="projects">
+    <div class="shell">
+      <div class="section-head">
+        <div class="section-copy">
+          <div class="eyebrow">AI exploration portfolio</div>
+          <h2>33 个 AI 体验设计探索项目</h2>
+          <p>从设计生产、用户增长到金融风险与组织能力，建立一套可以逐步试点、验证和复制的 AI 项目组合。</p>
+        </div>
+        <a class="text-link" href="projects/index.html">查看全部项目
+          <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+        </a>
+      </div>
+      <div class="project-stats">
+        <div class="project-stat"><strong>7</strong><span>战略与组织</span></div>
+        <div class="project-stat"><strong>13</strong><span>设计生产</span></div>
+        <div class="project-stat"><strong>8</strong><span>增长与运营</span></div>
+        <div class="project-stat"><strong>5</strong><span>风险与治理</span></div>
+      </div>
+      <div class="project-preview-grid">
+        <a class="project-preview-card" href="projects/12_90天执行计划.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>S05 · STRATEGY</span><span>↗</span></div><h3>90 天执行计划</h3><p>通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。</p><div class="project-preview-foot"><span>组织执行</span><span>可立项</span></div></a>
+        <a class="project-preview-card" href="projects/08_AI需求分析与体验策略中心.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>P01 · PRODUCTION</span><span>↗</span></div><h3>AI 需求分析与体验策略中心</h3><p>统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。</p><div class="project-preview-foot"><span>设计生产</span><span>可立项</span></div></a>
+        <a class="project-preview-card" href="projects/15_项目八_AI新用户激活助手.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>P08 · GROWTH</span><span>↗</span></div><h3>AI 新用户激活助手</h3><p>基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。</p><div class="project-preview-foot"><span>业务增长</span><span>可立项</span></div></a>
+        <a class="project-preview-card" href="projects/30_项目二十三_AI高风险操作体验审计.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>P23 · RISK</span><span>↗</span></div><h3>AI 高风险操作体验审计</h3><p>审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。</p><div class="project-preview-foot"><span>金融风险</span><span>可立项</span></div></a>
+      </div>
+      <div class="project-actions"><a class="btn primary" href="projects/index.html">查看全部 33 个项目<svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg></a><a class="btn secondary" href="projects/12_90天执行计划.html" target="_blank" rel="noopener">查看 90 天执行路线</a></div>
+    </div>
+  </section>
+
+  <section class="section" id="assets">
+    <div class="shell">
+      <div class="section-head">
+        <div class="section-copy">
+          <div class="eyebrow">Latest assets</div>
+          <h2>最近更新的设计资产</h2>
+          <p>卡片只保留最关键的信息：资产类型、标题、维护团队、验证状态与更新时间。</p>
+        </div>
+        <button class="text-link" type="button" data-workspace>进入完整资产库
+          <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <label class="asset-search">
+          <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+          <input id="assetSearch" type="search" placeholder="搜索标题、场景或维护团队…" />
+        </label>
+        <div class="filters" role="group" aria-label="资产筛选">
+          <button class="filter active" data-filter="all">全部</button>
+          <button class="filter" data-filter="component">组件规范</button>
+          <button class="filter" data-filter="template">页面模板</button>
+          <button class="filter" data-filter="workflow">AI 工作流</button>
+          <button class="filter" data-filter="delivery">交付规范</button>
+        </div>
+      </div>
+
+      <div class="asset-grid" id="assetGrid">
+        <article class="asset-card" data-category="component" data-title="Web 数据表格组件规范 交易列表 筛选 批量操作 设计系统">
+          <div class="asset-visual">
+            <span class="asset-chip">Component system</span>
+            <div class="asset-mini-window">
+              <div class="asset-mini-bar"><i></i><i></i><i></i></div>
+              <div class="asset-mini-body">
+                <div class="asset-mini-side"><i></i><i></i><i></i></div>
+                <div class="asset-lines"><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="asset-body">
+            <div class="asset-meta"><span>组件规范</span><span>更新于 2 天前</span></div>
+            <h3>Web 数据表格组件规范</h3>
+            <p>统一复杂业务表格的布局、筛选、批量操作、状态与空数据表达。</p>
+            <div class="asset-footer"><span>设计系统小组</span><b>已验证 · 72% 复用</b></div>
+          </div>
+        </article>
+
+        <article class="asset-card" data-category="template" data-title="业务经营看板页面模板 指标叙事 管理层 体验设计">
+          <div class="asset-visual">
+            <span class="asset-chip">Page template</span>
+            <div class="asset-chart-visual">
+              <svg viewBox="0 0 280 120" preserveAspectRatio="none">
+                <path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4 L280,120 L0,120Z" fill="currentColor" opacity=".06"/>
+              </svg>
+            </div>
+          </div>
+          <div class="asset-body">
+            <div class="asset-meta"><span>页面模板</span><span>更新于 5 天前</span></div>
+            <h3>业务经营看板页面模板</h3>
+            <p>帮助设计师快速建立指标层级、经营叙事和管理层决策视图。</p>
+            <div class="asset-footer"><span>体验设计小组</span><b>18 个模板</b></div>
+          </div>
+        </article>
+
+        <article class="asset-card" data-category="workflow" data-title="AI Skill 工具包 需求分析 体验策略 设计判断 AI设计">
+          <div class="asset-visual">
+            <span class="asset-chip">AI workflow</span>
+            <div class="asset-process"><i></i><i></i><i></i></div>
+          </div>
+          <div class="asset-body">
+            <div class="asset-meta"><span>AI 工作流</span><span>更新于 1 周前</span></div>
+            <h3>体验策略分析 AI Skill</h3>
+            <p>将输入材料、分析维度、输出结构和设计判断整合为可复用工作流。</p>
+            <div class="asset-footer"><span>AI 设计小组</span><b>评分 8.8</b></div>
+          </div>
+        </article>
+
+        <article class="asset-card" data-category="delivery" data-title="设计交付检查清单 状态覆盖 验收 走查 设计运营">
+          <div class="asset-visual">
+            <span class="asset-chip">Delivery system</span>
+            <div class="asset-checks"><i></i><i></i><i></i></div>
+          </div>
+          <div class="asset-body">
+            <div class="asset-meta"><span>交付规范</span><span>更新于 2 周前</span></div>
+            <h3>设计交付检查清单</h3>
+            <p>统一状态覆盖、交互说明、验收口径与设计走查的团队标准。</p>
+            <div class="asset-footer"><span>设计运营小组</span><b>高频使用</b></div>
+          </div>
+        </article>
+      </div>
+      <div class="empty" id="assetEmpty">没有找到匹配的设计资产。</div>
+    </div>
+  </section>
+
+  <section class="section compact" id="cases">
+    <div class="shell">
+      <div class="section-head">
+        <div class="section-copy">
+          <div class="eyebrow">Verified AI practice</div>
+          <h2>一个案例，说明方法与结果</h2>
+          <p>不再平铺多张相似卡片，而是用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p>
+        </div>
+      </div>
+
+      <article class="case-card">
+        <div class="case-visual">
+          <div class="case-head"><small>Before / After</small><span class="badge">Verified case</span></div>
+          <div class="case-canvas">
+            <div class="case-stage">
+              <div class="case-stage-label"><span>传统流程</span><span>3 days</span></div>
+              <div class="stage-screen">
+                <div class="s-head"></div>
+                <div class="s-grid"><i></i><i></i><i></i></div>
+              </div>
+            </div>
+            <div class="case-arrow">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+            </div>
+            <div class="case-stage">
+              <div class="case-stage-label"><span>AI 协同流程</span><span>4 hours</span></div>
+              <div class="stage-screen after">
+                <div class="after-side"><i></i><i></i><i></i><i></i></div>
+                <div class="after-main"><i></i><div class="after-cards"><i></i><i></i><i></i><i></i></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="case-copy">
+          <span class="badge">效率提升 · AI 精选</span>
+          <h3>营销活动视觉探索</h3>
+          <p>AI 不直接替代设计判断，而是加速参考图整理、方向扩散和方案初筛；设计师负责定义边界、选择方向并形成可复用方法。</p>
+          <div class="case-steps">
+            <div class="case-step"><span>01</span><div><b>定义输入边界</b><p>设计师确定品牌资产、参考风格和不可突破的约束。</p></div></div>
+            <div class="case-step"><span>02</span><div><b>AI 扩散与聚类</b><p>快速生成方向并按视觉语言、场景和风险进行归类。</p></div></div>
+            <div class="case-step"><span>03</span><div><b>人工筛选与沉淀</b><p>设计师完成最终选择，并把有效路径保存为下一次可调用的 Skill。</p></div></div>
+          </div>
+          <div class="case-results">
+            <div><strong>3d → 4h</strong><span>首轮视觉探索</span></div>
+            <div><strong>12</strong><span>验证方向数量</span></div>
+            <div><strong>1 Skill</strong><span>已沉淀为工作流</span></div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section compact governance-section">
+    <div class="shell">
+      <div class="section-head">
+        <div class="section-copy">
+          <div class="eyebrow">Platform governance</div>
+          <h2>平台不是作品集，而是治理机制</h2>
+          <p>用三个角色形成从标准、创新到质量闭环，避免资产只上传、不维护、不复用。</p>
+        </div>
+      </div>
+      <div class="governance">
+        <article class="gov-card">
+          <span class="gov-num">01 / STANDARDIZE</span>
+          <h3>设计系统</h3>
+          <p>负责组件、模式、Token 与跨业务体验标准。</p>
+          <footer>标准建立 · 资产维护 · 版本治理</footer>
+        </article>
+        <div class="gov-connector"><i></i></div>
+        <article class="gov-card">
+          <span class="gov-num">02 / EXPLORE</span>
+          <h3>AI 设计</h3>
+          <p>将实验性的 AI 产出转化为可调用、可验证的方法。</p>
+          <footer>Skill 设计 · 方法验证 · 案例沉淀</footer>
+        </article>
+        <div class="gov-connector"><i></i></div>
+        <article class="gov-card">
+          <span class="gov-num">03 / OPERATE</span>
+          <h3>设计运营</h3>
+          <p>维护审核、发布、复用反馈和影响力数据。</p>
+          <footer>质量审核 · 内容运营 · 价值度量</footer>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell">
+      <div class="cta">
+        <div class="cta-copy">
+          <h2>把一次优秀产出，变成团队下一次工作的起点</h2>
+          <p>本版本用于验证首页信息架构、品牌表达与核心入口，不包含真实权限和后台数据。</p>
+        </div>
+        <button class="btn primary" type="button" data-workspace>进入工作台
+          <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="shell footer-inner">
+    <div class="footer-left">
+      <a class="brand" href="#home" aria-label="返回首页">
+      <span class="brand-mark" aria-hidden="true">
+        <img src="data:image/png;base64,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" alt="PalmPay Logo" />
+      </span>
+      <span class="brand-copy">
+        <strong>PalmPay Design</strong>
+        <span>Intelligence Hub</span>
+      </span>
+    </a>
+    </div>
+    <div class="footer-meta">
+      <span>Demo data</span><span>Dark / Light supported</span><span>Single-file HTML</span>
+    </div>
+  </div>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+
+<section class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="全局搜索">
+  <div class="search-field">
+    <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+    <input id="globalSearch" type="search" placeholder="搜索设计资产、AI Skill 或案例…" autocomplete="off" />
+    <button class="modal-close" type="button" data-close-search aria-label="关闭搜索">×</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</section>
+
+<section class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+  <div class="modal-top">
+    <small id="detailType">Design Asset</small>
+    <button class="modal-close" type="button" data-close-modal aria-label="关闭详情">×</button>
+  </div>
+  <div class="modal-body">
+    <h2 id="detailTitle">资产详情</h2>
+    <p id="detailDescription"></p>
+    <div class="modal-grid">
+      <div class="modal-item"><span>维护团队</span><b id="detailTeam"></b></div>
+      <div class="modal-item"><span>验证状态</span><b id="detailStatus"></b></div>
+      <div class="modal-item"><span>适用场景</span><b id="detailScene"></b></div>
+      <div class="modal-item"><span>最近更新</span><b id="detailUpdated"></b></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" type="button" data-close-modal>关闭</button>
+      <button class="btn primary" type="button" data-copy-asset>复制资产链接</button>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast">已复制</div>
+
+<script>
+const assetDetails = [
+  {
+    title:'Web 数据表格组件规范',
+    type:'Component System',
+    description:'统一复杂业务表格的布局、筛选、批量操作、状态、空数据与响应式规则，降低交易和运营后台中的重复设计与交付偏差。',
+    team:'设计系统小组',
+    status:'已验证 · 72% 复用',
+    scene:'交易列表、商户管理、结算明细',
+    updated:'2026.07 · 2 天前'
+  },
+  {
+    title:'业务经营看板页面模板',
+    type:'Page Template',
+    description:'面向经营分析、项目状态与指标叙事的页面模板，帮助设计师快速建立统一的信息层级和管理层决策视图。',
+    team:'体验设计小组',
+    status:'MVP 精选 · 18 个模板',
+    scene:'经营分析、项目汇报、指标复盘',
+    updated:'2026.07 · 5 天前'
+  },
+  {
+    title:'体验策略分析 AI Skill',
+    type:'AI Workflow',
+    description:'将需求材料、研究输入、分析维度、输出结构和设计判断整合为可复制的 AI Skill，支持多业务线快速复用。',
+    team:'AI 设计小组',
+    status:'已验证 · 评分 8.8',
+    scene:'需求分析、体验策略、方案评审',
+    updated:'2026.07 · 1 周前'
+  },
+  {
+    title:'设计交付检查清单',
+    type:'Delivery System',
+    description:'统一页面状态覆盖、交互说明、验收口径和设计走查标准，让设计交付从个人经验转化为团队机制。',
+    team:'设计运营小组',
+    status:'高频使用',
+    scene:'设计交付、开发验收、项目复盘',
+    updated:'2026.06 · 2 周前'
+  }
+];
+
+const globalItems = [
+  ...assetDetails.map((item,index)=>({...item,kind:'设计资产',action:()=>openAsset(index)})),
+  {
+    title:'UI 视觉走查 Skill',kind:'AI Skill',type:'AI Skill',
+    description:'对比设计稿与开发稿，识别布局、间距、字号、颜色、圆角与组件状态偏差。',
+    team:'AI 设计小组',status:'已验证',scene:'UI 验收、设计走查',updated:'2026.07',
+    action:()=>openSkill()
+  },
+  {
+    title:'营销活动视觉探索',kind:'AI 案例',type:'Verified AI Practice',
+    description:'从 3 天首轮探索缩短到 4 小时，并沉淀为可复用工作流。',
+    team:'AI 设计小组',status:'已验证案例',scene:'营销设计、视觉探索',updated:'2026.07',
+    action:()=>document.querySelector('#cases').scrollIntoView({behavior:'smooth'})
+  },
+  {
+    title:'90 天执行计划',kind:'AI 探索项目',type:'Exploration Project',
+    description:'通过试点完成基础建设、结果验证、标准化与复制。',
+    team:'Design Ops',status:'可立项',scene:'组织执行',updated:'2026.07',
+    action:()=>window.open('projects/12_90天执行计划.html','_blank','noopener')
+  },
+  {
+    title:'AI 新用户激活助手',kind:'AI 探索项目',type:'Exploration Project',
+    description:'基于用户状态推荐下一步最有价值的行动。',
+    team:'Growth Design',status:'可立项',scene:'用户增长',updated:'2026.07',
+    action:()=>window.open('projects/15_项目八_AI新用户激活助手.html','_blank','noopener')
+  }
+];
+
+const root = document.documentElement;
+const overlay = document.getElementById('overlay');
+const detailModal = document.getElementById('detailModal');
+const searchModal = document.getElementById('searchModal');
+const toast = document.getElementById('toast');
+const mobileNav = document.getElementById('mobileNav');
+
+function getStoredTheme(){
+  try{
+    const workspaceTheme = localStorage.getItem('pp-theme');
+    if(workspaceTheme){
+      try{return JSON.parse(workspaceTheme);}catch{return workspaceTheme;}
+    }
+    return localStorage.getItem('ppux-theme');
+  } catch { return null; }
+}
+function setTheme(theme){
+  root.dataset.theme = theme;
+  try{
+    localStorage.setItem('ppux-theme',theme);
+    localStorage.setItem('pp-theme',JSON.stringify(theme));
+  }catch{}
+}
+setTheme(getStoredTheme() || 'dark');
+
+document.getElementById('themeToggle').addEventListener('click',()=>{
+  setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+});
+
+function lock(open){
+  document.body.classList.toggle('locked',open);
+  overlay.classList.toggle('open',open);
+}
+function closeAll(){
+  detailModal.classList.remove('open');
+  searchModal.classList.remove('open');
+  lock(false);
+}
+overlay.addEventListener('click',closeAll);
+document.querySelectorAll('[data-close-modal],[data-close-search]').forEach(btn=>btn.addEventListener('click',closeAll));
+document.addEventListener('keydown',e=>{
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase()==='k'){
+    e.preventDefault();openSearch();
+  }
+  if(e.key==='Escape') closeAll();
+});
+
+function openAsset(index){
+  const item = assetDetails[index];
+  document.getElementById('detailType').textContent = item.type;
+  document.getElementById('detailTitle').textContent = item.title;
+  document.getElementById('detailDescription').textContent = item.description;
+  document.getElementById('detailTeam').textContent = item.team;
+  document.getElementById('detailStatus').textContent = item.status;
+  document.getElementById('detailScene').textContent = item.scene;
+  document.getElementById('detailUpdated').textContent = item.updated;
+  searchModal.classList.remove('open');
+  lock(true);detailModal.classList.add('open');
+}
+document.querySelectorAll('.asset-card').forEach((card,index)=>card.addEventListener('click',()=>openAsset(index)));
+
+function openSkill(){
+  document.getElementById('detailType').textContent = 'AI Skill';
+  document.getElementById('detailTitle').textContent = 'UI 视觉走查 Skill';
+  document.getElementById('detailDescription').textContent = '通过设计稿与开发稿对比，识别布局、间距、字号、颜色、圆角、阴影、图标、对齐方式和组件状态偏差，并生成分级问题清单。';
+  document.getElementById('detailTeam').textContent = 'AI 设计小组';
+  document.getElementById('detailStatus').textContent = '已验证 · 可复制';
+  document.getElementById('detailScene').textContent = 'UI 验收、设计走查、开发协同';
+  document.getElementById('detailUpdated').textContent = '2026.07';
+  lock(true);detailModal.classList.add('open');
+}
+document.querySelectorAll('[data-skill-card]').forEach(el=>el.addEventListener('click',openSkill));
+
+function showToast(message){
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>toast.classList.remove('show'),1800);
+}
+document.querySelector('[data-copy-asset]').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(location.href);showToast('资产链接已复制');}
+  catch{showToast('已模拟复制资产链接');}
+});
+
+function openSearch(){
+  lock(true);detailModal.classList.remove('open');searchModal.classList.add('open');
+  const input = document.getElementById('globalSearch');
+  input.value='';renderSearch('');setTimeout(()=>input.focus(),80);
+}
+document.querySelectorAll('[data-open-search]').forEach(btn=>btn.addEventListener('click',openSearch));
+
+function renderSearch(query){
+  const target = document.getElementById('searchResults');
+  const q = query.trim().toLowerCase();
+  const items = globalItems.filter(item=>`${item.title} ${item.kind} ${item.description} ${item.team}`.toLowerCase().includes(q));
+  if(!items.length){target.innerHTML='<div class="search-empty">没有找到匹配内容。</div>';return}
+  target.innerHTML = items.map((item,index)=>`
+    <button class="search-result" data-result="${index}">
+      <span class="result-icon">
+        <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h6"/></svg>
+      </span>
+      <span class="result-copy"><b>${item.title}</b><span>${item.kind} · ${item.team}</span></span>
+    </button>`).join('');
+  target.querySelectorAll('[data-result]').forEach((button,index)=>button.addEventListener('click',()=>items[index].action()));
+}
+document.getElementById('globalSearch').addEventListener('input',e=>renderSearch(e.target.value));
+
+const assetSearch = document.getElementById('assetSearch');
+const filterButtons = [...document.querySelectorAll('.filter')];
+let activeFilter='all';
+
+function filterAssets(){
+  const q = assetSearch.value.trim().toLowerCase();
+  let visible=0;
+  document.querySelectorAll('.asset-card').forEach(card=>{
+    const matchType = activeFilter==='all' || card.dataset.category===activeFilter;
+    const matchText = card.dataset.title.toLowerCase().includes(q);
+    const show = matchType && matchText;
+    card.style.display = show ? '' : 'none';
+    if(show) visible++;
+  });
+  document.getElementById('assetEmpty').style.display = visible ? 'none' : 'block';
+}
+assetSearch.addEventListener('input',filterAssets);
+filterButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  filterButtons.forEach(item=>item.classList.remove('active'));
+  btn.classList.add('active');activeFilter=btn.dataset.filter;filterAssets();
+}));
+
+document.querySelectorAll('[data-scroll-target]').forEach(card=>card.addEventListener('click',()=>{
+  document.getElementById(card.dataset.scrollTarget).scrollIntoView({behavior:'smooth'});
+}));
+document.querySelectorAll('[data-workspace]').forEach(btn=>btn.addEventListener('click',()=>{
+  try{localStorage.setItem('pp-theme',JSON.stringify(root.dataset.theme || 'dark'));}catch{}
+  window.location.href = './workspace.html';
+}));
+
+document.getElementById('mobileMenuBtn').addEventListener('click',()=>mobileNav.classList.toggle('open'));
+mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mobileNav.classList.remove('open')));
+
+const sections = [...document.querySelectorAll('main section[id]')];
+const navLinks = [...document.querySelectorAll('.nav a')];
+window.addEventListener('scroll',()=>{
+  let current='home';
+  sections.forEach(section=>{
+    if(window.scrollY >= section.offsetTop - 140) current=section.id;
+  });
+  navLinks.forEach(link=>link.classList.toggle('active',link.getAttribute('href')==='#'+current));
+},{passive:true});
+</script>
+<link rel="stylesheet" href="./logo-unification.css">
+<script src="./logo-unification.js"></script>
+</body>
+</html>

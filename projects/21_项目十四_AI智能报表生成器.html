@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>AI 智能报表生成器｜项目十四</title>
+  <style>
+    :root{
+      --bg:#080808;--panel:#111;--panel-2:#171717;--panel-3:#202020;
+      --text:#f5f5f5;--muted:#9c9c9c;--line:#2b2b2b;--strong:#fff;
+      --soft:#242424;--good:#dff7df;--warn:#fff0bc;--risk:#ffd9d9;
+      --shadow:0 28px 90px rgba(0,0,0,.34);--radius:24px;
+    }
+    [data-theme="light"]{
+      --bg:#f4f4f1;--panel:#fff;--panel-2:#f8f8f5;--panel-3:#ecece8;
+      --text:#151515;--muted:#6b6b67;--line:#deded8;--strong:#111;
+      --soft:#ecece7;--good:#e8f7e6;--warn:#fff3c7;--risk:#ffe5e5;
+      --shadow:0 28px 90px rgba(40,40,20,.11);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.065),transparent 30%),var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.55;
+    }
+    button,input,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .shell{max-width:1460px;margin:auto;padding:22px}
+    .topbar{
+      position:sticky;top:14px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px 12px 18px;border:1px solid var(--line);border-radius:18px;
+      background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--strong);color:var(--bg);font-weight:900;font-size:12px}
+    .brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:8px 12px;cursor:pointer;transition:.2s ease;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .btn.primary{background:var(--strong);color:var(--bg);border-color:var(--strong);font-weight:760}
+
+    .hero{margin-top:26px;border:1px solid var(--line);border-radius:30px;overflow:hidden;background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:var(--shadow)}
+    .hero-grid{display:grid;grid-template-columns:1.35fr .65fr;min-height:610px}
+    .hero-copy{padding:68px 58px 48px}
+    .eyebrow{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:850}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--strong)}
+    h1{margin:22px 0 20px;font-size:clamp(46px,6.3vw,88px);line-height:.98;letter-spacing:-.065em;max-width:1080px}
+    .hero-copy>p{font-size:18px;color:var(--muted);max-width:880px;margin:0}
+    .hero-summary{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .summary-chip{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+    .summary-chip small{display:block;color:var(--muted);font-weight:800;margin-bottom:6px}
+    .summary-chip strong{font-size:16px;line-height:1.35;display:block}
+    .hero-side{
+      border-left:1px solid var(--line);padding:34px 28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+      repeating-linear-gradient(90deg,transparent 0 49px,var(--line) 50px),
+      repeating-linear-gradient(0deg,transparent 0 49px,var(--line) 50px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .hero-side-title{font-size:12px;color:var(--muted);letter-spacing:.13em;font-weight:850}
+    .outcome-stack{display:grid;gap:12px;margin-top:18px}
+    .outcome-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:color-mix(in srgb,var(--panel) 88%,transparent)}
+    .outcome-card strong{display:block;font-size:14px;margin-bottom:4px}
+    .outcome-card span{font-size:12px;color:var(--muted)}
+    .hero-note{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+
+    .section{margin-top:58px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:20px}
+    .section-kicker{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:850}
+    h2{font-size:clamp(30px,3.4vw,50px);line-height:1.04;letter-spacing:-.045em;margin:6px 0 0}
+    .section-desc{max-width:710px;color:var(--muted);font-size:14px}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px}
+
+    .exec-summary{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .signal-board{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .signal{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .signal-label{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.08em}
+    .signal-value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:12px 0 6px}
+    .signal-desc{font-size:12px;color:var(--muted)}
+    .summary-story{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+    .summary-story small{font-size:11px;letter-spacing:.12em;font-weight:850;opacity:.55}
+    .summary-story h3{font-size:30px;line-height:1.05;letter-spacing:-.045em;margin:18px 0 14px}
+    .summary-story p{margin:0;font-size:14px;opacity:.68}
+    .summary-story .formula{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:13px;font-weight:760}
+
+    .parameter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .parameter-card{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:22px;min-height:230px;position:relative;overflow:hidden}
+    .parameter-card::after{content:"";position:absolute;right:-42px;bottom:-52px;width:130px;height:130px;border:1px solid var(--line);border-radius:50%}
+    .parameter-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .parameter-card strong{display:block;font-size:21px;margin:22px 0 8px;letter-spacing:-.035em}
+    .parameter-card p{font-size:12px;color:var(--muted);margin:0}
+    .parameter-meta{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .pipeline{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:clamp(16px,1.55vw,26px);overflow-x:auto;overflow-y:hidden;scrollbar-gutter:stable}
+    .pipeline-grid{
+      display:grid;
+      grid-template-columns:minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr);
+      gap:6px;min-width:1150px;align-items:stretch;
+    }
+    .pipe-step{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--panel-2);padding:18px;min-height:190px}
+    .pipe-step small{display:block;color:var(--muted);font-size:11px;font-weight:850}
+    .pipe-step strong{display:block;font-size:15px;line-height:1.42;margin:12px 0 8px;text-wrap:balance}
+    .pipe-step p{font-size:11px;line-height:1.68;color:var(--muted);margin:0}
+    .pipe-badge{margin-top:14px;display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800}
+    .pipe-link{display:grid;place-items:center;color:var(--muted);font-size:21px}
+
+    .analysis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .analysis-card{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:22px;min-height:250px}
+    .analysis-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .analysis-card strong{display:block;font-size:21px;margin:22px 0 8px;letter-spacing:-.035em}
+    .analysis-card p{font-size:12px;color:var(--muted);margin:0}
+    .analysis-list{display:grid;gap:8px;margin-top:16px}
+    .analysis-list span{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:9px 10px;font-size:11px}
+
+    .preview-shell{display:grid;grid-template-columns:1.08fr .92fr;gap:16px}
+    .preview-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .preview-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .app-frame{border:1px solid var(--line);border-radius:24px;background:var(--bg);padding:20px}
+    .app-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .app-head strong{font-size:14px}.app-head span{font-size:11px;color:var(--muted)}
+    .filter-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+    .filter-box{border:1px solid var(--line);border-radius:12px;background:var(--panel-2);padding:10px}
+    .filter-box small{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}
+    .filter-box strong{font-size:11px}
+    .report-card{border:1px solid var(--line);border-radius:20px;background:var(--strong);color:var(--bg);padding:22px}
+    .report-label{font-size:10px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .report-card h4{font-size:25px;line-height:1.1;letter-spacing:-.04em;margin:14px 0 8px}
+    .report-card>p{font-size:12px;opacity:.68;margin:0}
+    .report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:17px}
+    .report-stat{border:1px solid color-mix(in srgb,var(--bg) 18%,transparent);border-radius:12px;padding:10px}
+    .report-stat small{display:block;font-size:8px;opacity:.48;margin-bottom:4px}
+    .report-stat strong{font-size:14px}
+    .insight-strip{margin-top:15px;padding-top:13px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);display:grid;gap:8px}
+    .insight-strip span{font-size:10px}
+    .cta-row{display:flex;gap:9px;margin-top:17px}
+    .cta{flex:1;border-radius:11px;padding:11px 13px;text-align:center;font-size:12px;font-weight:800}
+    .cta.primary{background:var(--bg);color:var(--strong)}
+    .cta.secondary{border:1px solid color-mix(in srgb,var(--bg) 20%,transparent)}
+    .anatomy-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .anatomy-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .anatomy-list{display:grid;gap:10px}
+    .anatomy-item{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px;display:grid;grid-template-columns:34px 1fr;gap:11px;align-items:start}
+    .anatomy-no{width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:10px;font-weight:850}
+    .anatomy-item strong{display:block;font-size:13px}.anatomy-item span{font-size:11px;color:var(--muted)}
+
+    .template-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .template-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:255px}
+    .template-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .template-card strong{display:block;font-size:20px;margin:22px 0 8px}
+    .template-card p{font-size:12px;color:var(--muted);margin:0}
+    .template-list{display:grid;gap:8px;margin-top:16px}
+    .template-list span{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:9px 10px;font-size:11px}
+
+    .boundary-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}
+    .boundary-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;overflow:auto}
+    .boundary-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .boundary-table{min-width:820px;display:grid;gap:9px}
+    .boundary-head,.boundary-row{display:grid;grid-template-columns:1.1fr 1.05fr 1.1fr;gap:12px;align-items:center}
+    .boundary-head{padding:0 14px 9px;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.08em}
+    .boundary-row{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px}
+    .boundary-row strong{font-size:12px}.boundary-row span{font-size:11px;color:var(--muted)}
+    .boundary-result{border:1px solid var(--line);border-radius:999px;padding:7px 10px;text-align:center;font-size:10px;font-weight:800;white-space:nowrap}
+    .boundary-side{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:26px;display:flex;flex-direction:column;justify-content:space-between}
+    .boundary-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .boundary-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .boundary-side p{font-size:13px;opacity:.65;margin:0}
+    .boundary-factors{display:grid;gap:8px;margin-top:20px}
+    .boundary-factors span{padding:10px 0;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:11px}
+    .boundary-side .note{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:12px;font-weight:760}
+
+    .mvp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .week-card{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .week-card.primary{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .week-card small{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.1em}
+    .week-card.primary small{color:color-mix(in srgb,var(--bg) 55%,transparent)}
+    .week-card h3{font-size:28px;letter-spacing:-.04em;margin:17px 0 8px}
+    .week-card p{font-size:12px;color:var(--muted);margin:0}
+    .week-card.primary p{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+    .mvp-list{display:grid;gap:9px;margin-top:20px}
+    .mvp-item{display:grid;grid-template-columns:34px 1fr;gap:11px;padding:12px 0;border-top:1px solid var(--line)}
+    .week-card.primary .mvp-item{border-color:color-mix(in srgb,var(--bg) 18%,transparent)}
+    .mvp-no{width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:10px;font-weight:850}
+    .week-card.primary .mvp-no{background:var(--bg);color:var(--strong)}
+    .mvp-item strong{display:block;font-size:13px}.mvp-item span{font-size:11px;color:var(--muted)}
+    .week-card.primary .mvp-item span{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+
+    .metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    .metric-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:215px}
+    .metric-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .metric-card strong{display:block;font-size:21px;margin:24px 0 8px;letter-spacing:-.04em}
+    .metric-card p{font-size:12px;color:var(--muted);margin:0}
+    .metric-card .formula{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .score-shell{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .score-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .score-summary{display:flex;align-items:baseline;gap:10px}
+    .score-number{font-size:34px;font-weight:850;letter-spacing:-.05em}
+    .score-label{font-size:13px;color:var(--muted)}
+    .table-scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1120px}
+    th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--panel-2)}
+    td{font-size:13px}
+    .metric-name{font-weight:750}
+    .metric-help{display:block;color:var(--muted);font-size:11px;margin-top:3px;max-width:360px}
+    .tag{display:inline-flex;align-items:center;justify-content:center;min-width:max-content;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;line-height:1.2;font-weight:750;white-space:nowrap;word-break:keep-all}
+    #scoreTable th:first-child,#scoreTable td:first-child{min-width:76px;white-space:nowrap}
+    #scoreTable th:nth-child(6),#scoreTable td:nth-child(6){min-width:72px;width:72px;white-space:nowrap;word-break:keep-all}
+    .input{width:100%;min-width:74px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:8px 9px;outline:none}
+    .input:focus{border-color:var(--muted)}
+    .progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;min-width:120px}
+    .progress>span{display:block;height:100%;background:var(--strong);width:0;border-radius:inherit;transition:.35s ease}
+    .progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+    .status{font-size:11px;font-weight:850;padding:5px 8px;border-radius:999px;display:inline-flex;white-space:nowrap}
+    .status.good{background:var(--good);color:#173617}.status.warn{background:var(--warn);color:#3d3210}.status.risk{background:var(--risk);color:#421a1a}
+
+    .action-grid{display:grid;grid-template-columns:1fr .9fr;gap:16px}
+    .checklist{display:grid;gap:9px}
+    .check-row{display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2)}
+    .check-row input{width:18px;height:18px;margin-top:2px;accent-color:var(--strong)}
+    .check-row strong{font-size:13px;display:block}.check-row span{font-size:11px;color:var(--muted)}
+    textarea{width:100%;min-height:290px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);padding:14px;resize:vertical;outline:none}
+    textarea:focus{border-color:var(--muted)}
+    footer{margin:56px 0 28px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:18px}
+
+    @media(max-width:1200px){
+      .template-grid{grid-template-columns:repeat(2,1fr)}
+      .metric-grid{grid-template-columns:repeat(3,1fr)}
+    }
+    @media(max-width:1100px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-side{border-left:none;border-top:1px solid var(--line);min-height:430px}
+      .exec-summary,.preview-shell,.boundary-grid,.action-grid{grid-template-columns:1fr}
+      .mvp-grid{grid-template-columns:1fr}
+      .parameter-grid,.analysis-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:860px){
+      .pipeline{overflow:visible;padding:16px}
+      .pipeline-grid{min-width:0;grid-template-columns:1fr;gap:8px}
+      .pipe-link{min-height:28px;transform:rotate(90deg)}
+      .pipe-step{min-height:auto;padding:20px}
+    }
+    @media(max-width:720px){
+      .shell{padding:12px}.topbar{top:8px;align-items:flex-start}
+      .brand-sub{display:none}.actions .btn:not(.primary){display:none}
+      .hero-copy{padding:44px 22px 32px}h1{font-size:44px}.hero-side{padding:22px}
+      .hero-summary,.signal-board,.parameter-grid,.analysis-grid,.template-grid,.metric-grid{grid-template-columns:1fr}
+      .section-head{align-items:start;flex-direction:column}
+      .filter-row,.report-stats{grid-template-columns:repeat(2,1fr)}
+      .cta-row{flex-direction:column}
+      footer{flex-direction:column}
+    }
+    @media print{
+      .topbar,.actions{display:none!important}
+      body{background:#fff;color:#111}.shell{max-width:none;padding:0}
+      .hero,.panel,.signal-board,.summary-story,.parameter-card,.pipeline,.analysis-card,.preview-panel,.anatomy-panel,
+      .template-card,.boundary-panel,.boundary-side,.week-card,.metric-card,.score-shell{box-shadow:none;break-inside:avoid}
+      .hero{margin-top:0}.section{margin-top:30px}
+      .input,textarea{border:none;background:transparent;color:#111;padding:0}
+    }
+  </style>
+<style id="pp-platform-nav-style">
+    body{padding-top:58px!important}
+    .topbar{top:72px!important}
+    .pp-platform-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;border-bottom:1px solid var(--line,#292929);background:color-mix(in srgb,var(--bg,#080808) 90%,transparent);backdrop-filter:blur(18px);font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .pp-platform-inner{max-width:1460px;height:100%;margin:auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+    .pp-platform-brand{display:flex;align-items:center;gap:10px;min-width:0;color:var(--text,#f5f5f5);text-decoration:none}
+    .pp-platform-logo{width:38px;height:32px;border:1px solid var(--line,#2b2b2b);border-radius:13px;display:grid;place-items:center;background:var(--panel,#111);flex:0 0 auto}
+    .pp-platform-logo img{width:20px;height:20px;object-fit:contain}
+    [data-theme="light"] .pp-platform-logo img{filter:invert(1)}
+    .pp-platform-title{font-size:12px;font-weight:720;white-space:nowrap}.pp-platform-crumb{font-size:11px;color:var(--muted,#999);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pp-platform-links{margin-left:auto;display:flex;align-items:center;gap:7px}.pp-platform-links a,.pp-platform-links span{height:34px;padding:0 10px;border:1px solid var(--line,#2b2b2b);border-radius:9px;display:inline-flex;align-items:center;color:var(--text,#f5f5f5);text-decoration:none;font-size:11px;background:var(--panel-2,#171717)}.pp-platform-links a:hover{border-color:var(--muted,#999)}.pp-platform-links .disabled{opacity:.35}
+    @media(max-width:720px){body{padding-top:54px!important}.topbar{top:62px!important}.pp-platform-nav{height:54px}.pp-platform-inner{padding:0 12px}.pp-platform-title,.pp-platform-links a:first-child,.pp-platform-links .disabled:first-child{display:none}.pp-platform-crumb{max-width:150px}.pp-platform-links a,.pp-platform-links span{padding:0 8px}}
+    @media print{.pp-platform-nav{display:none!important}body{padding-top:0!important}.topbar{top:0!important}}
+    </style></head>
+<body><nav class="pp-platform-nav"><div class="pp-platform-inner"><a class="pp-platform-brand" href="index.html"><span class="pp-platform-logo"><img src="data:image/png;base64,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" alt="PalmPay"></span><span class="pp-platform-title">PalmPay Design</span><span class="pp-platform-crumb">AI 项目库 / P14 AI 智能报表生成器</span></a><div class="pp-platform-links"><a href="index.html">返回项目库</a><a href="20_项目十三_AI审核材料预检.html" title="上一个项目">← 上一个</a><a href="29_项目二十二_AI多语言与本地化体验检查.html" title="下一个项目">下一个 →</a></div></div></nav>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P14</div>
+      <div>
+        <div class="brand-title">AI 智能报表生成器</div>
+        <div class="brand-sub">把重复查询、人工整理与文字总结转化为标准化报告</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeBtn">切换亮色</button>
+      <button class="btn" id="resetBtn">重置记录</button>
+      <button class="btn primary" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="dot"></span> Project 14 · AI Smart Report Generator</div>
+          <h1>从“每周重新查数和整理”，<br>升级为“选择场景与参数，自动生成可理解、可追踪的经营报告”。</h1>
+          <p>
+            用户和内部团队经常需要人工整理周报、月报、经营报告、失败交易分析、
+            换汇费用报告、入账申报报告和客服问题周报。
+            AI 智能报表生成器通过固定模板、明确参数、统一数据口径和自动分析，
+            将时间范围、币种、国家、交易类型、商户和报告用途转化为标准化报告，
+            自动输出概览、变化、异常、费用、风险和建议关注事项。
+          </p>
+          <div class="hero-summary">
+            <div class="summary-chip"><small>现状</small><strong>重复查数、复制表格、人工对比和撰写结论</strong></div>
+            <div class="summary-chip"><small>第一阶段</small><strong>先建设 5—10 个固定模板，不做任意数据问答</strong></div>
+            <div class="summary-chip"><small>结果</small><strong>缩短制作时间，提高复用、留存与数据决策效率</strong></div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div>
+            <div class="hero-side-title">报表生成器必须回答四个问题</div>
+            <div class="outcome-stack">
+              <div class="outcome-card"><strong>用户需要哪一种报告</strong><span>根据经营、交易、费用、申报、退款或运营目的选择模板。</span></div>
+              <div class="outcome-card"><strong>应该使用哪些数据范围</strong><span>明确时间、币种、国家、交易类型、商户和数据口径。</span></div>
+              <div class="outcome-card"><strong>数据发生了什么变化</strong><span>输出概览、环比、异常、主要国家、币种和失败原因。</span></div>
+              <div class="outcome-card"><strong>哪些事项值得继续关注</strong><span>标记风险、费用、异常增长和需要跟进的业务问题。</span></div>
+            </div>
+          </div>
+          <div class="hero-note">第一阶段不要直接开放任意数据问答。先用固定模板保证口径、结构、可解释性和结果稳定性。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">01 · MANAGEMENT SUMMARY</div>
+          <h2>为什么团队每周都在制作报表，却没有形成可复用能力</h2>
+        </div>
+        <div class="section-desc">大量报表工作并不是分析本身，而是反复确认口径、查找数据、复制表格、计算变化和整理文字结论。</div>
+      </div>
+      <div class="exec-summary">
+        <div class="signal-board">
+          <div class="signal"><div class="signal-label">数据获取</div><div class="signal-value">重复查询</div><div class="signal-desc">每次制作都重新选择时间、条件、字段和数据来源。</div></div>
+          <div class="signal"><div class="signal-label">分析口径</div><div class="signal-value">不统一</div><div class="signal-desc">不同人员计算交易、失败、费用和环比的方式不同。</div></div>
+          <div class="signal"><div class="signal-label">报告表达</div><div class="signal-value">依赖个人</div><div class="signal-desc">结构、图表、结论和重点随制作人变化。</div></div>
+          <div class="signal"><div class="signal-label">报告复用</div><div class="signal-value">难沉淀</div><div class="signal-desc">同类报告不断重做，历史版本难以追踪和比较。</div></div>
+        </div>
+        <div class="summary-story">
+          <div>
+            <small>REPORT AUTOMATION STRATEGY</small>
+            <h3>先把高频报告标准化，再用 AI 自动完成数据解释与文字总结。</h3>
+            <p>固定模板负责定义口径与结构，参数负责限定范围，AI 负责识别变化、异常和建议关注事项。</p>
+          </div>
+          <div class="formula">固定模板 × 统一口径 × 用户参数 × 自动分析 × 可追踪版本 = 可复用智能报表</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">02 · USER PARAMETERS</div>
+          <h2>用户生成报告时需要选择的六类参数</h2>
+        </div>
+        <div class="section-desc">参数既决定数据范围，也影响报告结构、指标口径和最终表达方式。</div>
+      </div>
+      <div class="parameter-grid">
+        <article class="parameter-card"><small>TIME RANGE</small><strong>时间范围</strong><p>按日、周、月、季度、自定义周期或对比周期生成。</p><div class="parameter-meta">影响：趋势、环比和异常判断</div></article>
+        <article class="parameter-card"><small>CURRENCY</small><strong>币种</strong><p>选择单币种、多币种或按结算币种统一换算。</p><div class="parameter-meta">影响：金额汇总与换汇费用分析</div></article>
+        <article class="parameter-card"><small>COUNTRY</small><strong>国家</strong><p>选择注册国家、交易国家、收款国家或全部市场。</p><div class="parameter-meta">影响：市场结构与地区异常</div></article>
+        <article class="parameter-card"><small>TRANSACTION TYPE</small><strong>交易类型</strong><p>收款、换汇、付款、退款、入账申报或其他业务类型。</p><div class="parameter-meta">影响：指标、失败原因和流程分析</div></article>
+        <article class="parameter-card"><small>MERCHANT</small><strong>商户</strong><p>单一商户、商户组、行业、客户等级或全部商户。</p><div class="parameter-meta">影响：经营对比与客户分析</div></article>
+        <article class="parameter-card"><small>PURPOSE</small><strong>报告用途</strong><p>经营复盘、财务对账、风险监控、客户沟通或管理汇报。</p><div class="parameter-meta">影响：信息层级与结论重点</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">03 · GENERATION PIPELINE</div>
+          <h2>从模板选择到报告交付的完整链路</h2>
+        </div>
+        <div class="section-desc">固定模板定义报告问题，数据层提供可信口径，AI 只在明确边界内完成分析、表达与重点提炼。</div>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-grid">
+          <div class="pipe-step"><small>01</small><strong>选择报告模板</strong><p>先确定经营、失败、费用、申报、退款或运营场景。</p><span class="pipe-badge">明确业务问题</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>02</small><strong>配置数据参数</strong><p>选择时间、币种、国家、类型、商户和用途。</p><span class="pipe-badge">限定分析范围</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>03</small><strong>校验数据口径</strong><p>检查数据完整性、更新时间、字段映射和指标定义。</p><span class="pipe-badge">保证可信</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>04</small><strong>生成指标与图表</strong><p>计算概览、趋势、结构、失败、费用和风险。</p><span class="pipe-badge">形成基础内容</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>05</small><strong>AI 生成解释</strong><p>提炼变化原因、异常、重点市场与关注事项。</p><span class="pipe-badge">生成业务洞察</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>06</small><strong>预览、确认与保存</strong><p>用户确认内容、补充备注并导出或定时发送。</p><span class="pipe-badge">形成可复用报告</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">04 · AI GENERATED CONTENT</div>
+          <h2>AI 自动生成的九类报告内容</h2>
+        </div>
+        <div class="section-desc">自动生成内容需要围绕“发生了什么、为什么、影响什么、接下来关注什么”组织，而不是简单堆叠数据。</div>
+      </div>
+      <div class="analysis-grid">
+        <article class="analysis-card"><small>01</small><strong>交易概览</strong><p>汇总交易量、金额、用户、成功率和主要业务结构。</p><div class="analysis-list"><span>总量与核心指标</span><span>业务结构与占比</span></div></article>
+        <article class="analysis-card"><small>02</small><strong>环比变化</strong><p>展示与上一周期相比的增长、下降和贡献来源。</p><div class="analysis-list"><span>变化幅度</span><span>主要贡献因素</span></div></article>
+        <article class="analysis-card"><small>03</small><strong>异常变化</strong><p>识别明显偏离历史、目标或同类商户的异常。</p><div class="analysis-list"><span>异常指标</span><span>影响范围与时间</span></div></article>
+        <article class="analysis-card"><small>04</small><strong>主要国家</strong><p>输出交易、收入、失败或增长贡献最高的国家。</p><div class="analysis-list"><span>市场排名</span><span>结构变化</span></div></article>
+        <article class="analysis-card"><small>05</small><strong>主要币种</strong><p>分析币种规模、占比、变化和换汇需求。</p><div class="analysis-list"><span>币种结构</span><span>换汇机会</span></div></article>
+        <article class="analysis-card"><small>06</small><strong>失败原因</strong><p>聚类交易失败、申报失败、退款失败和系统异常。</p><div class="analysis-list"><span>Top 原因</span><span>对应流程与用户群</span></div></article>
+        <article class="analysis-card"><small>07</small><strong>费用分析</strong><p>汇总手续费、换汇费用、退款成本与异常费用变化。</p><div class="analysis-list"><span>成本结构</span><span>变化与优化机会</span></div></article>
+        <article class="analysis-card"><small>08</small><strong>风险提示</strong><p>标记失败激增、集中交易、异常金额和高风险市场。</p><div class="analysis-list"><span>风险等级</span><span>需复核事项</span></div></article>
+        <article class="analysis-card"><small>09</small><strong>建议关注事项</strong><p>将数据变化转化为管理、运营、产品或客户跟进清单。</p><div class="analysis-list"><span>行动建议</span><span>责任人与时间</span></div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">05 · REPORT EXPERIENCE</div>
+          <h2>智能报表不只是导出一份文件</h2>
+        </div>
+        <div class="section-desc">报告生成前要让用户明确参数，生成后要让用户快速理解核心变化、风险和下一步行动。</div>
+      </div>
+      <div class="preview-shell">
+        <div class="preview-panel">
+          <h3>商户月度交易报告示例</h3>
+          <div class="app-frame">
+            <div class="app-head"><strong>生成商户月度交易报告</strong><span>数据更新至本月 30 日</span></div>
+            <div class="filter-row">
+              <div class="filter-box"><small>时间范围</small><strong>本月</strong></div>
+              <div class="filter-box"><small>商户</small><strong>Palm Trade Ltd.</strong></div>
+              <div class="filter-box"><small>报告用途</small><strong>经营复盘</strong></div>
+            </div>
+            <div class="report-card">
+              <div class="report-label">MONTHLY TRANSACTION REPORT</div>
+              <h4>交易规模保持增长，但成功率与退款成本需要关注</h4>
+              <p>本月交易金额环比增长 18.4%，主要来自尼日利亚与肯尼亚市场；成功率下降 1.8 个百分点，退款费用环比增长 26%。</p>
+              <div class="report-stats">
+                <div class="report-stat"><small>交易金额</small><strong>$2.48M</strong></div>
+                <div class="report-stat"><small>环比</small><strong>+18.4%</strong></div>
+                <div class="report-stat"><small>成功率</small><strong>94.2%</strong></div>
+                <div class="report-stat"><small>退款费用</small><strong>+$8.6K</strong></div>
+              </div>
+              <div class="insight-strip">
+                <span>主要增长：尼日利亚 NGN 收款与肯尼亚 KES 付款</span>
+                <span>主要异常：银行拒绝导致失败交易增加 31%</span>
+                <span>建议关注：复核退款增长商户与失败交易恢复策略</span>
+              </div>
+              <div class="cta-row">
+                <div class="cta primary">保存并导出报告</div>
+                <div class="cta secondary">设置每月自动生成</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="anatomy-panel">
+          <h3>报表六个核心组成</h3>
+          <div class="anatomy-list">
+            <div class="anatomy-item"><div class="anatomy-no">1</div><div><strong>参数与数据口径</strong><span>明确时间、对象、范围、币种和数据更新时间。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">2</div><div><strong>一句话管理摘要</strong><span>先说明最重要的结果、变化与风险。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">3</div><div><strong>关键指标</strong><span>展示规模、变化、成功、成本和风险核心数据。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">4</div><div><strong>趋势与结构分析</strong><span>解释国家、币种、商户和交易类型贡献。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">5</div><div><strong>异常与原因</strong><span>识别偏离、失败、费用和潜在风险。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">6</div><div><strong>建议关注事项</strong><span>转化为可执行的业务、运营和产品行动。</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">06 · FIRST TEMPLATE SET</div>
+          <h2>第一阶段优先支持的固定模板</h2>
+        </div>
+        <div class="section-desc">优先覆盖高频、结构稳定、指标口径明确且存在大量人工整理工作的报告。</div>
+      </div>
+      <div class="template-grid">
+        <article class="template-card"><small>P0</small><strong>商户月度交易报告</strong><p>面向商户或客户成功团队，汇总交易、成功率、国家、币种和异常。</p><div class="template-list"><span>使用场景：客户复盘</span><span>价值：减少手工整理与沟通</span></div></article>
+        <article class="template-card"><small>P0</small><strong>失败交易分析</strong><p>聚类失败原因、用户类型、银行、国家和流程节点。</p><div class="template-list"><span>使用场景：运营与产品优化</span><span>价值：快速定位异常与根因</span></div></article>
+        <article class="template-card"><small>P0</small><strong>换汇费用报告</strong><p>汇总币种、换汇金额、费率、成本和变化趋势。</p><div class="template-list"><span>使用场景：财务与经营管理</span><span>价值：识别成本与优化空间</span></div></article>
+        <article class="template-card"><small>P0</small><strong>入账申报报告</strong><p>展示申报量、通过率、补件、失败原因和处理周期。</p><div class="template-list"><span>使用场景：申报与合规运营</span><span>价值：减少人工周报</span></div></article>
+        <article class="template-card"><small>P1</small><strong>退款情况报告</strong><p>分析退款量、金额、原因、周期、费用和异常商户。</p><div class="template-list"><span>使用场景：客服、运营与财务</span><span>价值：识别退款成本与问题</span></div></article>
+        <article class="template-card"><small>P1</small><strong>运营日报</strong><p>汇总任务量、处理量、超时、异常、风险和人力效率。</p><div class="template-list"><span>使用场景：运营管理</span><span>价值：形成每日统一视图</span></div></article>
+        <article class="template-card"><small>P1</small><strong>客服问题周报</strong><p>展示高频、新增、增长最快问题及对应页面和产品机会。</p><div class="template-list"><span>使用场景：客服与产品周会</span><span>价值：推动问题产品化</span></div></article>
+        <article class="template-card"><small>P2</small><strong>自定义经营报告</strong><p>在模板、指标和数据口径稳定后，支持有限度的模块组合。</p><div class="template-list"><span>使用场景：管理层专题分析</span><span>价值：第二阶段逐步开放</span></div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">07 · AI &amp; DATA BOUNDARY</div>
+          <h2>固定模板与任意数据问答的边界</h2>
+        </div>
+        <div class="section-desc">第一阶段必须优先保证指标口径、数据完整性和解释可信度，避免 AI 在不明确的数据边界内自由推断。</div>
+      </div>
+      <div class="boundary-grid">
+        <div class="boundary-panel">
+          <h3>能力边界与处理方式</h3>
+          <div class="boundary-table">
+            <div class="boundary-head"><span>用户需求</span><span>第一阶段处理</span><span>必要控制</span></div>
+            <div class="boundary-row"><strong>固定经营、交易或运营报告</strong><span>直接选择模板生成</span><div class="boundary-result">统一指标口径</div></div>
+            <div class="boundary-row"><strong>调整时间、国家、币种与商户</strong><span>通过标准参数配置</span><div class="boundary-result">展示筛选范围</div></div>
+            <div class="boundary-row"><strong>修改报告结构或重点</strong><span>选择预设报告用途</span><div class="boundary-result">限定模块组合</div></div>
+            <div class="boundary-row"><strong>询问模板内已有指标原因</strong><span>允许基于当前数据解释</span><div class="boundary-result">标记证据与置信度</div></div>
+            <div class="boundary-row"><strong>任意字段、任意口径数据问答</strong><span>第一阶段暂不开放</span><div class="boundary-result">避免口径与权限风险</div></div>
+            <div class="boundary-row"><strong>数据缺失、延迟或冲突</strong><span>停止生成结论并提示限制</span><div class="boundary-result">不得用推测补齐数据</div></div>
+          </div>
+        </div>
+        <div class="boundary-side">
+          <div>
+            <small>TRUST PRINCIPLE</small>
+            <h3>AI 可以解释数据，但不能替代数据治理。</h3>
+            <p>所有报告都应显示数据范围、更新时间、指标定义、筛选条件和可能的数据限制。</p>
+            <div class="boundary-factors">
+              <span>可追溯：指标可回到明细数据</span>
+              <span>可解释：结论有明确证据支持</span>
+              <span>可复现：相同参数应生成一致结果</span>
+              <span>可控制：敏感数据受权限和导出规则限制</span>
+            </div>
+          </div>
+          <div class="note">先用模板建立信任和使用习惯，再逐步开放更灵活的分析能力。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">08 · TWO-WEEK MVP</div>
+          <h2>两周 MVP：先跑通一个固定报表模板</h2>
+        </div>
+        <div class="section-desc">建议选择商户月度交易报告或失败交易分析，验证数据、模板、AI 解释、导出与复用闭环。</div>
+      </div>
+      <div class="mvp-grid">
+        <article class="week-card">
+          <small>WEEK 01</small>
+          <h3>模板、指标与数据口径准备</h3>
+          <p>从真实人工报表中提取固定结构、重复动作和核心指标。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>选择一个高频报告</strong><span>优先选择月度交易报告或失败交易分析。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>收集近三个月人工样本</strong><span>分析数据来源、指标、图表、结论和制作耗时。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>统一指标与字段口径</strong><span>明确金额、成功率、费用、环比和异常定义。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>设计模板与参数结构</strong><span>确定报告模块、筛选条件、用途和导出格式。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>定义 AI 输出范围</strong><span>明确概览、变化、原因、风险和关注事项。</span></div></div>
+          </div>
+        </article>
+
+        <article class="week-card primary">
+          <small>WEEK 02</small>
+          <h3>真实生成与使用验证</h3>
+          <p>让真实用户或内部团队生成报告，并对比人工方式的时间与质量。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>接入真实数据样本</strong><span>验证指标、筛选、结构和数据一致性。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>生成 AI 分析与摘要</strong><span>检查结论是否准确、可解释且没有越界推断。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>支持预览、保存与导出</strong><span>保留参数、版本、备注和历史报告。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>对比人工制作成本</strong><span>记录制作时间、查询次数、整理时长和修改次数。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>形成首批模板路线</strong><span>确定下一批 5—10 个固定模板优先级。</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">09 · KEY METRICS</div>
+          <h2>五个关键指标</h2>
+        </div>
+        <div class="section-desc">既要衡量制作效率，也要观察使用、复用、查询减少和报告留存。</div>
+      </div>
+      <div class="metric-grid">
+        <article class="metric-card"><small>01</small><strong>报告制作时间</strong><p>从选择模板和参数到生成可使用报告所需时间。</p><div class="formula">建议使用中位数</div></article>
+        <article class="metric-card"><small>02</small><strong>报告使用次数</strong><p>报告被生成、查看、导出、分享或定时发送的次数。</p><div class="formula">按模板与用户角色拆分</div></article>
+        <article class="metric-card"><small>03</small><strong>人工整理时长</strong><p>生成后仍需要手动复制、整理、修改和补充的时间。</p><div class="formula">人工补充总时长 ÷ 报告数</div></article>
+        <article class="metric-card"><small>04</small><strong>数据查询次数</strong><p>完成同一报告所需的页面、系统或数据查询次数。</p><div class="formula">查询总次数 ÷ 报告数</div></article>
+        <article class="metric-card"><small>05</small><strong>用户报表留存率</strong><p>首次使用后仍持续生成或查看报告的用户比例。</p><div class="formula">持续使用用户 ÷ 首次使用用户</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">10 · KPI SCORECARD</div>
+          <h2>可编辑的智能报表指标看板</h2>
+        </div>
+        <div class="section-desc">示例值可直接修改，页面会自动保存到当前浏览器并计算目标完成度。</div>
+      </div>
+      <div class="score-shell">
+        <div class="score-toolbar">
+          <div class="score-summary"><div class="score-number" id="overallScore">0%</div><div class="score-label">整体目标完成度</div></div>
+          <div style="font-size:12px;color:var(--muted)">建议按模板、用户角色和报告用途分别观察。</div>
+        </div>
+        <div class="table-scroll">
+          <table id="scoreTable">
+            <thead><tr><th>维度</th><th>指标</th><th>方向</th><th>当前值</th><th>目标值</th><th>单位</th><th>负责人</th><th>完成度</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr data-direction="down" data-default-current="95" data-default-target="12">
+                <td><span class="tag">北极星</span></td>
+                <td><span class="metric-name">报告制作时间</span><span class="metric-help">从选择模板到生成可使用报告所需的中位时间</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>分钟</td>
+                <td><input class="input owner" value="数据产品负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="42" data-default-target="120">
+                <td><span class="tag">使用</span></td>
+                <td><span class="metric-name">周报告使用次数</span><span class="metric-help">报告被生成、查看、导出或分享的周次数</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>次</td>
+                <td><input class="input owner" value="报表产品运营"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="48" data-default-target="8">
+                <td><span class="tag">整理</span></td>
+                <td><span class="metric-name">单报告人工整理时长</span><span class="metric-help">自动生成后仍需人工修改与补充的中位时间</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>分钟</td>
+                <td><input class="input owner" value="业务分析负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="11" data-default-target="3">
+                <td><span class="tag">查询</span></td>
+                <td><span class="metric-name">单报告数据查询次数</span><span class="metric-help">完成同一报告所需的页面、系统和数据查询次数</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>次</td>
+                <td><input class="input owner" value="数据平台负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="36" data-default-target="65">
+                <td><span class="tag">留存</span></td>
+                <td><span class="metric-name">用户报表 30 日留存率</span><span class="metric-help">首次使用后 30 天内仍持续生成或查看报告的用户比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="用户增长负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="62" data-default-target="85">
+                <td><span class="tag">质量</span></td>
+                <td><span class="metric-name">报告首次可用率</span><span class="metric-help">无需重大修改即可直接使用或导出的报告比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="AI 报告负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">11 · EXECUTION BOARD</div>
+          <h2>项目实施记录</h2>
+        </div>
+        <div class="section-desc">用于记录首个模板、数据口径、AI 输出、使用反馈与效率结果，内容只保存在当前浏览器。</div>
+      </div>
+      <div class="action-grid">
+        <div class="panel">
+          <h3 style="margin:0 0 18px;font-size:23px">两周 MVP 检查清单</h3>
+          <div class="checklist" id="checklist">
+            <label class="check-row"><input type="checkbox"><span><strong>选择一个高频固定报告</strong><span>建议从商户月度交易报告或失败交易分析开始。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>收集近三个月人工报告样本</strong><span>分析数据来源、结构、指标、结论与制作时间。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>统一指标、字段与筛选口径</strong><span>明确时间、币种、国家、商户、成功率和费用定义。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成固定模板与参数设计</strong><span>定义报告模块、筛选项、用途、预览与导出方式。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成 AI 摘要、异常与建议生成</strong><span>确保所有结论有数据依据并标记数据限制。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>复盘制作时间、查询、整理与留存</strong><span>验证是否真正替代高频人工报表工作。</span></span></label>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0 0 8px;font-size:23px">试点说明</h3>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:12px">建议记录试点模板、指标口径、数据限制、AI 输出和两周结果。</p>
+          <textarea id="notes" placeholder="试点报告模板：
+主要用户：
+报告用途：
+当前制作时间：
+当前查询次数：
+当前人工整理时长：
+
+参数范围：
+时间：
+币种：
+国家：
+交易类型：
+商户：
+
+核心指标：
+AI 自动分析内容：
+数据限制：
+项目 Owner：
+
+实验主指标：
+防护指标：
+两周 MVP 结论：
+下一批固定模板："></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AI 体验设计项目 · Project 14</span>
+    <span>报表目标：数据口径统一、制作更快、结论更清晰、报告能够持续复用。</span>
+  </footer>
+</div>
+
+<script>
+  const DATA_KEY="project14_ai_smart_report_generator_v1";
+  const THEME_KEY="project14_ai_smart_report_generator_theme_v1";
+  const rows=[...document.querySelectorAll("#scoreTable tbody tr")];
+  const checks=[...document.querySelectorAll("#checklist input")];
+  const notes=document.getElementById("notes");
+  const themeBtn=document.getElementById("themeBtn");
+
+  function setTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    themeBtn.textContent=theme==="light"?"切换暗黑":"切换亮色";
+    localStorage.setItem(THEME_KEY,theme);
+  }
+  function calcProgress(current,target,direction){
+    if(!isFinite(current)||!isFinite(target)||target===0)return 0;
+    if(direction==="up")return Math.max(0,Math.min(130,current/target*100));
+    if(current<=0)return 130;
+    return Math.max(0,Math.min(130,target/current*100));
+  }
+  function statusFor(progress){
+    return progress>=100?["已达成","good"]:progress>=75?["接近目标","warn"]:["需关注","risk"];
+  }
+  function updateScore(save=true){
+    let total=0;
+    rows.forEach(row=>{
+      const current=parseFloat(row.querySelector(".current").value);
+      const target=parseFloat(row.querySelector(".target").value);
+      const p=calcProgress(current,target,row.dataset.direction);
+      const normalized=Math.min(100,p);
+      total+=normalized;
+      row.querySelector(".progress>span").style.width=normalized+"%";
+      row.querySelector(".progress-text").textContent=Math.round(p)+"%";
+      const [label,cls]=statusFor(p);
+      const status=row.querySelector(".status");
+      status.textContent=label;
+      status.className="status "+cls;
+    });
+    document.getElementById("overallScore").textContent=Math.round(total/rows.length)+"%";
+    if(save)saveData();
+  }
+  function saveData(){
+    localStorage.setItem(DATA_KEY,JSON.stringify({
+      rows:rows.map(row=>({
+        current:row.querySelector(".current").value,
+        target:row.querySelector(".target").value,
+        owner:row.querySelector(".owner").value
+      })),
+      checks:checks.map(c=>c.checked),
+      notes:notes.value
+    }));
+  }
+  function loadData(){
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){}
+    rows.forEach((row,i)=>{
+      const data=saved.rows?.[i];
+      row.querySelector(".current").value=data?.current??row.dataset.defaultCurrent;
+      row.querySelector(".target").value=data?.target??row.dataset.defaultTarget;
+      if(data?.owner)row.querySelector(".owner").value=data.owner;
+    });
+    checks.forEach((c,i)=>c.checked=Boolean(saved.checks?.[i]));
+    notes.value=saved.notes||"";
+    updateScore(false);
+  }
+
+  document.querySelectorAll("#scoreTable input").forEach(el=>el.addEventListener("input",()=>updateScore(true)));
+  checks.forEach(c=>c.addEventListener("change",saveData));
+  notes.addEventListener("input",saveData);
+  themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+  document.getElementById("resetBtn").addEventListener("click",()=>{
+    if(confirm("确认清空本页面的指标与实施记录吗？")){
+      localStorage.removeItem(DATA_KEY);
+      loadData();
+    }
+  });
+
+  setTheme(localStorage.getItem(THEME_KEY)||"dark");
+  loadData();
+</script>
+<script id="pp-theme-sync">(function(){try{var t=localStorage.getItem('ppux-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);var o=new MutationObserver(function(){var v=document.documentElement.getAttribute('data-theme')||'dark';localStorage.setItem('ppux-theme',v)});o.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();</script></body>
+</html>

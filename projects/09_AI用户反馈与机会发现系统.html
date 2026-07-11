@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>AI 用户反馈与机会发现系统｜项目二</title>
+  <style>
+    :root{
+      --bg:#080808;--panel:#111;--panel-2:#171717;--panel-3:#202020;
+      --text:#f5f5f5;--muted:#9c9c9c;--line:#2b2b2b;--strong:#fff;
+      --soft:#242424;--good:#dff7df;--warn:#fff0bc;--risk:#ffd9d9;
+      --shadow:0 28px 90px rgba(0,0,0,.34);--radius:24px;
+    }
+    [data-theme="light"]{
+      --bg:#f4f4f1;--panel:#fff;--panel-2:#f8f8f5;--panel-3:#ecece8;
+      --text:#151515;--muted:#6b6b67;--line:#deded8;--strong:#111;
+      --soft:#ecece7;--good:#e8f7e6;--warn:#fff3c7;--risk:#ffe5e5;
+      --shadow:0 28px 90px rgba(40,40,20,.11);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.065),transparent 30%),var(--bg);
+      color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;line-height:1.55;
+    }
+    button,input,textarea{font:inherit}a{color:inherit;text-decoration:none}
+    .shell{max-width:1460px;margin:auto;padding:22px}
+    .topbar{
+      position:sticky;top:14px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px 12px 18px;border:1px solid var(--line);border-radius:18px;
+      background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--strong);color:var(--bg);font-weight:900;font-size:13px}
+    .brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:8px 12px;cursor:pointer;transition:.2s ease;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .btn.primary{background:var(--strong);color:var(--bg);border-color:var(--strong);font-weight:760}
+
+    .hero{margin-top:26px;border:1px solid var(--line);border-radius:30px;overflow:hidden;background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:var(--shadow)}
+    .hero-grid{display:grid;grid-template-columns:1.35fr .65fr;min-height:610px}
+    .hero-copy{padding:68px 58px 48px}
+    .eyebrow{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:850}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--strong)}
+    h1{margin:22px 0 20px;font-size:clamp(46px,6.3vw,88px);line-height:.98;letter-spacing:-.065em;max-width:1000px}
+    .hero-copy>p{font-size:18px;color:var(--muted);max-width:840px;margin:0}
+    .hero-summary{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .summary-chip{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+    .summary-chip small{display:block;color:var(--muted);font-weight:800;margin-bottom:6px}
+    .summary-chip strong{font-size:16px;line-height:1.35;display:block}
+    .hero-side{
+      border-left:1px solid var(--line);padding:34px 28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+      repeating-linear-gradient(90deg,transparent 0 49px,var(--line) 50px),
+      repeating-linear-gradient(0deg,transparent 0 49px,var(--line) 50px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .hero-side-title{font-size:12px;color:var(--muted);letter-spacing:.13em;font-weight:850}
+    .outcome-stack{display:grid;gap:12px;margin-top:18px}
+    .outcome-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:color-mix(in srgb,var(--panel) 88%,transparent)}
+    .outcome-card strong{display:block;font-size:14px;margin-bottom:4px}
+    .outcome-card span{font-size:12px;color:var(--muted)}
+    .hero-note{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+
+    .section{margin-top:58px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:20px}
+    .section-kicker{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:850}
+    h2{font-size:clamp(30px,3.4vw,50px);line-height:1.04;letter-spacing:-.045em;margin:6px 0 0}
+    .section-desc{max-width:670px;color:var(--muted);font-size:14px}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px}
+
+    .exec-summary{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .signal-board{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .signal{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .signal-label{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.08em}
+    .signal-value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:12px 0 6px}
+    .signal-desc{font-size:12px;color:var(--muted)}
+    .summary-story{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+    .summary-story small{font-size:11px;letter-spacing:.12em;font-weight:850;opacity:.55}
+    .summary-story h3{font-size:30px;line-height:1.05;letter-spacing:-.045em;margin:18px 0 14px}
+    .summary-story p{margin:0;font-size:14px;opacity:.68}
+    .summary-story .formula{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:13px;font-weight:760}
+
+    .source-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .source-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:20px;min-height:190px}
+    .source-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .source-card strong{display:block;font-size:19px;margin:18px 0 7px}
+    .source-card p{font-size:12px;color:var(--muted);margin:0}
+    .source-card .tagline{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .pipeline{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:28px;overflow:auto}
+    .pipeline-grid{min-width:1240px;display:grid;grid-template-columns:repeat(15,1fr);gap:10px;align-items:center}
+    .pipe-step{border:1px solid var(--line);border-radius:18px;background:var(--panel-2);padding:17px;min-height:178px}
+    .pipe-step small{display:block;color:var(--muted);font-size:11px;font-weight:850}
+    .pipe-step strong{display:block;font-size:15px;margin:12px 0 8px}
+    .pipe-step p{font-size:11px;color:var(--muted);margin:0}
+    .pipe-badge{margin-top:14px;display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800}
+    .pipe-link{text-align:center;color:var(--muted);font-size:22px}
+
+    .opportunity-pool{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+    .pool-map{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .pool-map h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .pool-list{display:grid;gap:10px}
+    .pool-item{border:1px solid var(--line);border-radius:15px;background:var(--panel-2);padding:16px;display:grid;grid-template-columns:44px 1fr 110px;gap:14px;align-items:center}
+    .pool-rank{width:42px;height:42px;border-radius:13px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:850}
+    .pool-copy strong{display:block;font-size:14px}
+    .pool-copy span{font-size:11px;color:var(--muted)}
+    .pool-score{text-align:right}
+    .pool-score b{display:block;font-size:19px}
+    .pool-score span{font-size:10px;color:var(--muted)}
+    .pool-side{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:26px;display:flex;flex-direction:column;justify-content:space-between}
+    .pool-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .pool-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .pool-side p{font-size:13px;opacity:.65;margin:0}
+    .pool-side .note{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:12px;font-weight:760}
+
+    .schema{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
+    .schema-fields{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .field{border:1px solid var(--line);border-radius:15px;background:var(--panel-2);padding:15px;min-height:110px}
+    .field small{display:block;color:var(--muted);font-size:11px;font-weight:850;margin-bottom:7px}
+    .field strong{display:block;font-size:13px;margin-bottom:4px}
+    .field span{font-size:11px;color:var(--muted)}
+    .issue-example{border:1px solid var(--line);border-radius:18px;background:var(--bg);padding:20px}
+    .issue-example small{display:block;color:var(--muted);font-size:11px;font-weight:850;margin-bottom:14px}
+    .example-line{padding:10px 0;border-top:1px solid var(--line);font-size:12px}
+    .example-line:first-of-type{border-top:none}
+    .example-line b{display:block;margin-bottom:3px}
+
+    .priority-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px}
+    .priority-map{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .priority-title{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .priority-axis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .priority-card{border:1px solid var(--line);border-radius:17px;background:var(--panel-2);padding:17px;min-height:175px}
+    .priority-card.hot{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .priority-card small{color:var(--muted);font-size:11px;font-weight:850}
+    .hot small{color:color-mix(in srgb,var(--bg) 58%,transparent)}
+    .priority-card strong{display:block;font-size:17px;margin:12px 0 7px}
+    .priority-card p{font-size:12px;color:var(--muted);margin:0}
+    .hot p{color:color-mix(in srgb,var(--bg) 65%,transparent)}
+    .priority-side{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .priority-side h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .rule-list{display:grid;gap:10px}
+    .rule{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px;display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start}
+    .rule-no{width:27px;height:27px;border-radius:8px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:11px;font-weight:850}
+    .rule strong{display:block;font-size:13px}.rule span{font-size:12px;color:var(--muted)}
+
+    .output-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .output-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:220px}
+    .output-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .output-card strong{display:block;font-size:23px;margin:23px 0 8px;letter-spacing:-.04em}
+    .output-card p{margin:0;font-size:12px;color:var(--muted)}
+    .output-card .bar{height:7px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:18px}
+    .output-card .bar span{display:block;height:100%;background:var(--strong);border-radius:999px}
+
+    .roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .phase{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:24px}
+    .phase-time{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.12em}
+    .phase h3{font-size:24px;margin:14px 0 8px;letter-spacing:-.035em}
+    .phase-goal{color:var(--muted);font-size:12px;min-height:38px}
+    .phase ul{padding-left:18px;margin:18px 0 0;display:grid;gap:9px;font-size:12px}
+    .deliverable{margin-top:18px;padding:14px;border:1px dashed var(--line);border-radius:13px;font-size:11px;color:var(--muted)}
+
+    .score-shell{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .score-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .score-summary{display:flex;align-items:baseline;gap:10px}
+    .score-number{font-size:34px;font-weight:850;letter-spacing:-.05em}
+    .score-label{font-size:13px;color:var(--muted)}
+    .table-scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1060px}
+    th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--panel-2)}
+    td{font-size:13px}
+    .metric-name{font-weight:750}
+    .metric-help{display:block;color:var(--muted);font-size:11px;margin-top:3px;max-width:340px}
+    .tag{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;font-weight:750}
+    .input{width:100%;min-width:74px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:8px 9px;outline:none}
+    .input:focus{border-color:var(--muted)}
+    .progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;min-width:120px}
+    .progress>span{display:block;height:100%;background:var(--strong);width:0;border-radius:inherit;transition:.35s ease}
+    .progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+    .status{font-size:11px;font-weight:850;padding:5px 8px;border-radius:999px;display:inline-flex}
+    .status.good{background:var(--good);color:#173617}.status.warn{background:var(--warn);color:#3d3210}.status.risk{background:var(--risk);color:#421a1a}
+
+    .action-grid{display:grid;grid-template-columns:1fr .9fr;gap:16px}
+    .checklist{display:grid;gap:9px}
+    .check-row{display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2)}
+    .check-row input{width:18px;height:18px;margin-top:2px;accent-color:var(--strong)}
+    .check-row strong{font-size:13px;display:block}.check-row span{font-size:11px;color:var(--muted)}
+    textarea{width:100%;min-height:250px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);padding:14px;resize:vertical;outline:none}
+    textarea:focus{border-color:var(--muted)}
+    footer{margin:56px 0 28px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:18px}
+
+    @media(max-width:1100px){
+      .hero-grid{grid-template-columns:1fr}.hero-side{border-left:none;border-top:1px solid var(--line);min-height:430px}
+      .exec-summary,.opportunity-pool,.schema,.priority-grid,.action-grid{grid-template-columns:1fr}
+      .source-grid,.output-grid{grid-template-columns:repeat(2,1fr)}
+      .roadmap{grid-template-columns:1fr}
+    }
+    @media(max-width:720px){
+      .shell{padding:12px}.topbar{top:8px;align-items:flex-start}.brand-sub{display:none}.actions .btn:not(.primary){display:none}
+      .hero-copy{padding:44px 22px 32px}h1{font-size:44px}.hero-side{padding:22px}.hero-summary{grid-template-columns:1fr}
+      .section-head{align-items:start;flex-direction:column}
+      .signal-board,.source-grid,.schema-fields,.priority-axis,.output-grid{grid-template-columns:1fr}
+      .pool-item{grid-template-columns:44px 1fr}.pool-score{grid-column:2;text-align:left}
+      footer{flex-direction:column}
+    }
+    @media print{
+      .topbar,.actions{display:none!important}
+      body{background:#fff;color:#111}.shell{max-width:none;padding:0}
+      .hero,.panel,.signal-board,.summary-story,.source-card,.pipeline,.pool-map,.pool-side,.schema,.priority-map,.priority-side,.output-card,.phase,.score-shell{box-shadow:none;break-inside:avoid}
+      .hero{margin-top:0}.section{margin-top:30px}
+      .input,textarea{border:none;background:transparent;color:#111;padding:0}
+    }
+  </style>
+
+<style id="global-adaptive-layout-v2">
+
+    .pipeline{
+      padding:clamp(16px,1.55vw,26px);
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-gutter:stable;
+    }
+    .pipeline-grid{
+      display:grid;
+      grid-template-columns:minmax(160px,1fr) clamp(18px,1.65vw,28px) minmax(160px,1fr) clamp(18px,1.65vw,28px) minmax(160px,1fr) clamp(18px,1.65vw,28px) minmax(160px,1fr) clamp(18px,1.65vw,28px) minmax(160px,1fr) clamp(18px,1.65vw,28px) minmax(160px,1fr) clamp(18px,1.65vw,28px) minmax(160px,1fr) clamp(18px,1.65vw,28px) minmax(160px,1fr);
+      gap:clamp(4px,.48vw,8px);
+      min-width:1504px;
+      align-items:stretch;
+    }
+    .pipe-step{
+      min-width:0;
+      padding:clamp(16px,1.2vw,20px);
+      min-height:184px;
+    }
+    .pipe-link{
+      min-width:18px;
+      display:grid;
+      place-items:center;
+      font-size:21px;
+    }
+    
+    .pipe-step strong{
+      line-height:1.42;
+      text-wrap:balance;
+      overflow-wrap:anywhere;
+    }
+    .pipe-step p{
+      line-height:1.68;
+      overflow-wrap:anywhere;
+    }
+    @media(max-width:860px){
+      .pipeline{overflow:visible;padding:16px}
+      .pipeline-grid{min-width:0;grid-template-columns:1fr;gap:8px}
+      .pipe-link{min-height:28px;transform:rotate(90deg)}
+      .pipe-step{min-height:auto;padding:20px}
+    }
+    
+</style>
+<style id="pp-platform-nav-style">
+    body{padding-top:58px!important}
+    .topbar{top:72px!important}
+    .pp-platform-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;border-bottom:1px solid var(--line,#292929);background:color-mix(in srgb,var(--bg,#080808) 90%,transparent);backdrop-filter:blur(18px);font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .pp-platform-inner{max-width:1460px;height:100%;margin:auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+    .pp-platform-brand{display:flex;align-items:center;gap:10px;min-width:0;color:var(--text,#f5f5f5);text-decoration:none}
+    .pp-platform-logo{width:38px;height:32px;border:1px solid var(--line,#2b2b2b);border-radius:13px;display:grid;place-items:center;background:var(--panel,#111);flex:0 0 auto}
+    .pp-platform-logo img{width:20px;height:20px;object-fit:contain}
+    [data-theme="light"] .pp-platform-logo img{filter:invert(1)}
+    .pp-platform-title{font-size:12px;font-weight:720;white-space:nowrap}.pp-platform-crumb{font-size:11px;color:var(--muted,#999);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pp-platform-links{margin-left:auto;display:flex;align-items:center;gap:7px}.pp-platform-links a,.pp-platform-links span{height:34px;padding:0 10px;border:1px solid var(--line,#2b2b2b);border-radius:9px;display:inline-flex;align-items:center;color:var(--text,#f5f5f5);text-decoration:none;font-size:11px;background:var(--panel-2,#171717)}.pp-platform-links a:hover{border-color:var(--muted,#999)}.pp-platform-links .disabled{opacity:.35}
+    @media(max-width:720px){body{padding-top:54px!important}.topbar{top:62px!important}.pp-platform-nav{height:54px}.pp-platform-inner{padding:0 12px}.pp-platform-title,.pp-platform-links a:first-child,.pp-platform-links .disabled:first-child{display:none}.pp-platform-crumb{max-width:150px}.pp-platform-links a,.pp-platform-links span{padding:0 8px}}
+    @media print{.pp-platform-nav{display:none!important}body{padding-top:0!important}.topbar{top:0!important}}
+    </style></head>
+<body><nav class="pp-platform-nav"><div class="pp-platform-inner"><a class="pp-platform-brand" href="index.html"><span class="pp-platform-logo"><img src="data:image/png;base64,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" alt="PalmPay"></span><span class="pp-platform-title">PalmPay Design</span><span class="pp-platform-crumb">AI 项目库 / P02 AI 用户反馈与机会发现系统</span></a><div class="pp-platform-links"><a href="index.html">返回项目库</a><a href="08_AI需求分析与体验策略中心.html" title="上一个项目">← 上一个</a><a href="03_AI设计系统与设计开发一体化.html" title="下一个项目">下一个 →</a></div></div></nav>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P2</div>
+      <div>
+        <div class="brand-title">AI 用户反馈与机会发现系统</div>
+        <div class="brand-sub">从分散用户声音升级为持续驱动产品决策的体验机会系统</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeBtn">切换亮色</button>
+      <button class="btn" id="resetBtn">重置记录</button>
+      <button class="btn primary" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="dot"></span> Project 02 · AI Feedback Intelligence</div>
+          <h1>把“零散用户声音”，<br>升级为“持续发现增长与体验机会的系统”。</h1>
+          <p>
+            企业拥有大量客服、销售、访谈、群聊、NPS、投诉、行为数据和产品建议，
+            但这些信息往往分散、重复、缺少结构，设计团队仍依赖少量访谈和主观判断。
+            AI 用户反馈系统的目标，是持续把用户声音转化为可验证、可排序、可行动的体验机会。
+          </p>
+          <div class="hero-summary">
+            <div class="summary-chip"><small>现状</small><strong>反馈分散、信息重复、问题无法系统利用</strong></div>
+            <div class="summary-chip"><small>升级</small><strong>统一汇入 + AI 分析 + 机会池 + 优先级管理</strong></div>
+            <div class="summary-chip"><small>结果</small><strong>更早发现问题、更准识别机会、更快进入验证</strong></div>
+          </div>
+        </div>
+        <aside class="hero-side">
+          <div>
+            <div class="hero-side-title">系统必须持续产出四类价值</div>
+            <div class="outcome-stack">
+              <div class="outcome-card"><strong>把分散反馈变成统一资产</strong><span>客服、销售、用研、群聊、NPS、投诉和行为数据进入同一体系。</span></div>
+              <div class="outcome-card"><strong>自动识别高频与高影响问题</strong><span>问题聚类、情绪、角色、流程、严重度和商业影响自动分析。</span></div>
+              <div class="outcome-card"><strong>持续形成体验问题机会池</strong><span>每条问题结构化、去重、可追溯，并拥有明确优先级。</span></div>
+              <div class="outcome-card"><strong>让洞察真正进入产品行动</strong><span>高价值问题进入研究、实验、优化和产品规划。</span></div>
+            </div>
+          </div>
+          <div class="hero-note">系统的价值不在于生成更多总结，而在于是否持续推动高价值问题被发现、被验证、被解决。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">01 · MANAGEMENT SUMMARY</div><h2>一页看懂：为什么企业有反馈，却仍然缺少用户洞察</h2></div>
+        <div class="section-desc">信息数量不等于洞察质量。缺少统一结构、去重、定位和优先级时，大量用户声音仍无法进入产品决策。</div>
+      </div>
+      <div class="exec-summary">
+        <div class="signal-board">
+          <div class="signal"><div class="signal-label">信息来源</div><div class="signal-value">分散</div><div class="signal-desc">客服、销售、访谈、群聊和产品数据由不同团队分别保存。</div></div>
+          <div class="signal"><div class="signal-label">问题识别</div><div class="signal-value">低效</div><div class="signal-desc">依赖人工阅读和少量访谈，难以覆盖全部用户声音。</div></div>
+          <div class="signal"><div class="signal-label">问题定位</div><div class="signal-value">模糊</div><div class="signal-desc">无法快速判断问题发生在哪个角色、流程、页面和业务环节。</div></div>
+          <div class="signal"><div class="signal-label">业务行动</div><div class="signal-value">脱节</div><div class="signal-desc">反馈总结完成后，没有持续进入产品优先级和实验验证。</div></div>
+        </div>
+        <div class="summary-story">
+          <div><small>FEEDBACK INTELLIGENCE STRATEGY</small><h3>把“用户反馈收集”，升级为“问题识别、机会排序和行动跟踪系统”。</h3><p>通过统一接入、AI 结构化分析、问题聚类、商业影响判断和机会池运营，让用户洞察从项目制工作变成持续运行能力。</p></div>
+          <div class="formula">多源反馈 × AI 结构化 × 机会优先级 × 行动闭环 = 持续体验洞察能力</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">02 · FEEDBACK SOURCES</div><h2>统一接入企业已有的用户信息</h2></div>
+        <div class="section-desc">系统不要求重新制造更多调研，而是优先激活企业已经拥有、但尚未被系统利用的用户信息。</div>
+      </div>
+      <div class="source-grid">
+        <article class="source-card"><small>SERVICE</small><strong>客服与工单</strong><p>问题描述、咨询原因、解决时长、升级记录与重复来访。</p><div class="tagline">适合识别：高频问题、任务阻断、错误恢复</div></article>
+        <article class="source-card"><small>RESEARCH</small><strong>访谈与调研</strong><p>用户访谈、可用性测试、NPS、满意度与开放题反馈。</p><div class="tagline">适合识别：动机、认知、情绪、深层根因</div></article>
+        <article class="source-card"><small>BUSINESS</small><strong>销售与运营反馈</strong><p>客户异议、商户建议、续费阻力、功能诉求与内部群聊。</p><div class="tagline">适合识别：商业影响、重点客户、市场机会</div></article>
+        <article class="source-card"><small>BEHAVIOR</small><strong>产品行为数据</strong><p>页面访问、路径流失、点击、错误、重复操作和功能使用。</p><div class="tagline">适合识别：行为异常、流程阻力、验证反馈真实性</div></article>
+        <article class="source-card"><small>COMPLAINT</small><strong>投诉与异常</strong><p>客诉、争议、资金异常、失败交易和严重问题升级记录。</p><div class="tagline">适合识别：高风险体验问题与品牌损伤</div></article>
+        <article class="source-card"><small>IDEATION</small><strong>产品建议</strong><p>产品内建议、需求池、客户成功记录与竞品提及。</p><div class="tagline">适合识别：新功能机会与未满足需求</div></article>
+        <article class="source-card"><small>COMMUNITY</small><strong>社群与公开声音</strong><p>用户群、论坛、应用商店评价、社交平台和社区讨论。</p><div class="tagline">适合识别：趋势、情绪变化与口碑问题</div></article>
+        <article class="source-card"><small>INTERNAL</small><strong>内部业务记录</strong><p>需求评审、问题复盘、运营日报、销售纪要与项目总结。</p><div class="tagline">适合识别：重复问题、组织认知差异与历史决策</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">03 · AI ANALYSIS PIPELINE</div><h2>每周自动完成八类反馈分析</h2></div>
+        <div class="section-desc">AI 不直接替代研究判断，而是先完成大规模初筛、聚类、定位与影响判断，设计团队再进行验证和根因确认。</div>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-grid">
+          <div class="pipe-step"><small>01</small><strong>统一汇入</strong><p>接入反馈文本、语音转写、标签、行为与业务数据。</p><span class="pipe-badge">多源汇总</span></div><div class="pipe-link">→</div>
+          <div class="pipe-step"><small>02</small><strong>清洗去重</strong><p>过滤噪音、重复、无效记录和敏感信息。</p><span class="pipe-badge">提高质量</span></div><div class="pipe-link">→</div>
+          <div class="pipe-step"><small>03</small><strong>问题聚类</strong><p>识别相同问题、相似表达和主题趋势。</p><span class="pipe-badge">形成主题</span></div><div class="pipe-link">→</div>
+          <div class="pipe-step"><small>04</small><strong>情绪分析</strong><p>识别不满、焦虑、困惑、信任与满意变化。</p><span class="pipe-badge">识别强度</span></div><div class="pipe-link">→</div>
+          <div class="pipe-step"><small>05</small><strong>角色识别</strong><p>判断问题来自商户、运营、财务、管理员或其他角色。</p><span class="pipe-badge">定位用户</span></div><div class="pipe-link">→</div>
+          <div class="pipe-step"><small>06</small><strong>流程定位</strong><p>定位到注册、认证、交易、申报、退款等具体环节。</p><span class="pipe-badge">定位场景</span></div><div class="pipe-link">→</div>
+          <div class="pipe-step"><small>07</small><strong>影响判断</strong><p>评估严重程度、频率、商业影响与风险。</p><span class="pipe-badge">形成优先级</span></div><div class="pipe-link">→</div>
+          <div class="pipe-step"><small>08</small><strong>根因初析</strong><p>输出可能原因、证据缺口和建议验证方式。</p><span class="pipe-badge">进入研究</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">04 · OPPORTUNITY POOL</div><h2>形成持续更新的体验问题机会池</h2></div>
+        <div class="section-desc">机会池不是一份反馈列表，而是经过聚类、去重、定位、影响判断和证据标记后的行动资产。</div>
+      </div>
+      <div class="opportunity-pool">
+        <div class="pool-map">
+          <h3>机会池示例</h3>
+          <div class="pool-list">
+            <div class="pool-item"><div class="pool-rank">01</div><div class="pool-copy"><strong>企业认证材料要求难理解</strong><span>新商户 · 认证上传环节 · 高频退出与重复提交</span></div><div class="pool-score"><b>92</b><span>机会评分</span></div></div>
+            <div class="pool-item"><div class="pool-rank">02</div><div class="pool-copy"><strong>交易失败原因不可理解</strong><span>财务角色 · 交易详情 · 高咨询与重复操作</span></div><div class="pool-score"><b>88</b><span>机会评分</span></div></div>
+            <div class="pool-item"><div class="pool-rank">03</div><div class="pool-copy"><strong>入账申报字段与材料关系不清</strong><span>运营角色 · 入账申报 · 审核驳回与人工咨询</span></div><div class="pool-score"><b>84</b><span>机会评分</span></div></div>
+            <div class="pool-item"><div class="pool-rank">04</div><div class="pool-copy"><strong>批量导出缺少进度与结果反馈</strong><span>高频商户 · 交易列表 · 重复点击与导出失败</span></div><div class="pool-score"><b>76</b><span>机会评分</span></div></div>
+          </div>
+        </div>
+        <div class="pool-side">
+          <div><small>POOL PRINCIPLE</small><h3>每个机会都必须可追溯、可验证、可排序、可行动。</h3><p>问题必须保留原始证据、来源数量、影响角色、发生流程、频率趋势和待验证假设，避免 AI 总结脱离真实用户声音。</p></div>
+          <div class="note">建议机会池每周更新、每月复盘、每季度清理，避免变成不断增长但无人使用的需求仓库。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">05 · ISSUE SCHEMA</div><h2>每条问题必须包含的结构化信息</h2></div>
+        <div class="section-desc">只有字段结构统一，问题才能被检索、比较、聚类、排序并进入后续研究与实验。</div>
+      </div>
+      <div class="schema">
+        <div class="schema-fields">
+          <div class="field"><small>01</small><strong>问题标题</strong><span>用用户任务与阻力描述，不直接写解决方案。</span></div>
+          <div class="field"><small>02</small><strong>目标用户角色</strong><span>商户、财务、运营、管理员、审核员等。</span></div>
+          <div class="field"><small>03</small><strong>发生场景</strong><span>具体流程、页面、步骤与触发条件。</span></div>
+          <div class="field"><small>04</small><strong>用户原声</strong><span>保留代表性原句与原始记录链接。</span></div>
+          <div class="field"><small>05</small><strong>反馈来源</strong><span>客服、访谈、销售、群聊、NPS、投诉、行为等。</span></div>
+          <div class="field"><small>06</small><strong>频率与趋势</strong><span>出现次数、影响用户数、环比变化与时间范围。</span></div>
+          <div class="field"><small>07</small><strong>严重程度</strong><span>任务阻断、效率损失、理解困难、低影响细节。</span></div>
+          <div class="field"><small>08</small><strong>商业影响</strong><span>转化、交易、留存、客服、运营、风险或收入影响。</span></div>
+          <div class="field"><small>09</small><strong>根因假设</strong><span>当前判断、支持证据与尚未确认的部分。</span></div>
+          <div class="field"><small>10</small><strong>证据置信度</strong><span>高、中、低，并说明数据与研究是否一致。</span></div>
+          <div class="field"><small>11</small><strong>建议验证方式</strong><span>数据分析、访谈、可用性测试或小范围实验。</span></div>
+          <div class="field"><small>12</small><strong>当前状态与 Owner</strong><span>待验证、研究中、实验中、已解决、持续观察。</span></div>
+        </div>
+        <div class="issue-example">
+          <small>EXAMPLE · 结构化问题卡片</small>
+          <div class="example-line"><b>问题标题</b>新商户无法理解企业认证材料要求。</div>
+          <div class="example-line"><b>角色与场景</b>新注册商户，在企业认证上传材料步骤。</div>
+          <div class="example-line"><b>证据</b>近 30 天 86 条客服咨询、17 次访谈提及、该步骤流失率 31%。</div>
+          <div class="example-line"><b>用户原声</b>“我不知道营业执照和公司注册证明是不是同一个东西。”</div>
+          <div class="example-line"><b>商业影响</b>认证提交率下降、客服咨询增加、首次交易时间延长。</div>
+          <div class="example-line"><b>根因假设</b>材料名称偏内部语言，缺少示例、适用条件与即时校验。</div>
+          <div class="example-line"><b>建议验证</b>测试“材料示例 + 条件说明 + 上传前校验”方案。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">06 · PRIORITY MODEL</div><h2>机会优先级：不是高频就一定优先</h2></div>
+        <div class="section-desc">高频问题可能影响轻微，低频问题也可能造成资金或合规风险。优先级需要综合判断。</div>
+      </div>
+      <div class="priority-grid">
+        <div class="priority-map">
+          <h3 class="priority-title">四象限机会地图</h3>
+          <div class="priority-axis">
+            <div class="priority-card hot"><small>高业务影响 × 强证据</small><strong>优先进入研究或实验</strong><p>高频、关键旅程、影响转化或成本，并有多源证据支持。</p></div>
+            <div class="priority-card"><small>高业务影响 × 弱证据</small><strong>优先补充证据</strong><p>潜在价值或风险较高，但需要通过数据、访谈或日志进一步确认。</p></div>
+            <div class="priority-card"><small>低业务影响 × 强证据</small><strong>纳入基础治理</strong><p>问题真实但影响有限，可进入设计系统、内容治理或体验债务计划。</p></div>
+            <div class="priority-card"><small>低业务影响 × 弱证据</small><strong>观察或归档</strong><p>保留记录，等待更多证据，不占用当前重点资源。</p></div>
+          </div>
+        </div>
+        <div class="priority-side">
+          <h3>建议评分维度</h3>
+          <div class="rule-list">
+            <div class="rule"><div class="rule-no">F</div><div><strong>频率</strong><span>出现次数、影响用户数和增长趋势。</span></div></div>
+            <div class="rule"><div class="rule-no">S</div><div><strong>严重度</strong><span>是否阻断任务、造成损失或难以恢复。</span></div></div>
+            <div class="rule"><div class="rule-no">B</div><div><strong>商业影响</strong><span>与转化、交易、留存、成本和风险的关联。</span></div></div>
+            <div class="rule"><div class="rule-no">E</div><div><strong>证据强度</strong><span>来源数量、样本质量与数据一致性。</span></div></div>
+            <div class="rule"><div class="rule-no">R</div><div><strong>可解决性</strong><span>投入成本、验证周期、依赖和实施风险。</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">07 · SYSTEM OUTPUT</div><h2>系统每周应输出的四类结果</h2></div>
+        <div class="section-desc">输出必须服务产品、设计、运营和管理层的不同阅读需求，而不是只生成一份长篇总结。</div>
+      </div>
+      <div class="output-grid">
+        <div class="output-card"><small>WEEKLY SIGNAL</small><strong>用户问题周报</strong><p>新增问题、上升问题、严重问题、关键用户原声和异常趋势。</p><div class="bar"><span style="width:90%"></span></div></div>
+        <div class="output-card"><small>OPPORTUNITY POOL</small><strong>体验机会池</strong><p>结构化问题、证据、影响、优先级、状态和责任人。</p><div class="bar"><span style="width:84%"></span></div></div>
+        <div class="output-card"><small>JOURNEY INSIGHT</small><strong>关键旅程问题地图</strong><p>按注册、认证、交易、申报、退款等流程展示问题密度与影响。</p><div class="bar"><span style="width:76%"></span></div></div>
+        <div class="output-card"><small>ACTION TRACKING</small><strong>问题行动追踪</strong><p>问题进入研究、实验、优化、已解决或持续观察的闭环状态。</p><div class="bar"><span style="width:94%"></span></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">08 · 90-DAY ROADMAP</div><h2>90 天落地路径</h2></div>
+        <div class="section-desc">先接入两到三类高质量反馈源，跑通分析与行动闭环，再逐步扩展全部数据源。</div>
+      </div>
+      <div class="roadmap">
+        <article class="phase"><div class="phase-time">DAY 01—30</div><h3>建立反馈底座</h3><div class="phase-goal">确定反馈源、数据边界、问题字段和试点业务旅程。</div><ul><li>选择客服工单、用户访谈和行为数据作为首批来源</li><li>建立反馈接入、清洗和隐私规则</li><li>定义 12 类问题结构化字段</li><li>选择注册认证或交易流程作为试点</li></ul><div class="deliverable">交付物：数据源清单、问题模型、隐私规则、试点范围。</div></article>
+        <article class="phase"><div class="phase-time">DAY 31—60</div><h3>运行 AI 分析</h3><div class="phase-goal">完成聚类、情绪、角色、流程、严重度和根因初析。</div><ul><li>建立自动分析与人工抽检机制</li><li>形成第一版体验问题机会池</li><li>与行为数据交叉验证高频问题</li><li>选出首批 3—5 个高价值问题</li></ul><div class="deliverable">交付物：问题周报、机会池、验证清单、优先级结果。</div></article>
+        <article class="phase"><div class="phase-time">DAY 61—90</div><h3>进入产品行动</h3><div class="phase-goal">让高价值问题进入研究、实验和产品优化，并形成结果回流。</div><ul><li>完成问题根因验证</li><li>推动 2—3 个体验实验或优化项目</li><li>跟踪问题状态与业务结果变化</li><li>形成月度复盘和下一阶段扩展计划</li></ul><div class="deliverable">交付物：行动项目、验证结果、问题闭环、扩展路线图。</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">09 · KPI SCORECARD</div><h2>可编辑的反馈洞察指标看板</h2></div>
+        <div class="section-desc">示例值可直接修改，页面会自动保存到当前浏览器并计算目标完成度。</div>
+      </div>
+      <div class="score-shell">
+        <div class="score-toolbar">
+          <div class="score-summary"><div class="score-number" id="overallScore">0%</div><div class="score-label">整体目标完成度</div></div>
+          <div style="font-size:12px;color:var(--muted)">建议按周观察反馈分析，按月复盘行动结果。</div>
+        </div>
+        <div class="table-scroll">
+          <table id="scoreTable">
+            <thead><tr><th>维度</th><th>指标</th><th>方向</th><th>当前值</th><th>目标值</th><th>单位</th><th>负责人</th><th>完成度</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr data-direction="up" data-default-current="42" data-default-target="80"><td><span class="tag">北极星</span></td><td><span class="metric-name">高价值问题进入行动的比例</span><span class="metric-help">高优问题进入研究、实验、优化或产品规划的比例</span></td><td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td><td><input class="input owner" value="体验洞察负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td></tr>
+              <tr data-direction="up" data-default-current="35" data-default-target="75"><td><span class="tag">覆盖</span></td><td><span class="metric-name">核心反馈源接入覆盖率</span><span class="metric-help">客服、用研、销售、NPS、投诉、行为等反馈源接入比例</span></td><td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td><td><input class="input owner" value="Design Ops"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td></tr>
+              <tr data-direction="up" data-default-current="62" data-default-target="90"><td><span class="tag">质量</span></td><td><span class="metric-name">AI 问题聚类准确率</span><span class="metric-help">AI 聚类与人工确认结果一致的比例</span></td><td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td><td><input class="input owner" value="AI 工作流负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td></tr>
+              <tr data-direction="down" data-default-current="14" data-default-target="5"><td><span class="tag">速度</span></td><td><span class="metric-name">反馈到机会识别周期</span><span class="metric-help">从反馈产生到进入机会池的中位天数</span></td><td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>天</td><td><input class="input owner" value="研究运营"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td></tr>
+              <tr data-direction="up" data-default-current="48" data-default-target="85"><td><span class="tag">结构化</span></td><td><span class="metric-name">问题字段完整率</span><span class="metric-help">机会池问题卡片中关键字段完整的比例</span></td><td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td><td><input class="input owner" value="体验研究"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td></tr>
+              <tr data-direction="up" data-default-current="18" data-default-target="50"><td><span class="tag">闭环</span></td><td><span class="metric-name">已解决问题回流验证率</span><span class="metric-help">优化上线后重新验证问题是否改善的比例</span></td><td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td><td><input class="input owner" value="项目 Owner"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="section-kicker">10 · EXECUTION BOARD</div><h2>本季度实施记录</h2></div>
+        <div class="section-desc">用于记录首批反馈源、试点旅程、问题池和阶段目标，内容只保存在当前浏览器。</div>
+      </div>
+      <div class="action-grid">
+        <div class="panel">
+          <h3 style="margin:0 0 18px;font-size:23px">启动检查清单</h3>
+          <div class="checklist" id="checklist">
+            <label class="check-row"><input type="checkbox"><span><strong>确定首批 2—3 类反馈源</strong><span>建议优先客服工单、用户访谈和行为数据。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>定义问题结构化字段</strong><span>至少包含角色、场景、证据、频率、严重度和商业影响。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>建立反馈清洗与隐私规则</strong><span>处理重复、噪音、敏感信息和数据权限。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>建立 AI 分析与人工抽检</strong><span>聚类、情绪、流程、严重度和根因初析需要人工验证。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>形成第一版体验问题机会池</strong><span>问题必须可追溯、可排序、可行动。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>推动首批高价值问题进入行动</strong><span>进入研究、实验、设计优化或产品规划。</span></span></label>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0 0 8px;font-size:23px">试点说明</h3>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:12px">建议写清反馈源、试点旅程、负责人和 90 天目标。</p>
+          <textarea id="notes" placeholder="首批反馈源：
+试点业务旅程：
+体验洞察负责人：
+AI 工作流负责人：
+数据负责人：
+首批高价值问题：
+90 天目标：
+1. 接入 3 类核心反馈源
+2. 建立第一版体验问题机会池
+3. 推动 3—5 个高价值问题进入研究或实验"></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AI 时代体验设计团队突破 · 项目二</span>
+    <span>洞察目标：反馈统一汇入、问题自动识别、机会持续排序、结果进入行动。</span>
+  </footer>
+</div>
+
+<script>
+  const DATA_KEY="project02_feedback_intelligence_v1";
+  const THEME_KEY="project02_feedback_intelligence_theme_v1";
+  const rows=[...document.querySelectorAll("#scoreTable tbody tr")];
+  const checks=[...document.querySelectorAll("#checklist input")];
+  const notes=document.getElementById("notes");
+  const themeBtn=document.getElementById("themeBtn");
+
+  function setTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    themeBtn.textContent=theme==="light"?"切换暗黑":"切换亮色";
+    localStorage.setItem(THEME_KEY,theme);
+  }
+  function calcProgress(current,target,direction){
+    if(!isFinite(current)||!isFinite(target)||target===0)return 0;
+    if(direction==="up")return Math.max(0,Math.min(130,current/target*100));
+    if(current<=0)return 130;
+    return Math.max(0,Math.min(130,target/current*100));
+  }
+  function statusFor(progress){
+    return progress>=100?["已达成","good"]:progress>=75?["接近目标","warn"]:["需关注","risk"];
+  }
+  function updateScore(save=true){
+    let total=0;
+    rows.forEach(row=>{
+      const current=parseFloat(row.querySelector(".current").value);
+      const target=parseFloat(row.querySelector(".target").value);
+      const p=calcProgress(current,target,row.dataset.direction);
+      const normalized=Math.min(100,p);
+      total+=normalized;
+      row.querySelector(".progress>span").style.width=normalized+"%";
+      row.querySelector(".progress-text").textContent=Math.round(p)+"%";
+      const [label,cls]=statusFor(p);
+      const status=row.querySelector(".status");
+      status.textContent=label;
+      status.className="status "+cls;
+    });
+    document.getElementById("overallScore").textContent=Math.round(total/rows.length)+"%";
+    if(save)saveData();
+  }
+  function saveData(){
+    localStorage.setItem(DATA_KEY,JSON.stringify({
+      rows:rows.map(row=>({
+        current:row.querySelector(".current").value,
+        target:row.querySelector(".target").value,
+        owner:row.querySelector(".owner").value
+      })),
+      checks:checks.map(c=>c.checked),
+      notes:notes.value
+    }));
+  }
+  function loadData(){
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){}
+    rows.forEach((row,i)=>{
+      const data=saved.rows?.[i];
+      row.querySelector(".current").value=data?.current??row.dataset.defaultCurrent;
+      row.querySelector(".target").value=data?.target??row.dataset.defaultTarget;
+      if(data?.owner)row.querySelector(".owner").value=data.owner;
+    });
+    checks.forEach((c,i)=>c.checked=Boolean(saved.checks?.[i]));
+    notes.value=saved.notes||"";
+    updateScore(false);
+  }
+  document.querySelectorAll("#scoreTable input").forEach(el=>el.addEventListener("input",()=>updateScore(true)));
+  checks.forEach(c=>c.addEventListener("change",saveData));
+  notes.addEventListener("input",saveData);
+  themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+  document.getElementById("resetBtn").addEventListener("click",()=>{
+    if(confirm("确认清空本页面的指标与实施记录吗？")){
+      localStorage.removeItem(DATA_KEY);loadData();
+    }
+  });
+  setTheme(localStorage.getItem(THEME_KEY)||"dark");
+  loadData();
+</script>
+<script id="pp-theme-sync">(function(){try{var t=localStorage.getItem('ppux-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);var o=new MutationObserver(function(){var v=document.documentElement.getAttribute('data-theme')||'dark';localStorage.setItem('ppux-theme',v)});o.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();</script></body>
+</html>

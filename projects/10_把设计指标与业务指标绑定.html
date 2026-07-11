@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>把设计指标与业务指标绑定｜模块 04</title>
+  <style>
+    :root{
+      --bg:#080808;--panel:#111;--panel-2:#171717;--panel-3:#202020;
+      --text:#f5f5f5;--muted:#9c9c9c;--line:#2b2b2b;--strong:#fff;
+      --soft:#242424;--good:#dff7df;--warn:#fff0bc;--risk:#ffd9d9;
+      --shadow:0 28px 90px rgba(0,0,0,.34);--radius:24px;
+    }
+    [data-theme="light"]{
+      --bg:#f4f4f1;--panel:#fff;--panel-2:#f8f8f5;--panel-3:#ecece8;
+      --text:#151515;--muted:#6b6b67;--line:#deded8;--strong:#111;
+      --soft:#ecece7;--good:#e8f7e6;--warn:#fff3c7;--risk:#ffe5e5;
+      --shadow:0 28px 90px rgba(40,40,20,.11);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.065),transparent 30%),var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.55;
+    }
+    button,input,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .shell{max-width:1460px;margin:auto;padding:22px}
+    .topbar{
+      position:sticky;top:14px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px 12px 18px;border:1px solid var(--line);border-radius:18px;
+      background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+      background:var(--strong);color:var(--bg);font-weight:900;font-size:13px;
+    }
+    .brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{
+      border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);
+      padding:8px 12px;cursor:pointer;transition:.2s ease;white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .btn.primary{background:var(--strong);color:var(--bg);border-color:var(--strong);font-weight:760}
+
+    .hero{
+      margin-top:26px;border:1px solid var(--line);border-radius:30px;overflow:hidden;
+      background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:var(--shadow);
+    }
+    .hero-grid{display:grid;grid-template-columns:1.35fr .65fr;min-height:610px}
+    .hero-copy{padding:68px 58px 48px}
+    .eyebrow{
+      display:flex;align-items:center;gap:8px;color:var(--muted);
+      font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:850;
+    }
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--strong)}
+    h1{
+      margin:22px 0 20px;font-size:clamp(46px,6.3vw,88px);
+      line-height:.98;letter-spacing:-.065em;max-width:1000px;
+    }
+    .hero-copy>p{font-size:18px;color:var(--muted);max-width:840px;margin:0}
+    .hero-summary{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .summary-chip{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+    .summary-chip small{display:block;color:var(--muted);font-weight:800;margin-bottom:6px}
+    .summary-chip strong{font-size:16px;line-height:1.35;display:block}
+    .hero-side{
+      border-left:1px solid var(--line);padding:34px 28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+      repeating-linear-gradient(90deg,transparent 0 49px,var(--line) 50px),
+      repeating-linear-gradient(0deg,transparent 0 49px,var(--line) 50px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .hero-side-title{font-size:12px;color:var(--muted);letter-spacing:.13em;font-weight:850}
+    .outcome-stack{display:grid;gap:12px;margin-top:18px}
+    .outcome-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:color-mix(in srgb,var(--panel) 88%,transparent)}
+    .outcome-card strong{display:block;font-size:14px;margin-bottom:4px}
+    .outcome-card span{font-size:12px;color:var(--muted)}
+    .hero-note{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+
+    .section{margin-top:58px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:20px}
+    .section-kicker{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:850}
+    h2{font-size:clamp(30px,3.4vw,50px);line-height:1.04;letter-spacing:-.045em;margin:6px 0 0}
+    .section-desc{max-width:680px;color:var(--muted);font-size:14px}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px}
+
+    .exec-summary{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .signal-board{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;
+      display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+    }
+    .signal{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .signal-label{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.08em}
+    .signal-value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:12px 0 6px}
+    .signal-desc{font-size:12px;color:var(--muted)}
+    .summary-story{
+      border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);
+      padding:28px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .summary-story small{font-size:11px;letter-spacing:.12em;font-weight:850;opacity:.55}
+    .summary-story h3{font-size:30px;line-height:1.05;letter-spacing:-.045em;margin:18px 0 14px}
+    .summary-story p{margin:0;font-size:14px;opacity:.68}
+    .summary-story .formula{
+      margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:13px;font-weight:760;
+    }
+
+    .pyramid{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:30px;overflow:auto;
+    }
+    .pyramid-inner{min-width:1040px;display:grid;gap:12px}
+    .level{
+      margin:auto;border:1px solid var(--line);border-radius:20px;padding:22px 26px;
+      display:grid;grid-template-columns:180px 1fr 190px;gap:20px;align-items:center;
+    }
+    .level.one{width:72%;background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .level.two{width:86%;background:var(--panel-2)}
+    .level.three{width:100%;background:var(--panel-2)}
+    .level-label small{display:block;font-size:10px;font-weight:850;letter-spacing:.1em;color:var(--muted)}
+    .level.one .level-label small{color:color-mix(in srgb,var(--bg) 55%,transparent)}
+    .level-label strong{display:block;font-size:21px;margin-top:5px}
+    .metric-chips{display:flex;flex-wrap:wrap;gap:7px}
+    .metric-chip{
+      border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--bg);
+      font-size:11px;white-space:nowrap;
+    }
+    .level.one .metric-chip{background:var(--bg);color:var(--strong);border-color:var(--bg)}
+    .level-owner{text-align:right}
+    .level-owner b{display:block;font-size:12px}
+    .level-owner span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+    .level.one .level-owner span{color:color-mix(in srgb,var(--bg) 58%,transparent)}
+
+    .causal{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:28px;overflow:auto;
+    }
+    .causal-grid{
+      min-width:1180px;display:grid;grid-template-columns:1fr 50px 1fr 50px 1fr 50px 1fr;align-items:stretch;
+    }
+    .causal-col{border:1px solid var(--line);border-radius:18px;background:var(--panel-2);padding:18px}
+    .causal-col.highlight{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .causal-col small{display:block;font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.1em;margin-bottom:13px}
+    .causal-col.highlight small{color:color-mix(in srgb,var(--bg) 55%,transparent)}
+    .causal-item{padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+    .causal-item:first-of-type{border-top:none}
+    .causal-col.highlight .causal-item{border-color:color-mix(in srgb,var(--bg) 18%,transparent)}
+    .causal-arrow{display:grid;place-items:center;color:var(--muted);font-size:24px}
+
+    .journey-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .journey{
+      border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:24px;min-height:350px;
+    }
+    .journey-no{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.12em}
+    .journey h3{font-size:24px;margin:24px 0 8px;letter-spacing:-.035em}
+    .journey p{font-size:12px;color:var(--muted);margin:0}
+    .bind-row{
+      margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);
+      display:grid;grid-template-columns:120px 1fr;gap:12px;
+    }
+    .bind-row b{font-size:11px}
+    .bind-row span{font-size:11px;color:var(--muted)}
+
+    .metric-map{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:28px;overflow:auto;
+    }
+    .map-table{min-width:1200px;width:100%;border-collapse:collapse}
+    .map-table th,.map-table td{padding:15px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    .map-table th{font-size:11px;color:var(--muted);letter-spacing:.08em;background:var(--panel-2)}
+    .map-table td{font-size:12px}
+    .map-table .strong-cell{font-weight:800}
+    .map-table .link-pill{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800;margin:2px}
+
+    .principles{display:grid;grid-template-columns:1.08fr .92fr;gap:16px}
+    .principle-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .principle-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .rule-list{display:grid;gap:10px}
+    .rule{
+      border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px;
+      display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start;
+    }
+    .rule-no{
+      width:27px;height:27px;border-radius:8px;background:var(--strong);color:var(--bg);
+      display:grid;place-items:center;font-size:11px;font-weight:850;
+    }
+    .rule strong{display:block;font-size:13px}
+    .rule span{font-size:12px;color:var(--muted)}
+    .principle-side{
+      border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:26px;
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .principle-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .principle-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .principle-side p{font-size:13px;opacity:.65;margin:0}
+    .principle-side .note{
+      margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:12px;font-weight:760;
+    }
+
+    .cadence-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .cadence{
+      border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:230px;
+    }
+    .cadence small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .cadence h3{font-size:21px;margin:22px 0 8px;letter-spacing:-.03em}
+    .cadence p{font-size:12px;color:var(--muted);margin:0}
+    .cadence .output{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .result-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:210px}
+    .result-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .result-card strong{display:block;font-size:25px;margin:24px 0 8px;letter-spacing:-.04em}
+    .result-card p{margin:0;font-size:12px;color:var(--muted)}
+    .result-card .bar{height:7px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:18px}
+    .result-card .bar span{display:block;height:100%;background:var(--strong);border-radius:999px}
+
+    .roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .phase{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:24px}
+    .phase-time{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.12em}
+    .phase h3{font-size:24px;margin:14px 0 8px;letter-spacing:-.035em}
+    .phase-goal{color:var(--muted);font-size:12px;min-height:38px}
+    .phase ul{padding-left:18px;margin:18px 0 0;display:grid;gap:9px;font-size:12px}
+    .deliverable{margin-top:18px;padding:14px;border:1px dashed var(--line);border-radius:13px;font-size:11px;color:var(--muted)}
+
+    .score-shell{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .score-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .score-summary{display:flex;align-items:baseline;gap:10px}
+    .score-number{font-size:34px;font-weight:850;letter-spacing:-.05em}
+    .score-label{font-size:13px;color:var(--muted)}
+    .table-scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1100px}
+    th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--panel-2)}
+    td{font-size:13px}
+    .metric-name{font-weight:750}
+    .metric-help{display:block;color:var(--muted);font-size:11px;margin-top:3px;max-width:350px}
+    .tag{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;font-weight:750}
+    .input{width:100%;min-width:74px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:8px 9px;outline:none}
+    .input:focus{border-color:var(--muted)}
+    .progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;min-width:120px}
+    .progress>span{display:block;height:100%;background:var(--strong);width:0;border-radius:inherit;transition:.35s ease}
+    .progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+    .status{font-size:11px;font-weight:850;padding:5px 8px;border-radius:999px;display:inline-flex}
+    .status.good{background:var(--good);color:#173617}
+    .status.warn{background:var(--warn);color:#3d3210}
+    .status.risk{background:var(--risk);color:#421a1a}
+
+    .action-grid{display:grid;grid-template-columns:1fr .9fr;gap:16px}
+    .checklist{display:grid;gap:9px}
+    .check-row{
+      display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;
+      padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);
+    }
+    .check-row input{width:18px;height:18px;margin-top:2px;accent-color:var(--strong)}
+    .check-row strong{font-size:13px;display:block}
+    .check-row span{font-size:11px;color:var(--muted)}
+    textarea{
+      width:100%;min-height:250px;border:1px solid var(--line);border-radius:14px;
+      background:var(--bg);color:var(--text);padding:14px;resize:vertical;outline:none;
+    }
+    textarea:focus{border-color:var(--muted)}
+    footer{margin:56px 0 28px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:18px}
+
+    @media(max-width:1100px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-side{border-left:none;border-top:1px solid var(--line);min-height:430px}
+      .exec-summary,.principles,.action-grid{grid-template-columns:1fr}
+      .journey-grid{grid-template-columns:1fr}
+      .cadence-grid,.result-grid{grid-template-columns:repeat(2,1fr)}
+      .roadmap{grid-template-columns:1fr}
+    }
+    @media(max-width:720px){
+      .shell{padding:12px}.topbar{top:8px;align-items:flex-start}
+      .brand-sub{display:none}.actions .btn:not(.primary){display:none}
+      .hero-copy{padding:44px 22px 32px}h1{font-size:44px}.hero-side{padding:22px}
+      .hero-summary{grid-template-columns:1fr}
+      .section-head{align-items:start;flex-direction:column}
+      .signal-board,.cadence-grid,.result-grid{grid-template-columns:1fr}
+      .bind-row{grid-template-columns:1fr}
+      footer{flex-direction:column}
+    }
+    @media print{
+      .topbar,.actions{display:none!important}
+      body{background:#fff;color:#111}.shell{max-width:none;padding:0}
+      .hero,.panel,.signal-board,.summary-story,.pyramid,.causal,.journey,.metric-map,
+      .principle-panel,.principle-side,.cadence,.result-card,.phase,.score-shell{
+        box-shadow:none;break-inside:avoid
+      }
+      .hero{margin-top:0}.section{margin-top:30px}
+      .input,textarea{border:none;background:transparent;color:#111;padding:0}
+    }
+  </style>
+
+<style id="global-adaptive-layout-v2">
+
+    .causal{
+      padding:clamp(16px,1.55vw,26px);
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-gutter:stable;
+    }
+    .causal-grid{
+      display:grid;
+      grid-template-columns:minmax(238px,1fr) clamp(18px,1.65vw,28px) minmax(238px,1fr) clamp(18px,1.65vw,28px) minmax(238px,1fr) clamp(18px,1.65vw,28px) minmax(238px,1fr);
+      gap:clamp(4px,.48vw,8px);
+      min-width:1048px;
+      align-items:stretch;
+    }
+    .causal-col{
+      min-width:0;
+      padding:clamp(16px,1.2vw,20px);
+      min-height:auto;
+    }
+    .causal-arrow{
+      min-width:18px;
+      display:grid;
+      place-items:center;
+      font-size:21px;
+    }
+    
+    .causal-col small{
+      line-height:1.42;
+      text-wrap:balance;
+      overflow-wrap:anywhere;
+    }
+    .causal-item{
+      line-height:1.56;
+      overflow-wrap:anywhere;
+    }
+    @media(max-width:860px){
+      .causal{overflow:visible;padding:16px}
+      .causal-grid{min-width:0;grid-template-columns:1fr;gap:8px}
+      .causal-arrow{min-height:28px;transform:rotate(90deg)}
+      .causal-col{min-height:auto;padding:20px}
+    }
+    
+    .pyramid{padding:clamp(18px,1.8vw,28px);overflow-x:auto;scrollbar-gutter:stable}
+    .pyramid-inner{min-width:980px;gap:10px}
+    .level{grid-template-columns:minmax(160px,180px) minmax(0,1fr) minmax(155px,180px);gap:clamp(12px,1.2vw,20px)}
+    @media(max-width:860px){
+      .pyramid{overflow:visible;padding:16px}
+      .pyramid-inner{min-width:0}
+      .level,.level.one,.level.two,.level.three{
+        width:100%;
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+      .level-owner{text-align:left}
+    }
+    
+</style>
+<style id="pp-platform-nav-style">
+    body{padding-top:58px!important}
+    .topbar{top:72px!important}
+    .pp-platform-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;border-bottom:1px solid var(--line,#292929);background:color-mix(in srgb,var(--bg,#080808) 90%,transparent);backdrop-filter:blur(18px);font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .pp-platform-inner{max-width:1460px;height:100%;margin:auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+    .pp-platform-brand{display:flex;align-items:center;gap:10px;min-width:0;color:var(--text,#f5f5f5);text-decoration:none}
+    .pp-platform-logo{width:38px;height:32px;border:1px solid var(--line,#2b2b2b);border-radius:13px;display:grid;place-items:center;background:var(--panel,#111);flex:0 0 auto}
+    .pp-platform-logo img{width:20px;height:20px;object-fit:contain}
+    [data-theme="light"] .pp-platform-logo img{filter:invert(1)}
+    .pp-platform-title{font-size:12px;font-weight:720;white-space:nowrap}.pp-platform-crumb{font-size:11px;color:var(--muted,#999);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pp-platform-links{margin-left:auto;display:flex;align-items:center;gap:7px}.pp-platform-links a,.pp-platform-links span{height:34px;padding:0 10px;border:1px solid var(--line,#2b2b2b);border-radius:9px;display:inline-flex;align-items:center;color:var(--text,#f5f5f5);text-decoration:none;font-size:11px;background:var(--panel-2,#171717)}.pp-platform-links a:hover{border-color:var(--muted,#999)}.pp-platform-links .disabled{opacity:.35}
+    @media(max-width:720px){body{padding-top:54px!important}.topbar{top:62px!important}.pp-platform-nav{height:54px}.pp-platform-inner{padding:0 12px}.pp-platform-title,.pp-platform-links a:first-child,.pp-platform-links .disabled:first-child{display:none}.pp-platform-crumb{max-width:150px}.pp-platform-links a,.pp-platform-links span{padding:0 8px}}
+    @media print{.pp-platform-nav{display:none!important}body{padding-top:0!important}.topbar{top:0!important}}
+    </style></head>
+<body><nav class="pp-platform-nav"><div class="pp-platform-inner"><a class="pp-platform-brand" href="index.html"><span class="pp-platform-logo"><img src="data:image/png;base64,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" alt="PalmPay"></span><span class="pp-platform-title">PalmPay Design</span><span class="pp-platform-crumb">AI 项目库 / S03 把设计指标与业务指标绑定</span></a><div class="pp-platform-links"><a href="index.html">返回项目库</a><a href="02_设计团队升级为体验增长部门.html" title="上一个项目">← 上一个</a><a href="11_设计团队组织如何调整.html" title="下一个项目">下一个 →</a></div></div></nav>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">04</div>
+      <div>
+        <div class="brand-title">把设计指标与业务指标绑定</div>
+        <div class="brand-sub">从设计交付指标升级为可解释、可追踪的业务结果体系</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeBtn">切换亮色</button>
+      <button class="btn" id="resetBtn">重置记录</button>
+      <button class="btn primary" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="dot"></span> Section 04 · Business-linked Design Metrics</div>
+          <h1>把“设计做了什么”，<br>升级为“设计推动了什么业务结果”。</h1>
+          <p>
+            设计团队不能只汇报页面数量、交付速度和满意度，而需要建立业务结果、体验结果和组织能力三级指标体系。
+            通过关键旅程和因果链，把设计动作与注册、认证、首笔交易、交易成功、留存、成本和风险建立可解释的连接。
+          </p>
+          <div class="hero-summary">
+            <div class="summary-chip"><small>现状</small><strong>设计指标与业务结果分离，价值难以解释</strong></div>
+            <div class="summary-chip"><small>升级</small><strong>三级指标 + 关键旅程 + 因果链 + 联合复盘</strong></div>
+            <div class="summary-chip"><small>结果</small><strong>设计贡献可量化、问题可定位、策略可验证</strong></div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div>
+            <div class="hero-side-title">一套有效指标体系必须回答四个问题</div>
+            <div class="outcome-stack">
+              <div class="outcome-card"><strong>业务结果发生了什么变化</strong><span>收入、交易、活跃、留存、成本和风险是否改善。</span></div>
+              <div class="outcome-card"><strong>用户行为为什么发生变化</strong><span>完成率、成功率、时长、错误和使用率如何变化。</span></div>
+              <div class="outcome-card"><strong>设计采取了哪些可验证动作</strong><span>流程、内容、组件、实验和质量治理是否有效。</span></div>
+              <div class="outcome-card"><strong>变化能否被持续复用</strong><span>结果是否进入设计系统、方法和下一轮业务规划。</span></div>
+            </div>
+          </div>
+          <div class="hero-note">设计不需要独自承担全部业务结果，但必须证明设计动作如何影响用户行为，并与业务结果形成可信因果链。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">01 · MANAGEMENT SUMMARY</div>
+          <h2>为什么设计指标必须与业务指标绑定</h2>
+        </div>
+        <div class="section-desc">当设计只汇报交付数量、页面质量和满意度时，团队很难解释优先级，也无法判断哪些体验投入真正产生了业务价值。</div>
+      </div>
+      <div class="exec-summary">
+        <div class="signal-board">
+          <div class="signal">
+            <div class="signal-label">指标语言</div><div class="signal-value">不一致</div>
+            <div class="signal-desc">业务关注交易和成本，设计关注页面与满意度，双方缺少共同语言。</div>
+          </div>
+          <div class="signal">
+            <div class="signal-label">价值归因</div><div class="signal-value">不清晰</div>
+            <div class="signal-desc">上线后指标变化无法解释与设计动作之间的关系。</div>
+          </div>
+          <div class="signal">
+            <div class="signal-label">问题定位</div><div class="signal-value">过于粗</div>
+            <div class="signal-desc">只看最终转化，无法识别具体环节、角色和体验阻力。</div>
+          </div>
+          <div class="signal">
+            <div class="signal-label">复盘机制</div><div class="signal-value">不连续</div>
+            <div class="signal-desc">设计上线后缺少持续观察，经验不能进入下一轮规划。</div>
+          </div>
+        </div>
+        <div class="summary-story">
+          <div>
+            <small>METRIC STRATEGY</small>
+            <h3>把业务结果拆解到用户行为，再拆解到可控制的设计动作。</h3>
+            <p>三级指标体系不是让设计团队承担全部营收，而是让设计能清晰说明：哪个用户行为被改变、为什么被改变、最终影响了哪个业务结果。</p>
+          </div>
+          <div class="formula">业务结果指标 ← 体验结果指标 ← 设计能力与过程指标</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">02 · THREE-LEVEL METRICS</div>
+          <h2>设计团队的三级指标体系</h2>
+        </div>
+        <div class="section-desc">从业务最终结果，到用户体验结果，再到设计团队可以直接控制和改善的过程能力。</div>
+      </div>
+
+      <div class="pyramid">
+        <div class="pyramid-inner">
+          <div class="level one">
+            <div class="level-label"><small>LEVEL 01</small><strong>业务结果指标</strong></div>
+            <div class="metric-chips">
+              <span class="metric-chip">收入</span><span class="metric-chip">交易量</span>
+              <span class="metric-chip">活跃商户数</span><span class="metric-chip">首次交易商户数</span>
+              <span class="metric-chip">留存率</span><span class="metric-chip">增购率</span>
+              <span class="metric-chip">客服成本</span><span class="metric-chip">运营成本</span>
+              <span class="metric-chip">风险损失</span>
+            </div>
+            <div class="level-owner"><b>业务负责人共同关注</b><span>回答最终经营结果</span></div>
+          </div>
+
+          <div class="level two">
+            <div class="level-label"><small>LEVEL 02</small><strong>体验结果指标</strong></div>
+            <div class="metric-chips">
+              <span class="metric-chip">注册完成率</span><span class="metric-chip">认证完成率</span>
+              <span class="metric-chip">首笔交易转化率</span><span class="metric-chip">任务成功率</span>
+              <span class="metric-chip">流程完成时间</span><span class="metric-chip">表单错误率</span>
+              <span class="metric-chip">功能使用率</span><span class="metric-chip">用户满意度</span>
+            </div>
+            <div class="level-owner"><b>设计团队重点负责</b><span>回答用户行为变化</span></div>
+          </div>
+
+          <div class="level three">
+            <div class="level-label"><small>LEVEL 03</small><strong>设计能力与过程指标</strong></div>
+            <div class="metric-chips">
+              <span class="metric-chip">需求分析周期</span><span class="metric-chip">设计交付周期</span>
+              <span class="metric-chip">设计系统复用率</span><span class="metric-chip">上线前问题发现率</span>
+              <span class="metric-chip">需求返工率</span><span class="metric-chip">实验频率</span>
+              <span class="metric-chip">状态覆盖率</span><span class="metric-chip">质量门禁通过率</span>
+            </div>
+            <div class="level-owner"><b>设计组织直接负责</b><span>回答如何持续产生结果</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">03 · CAUSAL CHAIN</div>
+          <h2>从设计动作到业务结果的因果链</h2>
+        </div>
+        <div class="section-desc">不能直接声称“优化页面带来收入增长”，必须说明设计动作如何改变用户行为，并由数据验证每一层变化。</div>
+      </div>
+
+      <div class="causal">
+        <div class="causal-grid">
+          <div class="causal-col">
+            <small>设计动作</small>
+            <div class="causal-item">减少非必要字段</div>
+            <div class="causal-item">优化信息层级与说明</div>
+            <div class="causal-item">增加即时校验与恢复</div>
+            <div class="causal-item">统一组件与状态</div>
+          </div>
+          <div class="causal-arrow">→</div>
+          <div class="causal-col">
+            <small>体验行为变化</small>
+            <div class="causal-item">理解成本下降</div>
+            <div class="causal-item">错误与退出减少</div>
+            <div class="causal-item">流程完成更快</div>
+            <div class="causal-item">关键功能采用增加</div>
+          </div>
+          <div class="causal-arrow">→</div>
+          <div class="causal-col">
+            <small>体验结果指标</small>
+            <div class="causal-item">注册完成率提升</div>
+            <div class="causal-item">认证完成率提升</div>
+            <div class="causal-item">任务成功率提升</div>
+            <div class="causal-item">客服咨询率下降</div>
+          </div>
+          <div class="causal-arrow">→</div>
+          <div class="causal-col highlight">
+            <small>业务结果指标</small>
+            <div class="causal-item">活跃商户增加</div>
+            <div class="causal-item">首次交易增加</div>
+            <div class="causal-item">交易量与收入提升</div>
+            <div class="causal-item">运营和客服成本下降</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">04 · JOURNEY BINDING</div>
+          <h2>按关键业务旅程绑定指标</h2>
+        </div>
+        <div class="section-desc">设计指标不应按页面数量建立，而应围绕注册、认证、首笔交易、持续交易等关键旅程建立。</div>
+      </div>
+
+      <div class="journey-grid">
+        <article class="journey">
+          <div class="journey-no">01 / REGISTRATION</div>
+          <h3>注册与账户创建</h3>
+          <p>目标是让目标商户更顺利地完成账户创建，并进入认证阶段。</p>
+          <div class="bind-row"><b>业务结果</b><span>新增商户数、有效注册数、获客成本</span></div>
+          <div class="bind-row"><b>体验结果</b><span>注册完成率、步骤退出率、平均完成时间、表单错误率</span></div>
+          <div class="bind-row"><b>设计动作</b><span>字段精简、分步节奏、即时校验、手机号与邮箱规则优化</span></div>
+        </article>
+
+        <article class="journey">
+          <div class="journey-no">02 / KYC & ACTIVATION</div>
+          <h3>认证与商户激活</h3>
+          <p>目标是提高资料提交与审核通过效率，缩短首次价值时间。</p>
+          <div class="bind-row"><b>业务结果</b><span>活跃商户数、认证通过商户数、首次价值时间</span></div>
+          <div class="bind-row"><b>体验结果</b><span>认证完成率、一次提交通过率、材料错误率、客服咨询率</span></div>
+          <div class="bind-row"><b>设计动作</b><span>材料示例、规则解释、预填、即时校验、草稿与错误恢复</span></div>
+        </article>
+
+        <article class="journey">
+          <div class="journey-no">03 / FIRST TRANSACTION</div>
+          <h3>首笔交易</h3>
+          <p>目标是让已激活商户更快、更有信心完成第一笔真实交易。</p>
+          <div class="bind-row"><b>业务结果</b><span>首次交易商户数、首笔交易金额、激活转化率</span></div>
+          <div class="bind-row"><b>体验结果</b><span>首笔交易转化率、任务成功率、交易完成时间、失败恢复率</span></div>
+          <div class="bind-row"><b>设计动作</b><span>费用透明、收款信息核对、进度反馈、失败解释、下一步引导</span></div>
+        </article>
+
+        <article class="journey">
+          <div class="journey-no">04 / RETENTION & EXPANSION</div>
+          <h3>持续交易与功能渗透</h3>
+          <p>目标是让活跃商户持续使用更多能力，提高留存、增购与交易规模。</p>
+          <div class="bind-row"><b>业务结果</b><span>留存率、交易量、功能渗透率、增购率、收入</span></div>
+          <div class="bind-row"><b>体验结果</b><span>重复使用率、关键功能采用率、任务效率、满意度</span></div>
+          <div class="bind-row"><b>设计动作</b><span>智能推荐、数据洞察、批量操作、自动化流程与个性化提醒</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">05 · METRIC BINDING MAP</div>
+          <h2>业务指标—体验指标—设计动作映射表</h2>
+        </div>
+        <div class="section-desc">映射表帮助团队在项目启动时明确“为什么做、看什么指标、用什么设计动作验证”。</div>
+      </div>
+
+      <div class="metric-map">
+        <table class="map-table">
+          <thead>
+            <tr>
+              <th>业务目标</th><th>业务结果指标</th><th>体验结果指标</th><th>关键设计动作</th><th>建议验证方式</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong-cell">提升商户增长</td>
+              <td><span class="link-pill">新增商户</span><span class="link-pill">有效注册</span></td>
+              <td>注册完成率、退出率、完成时长、表单错误率</td>
+              <td>字段精简、步骤重组、内容解释、实时校验</td>
+              <td>漏斗分析 + A/B 实验 + 可用性测试</td>
+            </tr>
+            <tr>
+              <td class="strong-cell">提高商户激活</td>
+              <td><span class="link-pill">活跃商户</span><span class="link-pill">首次价值时间</span></td>
+              <td>认证完成率、一次通过率、资料错误率、咨询率</td>
+              <td>材料示例、智能预填、草稿保存、错误恢复</td>
+              <td>前后对比 + 灰度实验 + 客服工单分析</td>
+            </tr>
+            <tr>
+              <td class="strong-cell">提升首次交易</td>
+              <td><span class="link-pill">首次交易商户</span><span class="link-pill">首笔交易额</span></td>
+              <td>首笔交易转化率、任务成功率、失败恢复率</td>
+              <td>费用透明、流程引导、确认机制、失败解释</td>
+              <td>漏斗分析 + 任务测试 + 行为回放</td>
+            </tr>
+            <tr>
+              <td class="strong-cell">扩大交易规模</td>
+              <td><span class="link-pill">交易量</span><span class="link-pill">收入</span></td>
+              <td>重复使用率、交易成功率、完成时长、批量功能使用率</td>
+              <td>批量操作、智能默认、状态反馈、数据洞察</td>
+              <td>队列对比 + 功能渗透分析 + 商户分层</td>
+            </tr>
+            <tr>
+              <td class="strong-cell">降低服务成本</td>
+              <td><span class="link-pill">客服成本</span><span class="link-pill">运营成本</span></td>
+              <td>自助完成率、咨询率、人工介入率、一次解决率</td>
+              <td>自助解释、智能帮助、状态可见、异常恢复</td>
+              <td>工单量对比 + 服务时长 + 自助成功率</td>
+            </tr>
+            <tr>
+              <td class="strong-cell">降低业务风险</td>
+              <td><span class="link-pill">风险损失</span><span class="link-pill">异常交易</span></td>
+              <td>误操作率、信息填写准确率、风险提示理解率</td>
+              <td>关键确认、可解释提示、权限控制、撤销与审计</td>
+              <td>风险事件分析 + 任务测试 + 规则命中率</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">06 · MEASUREMENT PRINCIPLES</div>
+          <h2>指标绑定的五条原则</h2>
+        </div>
+        <div class="section-desc">指标不是越多越好。每个重点旅程应围绕一个业务结果、少量体验结果和明确设计动作建立闭环。</div>
+      </div>
+
+      <div class="principles">
+        <div class="principle-panel">
+          <h3>五条长期原则</h3>
+          <div class="rule-list">
+            <div class="rule"><div class="rule-no">1</div><div><strong>先定义业务结果</strong><span>没有业务目标的体验指标，容易退化为局部优化。</span></div></div>
+            <div class="rule"><div class="rule-no">2</div><div><strong>再定义用户行为变化</strong><span>设计团队主要对用户完成率、成功率、时长、错误和采用负责。</span></div></div>
+            <div class="rule"><div class="rule-no">3</div><div><strong>区分相关性与因果性</strong><span>业务变化不能简单归因于设计，需要实验或多源证据验证。</span></div></div>
+            <div class="rule"><div class="rule-no">4</div><div><strong>同时设置防护指标</strong><span>提升转化不能以风险、审核质量、投诉或满意度恶化为代价。</span></div></div>
+            <div class="rule"><div class="rule-no">5</div><div><strong>指标必须进入复盘</strong><span>上线后持续观察，并把结论回流下一轮设计和业务规划。</span></div></div>
+          </div>
+        </div>
+
+        <div class="principle-side">
+          <div>
+            <small>MEASUREMENT PRINCIPLE</small>
+            <h3>设计价值不是“独占归因”，而是“清晰贡献”。</h3>
+            <p>业务结果通常由产品、市场、运营、技术和设计共同推动。设计团队要证明的，是设计动作如何改变用户行为，以及这种变化对业务结果的贡献方向和幅度。</p>
+          </div>
+          <div class="note">建议每个重点项目只设置 1 个业务结果指标、2—4 个体验结果指标和 1—2 个防护指标。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">07 · OPERATING CADENCE</div>
+          <h2>指标如何进入日常运行</h2>
+        </div>
+        <div class="section-desc">指标只有进入项目启动、方案评审、上线观察和季度复盘，才能真正改变团队工作方式。</div>
+      </div>
+
+      <div class="cadence-grid">
+        <div class="cadence">
+          <small>PROJECT START</small>
+          <h3>项目启动</h3>
+          <p>确定业务目标、关键旅程、基线、体验指标、防护指标与负责人。</p>
+          <div class="output">输出：指标绑定卡片</div>
+        </div>
+        <div class="cadence">
+          <small>DESIGN REVIEW</small>
+          <h3>方案评审</h3>
+          <p>检查设计动作是否能够影响目标行为，埋点与验证方案是否完整。</p>
+          <div class="output">输出：方案—指标映射</div>
+        </div>
+        <div class="cadence">
+          <small>POST RELEASE</small>
+          <h3>上线观察</h3>
+          <p>监控业务结果、体验结果、防护指标和用户反馈，识别异常。</p>
+          <div class="output">输出：上线效果看板</div>
+        </div>
+        <div class="cadence">
+          <small>MONTHLY / QUARTERLY</small>
+          <h3>结果复盘</h3>
+          <p>分析指标变化、贡献链路、失败原因与下一轮体验机会。</p>
+          <div class="output">输出：体验价值复盘</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">08 · EXPECTED IMPACT</div>
+          <h2>绑定后应带来的四类改善</h2>
+        </div>
+        <div class="section-desc">以下为方向性目标，实际改善程度需要结合业务基线、数据能力和项目复杂度确定。</div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-card">
+          <small>PRIORITY</small><strong>优先级更清晰</strong>
+          <p>设计资源围绕业务影响和用户问题排序，而不是页面数量或需求声音大小。</p>
+          <div class="bar"><span style="width:90%"></span></div>
+        </div>
+        <div class="result-card">
+          <small>VALUE PROOF</small><strong>价值更可解释</strong>
+          <p>设计动作、用户行为与业务结果之间形成清晰证据链。</p>
+          <div class="bar"><span style="width:86%"></span></div>
+        </div>
+        <div class="result-card">
+          <small>PROBLEM LOCATION</small><strong>问题定位更准确</strong>
+          <p>业务指标波动可以继续拆解到具体旅程、步骤和体验阻力。</p>
+          <div class="bar"><span style="width:82%"></span></div>
+        </div>
+        <div class="result-card">
+          <small>ITERATION</small><strong>迭代更连续</strong>
+          <p>上线结果回流下一轮设计、实验、设计系统与业务规划。</p>
+          <div class="bar"><span style="width:94%"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">09 · 90-DAY ROADMAP</div>
+          <h2>90 天落地路径</h2>
+        </div>
+        <div class="section-desc">先选择一条核心业务旅程跑通三级指标体系，再扩展到更多流程和团队。</div>
+      </div>
+
+      <div class="roadmap">
+        <article class="phase">
+          <div class="phase-time">DAY 01—30</div>
+          <h3>建立指标框架</h3>
+          <div class="phase-goal">确定三级指标、指标定义、数据来源与试点旅程。</div>
+          <ul>
+            <li>选择注册、认证或首笔交易作为试点</li>
+            <li>明确业务结果、体验结果与过程指标</li>
+            <li>建立指标口径、基线和负责人</li>
+            <li>补齐必要埋点与数据看板</li>
+          </ul>
+          <div class="deliverable">交付物：指标树、口径字典、基线数据、责任矩阵。</div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-time">DAY 31—60</div>
+          <h3>运行首批项目</h3>
+          <div class="phase-goal">在实际项目中建立设计动作与指标变化的验证链路。</div>
+          <ul>
+            <li>每个重点方案绑定指标与验证方式</li>
+            <li>设置业务指标、体验指标和防护指标</li>
+            <li>运行 1—2 个小范围实验</li>
+            <li>建立上线后持续观察机制</li>
+          </ul>
+          <div class="deliverable">交付物：指标绑定卡、实验方案、效果看板、过程记录。</div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-time">DAY 61—90</div>
+          <h3>形成复盘机制</h3>
+          <div class="phase-goal">用结果验证指标链路，并形成可复制的旅程指标模板。</div>
+          <ul>
+            <li>完成首轮业务与体验联合复盘</li>
+            <li>识别有效设计动作和无效假设</li>
+            <li>将成熟指标扩展到第二条旅程</li>
+            <li>形成季度体验价值报告</li>
+          </ul>
+          <div class="deliverable">交付物：结果复盘、指标模板、经验资产、扩展计划。</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">10 · KPI SCORECARD</div>
+          <h2>可编辑的指标绑定成熟度看板</h2>
+        </div>
+        <div class="section-desc">示例值可直接修改，页面会自动保存到当前浏览器并计算目标完成度。</div>
+      </div>
+
+      <div class="score-shell">
+        <div class="score-toolbar">
+          <div class="score-summary">
+            <div class="score-number" id="overallScore">0%</div>
+            <div class="score-label">整体目标完成度</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted)">建议按月复盘指标体系运行质量。</div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="scoreTable">
+            <thead>
+              <tr>
+                <th>维度</th><th>指标</th><th>方向</th><th>当前值</th><th>目标值</th>
+                <th>单位</th><th>负责人</th><th>完成度</th><th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-direction="up" data-default-current="28" data-default-target="80">
+                <td><span class="tag">北极星</span></td>
+                <td><span class="metric-name">重点项目指标绑定覆盖率</span><span class="metric-help">具有业务、体验和过程三级指标的重点项目比例</span></td>
+                <td>越高越好</td>
+                <td><input class="input current" type="number" step="0.1"></td>
+                <td><input class="input target" type="number" step="0.1"></td>
+                <td>%</td><td><input class="input owner" value="体验设计总监"></td>
+                <td><div class="progress"><span></span></div><div class="progress-text"></div></td>
+                <td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="35" data-default-target="85">
+                <td><span class="tag">数据</span></td>
+                <td><span class="metric-name">关键旅程体验指标可观测率</span><span class="metric-help">拥有完整埋点、基线和持续看板的关键旅程比例</span></td>
+                <td>越高越好</td>
+                <td><input class="input current" type="number" step="0.1"></td>
+                <td><input class="input target" type="number" step="0.1"></td>
+                <td>%</td><td><input class="input owner" value="数据负责人"></td>
+                <td><div class="progress"><span></span></div><div class="progress-text"></div></td>
+                <td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="22" data-default-target="70">
+                <td><span class="tag">验证</span></td>
+                <td><span class="metric-name">设计动作可验证率</span><span class="metric-help">拥有实验、前后对比或多源证据的重点设计动作比例</span></td>
+                <td>越高越好</td>
+                <td><input class="input current" type="number" step="0.1"></td>
+                <td><input class="input target" type="number" step="0.1"></td>
+                <td>%</td><td><input class="input owner" value="增长体验负责人"></td>
+                <td><div class="progress"><span></span></div><div class="progress-text"></div></td>
+                <td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="30" data-default-target="75">
+                <td><span class="tag">复盘</span></td>
+                <td><span class="metric-name">上线后结果复盘覆盖率</span><span class="metric-help">上线后完成业务与体验联合复盘的重点项目比例</span></td>
+                <td>越高越好</td>
+                <td><input class="input current" type="number" step="0.1"></td>
+                <td><input class="input target" type="number" step="0.1"></td>
+                <td>%</td><td><input class="input owner" value="项目 Owner"></td>
+                <td><div class="progress"><span></span></div><div class="progress-text"></div></td>
+                <td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="18" data-default-target="55">
+                <td><span class="tag">价值</span></td>
+                <td><span class="metric-name">可量化业务改善项目占比</span><span class="metric-help">能够说明设计对增长、成本或风险贡献的项目比例</span></td>
+                <td>越高越好</td>
+                <td><input class="input current" type="number" step="0.1"></td>
+                <td><input class="input target" type="number" step="0.1"></td>
+                <td>%</td><td><input class="input owner" value="体验设计总监"></td>
+                <td><div class="progress"><span></span></div><div class="progress-text"></div></td>
+                <td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="24" data-default-target="10">
+                <td><span class="tag">返工</span></td>
+                <td><span class="metric-name">缺少指标导致的方案返工率</span><span class="metric-help">因目标不清、口径不一致或验证缺失导致的返工比例</span></td>
+                <td>越低越好</td>
+                <td><input class="input current" type="number" step="0.1"></td>
+                <td><input class="input target" type="number" step="0.1"></td>
+                <td>%</td><td><input class="input owner" value="设计管理"></td>
+                <td><div class="progress"><span></span></div><div class="progress-text"></div></td>
+                <td><span class="status"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">11 · EXECUTION BOARD</div>
+          <h2>本季度实施记录</h2>
+        </div>
+        <div class="section-desc">用于记录试点旅程、指标口径、负责人和 90 天目标，内容只保存在当前浏览器。</div>
+      </div>
+
+      <div class="action-grid">
+        <div class="panel">
+          <h3 style="margin:0 0 18px;font-size:23px">启动检查清单</h3>
+          <div class="checklist" id="checklist">
+            <label class="check-row"><input type="checkbox"><span><strong>选择一条核心业务旅程</strong><span>建议从注册、认证、首笔交易或持续交易开始。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>确定一个业务结果指标</strong><span>明确最终准备推动的经营结果及当前基线。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>确定 2—4 个体验结果指标</strong><span>围绕完成率、成功率、时长、错误、使用和满意度。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>建立设计动作与指标映射</strong><span>说明每个设计动作准备改变哪个用户行为。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>补齐埋点与防护指标</strong><span>确保转化改善不会带来风险、投诉或审核质量恶化。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>建立上线后联合复盘</strong><span>业务、产品、设计、数据共同解释指标变化。</span></span></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin:0 0 8px;font-size:23px">试点说明</h3>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:12px">建议写清试点旅程、指标、负责人和 90 天目标。</p>
+          <textarea id="notes" placeholder="试点业务旅程：
+业务结果指标：
+体验结果指标：
+防护指标：
+关键设计动作：
+数据负责人：
+体验负责人：
+90 天目标：
+1. 重点项目指标绑定覆盖率达到 80%
+2. 关键旅程体验指标可观测率达到 85%
+3. 完成首轮业务与体验联合复盘"></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AI 时代体验设计团队突破 · Section 04</span>
+    <span>指标目标：业务结果可连接、体验变化可解释、设计动作可验证、组织价值可复盘。</span>
+  </footer>
+</div>
+
+<script>
+  const DATA_KEY="section04_business_linked_design_metrics_v1";
+  const THEME_KEY="section04_business_linked_design_metrics_theme_v1";
+  const rows=[...document.querySelectorAll("#scoreTable tbody tr")];
+  const checks=[...document.querySelectorAll("#checklist input")];
+  const notes=document.getElementById("notes");
+  const themeBtn=document.getElementById("themeBtn");
+
+  function setTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    themeBtn.textContent=theme==="light"?"切换暗黑":"切换亮色";
+    localStorage.setItem(THEME_KEY,theme);
+  }
+  function calcProgress(current,target,direction){
+    if(!isFinite(current)||!isFinite(target)||target===0)return 0;
+    if(direction==="up")return Math.max(0,Math.min(130,current/target*100));
+    if(current<=0)return 130;
+    return Math.max(0,Math.min(130,target/current*100));
+  }
+  function statusFor(progress){
+    return progress>=100?["已达成","good"]:progress>=75?["接近目标","warn"]:["需关注","risk"];
+  }
+  function updateScore(save=true){
+    let total=0;
+    rows.forEach(row=>{
+      const current=parseFloat(row.querySelector(".current").value);
+      const target=parseFloat(row.querySelector(".target").value);
+      const p=calcProgress(current,target,row.dataset.direction);
+      const normalized=Math.min(100,p);
+      total+=normalized;
+      row.querySelector(".progress>span").style.width=normalized+"%";
+      row.querySelector(".progress-text").textContent=Math.round(p)+"%";
+      const [label,cls]=statusFor(p);
+      const status=row.querySelector(".status");
+      status.textContent=label;
+      status.className="status "+cls;
+    });
+    document.getElementById("overallScore").textContent=Math.round(total/rows.length)+"%";
+    if(save)saveData();
+  }
+  function saveData(){
+    localStorage.setItem(DATA_KEY,JSON.stringify({
+      rows:rows.map(row=>({
+        current:row.querySelector(".current").value,
+        target:row.querySelector(".target").value,
+        owner:row.querySelector(".owner").value
+      })),
+      checks:checks.map(c=>c.checked),
+      notes:notes.value
+    }));
+  }
+  function loadData(){
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){}
+    rows.forEach((row,i)=>{
+      const data=saved.rows?.[i];
+      row.querySelector(".current").value=data?.current??row.dataset.defaultCurrent;
+      row.querySelector(".target").value=data?.target??row.dataset.defaultTarget;
+      if(data?.owner)row.querySelector(".owner").value=data.owner;
+    });
+    checks.forEach((c,i)=>c.checked=Boolean(saved.checks?.[i]));
+    notes.value=saved.notes||"";
+    updateScore(false);
+  }
+  document.querySelectorAll("#scoreTable input").forEach(el=>el.addEventListener("input",()=>updateScore(true)));
+  checks.forEach(c=>c.addEventListener("change",saveData));
+  notes.addEventListener("input",saveData);
+  themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+  document.getElementById("resetBtn").addEventListener("click",()=>{
+    if(confirm("确认清空本页面的指标与实施记录吗？")){
+      localStorage.removeItem(DATA_KEY);
+      loadData();
+    }
+  });
+  setTheme(localStorage.getItem(THEME_KEY)||"dark");
+  loadData();
+</script>
+<script id="pp-theme-sync">(function(){try{var t=localStorage.getItem('ppux-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);var o=new MutationObserver(function(){var v=document.documentElement.getAttribute('data-theme')||'dark';localStorage.setItem('ppux-theme',v)});o.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();</script></body>
+</html>

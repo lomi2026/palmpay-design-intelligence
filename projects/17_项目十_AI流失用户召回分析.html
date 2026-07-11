@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>AI 流失用户召回分析｜项目十</title>
+  <style>
+    :root{
+      --bg:#080808;--panel:#111;--panel-2:#171717;--panel-3:#202020;
+      --text:#f5f5f5;--muted:#9c9c9c;--line:#2b2b2b;--strong:#fff;
+      --soft:#242424;--good:#dff7df;--warn:#fff0bc;--risk:#ffd9d9;
+      --shadow:0 28px 90px rgba(0,0,0,.34);--radius:24px;
+    }
+    [data-theme="light"]{
+      --bg:#f4f4f1;--panel:#fff;--panel-2:#f8f8f5;--panel-3:#ecece8;
+      --text:#151515;--muted:#6b6b67;--line:#deded8;--strong:#111;
+      --soft:#ecece7;--good:#e8f7e6;--warn:#fff3c7;--risk:#ffe5e5;
+      --shadow:0 28px 90px rgba(40,40,20,.11);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.065),transparent 30%),var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.55;
+    }
+    button,input,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .shell{max-width:1460px;margin:auto;padding:22px}
+    .topbar{
+      position:sticky;top:14px;z-index:50;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px 12px 18px;border:1px solid var(--line);
+      border-radius:18px;background:color-mix(in srgb,var(--panel) 88%,transparent);
+      backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+      background:var(--strong);color:var(--bg);font-weight:900;font-size:13px;
+    }
+    .brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{
+      border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);
+      padding:8px 12px;cursor:pointer;transition:.2s ease;white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .btn.primary{background:var(--strong);color:var(--bg);border-color:var(--strong);font-weight:760}
+
+    .hero{
+      margin-top:26px;border:1px solid var(--line);border-radius:30px;overflow:hidden;
+      background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:var(--shadow);
+    }
+    .hero-grid{display:grid;grid-template-columns:1.35fr .65fr;min-height:610px}
+    .hero-copy{padding:68px 58px 48px}
+    .eyebrow{
+      display:flex;align-items:center;gap:8px;color:var(--muted);
+      font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:850;
+    }
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--strong)}
+    h1{
+      margin:22px 0 20px;font-size:clamp(46px,6.3vw,88px);
+      line-height:.98;letter-spacing:-.065em;max-width:1080px;
+    }
+    .hero-copy>p{font-size:18px;color:var(--muted);max-width:870px;margin:0}
+    .hero-summary{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .summary-chip{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+    .summary-chip small{display:block;color:var(--muted);font-weight:800;margin-bottom:6px}
+    .summary-chip strong{font-size:16px;line-height:1.35;display:block}
+    .hero-side{
+      border-left:1px solid var(--line);padding:34px 28px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+        repeating-linear-gradient(90deg,transparent 0 49px,var(--line) 50px),
+        repeating-linear-gradient(0deg,transparent 0 49px,var(--line) 50px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .hero-side-title{font-size:12px;color:var(--muted);letter-spacing:.13em;font-weight:850}
+    .outcome-stack{display:grid;gap:12px;margin-top:18px}
+    .outcome-card{
+      border:1px solid var(--line);border-radius:16px;padding:16px;
+      background:color-mix(in srgb,var(--panel) 88%,transparent);
+    }
+    .outcome-card strong{display:block;font-size:14px;margin-bottom:4px}
+    .outcome-card span{font-size:12px;color:var(--muted)}
+    .hero-note{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+
+    .section{margin-top:58px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:20px}
+    .section-kicker{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:850}
+    h2{font-size:clamp(30px,3.4vw,50px);line-height:1.04;letter-spacing:-.045em;margin:6px 0 0}
+    .section-desc{max-width:710px;color:var(--muted);font-size:14px}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px}
+
+    .exec-summary{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .signal-board{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;
+      display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+    }
+    .signal{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .signal-label{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.08em}
+    .signal-value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:12px 0 6px}
+    .signal-desc{font-size:12px;color:var(--muted)}
+    .summary-story{
+      border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);
+      padding:28px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .summary-story small{font-size:11px;letter-spacing:.12em;font-weight:850;opacity:.55}
+    .summary-story h3{font-size:30px;line-height:1.05;letter-spacing:-.045em;margin:18px 0 14px}
+    .summary-story p{margin:0;font-size:14px;opacity:.68}
+    .summary-story .formula{
+      margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:13px;font-weight:760;
+    }
+
+    .input-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .input-card{
+      border:1px solid var(--line);border-radius:20px;background:var(--panel);
+      padding:20px;min-height:190px;
+    }
+    .input-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .input-card strong{display:block;font-size:19px;margin:18px 0 7px}
+    .input-card p{font-size:12px;color:var(--muted);margin:0}
+    .input-card .tagline{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .pipeline{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);
+      padding:clamp(16px,1.55vw,26px);overflow-x:auto;overflow-y:hidden;scrollbar-gutter:stable;
+    }
+    .pipeline-grid{
+      display:grid;
+      grid-template-columns:
+        minmax(185px,1fr) 24px minmax(185px,1fr) 24px minmax(185px,1fr) 24px
+        minmax(185px,1fr) 24px minmax(185px,1fr) 24px minmax(185px,1fr) 24px
+        minmax(185px,1fr);
+      gap:6px;min-width:1390px;align-items:stretch;
+    }
+    .pipe-step{
+      min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--panel-2);
+      padding:18px;min-height:195px;
+    }
+    .pipe-step small{display:block;color:var(--muted);font-size:11px;font-weight:850}
+    .pipe-step strong{display:block;font-size:15px;line-height:1.42;margin:12px 0 8px;text-wrap:balance}
+    .pipe-step p{font-size:11px;line-height:1.68;color:var(--muted);margin:0}
+    .pipe-badge{margin-top:14px;display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800}
+    .pipe-link{display:grid;place-items:center;color:var(--muted);font-size:21px}
+
+    .segment-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .segment-card{
+      border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:22px;min-height:285px;
+      position:relative;overflow:hidden;
+    }
+    .segment-card::after{
+      content:"";position:absolute;right:-40px;bottom:-50px;width:125px;height:125px;
+      border:1px solid var(--line);border-radius:50%;
+    }
+    .segment-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .segment-card strong{display:block;font-size:22px;margin:23px 0 8px;letter-spacing:-.035em}
+    .segment-card p{font-size:12px;color:var(--muted);margin:0}
+    .segment-list{display:grid;gap:8px;margin-top:16px}
+    .segment-list span{
+      border:1px solid var(--line);border-radius:10px;background:var(--panel-2);
+      padding:9px 10px;font-size:11px;
+    }
+
+    .risk-shell{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}
+    .risk-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .risk-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .risk-list{display:grid;gap:10px}
+    .risk-row{
+      border:1px solid var(--line);border-radius:15px;background:var(--panel-2);
+      padding:15px;display:grid;grid-template-columns:1fr 90px;gap:14px;align-items:center;
+    }
+    .risk-copy strong{display:block;font-size:13px}
+    .risk-copy span{font-size:11px;color:var(--muted)}
+    .risk-score{text-align:right}
+    .risk-score b{display:block;font-size:19px}
+    .risk-score span{font-size:9px;color:var(--muted)}
+    .risk-side{
+      border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);
+      padding:26px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .risk-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .risk-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .risk-side p{font-size:13px;opacity:.65;margin:0}
+    .risk-factors{display:grid;gap:8px;margin-top:20px}
+    .risk-factors span{
+      padding:10px 0;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:11px;
+    }
+    .risk-side .note{
+      margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:12px;font-weight:760;
+    }
+
+    .reason-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .reason-card{
+      border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:22px;min-height:270px;
+    }
+    .reason-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .reason-card strong{display:block;font-size:21px;margin:22px 0 8px;letter-spacing:-.035em}
+    .reason-card p{font-size:12px;color:var(--muted);margin:0}
+    .reason-evidence{display:grid;gap:8px;margin-top:16px}
+    .reason-evidence span{padding:9px 0;border-top:1px solid var(--line);font-size:11px}
+    .reason-output{margin-top:16px;padding:10px;border:1px dashed var(--line);border-radius:11px;font-size:10px;font-weight:760}
+
+    .action-map{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    .action-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;overflow:auto}
+    .action-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .action-table{min-width:820px;display:grid;gap:9px}
+    .action-head,.action-row{
+      display:grid;grid-template-columns:1fr 1.15fr 1.25fr;gap:12px;align-items:center;
+    }
+    .action-head{padding:0 14px 9px;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.08em}
+    .action-row{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px}
+    .action-row strong{font-size:12px}
+    .action-row span{font-size:11px;color:var(--muted)}
+    .action-result{
+      border:1px solid var(--line);border-radius:999px;padding:7px 10px;text-align:center;
+      font-size:10px;font-weight:800;white-space:nowrap;
+    }
+    .action-side{
+      border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);
+      padding:26px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .action-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .action-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .action-side p{font-size:13px;opacity:.65;margin:0}
+    .action-side .note{
+      margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:12px;font-weight:760;
+    }
+
+    .opportunity-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .opportunity-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .opportunity-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .opportunity-list{display:grid;gap:10px}
+    .opportunity-item{
+      border:1px solid var(--line);border-radius:14px;background:var(--panel-2);
+      padding:14px;display:grid;grid-template-columns:34px 1fr;gap:11px;
+    }
+    .op-no{
+      width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);
+      display:grid;place-items:center;font-size:10px;font-weight:850;
+    }
+    .opportunity-item strong{display:block;font-size:13px}
+    .opportunity-item span{font-size:11px;color:var(--muted)}
+
+    .mvp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .week-card{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .week-card.primary{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .week-card small{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.1em}
+    .week-card.primary small{color:color-mix(in srgb,var(--bg) 55%,transparent)}
+    .week-card h3{font-size:28px;letter-spacing:-.04em;margin:17px 0 8px}
+    .week-card p{font-size:12px;color:var(--muted);margin:0}
+    .week-card.primary p{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+    .mvp-list{display:grid;gap:9px;margin-top:20px}
+    .mvp-item{display:grid;grid-template-columns:34px 1fr;gap:11px;padding:12px 0;border-top:1px solid var(--line)}
+    .week-card.primary .mvp-item{border-color:color-mix(in srgb,var(--bg) 18%,transparent)}
+    .mvp-no{
+      width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);
+      display:grid;place-items:center;font-size:10px;font-weight:850;
+    }
+    .week-card.primary .mvp-no{background:var(--bg);color:var(--strong)}
+    .mvp-item strong{display:block;font-size:13px}
+    .mvp-item span{font-size:11px;color:var(--muted)}
+    .week-card.primary .mvp-item span{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+
+    .deliverable-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    .deliverable-card{
+      border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:220px;
+    }
+    .deliverable-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .deliverable-card strong{display:block;font-size:20px;margin:23px 0 8px;letter-spacing:-.035em}
+    .deliverable-card p{font-size:12px;color:var(--muted);margin:0}
+    .deliverable-card .bar{height:7px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:18px}
+    .deliverable-card .bar span{display:block;height:100%;background:var(--strong);border-radius:999px}
+
+    .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .metric-card{
+      border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:215px;
+    }
+    .metric-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .metric-card strong{display:block;font-size:22px;margin:24px 0 8px;letter-spacing:-.04em}
+    .metric-card p{font-size:12px;color:var(--muted);margin:0}
+    .metric-card .formula{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .score-shell{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .score-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .score-summary{display:flex;align-items:baseline;gap:10px}
+    .score-number{font-size:34px;font-weight:850;letter-spacing:-.05em}
+    .score-label{font-size:13px;color:var(--muted)}
+    .table-scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1120px}
+    th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--panel-2)}
+    td{font-size:13px}
+    .metric-name{font-weight:750}
+    .metric-help{display:block;color:var(--muted);font-size:11px;margin-top:3px;max-width:360px}
+    .tag{
+      display:inline-flex;align-items:center;justify-content:center;min-width:max-content;
+      padding:5px 8px;border-radius:999px;background:var(--soft);
+      font-size:11px;line-height:1.2;font-weight:750;white-space:nowrap;word-break:keep-all;
+    }
+    #scoreTable th:first-child,#scoreTable td:first-child{min-width:76px;white-space:nowrap}
+    #scoreTable th:nth-child(6),#scoreTable td:nth-child(6){min-width:72px;width:72px;white-space:nowrap;word-break:keep-all}
+    .input{width:100%;min-width:74px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:8px 9px;outline:none}
+    .input:focus{border-color:var(--muted)}
+    .progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;min-width:120px}
+    .progress>span{display:block;height:100%;background:var(--strong);width:0;border-radius:inherit;transition:.35s ease}
+    .progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+    .status{font-size:11px;font-weight:850;padding:5px 8px;border-radius:999px;display:inline-flex;white-space:nowrap}
+    .status.good{background:var(--good);color:#173617}
+    .status.warn{background:var(--warn);color:#3d3210}
+    .status.risk{background:var(--risk);color:#421a1a}
+
+    .action-grid{display:grid;grid-template-columns:1fr .9fr;gap:16px}
+    .checklist{display:grid;gap:9px}
+    .check-row{
+      display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;
+      padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);
+    }
+    .check-row input{width:18px;height:18px;margin-top:2px;accent-color:var(--strong)}
+    .check-row strong{font-size:13px;display:block}
+    .check-row span{font-size:11px;color:var(--muted)}
+    textarea{
+      width:100%;min-height:290px;border:1px solid var(--line);border-radius:14px;
+      background:var(--bg);color:var(--text);padding:14px;resize:vertical;outline:none;
+    }
+    textarea:focus{border-color:var(--muted)}
+    footer{margin:56px 0 28px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:18px}
+
+    @media(max-width:1200px){
+      .input-grid{grid-template-columns:repeat(2,1fr)}
+      .deliverable-grid{grid-template-columns:repeat(3,1fr)}
+    }
+    @media(max-width:1100px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-side{border-left:none;border-top:1px solid var(--line);min-height:430px}
+      .exec-summary,.risk-shell,.action-map,.opportunity-grid,.action-grid{grid-template-columns:1fr}
+      .mvp-grid{grid-template-columns:1fr}
+      .segment-grid,.reason-grid{grid-template-columns:repeat(2,1fr)}
+      .metric-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:860px){
+      .pipeline{overflow:visible;padding:16px}
+      .pipeline-grid{min-width:0;grid-template-columns:1fr;gap:8px}
+      .pipe-link{min-height:28px;transform:rotate(90deg)}
+      .pipe-step{min-height:auto;padding:20px}
+    }
+    @media(max-width:720px){
+      .shell{padding:12px}.topbar{top:8px;align-items:flex-start}
+      .brand-sub{display:none}.actions .btn:not(.primary){display:none}
+      .hero-copy{padding:44px 22px 32px}h1{font-size:44px}.hero-side{padding:22px}
+      .hero-summary,.signal-board,.input-grid,.segment-grid,.reason-grid,.deliverable-grid,.metric-grid{grid-template-columns:1fr}
+      .section-head{align-items:start;flex-direction:column}
+      footer{flex-direction:column}
+    }
+    @media print{
+      .topbar,.actions{display:none!important}
+      body{background:#fff;color:#111}.shell{max-width:none;padding:0}
+      .hero,.panel,.signal-board,.summary-story,.input-card,.pipeline,.segment-card,.risk-panel,.risk-side,
+      .reason-card,.action-panel,.action-side,.opportunity-panel,.week-card,.deliverable-card,.metric-card,.score-shell{
+        box-shadow:none;break-inside:avoid
+      }
+      .hero{margin-top:0}.section{margin-top:30px}
+      .input,textarea{border:none;background:transparent;color:#111;padding:0}
+    }
+  </style>
+<style id="pp-platform-nav-style">
+    body{padding-top:58px!important}
+    .topbar{top:72px!important}
+    .pp-platform-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;border-bottom:1px solid var(--line,#292929);background:color-mix(in srgb,var(--bg,#080808) 90%,transparent);backdrop-filter:blur(18px);font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .pp-platform-inner{max-width:1460px;height:100%;margin:auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+    .pp-platform-brand{display:flex;align-items:center;gap:10px;min-width:0;color:var(--text,#f5f5f5);text-decoration:none}
+    .pp-platform-logo{width:38px;height:32px;border:1px solid var(--line,#2b2b2b);border-radius:13px;display:grid;place-items:center;background:var(--panel,#111);flex:0 0 auto}
+    .pp-platform-logo img{width:20px;height:20px;object-fit:contain}
+    [data-theme="light"] .pp-platform-logo img{filter:invert(1)}
+    .pp-platform-title{font-size:12px;font-weight:720;white-space:nowrap}.pp-platform-crumb{font-size:11px;color:var(--muted,#999);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pp-platform-links{margin-left:auto;display:flex;align-items:center;gap:7px}.pp-platform-links a,.pp-platform-links span{height:34px;padding:0 10px;border:1px solid var(--line,#2b2b2b);border-radius:9px;display:inline-flex;align-items:center;color:var(--text,#f5f5f5);text-decoration:none;font-size:11px;background:var(--panel-2,#171717)}.pp-platform-links a:hover{border-color:var(--muted,#999)}.pp-platform-links .disabled{opacity:.35}
+    @media(max-width:720px){body{padding-top:54px!important}.topbar{top:62px!important}.pp-platform-nav{height:54px}.pp-platform-inner{padding:0 12px}.pp-platform-title,.pp-platform-links a:first-child,.pp-platform-links .disabled:first-child{display:none}.pp-platform-crumb{max-width:150px}.pp-platform-links a,.pp-platform-links span{padding:0 8px}}
+    @media print{.pp-platform-nav{display:none!important}body{padding-top:0!important}.topbar{top:0!important}}
+    </style></head>
+<body><nav class="pp-platform-nav"><div class="pp-platform-inner"><a class="pp-platform-brand" href="index.html"><span class="pp-platform-logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHYAAACCCAYAAACTpDweAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAACG9JREFUeAHtnY1x2zgQhVepICUoHfg60FVgXwViKjhfBUIqsFOBmAqSVEBdBU4HdAdJB++wBnmhbf2Q4gOwovnNYKxEM+KSnwiI2AW5kAkCYOn/XPt21TT99/vm7V++PTbtm2//LhaLR5mxiZf53reNbxWG8+DbuvlCzFjAy1j59hU8trPgjDRCK8Sj0m3ITBoSCH3JFvMZHA89uL6VyMcWs2Ae+P2j6CdscIdZ8Dj8AfwbdoR2qX1by8wwEMbRB9in9u1aZo6DMI5WuDy2mLvn18DeOHouG9/ey8yT1BuELm0q1DAw/i4kEwgX/xvfVjJNfvj2V6556HeSGIRu986/rGS6UhVNPujZu8XUx1/YvXyJTY3E3XOSrhih29Wz9EreNo++3fru+btEJqpYhC5oK9Pucs+h9O1TzPE3iliEn/x/+3YrvxPcM69xvn32gn8JGbpYL/VGQre7lJk+PPrmvNwvQoQm1gvV8VOFrsQOeiboAds1rxXtQfTLdy22epOdbx/NlOmguXyBPe5xZBYI+dOAh9BjmfcLB7uzRsWAfXCwR40cs1ewPVlfyEBgU66yRarJDdieZCjkTGBXbo2YZy/CWFrBLoWMBHblKluwz16ExHcNuxRCArbl1mBVTiJ0vZYphAxsy1U2MgbYvIzpUkgkMFW5CH26ZW4lMrAvdzt0hzawjZNEwL7cu747Yn1MdZIY2Jd7e2oHlrCNk0zAtlydV1geC76CXZxkBrblVoeCXsEuTowA23JX+wKuYBMnxoBdudXLQK2OrU6MArtyn1J+bfnpSuyhNUFOSCB8eWl5zia2T2KP4v9XsNcNOyGB19moGsRsCWydubqfV93gLKXhnJDA8dmzcfOtz7djQe4rqVewgxMS6DclypR7j3w8l9oEZOUyxwkJDJvnZsotkZ7XUptgbpEfJyRwXvLiUuXul9oEknt8cEIC4zJSlyb3sNSEQRzCCQlw0oyXIve41CaACnlwQgLc3PElyD29uA15xDohgTgFAZblFn03nPruLE5IIG6VB1NuBQ7FkI3WSIcTEkhT5TFaLsJdVRkUQ7abUqwTEkhbunO2XOSS2my8RnyckECeeqzBcpFTahNAbJyQQN4iu95ykVtqE0RMnJCAjcrJk3JhQWoTSCyckICtctjNkTjX4FDIWBAHJyRgs8Z5syfONTgUwgB8SiEBrtQtuM8O2HTiZKU+CyEArRQBl1JIgCu16HyuA48NglRGoUIhBBCWuz4wxZZCApGkdj6fKdecVP1AlthSSCCy1M52mHLHQFlcho5UhSG2FBJIJLWzvUnkovFCqjJWbCkkkFhqZ7u55DohgD1SlTFiSyGBTFI7208t1wkBHJCqnCu2FBLILLUTRyq5TgjgiFTlHLGlkIARqZ14Yst1QgAnpCpDxZZCAsakduKKJdcJCfSYaBkithQS4EqthAz4qUwnJNCzaqSv2FJIgD/3a12sExIYUArUR+xXIYF4E/rM+qQNeDghgYH1XafE6gBNWXqI+FkaRn3SBjyckMAZRXvHxF6S1Jazl0diQlKVQ2IvUWrLYLmYmFRln9hLltrSWy4mKFV5KXYKUltOysVEpSpdsUypVu7utj4S4wY8nJAAaXVDK5YpdY3xMG+dsN4T4wY8nJAAcclKu3bHmlQtN3Hgse7EuAEPJyRAXocUCp84ga3B4arzmUy5Or9agYcTEoiwuEwYIGLpJWzeKMsJCUT6kSljQYJ6WtiS64QEIl45yBiQsEgaNuQ6IYHIl4NyLshQ+Y68cp2QQIJrfDkHZFzOgDxynZBAmombWoYCA2tUkFauExJINxs3TCwMLTxCGrlOSCDtFGt/seBJdUICceWWQgLp580f+ga2Bo8axGe0IY7cUkggTzLkdLkQ4twdtYZduaWQQL4MV3UqMNYSwX3UsCe3FBLIm7bcHgssptSWGnbklkIC+XPR7lBgKaS21Ohzb8D+B/UcuaWQgI1bK9zuCyyl1JbTd/McdnCHyC2FBOzcL2P1MrAcUltyyC2FBGzdBOXVswFyP/QhpdxSSMCW1J/dwCxIbWHLLfB8yYZ+Pu3Zs7B3u6KqG5yF5wJ0ocpt9lGXHi6FCGzeg+qpDGjR7rT/81Ns8cu3PxeLxQ8xCMKSEif2+OCP2ePTI9D8Cz2IO7GFftkqkM9cBoal7lTqs/+B7ceM0h5ZNhbYfsz56lDQFeySXS5sS302P7x4EfjS/9GUD+2pjWQK39V8kQzAbvfb8qHbDb/rvtO8YfHRmS0lMpy5FyD1n1dj6z5gs5a3SzK5sN39Km7I/ugOlbBNdLmwL7WUc8AbPnPBrRqJwb2MAW9QLuxL5UyJIlzj1rAL864xa9ilxqFr1RE7vITtcdfSU61iUIG0MvLQzr/MlljCwlOt2FCzUacOguWzN+dTrdhUIGek+h4Qq2dvjqdaMal9u5GcIOQ572GPLY582xHivoM99FiOHksXQgLhIOp9Fy2l2TQd+c23781rbUvfVr7pZZKlOfGdhKlBSv6ZJrYFYcGVdoVLmenDowSh34QIXazSdCX6S452fTlBtPf47Nt9U+hAJYrYlqZ7dhK6vZnf7Hz72CsjcyZRxbYg/MK7k7l71vFTu92dROadJEDHD98++JcfJYwpbw3talXoHymkZgH2pybZUC5fhpKkK94HbF4eMdn59mmyZ+gpYHvu+Rxq5J41sgLCLJD1vO8pdLJe98FqIWA+cLnjb4Uck/WXhj9IN7iM7llvCbySmWHA7vibLkc6VRC6ZyvZo3kcZYP84+8W8zgaj0bwyacxEqkwj6PpQKicrBCPahaaEfC76K+zUEM0gvVX9MMZMitM7EdRtrnimCD8yFn5di0hVaitlaaZlkcJKTRt32PmRXPxHwKDoGu5jyzSAAAAAElFTkSuQmCC" alt="PalmPay"></span><span class="pp-platform-title">PalmPay Design</span><span class="pp-platform-crumb">AI 项目库 / P10 AI 流失用户召回分析</span></a><div class="pp-platform-links"><a href="index.html">返回项目库</a><a href="16_项目九_AI功能渗透增长助手.html" title="上一个项目">← 上一个</a><a href="18_项目十一_AI客服问题产品化系统.html" title="下一个项目">下一个 →</a></div></div></nav>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P10</div>
+      <div>
+        <div class="brand-title">AI 流失用户召回分析</div>
+        <div class="brand-sub">识别为什么流失、哪些用户值得召回，以及应该采取什么行动</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeBtn">切换亮色</button>
+      <button class="btn" id="resetBtn">重置记录</button>
+      <button class="btn primary" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="dot"></span> Project 10 · AI Churn Analysis &amp; Win-back</div>
+          <h1>从“用户已经流失”，<br>升级为“提前识别风险、解释原因，并选择值得召回的人”。</h1>
+          <p>
+            企业通常能够看到用户停止登录或交易，却不知道这是暂时沉默、业务季节性下降，
+            还是由产品体验、审核风险、失败交易或价格变化造成的真实流失。
+            AI 流失用户召回分析将登录、交易、功能、失败、客服、费率、审核和余额等信号统一分析，
+            对用户进行风险分类，并生成差异化召回动作、对应产品问题与设计优化机会。
+          </p>
+
+          <div class="hero-summary">
+            <div class="summary-chip"><small>现状</small><strong>知道用户流失，但原因、价值与召回优先级不清楚</strong></div>
+            <div class="summary-chip"><small>升级</small><strong>多信号风险识别 + 用户分类 + 原因验证 + 差异化召回</strong></div>
+            <div class="summary-chip"><small>结果</small><strong>提高召回与交易恢复，并把流失转化为产品改进机会</strong></div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div>
+            <div class="hero-side-title">系统需要持续回答四个问题</div>
+            <div class="outcome-stack">
+              <div class="outcome-card"><strong>哪些用户正在进入流失风险</strong><span>在完全停止使用之前识别行为和业务变化。</span></div>
+              <div class="outcome-card"><strong>用户为什么不再使用</strong><span>区分体验、风险、价格、季节性与真实业务变化。</span></div>
+              <div class="outcome-card"><strong>哪些用户值得优先召回</strong><span>综合客户价值、召回概率、问题可解决性和成本。</span></div>
+              <div class="outcome-card"><strong>应该采取什么行动</strong><span>匹配产品修复、运营触达、销售跟进或暂不打扰。</span></div>
+            </div>
+          </div>
+          <div class="hero-note">召回不是给所有沉默用户发送同一条消息，而是识别真正原因，并解决导致离开的具体问题。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">01 · MANAGEMENT SUMMARY</div>
+          <h2>为什么传统流失名单无法指导有效召回</h2>
+        </div>
+        <div class="section-desc">仅根据“多少天未登录”定义流失，会把季节性用户、暂时沉默用户和真实体验问题用户混在一起，造成错误触达和资源浪费。</div>
+      </div>
+
+      <div class="exec-summary">
+        <div class="signal-board">
+          <div class="signal"><div class="signal-label">流失定义</div><div class="signal-value">过于单一</div><div class="signal-desc">只看最后登录或交易时间，无法识别流失类型。</div></div>
+          <div class="signal"><div class="signal-label">原因判断</div><div class="signal-value">缺少证据</div><div class="signal-desc">团队知道活跃下降，却不知道由什么问题造成。</div></div>
+          <div class="signal"><div class="signal-label">召回对象</div><div class="signal-value">没有排序</div><div class="signal-desc">高价值、低价值与不可召回用户混在同一名单中。</div></div>
+          <div class="signal"><div class="signal-label">产品闭环</div><div class="signal-value">容易缺失</div><div class="signal-desc">召回失败原因没有反向进入产品和体验优化。</div></div>
+        </div>
+
+        <div class="summary-story">
+          <div>
+            <small>WIN-BACK STRATEGY</small>
+            <h3>从“批量触达沉默用户”，升级为“理解原因后进行差异化召回”。</h3>
+            <p>系统先识别风险，再区分流失类型、判断客户价值和召回概率，最后决定产品修复、服务恢复或商业触达。</p>
+          </div>
+          <div class="formula">流失风险 × 流失原因 × 客户价值 × 可解决性 = 召回优先级</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">02 · ANALYSIS SIGNALS</div>
+          <h2>AI 分析的八类关键信号</h2>
+        </div>
+        <div class="section-desc">需要把使用下降、业务变化、问题信号和账户状态结合起来，避免将正常波动误判为流失。</div>
+      </div>
+
+      <div class="input-grid">
+        <article class="input-card"><small>LOGIN</small><strong>最近登录时间</strong><p>登录间隔、访问频率、最近一次会话和角色变化。</p><div class="tagline">识别活跃度下降</div></article>
+        <article class="input-card"><small>TRANSACTION</small><strong>交易下降趋势</strong><p>交易笔数、金额、成功率、币种与对手方变化。</p><div class="tagline">识别业务使用减弱</div></article>
+        <article class="input-card"><small>FEATURE</small><strong>功能使用变化</strong><p>核心功能停止使用、使用深度下降和关键任务中断。</p><div class="tagline">识别价值感下降</div></article>
+        <article class="input-card"><small>FAILURE</small><strong>失败交易</strong><p>连续失败、错误码、重复重试、恢复失败和资金阻塞。</p><div class="tagline">识别体验与系统障碍</div></article>
+        <article class="input-card"><small>SERVICE</small><strong>客服问题</strong><p>投诉、重复咨询、升级工单、未解决问题和负面情绪。</p><div class="tagline">识别未解决痛点</div></article>
+        <article class="input-card"><small>PRICING</small><strong>费率变化</strong><p>价格调整、汇率差异、费用敏感反馈和竞品比较。</p><div class="tagline">识别价格敏感流失</div></article>
+        <article class="input-card"><small>REVIEW</small><strong>审核状态</strong><p>认证驳回、补件等待、风险限制和账户功能受限。</p><div class="tagline">识别合规与风险阻塞</div></article>
+        <article class="input-card"><small>BALANCE</small><strong>账户余额</strong><p>余额清空、长期闲置、资金转出和账户关闭倾向。</p><div class="tagline">识别退出与资金迁移</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">03 · ANALYSIS PIPELINE</div>
+          <h2>从风险信号到召回行动的分析链路</h2>
+        </div>
+        <div class="section-desc">AI 负责全量扫描、聚类与评分，运营、销售、客服和设计共同验证原因与行动。</div>
+      </div>
+
+      <div class="pipeline">
+        <div class="pipeline-grid">
+          <div class="pipe-step"><small>01</small><strong>识别活跃异常</strong><p>发现登录、交易、功能和余额的异常下降趋势。</p><span class="pipe-badge">风险预警</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>02</small><strong>验证是否真实流失</strong><p>排除季节性、短期沉默、业务暂停和正常波动。</p><span class="pipe-badge">减少误判</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>03</small><strong>用户类型分类</strong><p>区分即将流失、暂时沉默、季节性和问题型流失。</p><span class="pipe-badge">用户分群</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>04</small><strong>流失原因归类</strong><p>关联失败、客服、费率、审核、产品与业务变化。</p><span class="pipe-badge">原因诊断</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>05</small><strong>计算召回优先级</strong><p>综合客户价值、召回概率、问题可解决性和成本。</p><span class="pipe-badge">资源排序</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>06</small><strong>匹配召回动作</strong><p>选择产品修复、服务恢复、运营提醒或销售跟进。</p><span class="pipe-badge">差异化行动</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>07</small><strong>复盘恢复结果</strong><p>观察登录、任务、交易、留存和再次流失情况。</p><span class="pipe-badge">持续学习</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">04 · USER SEGMENTS</div>
+          <h2>六类流失与沉默用户</h2>
+        </div>
+        <div class="section-desc">用户分类决定是否召回、何时召回、由谁触达，以及应该解决什么问题。</div>
+      </div>
+
+      <div class="segment-grid">
+        <article class="segment-card">
+          <small>01 · HIGH RISK</small><strong>即将流失</strong>
+          <p>交易和关键功能持续下降，但仍保留部分活跃与可恢复行为。</p>
+          <div class="segment-list"><span>优先级：最高</span><span>行动：尽快识别阻塞并主动解决</span><span>窗口：完全沉默前 7—14 天</span></div>
+        </article>
+        <article class="segment-card">
+          <small>02 · DORMANT</small><strong>暂时沉默</strong>
+          <p>短期未登录或未交易，但没有明显投诉、失败和资金迁移。</p>
+          <div class="segment-list"><span>优先级：中</span><span>行动：低打扰提醒与场景触发</span><span>避免：过度销售触达</span></div>
+        </article>
+        <article class="segment-card">
+          <small>03 · SEASONAL</small><strong>业务季节性下降</strong>
+          <p>历史上存在相似周期波动，业务淡旺季和节假日特征明显。</p>
+          <div class="segment-list"><span>优先级：低至中</span><span>行动：在业务恢复前提供准备建议</span><span>避免：误判为真实流失</span></div>
+        </article>
+        <article class="segment-card">
+          <small>04 · EXPERIENCE</small><strong>产品体验问题导致流失</strong>
+          <p>出现关键任务失败、重复错误、长时间处理或功能无法完成。</p>
+          <div class="segment-list"><span>优先级：高</span><span>行动：修复问题并提供恢复路径</span><span>价值：反向推动产品优化</span></div>
+        </article>
+        <article class="segment-card">
+          <small>05 · RISK / REVIEW</small><strong>风险或审核问题导致流失</strong>
+          <p>认证、风控、合规补件或账户限制长期未解决。</p>
+          <div class="segment-list"><span>优先级：按风险判断</span><span>行动：解释状态、缩短等待或人工介入</span><span>限制：不可承诺绕过规则</span></div>
+        </article>
+        <article class="segment-card">
+          <small>06 · PRICE SENSITIVE</small><strong>价格敏感用户</strong>
+          <p>在费率、汇率或收费变化后明显减少交易或迁移资金。</p>
+          <div class="segment-list"><span>优先级：按客户价值</span><span>行动：价值解释、方案优化或商业跟进</span><span>避免：无依据的统一优惠</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">05 · RISK SCORING</div>
+          <h2>流失风险与召回优先级如何判断</h2>
+        </div>
+        <div class="section-desc">风险分数不是最终结论，需要结合流失类型、客户价值、原因证据与可解决性共同判断。</div>
+      </div>
+
+      <div class="risk-shell">
+        <div class="risk-panel">
+          <h3>流失风险名单示例</h3>
+          <div class="risk-list">
+            <div class="risk-row"><div class="risk-copy"><strong>商户 A · 高价值企业</strong><span>交易下降 68% · 连续失败 4 次 · 客服问题未关闭</span></div><div class="risk-score"><b>92</b><span>优先召回</span></div></div>
+            <div class="risk-row"><div class="risk-copy"><strong>商户 B · 中型企业</strong><span>审核补件等待 18 天 · 余额未使用 · 登录下降</span></div><div class="risk-score"><b>86</b><span>人工介入</span></div></div>
+            <div class="risk-row"><div class="risk-copy"><strong>商户 C · 活跃商户</strong><span>费率调整后交易迁移 · 多次查看费用说明</span></div><div class="risk-score"><b>78</b><span>商业跟进</span></div></div>
+            <div class="risk-row"><div class="risk-copy"><strong>商户 D · 季节性业务</strong><span>历史同期均下降 · 无投诉与失败 · 预计下月恢复</span></div><div class="risk-score"><b>41</b><span>观察提醒</span></div></div>
+            <div class="risk-row"><div class="risk-copy"><strong>商户 E · 低活跃用户</strong><span>长期无交易 · 无余额 · 未完成认证 · 无明确意图</span></div><div class="risk-score"><b>24</b><span>低优先级</span></div></div>
+          </div>
+        </div>
+
+        <div class="risk-side">
+          <div>
+            <small>PRIORITY MODEL</small>
+            <h3>高风险不一定等于高召回优先级。</h3>
+            <p>召回优先级还需要考虑客户价值、原因是否可解决、召回窗口、触达成本和风险限制。</p>
+            <div class="risk-factors">
+              <span>流失风险：未来 7—30 天停止使用的可能性</span>
+              <span>客户价值：历史收入、交易量、潜力与战略价值</span>
+              <span>召回概率：相似用户恢复使用的历史概率</span>
+              <span>可解决性：问题能否通过产品、服务或商业动作解决</span>
+            </div>
+          </div>
+          <div class="note">建议把高价值、问题明确、可快速解决且仍处于召回窗口的用户排在最前面。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">06 · CHURN REASONS</div>
+          <h2>流失原因分类与证据</h2>
+        </div>
+        <div class="section-desc">系统不应只给出一个原因标签，而要展示支持证据、冲突信号、置信度和待人工确认内容。</div>
+      </div>
+
+      <div class="reason-grid">
+        <article class="reason-card">
+          <small>PRODUCT EXPERIENCE</small><strong>产品体验问题</strong>
+          <p>关键流程失败、复杂度过高、处理时间过长或缺少恢复路径。</p>
+          <div class="reason-evidence"><span>证据：失败交易、退出路径、重复操作</span><span>证据：客服投诉与负面反馈</span><span>验证：查看会话与错误日志</span></div>
+          <div class="reason-output">对应机会：流程优化、错误恢复、状态透明</div>
+        </article>
+        <article class="reason-card">
+          <small>RISK &amp; COMPLIANCE</small><strong>审核或风险阻塞</strong>
+          <p>账户限制、认证驳回、材料补充与审核等待影响业务连续性。</p>
+          <div class="reason-evidence"><span>证据：审核状态与等待时长</span><span>证据：补件次数与重复咨询</span><span>验证：人工审核和规则命中</span></div>
+          <div class="reason-output">对应机会：状态解释、材料预检、人工升级</div>
+        </article>
+        <article class="reason-card">
+          <small>PRICE &amp; VALUE</small><strong>费率或价值感问题</strong>
+          <p>用户认为费用、汇率、服务价值或替代方案不具竞争力。</p>
+          <div class="reason-evidence"><span>证据：费率变化后的交易下降</span><span>证据：竞品比较与销售反馈</span><span>验证：价格敏感用户分群</span></div>
+          <div class="reason-output">对应机会：费用解释、方案优化、价值证明</div>
+        </article>
+        <article class="reason-card">
+          <small>SERVICE</small><strong>服务问题</strong>
+          <p>客服响应、问题解决、跨团队处理或异常恢复未达到预期。</p>
+          <div class="reason-evidence"><span>证据：未解决工单与升级次数</span><span>证据：首次解决率和处理时长</span><span>验证：用户回访与工单质检</span></div>
+          <div class="reason-output">对应机会：服务流程、主动通知、责任闭环</div>
+        </article>
+        <article class="reason-card">
+          <small>BUSINESS CHANGE</small><strong>业务变化</strong>
+          <p>用户业务暂停、季节性下降、市场退出或需求自然减少。</p>
+          <div class="reason-evidence"><span>证据：历史周期与行业趋势</span><span>证据：交易对手与币种变化</span><span>验证：销售或运营人工确认</span></div>
+          <div class="reason-output">对应机会：低打扰维护与恢复时机预测</div>
+        </article>
+        <article class="reason-card">
+          <small>COMPETITIVE SHIFT</small><strong>替代产品迁移</strong>
+          <p>用户因能力、覆盖、成本或服务差异将业务迁移至其他平台。</p>
+          <div class="reason-evidence"><span>证据：余额转出与交易突然归零</span><span>证据：竞品功能与价格咨询</span><span>验证：销售访谈与流失回访</span></div>
+          <div class="reason-output">对应机会：竞争差距与产品路线输入</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">07 · WIN-BACK ACTIONS</div>
+          <h2>不同流失原因对应不同召回动作</h2>
+        </div>
+        <div class="section-desc">召回动作需要解决真实问题。无法解决根因时，频繁触达只会进一步降低信任。</div>
+      </div>
+
+      <div class="action-map">
+        <div class="action-panel">
+          <h3>原因—动作—责任人映射</h3>
+          <div class="action-table">
+            <div class="action-head"><span>流失原因</span><span>推荐召回动作</span><span>主要责任人</span></div>
+            <div class="action-row"><strong>关键流程失败</strong><span>恢复任务状态、提供失败解释和人工协助入口</span><div class="action-result">产品 + 设计 + 客服</div></div>
+            <div class="action-row"><strong>审核或账户限制</strong><span>说明状态、缺失材料、预计时间与升级路径</span><div class="action-result">风控 + 运营 + 客服</div></div>
+            <div class="action-row"><strong>费率或价值敏感</strong><span>解释费用结构、提供适配方案或销售跟进</span><div class="action-result">商业 + 销售</div></div>
+            <div class="action-row"><strong>服务问题未解决</strong><span>重新打开问题、指定负责人并主动同步进展</span><div class="action-result">客服 + 运营</div></div>
+            <div class="action-row"><strong>季节性下降</strong><span>在预测恢复期前发送准备建议与业务提醒</span><div class="action-result">运营自动化</div></div>
+            <div class="action-row"><strong>功能不满足需求</strong><span>推荐替代工作流、收集缺口并进入产品机会池</span><div class="action-result">产品 + 设计</div></div>
+            <div class="action-row"><strong>高价值用户迁移</strong><span>由客户成功或销售进行原因访谈与定制恢复方案</span><div class="action-result">客户成功 + 销售</div></div>
+          </div>
+        </div>
+
+        <div class="action-side">
+          <div>
+            <small>WIN-BACK PRINCIPLE</small>
+            <h3>召回动作必须与原因匹配，并明确停止条件。</h3>
+            <p>用户明确拒绝、问题暂时不可解决或触达没有产生有效反馈时，应暂停自动召回，避免形成骚扰。</p>
+          </div>
+          <div class="note">对于资金、合规与高风险问题，召回文案不得承诺绕过审核或保证交易结果。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">08 · PRODUCT &amp; DESIGN OPPORTUNITIES</div>
+          <h2>把流失分析转化为产品与设计机会</h2>
+        </div>
+        <div class="section-desc">召回不是项目终点。高频流失原因应反向进入产品路线、体验治理与质量门禁。</div>
+      </div>
+
+      <div class="opportunity-grid">
+        <div class="opportunity-panel">
+          <h3>对应产品问题</h3>
+          <div class="opportunity-list">
+            <div class="opportunity-item"><div class="op-no">1</div><div><strong>核心任务长期失败</strong><span>交易、认证、付款或资金处理存在稳定失败模式。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">2</div><div><strong>状态与规则不透明</strong><span>用户不知道为什么受限、下一步做什么、需要等待多久。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">3</div><div><strong>恢复路径缺失</strong><span>失败后无法继续、已完成内容丢失或需要重复操作。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">4</div><div><strong>价值与费用解释不足</strong><span>用户难以理解费用、汇率、服务差异和实际价值。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">5</div><div><strong>服务闭环不完整</strong><span>工单、审核、运营和产品之间缺少统一责任与进度反馈。</span></div></div>
+          </div>
+        </div>
+
+        <div class="opportunity-panel">
+          <h3>设计优化机会</h3>
+          <div class="opportunity-list">
+            <div class="opportunity-item"><div class="op-no">1</div><div><strong>建立风险用户关键旅程地图</strong><span>标记行为变化、失败点、情绪和召回窗口。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">2</div><div><strong>优化失败解释与恢复体验</strong><span>提供原因、影响、下一步和已完成内容保留。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">3</div><div><strong>设计差异化召回触点</strong><span>产品内、邮件、客服、销售与运营采用不同策略。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">4</div><div><strong>建立召回实验与防护指标</strong><span>避免短期登录恢复却带来投诉、退订或再次流失。</span></div></div>
+            <div class="opportunity-item"><div class="op-no">5</div><div><strong>将高频原因纳入质量门禁</strong><span>新方案上线前检查是否重复制造历史流失问题。</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">09 · TWO-WEEK MVP</div>
+          <h2>两周 MVP：先分析 100—500 个流失商户样本</h2>
+        </div>
+        <div class="section-desc">先验证分类与原因识别是否可信，再决定是否建设自动化风险模型和大规模召回系统。</div>
+      </div>
+
+      <div class="mvp-grid">
+        <article class="week-card">
+          <small>WEEK 01</small>
+          <h3>样本准备与 AI 初步分类</h3>
+          <p>由数据团队导出真实样本，统一关键字段并完成第一轮用户分类和原因聚类。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>定义流失样本规则</strong><span>按业务周期定义登录、交易和功能下降阈值。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>导出 100—500 个商户样本</strong><span>包含行为、交易、失败、客服、费率、审核和余额。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>补充客户价值信息</strong><span>历史收入、交易量、行业、规模和战略价值。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>AI 分类与原因聚类</strong><span>输出用户类型、风险等级、疑似原因和证据。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>形成初版召回优先级</strong><span>综合价值、概率、可解决性与时间窗口排序。</span></div></div>
+          </div>
+        </article>
+
+        <article class="week-card primary">
+          <small>WEEK 02</small>
+          <h3>人工验证与召回试验</h3>
+          <p>运营和销售人工确认分类准确性，并选择小样本开展差异化召回。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>运营与销售人工验证</strong><span>核对真实业务变化、迁移原因和客户关系。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>确认流失原因分类</strong><span>记录正确、错误、不确定和多原因情况。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>选择 2—3 类召回动作</strong><span>产品恢复、服务修复、运营提醒或销售跟进。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>观察召回与交易恢复</strong><span>记录登录、任务完成、交易恢复和再次沉默。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>输出产品与设计机会</strong><span>形成高频流失原因、对应问题和下一阶段路线。</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">10 · DELIVERABLES</div>
+          <h2>项目五项核心产出</h2>
+        </div>
+        <div class="section-desc">每项产出需要同时支持客户召回、产品修复、运营协同和后续模型验证。</div>
+      </div>
+
+      <div class="deliverable-grid">
+        <article class="deliverable-card"><small>RISK LIST</small><strong>流失风险名单</strong><p>包含风险等级、客户价值、召回窗口和优先级。</p><div class="bar"><span style="width:94%"></span></div></article>
+        <article class="deliverable-card"><small>REASON</small><strong>流失原因分类</strong><p>展示原因、证据、置信度、冲突信号与验证状态。</p><div class="bar"><span style="width:90%"></span></div></article>
+        <article class="deliverable-card"><small>ACTION</small><strong>推荐召回动作</strong><p>按用户类型和原因匹配触达方式、责任人和停止条件。</p><div class="bar"><span style="width:88%"></span></div></article>
+        <article class="deliverable-card"><small>PRODUCT ISSUE</small><strong>对应产品问题</strong><p>将高频流失原因映射为流程、功能、服务和规则问题。</p><div class="bar"><span style="width:86%"></span></div></article>
+        <article class="deliverable-card"><small>DESIGN OPPORTUNITY</small><strong>设计优化机会</strong><p>形成关键旅程、失败恢复、状态解释与召回体验机会池。</p><div class="bar"><span style="width:84%"></span></div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">11 · KEY METRICS</div>
+          <h2>四个关键指标</h2>
+        </div>
+        <div class="section-desc">既要衡量召回结果，也要衡量原因识别的准确性和召回后的持续恢复。</div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric-card"><small>01</small><strong>用户召回率</strong><p>被触达用户在观察周期内恢复有效使用的比例。</p><div class="formula">恢复使用用户 ÷ 召回目标用户</div></article>
+        <article class="metric-card"><small>02</small><strong>召回后交易恢复率</strong><p>召回用户重新产生有效交易的比例。</p><div class="formula">恢复交易用户 ÷ 成功召回用户</div></article>
+        <article class="metric-card"><small>03</small><strong>商户留存率</strong><p>召回成功后在 30、60 或 90 天持续活跃的比例。</p><div class="formula">持续活跃商户 ÷ 成功召回商户</div></article>
+        <article class="metric-card"><small>04</small><strong>流失原因识别率</strong><p>经人工验证后能够正确识别主要流失原因的比例。</p><div class="formula">正确分类样本 ÷ 已验证样本</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">12 · KPI SCORECARD</div>
+          <h2>可编辑的流失与召回指标看板</h2>
+        </div>
+        <div class="section-desc">示例值可直接修改，页面会自动保存到当前浏览器并计算目标完成度。</div>
+      </div>
+
+      <div class="score-shell">
+        <div class="score-toolbar">
+          <div class="score-summary"><div class="score-number" id="overallScore">0%</div><div class="score-label">整体目标完成度</div></div>
+          <div style="font-size:12px;color:var(--muted)">建议按用户类型、原因与召回动作分别观察效果。</div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="scoreTable">
+            <thead>
+              <tr><th>维度</th><th>指标</th><th>方向</th><th>当前值</th><th>目标值</th><th>单位</th><th>负责人</th><th>完成度</th><th>状态</th></tr>
+            </thead>
+            <tbody>
+              <tr data-direction="up" data-default-current="12" data-default-target="28">
+                <td><span class="tag">北极星</span></td>
+                <td><span class="metric-name">用户召回率</span><span class="metric-help">召回目标用户在观察周期内恢复有效使用的比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="用户运营负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="38" data-default-target="60">
+                <td><span class="tag">交易</span></td>
+                <td><span class="metric-name">召回后交易恢复率</span><span class="metric-help">成功召回用户重新产生有效交易的比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="增长与销售"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="52" data-default-target="72">
+                <td><span class="tag">留存</span></td>
+                <td><span class="metric-name">召回商户 30 日留存率</span><span class="metric-help">成功召回商户在 30 天后仍保持有效活跃的比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="客户成功负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="61" data-default-target="82">
+                <td><span class="tag">识别</span></td>
+                <td><span class="metric-name">流失原因识别率</span><span class="metric-help">经人工验证后正确识别主要流失原因的比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="AI 分析负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="46" data-default-target="75">
+                <td><span class="tag">验证</span></td>
+                <td><span class="metric-name">人工验证覆盖率</span><span class="metric-help">已由运营、销售或客服确认真实原因的样本比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="运营与销售"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="27" data-default-target="15">
+                <td><span class="tag">防护</span></td>
+                <td><span class="metric-name">召回后再次流失率</span><span class="metric-help">成功召回用户在短期内再次停止使用的比例</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="客户成功负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">13 · EXECUTION BOARD</div>
+          <h2>项目实施记录</h2>
+        </div>
+        <div class="section-desc">用于记录样本规则、用户分类、流失原因、召回动作和实验结果，内容只保存在当前浏览器。</div>
+      </div>
+
+      <div class="action-grid">
+        <div class="panel">
+          <h3 style="margin:0 0 18px;font-size:23px">两周 MVP 检查清单</h3>
+          <div class="checklist" id="checklist">
+            <label class="check-row"><input type="checkbox"><span><strong>定义流失与风险用户口径</strong><span>结合登录、交易、功能和业务周期，避免只按未登录天数判断。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>导出 100—500 个真实商户样本</strong><span>包含交易、失败、客服、费率、审核、余额与客户价值。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成 AI 分类与原因聚类</strong><span>输出用户类型、风险等级、疑似原因、证据和置信度。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成运营与销售人工验证</strong><span>确认真实业务变化、流失原因和客户关系状态。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>选择差异化召回动作</strong><span>产品修复、服务恢复、运营提醒、销售跟进或暂不触达。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成召回结果与产品机会复盘</strong><span>记录恢复、交易、留存、再次流失和高频体验问题。</span></span></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin:0 0 8px;font-size:23px">试点说明</h3>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:12px">建议记录样本、流失类型、原因、召回动作、指标和两周结论。</p>
+          <textarea id="notes" placeholder="流失样本规则：
+样本数量：
+重点用户类型：
+主要流失原因：
+支持证据：
+人工验证结果：
+
+优先召回用户：
+推荐召回动作：
+对应责任人：
+产品问题：
+设计优化机会：
+
+实验主指标：
+防护指标：
+两周 MVP 结论："></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AI 体验设计项目 · Project 10</span>
+    <span>召回目标：风险更早识别、原因更可信、行动更匹配、恢复更可持续。</span>
+  </footer>
+</div>
+
+<script>
+  const DATA_KEY="project10_ai_churn_winback_v1";
+  const THEME_KEY="project10_ai_churn_winback_theme_v1";
+  const rows=[...document.querySelectorAll("#scoreTable tbody tr")];
+  const checks=[...document.querySelectorAll("#checklist input")];
+  const notes=document.getElementById("notes");
+  const themeBtn=document.getElementById("themeBtn");
+
+  function setTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    themeBtn.textContent=theme==="light"?"切换暗黑":"切换亮色";
+    localStorage.setItem(THEME_KEY,theme);
+  }
+  function calcProgress(current,target,direction){
+    if(!isFinite(current)||!isFinite(target)||target===0)return 0;
+    if(direction==="up")return Math.max(0,Math.min(130,current/target*100));
+    if(current<=0)return 130;
+    return Math.max(0,Math.min(130,target/current*100));
+  }
+  function statusFor(progress){
+    return progress>=100?["已达成","good"]:progress>=75?["接近目标","warn"]:["需关注","risk"];
+  }
+  function updateScore(save=true){
+    let total=0;
+    rows.forEach(row=>{
+      const current=parseFloat(row.querySelector(".current").value);
+      const target=parseFloat(row.querySelector(".target").value);
+      const p=calcProgress(current,target,row.dataset.direction);
+      const normalized=Math.min(100,p);
+      total+=normalized;
+      row.querySelector(".progress>span").style.width=normalized+"%";
+      row.querySelector(".progress-text").textContent=Math.round(p)+"%";
+      const [label,cls]=statusFor(p);
+      const status=row.querySelector(".status");
+      status.textContent=label;
+      status.className="status "+cls;
+    });
+    document.getElementById("overallScore").textContent=Math.round(total/rows.length)+"%";
+    if(save)saveData();
+  }
+  function saveData(){
+    localStorage.setItem(DATA_KEY,JSON.stringify({
+      rows:rows.map(row=>({
+        current:row.querySelector(".current").value,
+        target:row.querySelector(".target").value,
+        owner:row.querySelector(".owner").value
+      })),
+      checks:checks.map(c=>c.checked),
+      notes:notes.value
+    }));
+  }
+  function loadData(){
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){}
+    rows.forEach((row,i)=>{
+      const data=saved.rows?.[i];
+      row.querySelector(".current").value=data?.current??row.dataset.defaultCurrent;
+      row.querySelector(".target").value=data?.target??row.dataset.defaultTarget;
+      if(data?.owner)row.querySelector(".owner").value=data.owner;
+    });
+    checks.forEach((c,i)=>c.checked=Boolean(saved.checks?.[i]));
+    notes.value=saved.notes||"";
+    updateScore(false);
+  }
+
+  document.querySelectorAll("#scoreTable input").forEach(el=>el.addEventListener("input",()=>updateScore(true)));
+  checks.forEach(c=>c.addEventListener("change",saveData));
+  notes.addEventListener("input",saveData);
+  themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+  document.getElementById("resetBtn").addEventListener("click",()=>{
+    if(confirm("确认清空本页面的指标与实施记录吗？")){
+      localStorage.removeItem(DATA_KEY);
+      loadData();
+    }
+  });
+
+  setTheme(localStorage.getItem(THEME_KEY)||"dark");
+  loadData();
+</script>
+<script id="pp-theme-sync">(function(){try{var t=localStorage.getItem('ppux-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);var o=new MutationObserver(function(){var v=document.documentElement.getAttribute('data-theme')||'dark';localStorage.setItem('ppux-theme',v)});o.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();</script></body>
+</html>

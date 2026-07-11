@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>AI 页面状态生成器｜项目十九</title>
+  <style>
+    :root{
+      --bg:#080808;--panel:#111;--panel-2:#171717;--panel-3:#202020;
+      --text:#f5f5f5;--muted:#9c9c9c;--line:#2b2b2b;--strong:#fff;
+      --soft:#242424;--good:#dff7df;--warn:#fff0bc;--risk:#ffd9d9;
+      --shadow:0 28px 90px rgba(0,0,0,.34);--radius:24px;
+    }
+    [data-theme="light"]{
+      --bg:#f4f4f1;--panel:#fff;--panel-2:#f8f8f5;--panel-3:#ecece8;
+      --text:#151515;--muted:#6b6b67;--line:#deded8;--strong:#111;
+      --soft:#ecece7;--good:#e8f7e6;--warn:#fff3c7;--risk:#ffe5e5;
+      --shadow:0 28px 90px rgba(40,40,20,.11);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.065),transparent 30%),var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.55;
+    }
+    button,input,textarea{font:inherit}
+    .shell{max-width:1460px;margin:auto;padding:22px}
+    .topbar{
+      position:sticky;top:14px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px 12px 18px;border:1px solid var(--line);border-radius:18px;
+      background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--strong);color:var(--bg);font-weight:900;font-size:12px}
+    .brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:8px 12px;cursor:pointer;transition:.2s ease;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .btn.primary{background:var(--strong);color:var(--bg);border-color:var(--strong);font-weight:760}
+
+    .hero{margin-top:26px;border:1px solid var(--line);border-radius:30px;overflow:hidden;background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:var(--shadow)}
+    .hero-grid{display:grid;grid-template-columns:1.35fr .65fr;min-height:610px}
+    .hero-copy{padding:68px 58px 48px}
+    .eyebrow{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:850}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--strong)}
+    h1{margin:22px 0 20px;font-size:clamp(46px,6.2vw,86px);line-height:.98;letter-spacing:-.065em;max-width:1100px}
+    .hero-copy>p{font-size:18px;color:var(--muted);max-width:910px;margin:0}
+    .hero-summary{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .summary-chip{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+    .summary-chip small{display:block;color:var(--muted);font-weight:800;margin-bottom:6px}
+    .summary-chip strong{font-size:16px;line-height:1.35;display:block}
+    .hero-side{
+      border-left:1px solid var(--line);padding:34px 28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+      repeating-linear-gradient(90deg,transparent 0 49px,var(--line) 50px),
+      repeating-linear-gradient(0deg,transparent 0 49px,var(--line) 50px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .hero-side-title{font-size:12px;color:var(--muted);letter-spacing:.13em;font-weight:850}
+    .outcome-stack{display:grid;gap:12px;margin-top:18px}
+    .outcome-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:color-mix(in srgb,var(--panel) 88%,transparent)}
+    .outcome-card strong{display:block;font-size:14px;margin-bottom:4px}
+    .outcome-card span{font-size:12px;color:var(--muted)}
+    .hero-note{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+
+    .section{margin-top:58px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:20px}
+    .section-kicker{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:850}
+    h2{font-size:clamp(30px,3.4vw,50px);line-height:1.04;letter-spacing:-.045em;margin:6px 0 0}
+    .section-desc{max-width:720px;color:var(--muted);font-size:14px}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px}
+
+    .exec-summary{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .signal-board{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .signal{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .signal-label{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.08em}
+    .signal-value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:12px 0 6px}
+    .signal-desc{font-size:12px;color:var(--muted)}
+    .summary-story{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+    .summary-story small{font-size:11px;letter-spacing:.12em;font-weight:850;opacity:.55}
+    .summary-story h3{font-size:30px;line-height:1.05;letter-spacing:-.045em;margin:18px 0 14px}
+    .summary-story p{margin:0;font-size:14px;opacity:.68}
+    .summary-story .formula{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:13px;font-weight:760}
+
+    .state-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .state-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:20px;min-height:210px}
+    .state-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .state-card strong{display:block;font-size:19px;margin:18px 0 7px}
+    .state-card p{font-size:12px;color:var(--muted);margin:0}
+    .state-meta{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .pipeline{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:clamp(16px,1.55vw,26px);overflow-x:auto;overflow-y:hidden;scrollbar-gutter:stable}
+    .pipeline-grid{
+      display:grid;
+      grid-template-columns:minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr);
+      gap:6px;min-width:1150px;align-items:stretch;
+    }
+    .pipe-step{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--panel-2);padding:18px;min-height:190px}
+    .pipe-step small{display:block;color:var(--muted);font-size:11px;font-weight:850}
+    .pipe-step strong{display:block;font-size:15px;line-height:1.42;margin:12px 0 8px;text-wrap:balance}
+    .pipe-step p{font-size:11px;line-height:1.68;color:var(--muted);margin:0}
+    .pipe-badge{margin-top:14px;display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800}
+    .pipe-link{display:grid;place-items:center;color:var(--muted);font-size:21px}
+
+    .matrix-wrap{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .matrix-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .matrix-head strong{font-size:20px}.matrix-head span{font-size:12px;color:var(--muted)}
+    .matrix-scroll{overflow:auto}
+    .matrix{min-width:1180px;width:100%;border-collapse:collapse}
+    .matrix th,.matrix td{padding:14px 13px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);text-align:left;vertical-align:top}
+    .matrix th{font-size:11px;color:var(--muted);letter-spacing:.08em;background:var(--panel-2)}
+    .matrix td{font-size:12px}
+    .matrix th:first-child,.matrix td:first-child{min-width:180px;position:sticky;left:0;background:var(--panel);z-index:2}
+    .matrix th:first-child{background:var(--panel-2)}
+    .matrix-tag{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800;white-space:nowrap}
+    .matrix-cell strong{display:block;font-size:12px;margin-bottom:5px}
+    .matrix-cell span{font-size:10px;color:var(--muted)}
+
+    .preview-shell{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}
+    .preview-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .preview-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .app-frame{border:1px solid var(--line);border-radius:24px;background:var(--bg);padding:20px}
+    .app-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .app-head strong{font-size:14px}.app-head span{font-size:11px;color:var(--muted)}
+    .state-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .summary-box{border:1px solid var(--line);border-radius:13px;background:var(--panel-2);padding:12px}
+    .summary-box small{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}
+    .summary-box strong{font-size:18px}
+    .state-item{border:1px solid var(--line);border-radius:17px;background:var(--panel-2);padding:15px;margin-bottom:10px}
+    .state-item-top{display:flex;align-items:start;justify-content:space-between;gap:12px}
+    .state-copy small{display:block;font-size:9px;color:var(--muted);margin-bottom:5px}
+    .state-copy strong{display:block;font-size:13px}
+    .state-copy p{font-size:10px;color:var(--muted);margin:5px 0 0}
+    .state-risk{font-size:9px;padding:5px 7px;border-radius:999px;font-weight:800;white-space:nowrap}
+    .state-risk.high{background:var(--risk);color:#421a1a}.state-risk.medium{background:var(--warn);color:#3d3210}.state-risk.good{background:var(--good);color:#173617}
+    .state-detail{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
+    .state-detail div small{display:block;font-size:8px;color:var(--muted);margin-bottom:3px}.state-detail div strong{font-size:10px}
+    .cta-row{display:flex;gap:9px;margin-top:14px}
+    .cta{flex:1;border-radius:11px;padding:11px 13px;text-align:center;font-size:12px;font-weight:800}
+    .cta.primary{background:var(--strong);color:var(--bg)}.cta.secondary{border:1px solid var(--line)}
+    .anatomy-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .anatomy-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .anatomy-list{display:grid;gap:10px}
+    .anatomy-item{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px;display:grid;grid-template-columns:34px 1fr;gap:11px}
+    .anatomy-no{width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:10px;font-weight:850}
+    .anatomy-item strong{display:block;font-size:13px}.anatomy-item span{font-size:11px;color:var(--muted)}
+
+    .rule-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .rule-card{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:22px;min-height:245px}
+    .rule-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .rule-card strong{display:block;font-size:20px;margin:22px 0 8px}
+    .rule-card p{font-size:12px;color:var(--muted);margin:0}
+    .rule-list{display:grid;gap:8px;margin-top:16px}
+    .rule-list span{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:9px 10px;font-size:11px}
+
+    .boundary-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}
+    .boundary-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;overflow:auto}
+    .boundary-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .boundary-table{min-width:860px;display:grid;gap:9px}
+    .boundary-head,.boundary-row{display:grid;grid-template-columns:1.1fr 1.2fr 1fr;gap:12px;align-items:center}
+    .boundary-head{padding:0 14px 9px;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.08em}
+    .boundary-row{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px}
+    .boundary-row strong{font-size:12px}.boundary-row span{font-size:11px;color:var(--muted)}
+    .boundary-result{border:1px solid var(--line);border-radius:999px;padding:7px 10px;text-align:center;font-size:10px;font-weight:800;white-space:nowrap}
+    .boundary-side{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:26px;display:flex;flex-direction:column;justify-content:space-between}
+    .boundary-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .boundary-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .boundary-side p{font-size:13px;opacity:.65;margin:0}
+    .boundary-factors{display:grid;gap:8px;margin-top:20px}
+    .boundary-factors span{padding:10px 0;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:11px}
+    .boundary-side .note{margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:12px;font-weight:760}
+
+    .mvp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .week-card{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .week-card.primary{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .week-card small{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.1em}
+    .week-card.primary small{color:color-mix(in srgb,var(--bg) 55%,transparent)}
+    .week-card h3{font-size:28px;letter-spacing:-.04em;margin:17px 0 8px}
+    .week-card p{font-size:12px;color:var(--muted);margin:0}
+    .week-card.primary p{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+    .mvp-list{display:grid;gap:9px;margin-top:20px}
+    .mvp-item{display:grid;grid-template-columns:34px 1fr;gap:11px;padding:12px 0;border-top:1px solid var(--line)}
+    .week-card.primary .mvp-item{border-color:color-mix(in srgb,var(--bg) 18%,transparent)}
+    .mvp-no{width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);display:grid;place-items:center;font-size:10px;font-weight:850}
+    .week-card.primary .mvp-no{background:var(--bg);color:var(--strong)}
+    .mvp-item strong{display:block;font-size:13px}.mvp-item span{font-size:11px;color:var(--muted)}
+    .week-card.primary .mvp-item span{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+
+    .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .metric-card{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:215px}
+    .metric-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .metric-card strong{display:block;font-size:21px;margin:24px 0 8px;letter-spacing:-.04em}
+    .metric-card p{font-size:12px;color:var(--muted);margin:0}
+    .metric-card .formula{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .score-shell{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .score-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .score-summary{display:flex;align-items:baseline;gap:10px}
+    .score-number{font-size:34px;font-weight:850;letter-spacing:-.05em}
+    .score-label{font-size:13px;color:var(--muted)}
+    .table-scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1120px}
+    th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--panel-2)}
+    td{font-size:13px}
+    .metric-name{font-weight:750}.metric-help{display:block;color:var(--muted);font-size:11px;margin-top:3px;max-width:360px}
+    .tag{display:inline-flex;align-items:center;justify-content:center;min-width:max-content;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;line-height:1.2;font-weight:750;white-space:nowrap;word-break:keep-all}
+    #scoreTable th:first-child,#scoreTable td:first-child{min-width:76px;white-space:nowrap}
+    #scoreTable th:nth-child(6),#scoreTable td:nth-child(6){min-width:72px;width:72px;white-space:nowrap;word-break:keep-all}
+    .input{width:100%;min-width:74px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:8px 9px;outline:none}
+    .input:focus{border-color:var(--muted)}
+    .progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;min-width:120px}
+    .progress>span{display:block;height:100%;background:var(--strong);width:0;border-radius:inherit;transition:.35s ease}
+    .progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+    .status{font-size:11px;font-weight:850;padding:5px 8px;border-radius:999px;display:inline-flex;white-space:nowrap}
+    .status.good{background:var(--good);color:#173617}.status.warn{background:var(--warn);color:#3d3210}.status.risk{background:var(--risk);color:#421a1a}
+
+    .action-grid{display:grid;grid-template-columns:1fr .9fr;gap:16px}
+    .checklist{display:grid;gap:9px}
+    .check-row{display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2)}
+    .check-row input{width:18px;height:18px;margin-top:2px;accent-color:var(--strong)}
+    .check-row strong{font-size:13px;display:block}.check-row span{font-size:11px;color:var(--muted)}
+    textarea{width:100%;min-height:300px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);padding:14px;resize:vertical;outline:none}
+    textarea:focus{border-color:var(--muted)}
+    footer{margin:56px 0 28px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:18px}
+
+    @media(max-width:1200px){
+      .state-grid{grid-template-columns:repeat(3,1fr)}
+      .metric-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:1100px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-side{border-left:none;border-top:1px solid var(--line);min-height:430px}
+      .exec-summary,.preview-shell,.boundary-grid,.action-grid{grid-template-columns:1fr}
+      .mvp-grid{grid-template-columns:1fr}
+      .rule-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:860px){
+      .pipeline{overflow:visible;padding:16px}
+      .pipeline-grid{min-width:0;grid-template-columns:1fr;gap:8px}
+      .pipe-link{min-height:28px;transform:rotate(90deg)}
+      .pipe-step{min-height:auto;padding:20px}
+    }
+    @media(max-width:720px){
+      .shell{padding:12px}.topbar{top:8px;align-items:flex-start}
+      .brand-sub{display:none}.actions .btn:not(.primary){display:none}
+      .hero-copy{padding:44px 22px 32px}h1{font-size:44px}.hero-side{padding:22px}
+      .hero-summary,.signal-board,.state-grid,.rule-grid,.metric-grid{grid-template-columns:1fr}
+      .section-head{align-items:start;flex-direction:column}
+      .state-summary,.state-detail{grid-template-columns:repeat(2,1fr)}
+      .cta-row{flex-direction:column}
+      footer{flex-direction:column}
+    }
+    @media print{
+      .topbar,.actions{display:none!important}
+      body{background:#fff;color:#111}.shell{max-width:none;padding:0}
+      .hero,.panel,.signal-board,.summary-story,.state-card,.pipeline,.matrix-wrap,.preview-panel,.anatomy-panel,
+      .rule-card,.boundary-panel,.boundary-side,.week-card,.metric-card,.score-shell{box-shadow:none;break-inside:avoid}
+      .hero{margin-top:0}.section{margin-top:30px}
+      .input,textarea{border:none;background:transparent;color:#111;padding:0}
+    }
+  </style>
+<style id="pp-platform-nav-style">
+    body{padding-top:58px!important}
+    .topbar{top:72px!important}
+    .pp-platform-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;border-bottom:1px solid var(--line,#292929);background:color-mix(in srgb,var(--bg,#080808) 90%,transparent);backdrop-filter:blur(18px);font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .pp-platform-inner{max-width:1460px;height:100%;margin:auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+    .pp-platform-brand{display:flex;align-items:center;gap:10px;min-width:0;color:var(--text,#f5f5f5);text-decoration:none}
+    .pp-platform-logo{width:38px;height:32px;border:1px solid var(--line,#2b2b2b);border-radius:13px;display:grid;place-items:center;background:var(--panel,#111);flex:0 0 auto}
+    .pp-platform-logo img{width:20px;height:20px;object-fit:contain}
+    [data-theme="light"] .pp-platform-logo img{filter:invert(1)}
+    .pp-platform-title{font-size:12px;font-weight:720;white-space:nowrap}.pp-platform-crumb{font-size:11px;color:var(--muted,#999);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pp-platform-links{margin-left:auto;display:flex;align-items:center;gap:7px}.pp-platform-links a,.pp-platform-links span{height:34px;padding:0 10px;border:1px solid var(--line,#2b2b2b);border-radius:9px;display:inline-flex;align-items:center;color:var(--text,#f5f5f5);text-decoration:none;font-size:11px;background:var(--panel-2,#171717)}.pp-platform-links a:hover{border-color:var(--muted,#999)}.pp-platform-links .disabled{opacity:.35}
+    @media(max-width:720px){body{padding-top:54px!important}.topbar{top:62px!important}.pp-platform-nav{height:54px}.pp-platform-inner{padding:0 12px}.pp-platform-title,.pp-platform-links a:first-child,.pp-platform-links .disabled:first-child{display:none}.pp-platform-crumb{max-width:150px}.pp-platform-links a,.pp-platform-links span{padding:0 8px}}
+    @media print{.pp-platform-nav{display:none!important}body{padding-top:0!important}.topbar{top:0!important}}
+    </style></head>
+<body><nav class="pp-platform-nav"><div class="pp-platform-inner"><a class="pp-platform-brand" href="index.html"><span class="pp-platform-logo"><img src="data:image/png;base64,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" alt="PalmPay"></span><span class="pp-platform-title">PalmPay Design</span><span class="pp-platform-crumb">AI 项目库 / P19 AI 页面状态生成器</span></a><div class="pp-platform-links"><a href="index.html">返回项目库</a><a href="25_项目十八_AI用户研究助手.html" title="上一个项目">← 上一个</a><a href="27_项目二十_AI原型批量生成工作流.html" title="下一个项目">下一个 →</a></div></div></nav>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P19</div>
+      <div>
+        <div class="brand-title">AI 页面状态生成器</div>
+        <div class="brand-sub">从主流程设计升级为完整状态覆盖与交付矩阵</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeBtn">切换亮色</button>
+      <button class="btn" id="resetBtn">重置记录</button>
+      <button class="btn primary" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="dot"></span> Project 19 · AI Page State Generator</div>
+          <h1>从“只设计主流程”，<br>升级为“每个页面自动生成完整状态矩阵与交付清单”。</h1>
+          <p>
+            设计师经常优先完成默认与成功路径，空状态、加载、失败、审核中、权限不足、
+            网络异常、数据延迟和部分成功等状态往往在测试或上线后才补充。
+            AI 页面状态生成器基于 PRD、页面结构、组件、业务规则和接口状态，
+            自动生成页面级与组件级状态清单，识别遗漏、规则冲突、文案缺口与恢复路径，
+            输出可用于设计、开发、测试和验收的页面状态矩阵。
+          </p>
+          <div class="hero-summary">
+            <div class="summary-chip"><small>现状</small><strong>主流程完整，但异常、等待与权限状态大量遗漏</strong></div>
+            <div class="summary-chip"><small>升级</small><strong>PRD 解析 + 页面识别 + 状态推导 + 矩阵交付</strong></div>
+            <div class="summary-chip"><small>结果</small><strong>减少测试补设计、开发返工和上线异常状态问题</strong></div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div>
+            <div class="hero-side-title">生成器必须回答四个问题</div>
+            <div class="outcome-stack">
+              <div class="outcome-card"><strong>页面可能出现哪些状态</strong><span>从业务流程、组件、接口、权限和网络条件推导完整状态。</span></div>
+              <div class="outcome-card"><strong>每个状态用户应该看到什么</strong><span>明确内容、组件、文案、动作、反馈和下一步路径。</span></div>
+              <div class="outcome-card"><strong>状态之间如何转换</strong><span>定义触发条件、接口结果、等待、恢复、重试和退出逻辑。</span></div>
+              <div class="outcome-card"><strong>哪些状态仍需产品或技术确认</strong><span>识别规则缺失、接口不一致、权限冲突和数据延迟问题。</span></div>
+            </div>
+          </div>
+          <div class="hero-note">页面状态不是设计稿的附加内容，而是产品在真实运行环境中能否被理解、恢复和正确使用的核心组成。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">01 · MANAGEMENT SUMMARY</div>
+          <h2>为什么状态遗漏总在测试或上线后被发现</h2>
+        </div>
+        <div class="section-desc">PRD 更关注业务规则，设计稿更关注主流程，接口文档更关注技术状态，三者之间缺少统一的页面状态映射。</div>
+      </div>
+      <div class="exec-summary">
+        <div class="signal-board">
+          <div class="signal"><div class="signal-label">设计范围</div><div class="signal-value">主流程优先</div><div class="signal-desc">默认、成功和理想路径先完成，边界状态被推迟。</div></div>
+          <div class="signal"><div class="signal-label">状态来源</div><div class="signal-value">分散在多处</div><div class="signal-desc">PRD、接口、权限、埋点和测试用例没有统一映射。</div></div>
+          <div class="signal"><div class="signal-label">发现阶段</div><div class="signal-value">时间过晚</div><div class="signal-desc">测试、联调和线上异常才暴露缺失状态与文案。</div></div>
+          <div class="signal"><div class="signal-label">团队成本</div><div class="signal-value">多次返工</div><div class="signal-desc">设计、产品、开发和测试不断补页面、补逻辑、补说明。</div></div>
+        </div>
+        <div class="summary-story">
+          <div>
+            <small>STATE COVERAGE STRATEGY</small>
+            <h3>把页面从“静态设计稿”，升级为“具备完整状态、触发条件和恢复路径的运行模型”。</h3>
+            <p>状态生成器的价值不是多生成几张稿，而是让产品、设计、开发和测试围绕同一套状态定义协同。</p>
+          </div>
+          <div class="formula">业务规则 × 页面结构 × 组件状态 × 接口结果 × 用户权限 = 完整页面状态模型</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">02 · STATE TAXONOMY</div>
+          <h2>AI 自动生成的十七类核心状态</h2>
+        </div>
+        <div class="section-desc">状态需要同时覆盖组件交互、页面内容、业务流程、权限、网络和数据一致性。</div>
+      </div>
+      <div class="state-grid">
+        <article class="state-card"><small>01</small><strong>默认状态</strong><p>页面或组件首次进入时的基础展示。</p><div class="state-meta">检查：默认内容、可操作项与引导</div></article>
+        <article class="state-card"><small>02</small><strong>Hover</strong><p>鼠标悬停时的视觉、提示与可点击反馈。</p><div class="state-meta">检查：可发现性与信息补充</div></article>
+        <article class="state-card"><small>03</small><strong>Focus</strong><p>键盘或输入焦点进入时的可见反馈。</p><div class="state-meta">检查：无障碍与输入定位</div></article>
+        <article class="state-card"><small>04</small><strong>Filled</strong><p>输入、选择或配置完成后的展示状态。</p><div class="state-meta">检查：格式、校验与修改入口</div></article>
+        <article class="state-card"><small>05</small><strong>Loading</strong><p>页面、模块、列表或操作等待数据的状态。</p><div class="state-meta">检查：等待反馈、时长与取消</div></article>
+        <article class="state-card"><small>06</small><strong>Empty</strong><p>无数据、首次使用、筛选无结果等空场景。</p><div class="state-meta">检查：原因、下一步与引导</div></article>
+        <article class="state-card"><small>07</small><strong>Error</strong><p>输入、接口、业务规则或系统失败状态。</p><div class="state-meta">检查：原因、影响与恢复动作</div></article>
+        <article class="state-card"><small>08</small><strong>Disabled</strong><p>当前不可操作的按钮、字段或功能。</p><div class="state-meta">检查：禁用原因与解锁条件</div></article>
+        <article class="state-card"><small>09</small><strong>Partial success</strong><p>部分数据、任务或对象成功，其余失败。</p><div class="state-meta">检查：成功范围、失败原因与补救</div></article>
+        <article class="state-card"><small>10</small><strong>Processing</strong><p>任务已经提交，仍在后台处理。</p><div class="state-meta">检查：进度、时间、通知与离开</div></article>
+        <article class="state-card"><small>11</small><strong>Approved</strong><p>审核、认证、申报或申请通过。</p><div class="state-meta">检查：结果、后续能力与凭证</div></article>
+        <article class="state-card"><small>12</small><strong>Rejected</strong><p>审核或申请被拒绝，需要解释与修正。</p><div class="state-meta">检查：具体原因、材料与重新提交</div></article>
+        <article class="state-card"><small>13</small><strong>Expired</strong><p>链接、材料、任务或授权超过有效期。</p><div class="state-meta">检查：到期影响与恢复方式</div></article>
+        <article class="state-card"><small>14</small><strong>Cancelled</strong><p>用户或系统取消操作、订单或流程。</p><div class="state-meta">检查：后果、退款与重新发起</div></article>
+        <article class="state-card"><small>15</small><strong>Permission denied</strong><p>用户没有查看、编辑、审批或操作权限。</p><div class="state-meta">检查：角色、原因与申请权限</div></article>
+        <article class="state-card"><small>16</small><strong>Network error</strong><p>网络中断、请求失败或服务暂不可用。</p><div class="state-meta">检查：保留内容、重试与离线反馈</div></article>
+        <article class="state-card"><small>17</small><strong>Data delay</strong><p>数据尚未同步、入账、刷新或完成计算。</p><div class="state-meta">检查：更新时间、数据范围与预期</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">03 · GENERATION PIPELINE</div>
+          <h2>从 PRD 到页面状态矩阵的完整链路</h2>
+        </div>
+        <div class="section-desc">AI 负责解析与推导，产品、设计和技术共同确认业务规则、接口映射、权限和异常恢复。</div>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-grid">
+          <div class="pipe-step"><small>01</small><strong>解析 PRD 与业务规则</strong><p>识别用户、角色、流程、动作、审批、异常与时间条件。</p><span class="pipe-badge">建立业务状态</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>02</small><strong>识别页面与组件结构</strong><p>解析表单、列表、卡片、按钮、弹窗、状态标签和操作入口。</p><span class="pipe-badge">建立页面模型</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>03</small><strong>匹配接口与权限结果</strong><p>映射成功、失败、处理中、超时、无权限和数据延迟。</p><span class="pipe-badge">补充运行条件</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>04</small><strong>生成状态清单</strong><p>形成页面级、模块级和组件级状态候选集合。</p><span class="pipe-badge">覆盖完整状态</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>05</small><strong>识别缺口与冲突</strong><p>发现缺少文案、动作、恢复路径、权限或前后端不一致。</p><span class="pipe-badge">形成确认问题</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>06</small><strong>输出矩阵与设计任务</strong><p>生成状态矩阵、页面清单、开发说明和测试用例输入。</p><span class="pipe-badge">进入交付闭环</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">04 · STATE MATRIX</div>
+          <h2>每个页面自动生成一张状态矩阵</h2>
+        </div>
+        <div class="section-desc">矩阵帮助设计、产品、开发和测试快速确认每个模块在正常、空、错误、加载和权限状态下的展示与动作。</div>
+      </div>
+      <div class="matrix-wrap">
+        <div class="matrix-head"><strong>商户认证页面状态矩阵示例</strong><span>页面级 × 模块级 × 组件级状态统一映射</span></div>
+        <div class="matrix-scroll">
+          <table class="matrix">
+            <thead>
+              <tr><th>模块</th><th>正常状态</th><th>空状态</th><th>错误状态</th><th>加载状态</th><th>权限状态</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="matrix-tag">企业信息</span></td>
+                <td><div class="matrix-cell"><strong>已填写并可编辑</strong><span>显示完整字段、保存状态和修改入口</span></div></td>
+                <td><div class="matrix-cell"><strong>首次填写</strong><span>展示必填项、示例与预计耗时</span></div></td>
+                <td><div class="matrix-cell"><strong>字段校验失败</strong><span>定位具体字段、原因和修正方式</span></div></td>
+                <td><div class="matrix-cell"><strong>读取企业资料</strong><span>骨架屏并保留页面结构</span></div></td>
+                <td><div class="matrix-cell"><strong>仅管理员可编辑</strong><span>展示只读内容与权限说明</span></div></td>
+              </tr>
+              <tr>
+                <td><span class="matrix-tag">材料上传</span></td>
+                <td><div class="matrix-cell"><strong>文件已上传</strong><span>显示文件、状态、替换与删除动作</span></div></td>
+                <td><div class="matrix-cell"><strong>暂无材料</strong><span>说明所需文件、格式、大小与示例</span></div></td>
+                <td><div class="matrix-cell"><strong>文件不合格</strong><span>标记具体页、问题原因与重新上传</span></div></td>
+                <td><div class="matrix-cell"><strong>正在上传 / 识别</strong><span>显示进度、取消与离开页面规则</span></div></td>
+                <td><div class="matrix-cell"><strong>不可替换材料</strong><span>说明审核中或角色无编辑权限</span></div></td>
+              </tr>
+              <tr>
+                <td><span class="matrix-tag">审核结果</span></td>
+                <td><div class="matrix-cell"><strong>已通过 / 审核中</strong><span>展示进度、结果时间和后续能力</span></div></td>
+                <td><div class="matrix-cell"><strong>尚未提交</strong><span>展示完成条件和提交入口</span></div></td>
+                <td><div class="matrix-cell"><strong>被拒绝</strong><span>展示拒绝原因、补件与重新提交</span></div></td>
+                <td><div class="matrix-cell"><strong>同步审核状态</strong><span>显示更新时间和刷新规则</span></div></td>
+                <td><div class="matrix-cell"><strong>不可查看审核详情</strong><span>提示联系管理员或申请权限</span></div></td>
+              </tr>
+              <tr>
+                <td><span class="matrix-tag">提交操作</span></td>
+                <td><div class="matrix-cell"><strong>满足条件可提交</strong><span>明确操作结果和不可逆影响</span></div></td>
+                <td><div class="matrix-cell"><strong>缺少必填信息</strong><span>展示未完成清单并定位页面位置</span></div></td>
+                <td><div class="matrix-cell"><strong>提交失败</strong><span>区分网络、业务与系统错误</span></div></td>
+                <td><div class="matrix-cell"><strong>正在提交</strong><span>防止重复点击并显示处理状态</span></div></td>
+                <td><div class="matrix-cell"><strong>无提交权限</strong><span>显示可提交角色与申请路径</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">05 · STATE GENERATOR EXPERIENCE</div>
+          <h2>状态生成器不只是输出一张表</h2>
+        </div>
+        <div class="section-desc">工作台需要呈现状态覆盖率、遗漏风险、确认问题、设计任务和跨团队状态定义。</div>
+      </div>
+      <div class="preview-shell">
+        <div class="preview-panel">
+          <h3>页面状态生成结果示例</h3>
+          <div class="app-frame">
+            <div class="app-head"><strong>交易详情页 · 状态生成结果</strong><span>基于 PRD v2.6 与接口文档</span></div>
+            <div class="state-summary">
+              <div class="summary-box"><small>已识别状态</small><strong>24</strong></div>
+              <div class="summary-box"><small>高风险遗漏</small><strong>4</strong></div>
+              <div class="summary-box"><small>待确认规则</small><strong>6</strong></div>
+              <div class="summary-box"><small>覆盖率</small><strong>78%</strong></div>
+            </div>
+
+            <div class="state-item">
+              <div class="state-item-top">
+                <div class="state-copy"><small>PARTIAL SUCCESS · REFUND</small><strong>部分退款成功状态未定义</strong><p>批量退款中部分订单成功、部分失败时，页面展示、金额汇总和下一步动作未说明。</p></div>
+                <span class="state-risk high">高风险遗漏</span>
+              </div>
+              <div class="state-detail">
+                <div><small>影响模块</small><strong>退款结果</strong></div>
+                <div><small>需确认</small><strong>产品 + 技术</strong></div>
+                <div><small>设计任务</small><strong>结果页 + 明细</strong></div>
+                <div><small>建议动作</small><strong>补充失败重试</strong></div>
+              </div>
+            </div>
+
+            <div class="state-item">
+              <div class="state-item-top">
+                <div class="state-copy"><small>DATA DELAY · SETTLEMENT</small><strong>结算数据延迟时缺少用户解释</strong><p>接口返回旧数据，但页面仍显示“已更新”，可能导致商户误判资金状态。</p></div>
+                <span class="state-risk high">高风险遗漏</span>
+              </div>
+              <div class="state-detail">
+                <div><small>影响模块</small><strong>结算信息</strong></div>
+                <div><small>需确认</small><strong>数据 + 技术</strong></div>
+                <div><small>设计任务</small><strong>延迟提示</strong></div>
+                <div><small>建议动作</small><strong>显示数据时间</strong></div>
+              </div>
+            </div>
+
+            <div class="state-item">
+              <div class="state-item-top">
+                <div class="state-copy"><small>PERMISSION DENIED · EXPORT</small><strong>导出按钮禁用但未说明原因</strong><p>普通成员无导出权限，当前界面只显示不可点击状态，用户无法理解解锁条件。</p></div>
+                <span class="state-risk medium">中风险</span>
+              </div>
+              <div class="state-detail">
+                <div><small>影响模块</small><strong>操作区</strong></div>
+                <div><small>需确认</small><strong>产品</strong></div>
+                <div><small>设计任务</small><strong>禁用说明</strong></div>
+                <div><small>建议动作</small><strong>申请权限入口</strong></div>
+              </div>
+            </div>
+
+            <div class="cta-row">
+              <div class="cta primary">生成状态设计任务</div>
+              <div class="cta secondary">导出测试用例清单</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy-panel">
+          <h3>生成结果六个核心模块</h3>
+          <div class="anatomy-list">
+            <div class="anatomy-item"><div class="anatomy-no">1</div><div><strong>页面状态覆盖率</strong><span>展示已覆盖、待补充、待确认和高风险遗漏数量。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">2</div><div><strong>状态来源与依据</strong><span>标记状态来自 PRD、接口、权限、组件规则或历史问题。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">3</div><div><strong>状态展示要求</strong><span>明确页面内容、文案、组件、反馈和用户可执行动作。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">4</div><div><strong>触发与转换条件</strong><span>记录状态何时出现、如何变化、如何恢复与是否可重试。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">5</div><div><strong>待确认问题</strong><span>将缺失规则路由给产品、技术、数据、风控和权限负责人。</span></div></div>
+            <div class="anatomy-item"><div class="anatomy-no">6</div><div><strong>设计与测试任务</strong><span>自动生成页面、组件、文案、交互和测试覆盖清单。</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">06 · GENERATION RULES</div>
+          <h2>页面状态生成的六类规则</h2>
+        </div>
+        <div class="section-desc">状态不能只按组件穷举，需要结合业务、用户权限、接口和用户恢复路径进行推导。</div>
+      </div>
+      <div class="rule-grid">
+        <article class="rule-card"><small>01 · COMPONENT</small><strong>组件交互规则</strong><p>从组件类型推导 Hover、Focus、Filled、Disabled、校验与加载状态。</p><div class="rule-list"><span>输入、选择、按钮</span><span>表格、卡片、标签</span><span>弹窗、步骤与通知</span></div></article>
+        <article class="rule-card"><small>02 · CONTENT</small><strong>内容与数据规则</strong><p>从数据有无、数量、同步和完整度推导空、延迟与部分数据状态。</p><div class="rule-list"><span>首次无数据</span><span>筛选无结果</span><span>数据延迟与缺失</span></div></article>
+        <article class="rule-card"><small>03 · PROCESS</small><strong>业务流程规则</strong><p>从提交、处理、审核、通过、拒绝、取消和过期推导流程状态。</p><div class="rule-list"><span>处理中</span><span>审核结果</span><span>撤销与重新提交</span></div></article>
+        <article class="rule-card"><small>04 · PERMISSION</small><strong>角色与权限规则</strong><p>从查看、编辑、审批、导出和操作范围推导权限状态。</p><div class="rule-list"><span>只读</span><span>无权限</span><span>申请与授权路径</span></div></article>
+        <article class="rule-card"><small>05 · SYSTEM</small><strong>网络与系统规则</strong><p>从超时、服务异常、请求失败和第三方问题推导恢复状态。</p><div class="rule-list"><span>网络中断</span><span>系统繁忙</span><span>保留内容与重试</span></div></article>
+        <article class="rule-card"><small>06 · BUSINESS</small><strong>业务结果与风险规则</strong><p>从金额、交易、退款、申报和风控结果推导部分成功与高风险状态。</p><div class="rule-list"><span>部分成功</span><span>高风险阻断</span><span>资金与状态一致性</span></div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">07 · HUMAN–AI BOUNDARY</div>
+          <h2>AI 生成状态，但不能替代业务与技术确认</h2>
+        </div>
+        <div class="section-desc">AI 可以穷举候选状态和识别缺口，但最终状态定义必须与业务规则、接口能力和真实权限保持一致。</div>
+      </div>
+      <div class="boundary-grid">
+        <div class="boundary-panel">
+          <h3>状态任务与责任分配</h3>
+          <div class="boundary-table">
+            <div class="boundary-head"><span>任务</span><span>AI 适合承担</span><span>团队必须确认</span></div>
+            <div class="boundary-row"><strong>页面与组件识别</strong><span>解析结构、控件和基础交互状态</span><div class="boundary-result">设计师确认组件语义</div></div>
+            <div class="boundary-row"><strong>业务状态推导</strong><span>从 PRD 和规则提取通过、拒绝、处理中等状态</span><div class="boundary-result">产品确认业务定义</div></div>
+            <div class="boundary-row"><strong>接口结果映射</strong><span>匹配成功、失败、超时、延迟和部分结果</span><div class="boundary-result">技术确认真实能力</div></div>
+            <div class="boundary-row"><strong>权限状态生成</strong><span>根据角色和动作推导可见、只读与禁用状态</span><div class="boundary-result">权限负责人确认边界</div></div>
+            <div class="boundary-row"><strong>文案与恢复动作</strong><span>生成候选提示、重试、返回与联系支持动作</span><div class="boundary-result">设计与产品确认表达</div></div>
+            <div class="boundary-row"><strong>状态覆盖判断</strong><span>识别缺失和冲突，生成风险优先级</span><div class="boundary-result">跨团队确认关闭状态</div></div>
+          </div>
+        </div>
+
+        <div class="boundary-side">
+          <div>
+            <small>STATE PRINCIPLE</small>
+            <h3>每个状态都必须具备“原因、影响、动作与恢复路径”。</h3>
+            <p>只有展示结果而没有下一步动作的状态，仍然是不完整的状态设计。</p>
+            <div class="boundary-factors">
+              <span>状态必须与真实接口和业务结果一致</span>
+              <span>错误必须尽可能具体，不使用笼统失败提示</span>
+              <span>禁用必须说明原因与解锁条件</span>
+              <span>等待必须说明进度、时间和用户能否离开</span>
+            </div>
+          </div>
+          <div class="note">涉及资金、权限、审核和合规的状态，应优先进行人工确认与测试覆盖。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">08 · TWO-WEEK MVP</div>
+          <h2>两周 MVP：先跑通一个核心流程的状态生成</h2>
+        </div>
+        <div class="section-desc">建议选择商户认证、交易详情、退款或入账申报流程，验证 PRD、页面、接口和权限到状态矩阵的完整闭环。</div>
+      </div>
+      <div class="mvp-grid">
+        <article class="week-card">
+          <small>WEEK 01</small>
+          <h3>建立状态标准与完成首次生成</h3>
+          <p>从真实项目中提取页面、组件、业务和异常状态，形成可复用的状态分类与规则。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>选择一个核心流程</strong><span>认证、交易、退款或申报均可作为试点。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>收集 PRD、设计稿与接口文档</strong><span>同步权限、状态码、异常和测试用例。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>建立页面状态分类</strong><span>覆盖组件、内容、流程、权限、网络与数据状态。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>AI 生成首版状态矩阵</strong><span>输出页面、模块、组件、触发条件与恢复路径。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>设计师与产品人工确认</strong><span>删除误报，补充业务规则与文案标准。</span></div></div>
+          </div>
+        </article>
+
+        <article class="week-card primary">
+          <small>WEEK 02</small>
+          <h3>接入设计、开发与测试闭环</h3>
+          <p>把状态矩阵转化为设计任务、开发说明、测试覆盖和上线验收输入。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>生成状态设计任务</strong><span>按页面与优先级生成需要补充的稿件、组件和文案。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>技术确认接口与权限映射</strong><span>检查前后端状态、错误码和数据延迟规则。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>输出测试用例清单</strong><span>将状态、触发条件、预期展示和恢复动作同步测试。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>完成设计与开发验收</strong><span>验证高风险状态、部分成功、权限和网络异常。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>沉淀状态模板与规则库</strong><span>形成组件级、页面级和业务级状态资产。</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">09 · KEY METRICS</div>
+          <h2>四个关键指标</h2>
+        </div>
+        <div class="section-desc">指标需要衡量状态完整度、设计前置程度、开发返工和上线后的真实质量。</div>
+      </div>
+      <div class="metric-grid">
+        <article class="metric-card"><small>01</small><strong>状态遗漏数量</strong><p>在设计评审、开发或测试阶段发现的未定义页面状态数量。</p><div class="formula">目标：持续下降</div></article>
+        <article class="metric-card"><small>02</small><strong>测试阶段新增设计数量</strong><p>测试过程中因状态缺失而新增页面、组件或文案设计的数量。</p><div class="formula">衡量设计前置完整度</div></article>
+        <article class="metric-card"><small>03</small><strong>开发返工次数</strong><p>因状态定义、触发、权限或前后端不一致产生的返工次数。</p><div class="formula">按问题类型拆分</div></article>
+        <article class="metric-card"><small>04</small><strong>上线后异常状态问题</strong><p>线上出现的空白、错误反馈、无法恢复或状态冲突问题。</p><div class="formula">高风险防护指标</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">10 · KPI SCORECARD</div>
+          <h2>可编辑的页面状态指标看板</h2>
+        </div>
+        <div class="section-desc">示例值可直接修改，页面会自动保存到当前浏览器并计算目标完成度。</div>
+      </div>
+      <div class="score-shell">
+        <div class="score-toolbar">
+          <div class="score-summary"><div class="score-number" id="overallScore">0%</div><div class="score-label">整体目标完成度</div></div>
+          <div style="font-size:12px;color:var(--muted)">建议按产品线、页面类型、状态类别和风险等级分别观察。</div>
+        </div>
+        <div class="table-scroll">
+          <table id="scoreTable">
+            <thead><tr><th>维度</th><th>指标</th><th>方向</th><th>当前值</th><th>目标值</th><th>单位</th><th>负责人</th><th>完成度</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr data-direction="down" data-default-current="18" data-default-target="5">
+                <td><span class="tag">北极星</span></td>
+                <td><span class="metric-name">单需求状态遗漏数量</span><span class="metric-help">在设计评审、开发或测试阶段发现的未定义状态数量</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>个</td>
+                <td><input class="input owner" value="体验设计负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="9" data-default-target="2">
+                <td><span class="tag">测试</span></td>
+                <td><span class="metric-name">测试阶段新增设计数量</span><span class="metric-help">测试过程中因状态缺失新增的页面、组件或文案设计数量</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>个</td>
+                <td><input class="input owner" value="设计质量负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="6" data-default-target="2">
+                <td><span class="tag">返工</span></td>
+                <td><span class="metric-name">单需求开发返工次数</span><span class="metric-help">因状态、权限、接口与触发条件不一致产生的返工</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>次</td>
+                <td><input class="input owner" value="产品研发负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="12" data-default-target="3">
+                <td><span class="tag">上线</span></td>
+                <td><span class="metric-name">月度上线后异常状态问题</span><span class="metric-help">线上出现的空白、错误反馈、无法恢复或状态冲突问题</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="1"></td><td><input class="input target" type="number" step="1"></td><td>个</td>
+                <td><input class="input owner" value="上线质量负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="72" data-default-target="95">
+                <td><span class="tag">覆盖</span></td>
+                <td><span class="metric-name">高风险页面状态覆盖率</span><span class="metric-help">核心流程中已定义并完成设计的高风险状态比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="状态治理 Owner"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="64" data-default-target="90">
+                <td><span class="tag">复用</span></td>
+                <td><span class="metric-name">状态规则复用率</span><span class="metric-help">新页面使用标准组件、页面或业务状态模板的比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="设计系统负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">11 · EXECUTION BOARD</div>
+          <h2>项目实施记录</h2>
+        </div>
+        <div class="section-desc">用于记录试点流程、状态覆盖、确认问题、设计任务与测试结果，内容只保存在当前浏览器。</div>
+      </div>
+      <div class="action-grid">
+        <div class="panel">
+          <h3 style="margin:0 0 18px;font-size:23px">两周 MVP 检查清单</h3>
+          <div class="checklist" id="checklist">
+            <label class="check-row"><input type="checkbox"><span><strong>选择一个核心业务流程</strong><span>建议从认证、交易、退款或入账申报开始。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>收集 PRD、页面、接口与权限资料</strong><span>同步测试用例、错误码和历史异常问题。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>建立页面状态分类与生成规则</strong><span>覆盖组件、内容、流程、权限、系统和业务状态。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成 AI 状态矩阵与人工确认</strong><span>补充状态触发、文案、动作、恢复和跨团队问题。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>生成设计任务与测试覆盖清单</strong><span>明确页面、组件、优先级、Owner 和目标时间。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成验收并沉淀状态规则库</strong><span>将高频状态转化为组件、模板和质量门禁。</span></span></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin:0 0 8px;font-size:23px">试点说明</h3>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:12px">建议记录试点页面、状态来源、高风险遗漏、确认责任和最终覆盖结果。</p>
+          <textarea id="notes" placeholder="试点流程：
+页面范围：
+PRD 版本：
+设计稿版本：
+接口文档：
+权限规则：
+
+已识别状态：
+高风险遗漏：
+1.
+2.
+3.
+
+待产品确认：
+待技术确认：
+待数据确认：
+待权限确认：
+
+状态覆盖率：
+设计任务数量：
+测试用例数量：
+项目 Owner：
+
+实验主指标：
+防护指标：
+两周 MVP 结论：
+沉淀的状态模板："></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AI 体验设计项目 · Project 19</span>
+    <span>状态目标：页面状态更完整、设计更前置、开发返工更少、上线异常更可控。</span>
+  </footer>
+</div>
+
+<script>
+  const DATA_KEY="project19_ai_page_state_generator_v1";
+  const THEME_KEY="project19_ai_page_state_generator_theme_v1";
+  const rows=[...document.querySelectorAll("#scoreTable tbody tr")];
+  const checks=[...document.querySelectorAll("#checklist input")];
+  const notes=document.getElementById("notes");
+  const themeBtn=document.getElementById("themeBtn");
+
+  function setTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    themeBtn.textContent=theme==="light"?"切换暗黑":"切换亮色";
+    localStorage.setItem(THEME_KEY,theme);
+  }
+  function calcProgress(current,target,direction){
+    if(!isFinite(current)||!isFinite(target)||target===0)return 0;
+    if(direction==="up")return Math.max(0,Math.min(130,current/target*100));
+    if(current<=0)return 130;
+    return Math.max(0,Math.min(130,target/current*100));
+  }
+  function statusFor(progress){
+    return progress>=100?["已达成","good"]:progress>=75?["接近目标","warn"]:["需关注","risk"];
+  }
+  function updateScore(save=true){
+    let total=0;
+    rows.forEach(row=>{
+      const current=parseFloat(row.querySelector(".current").value);
+      const target=parseFloat(row.querySelector(".target").value);
+      const p=calcProgress(current,target,row.dataset.direction);
+      const normalized=Math.min(100,p);
+      total+=normalized;
+      row.querySelector(".progress>span").style.width=normalized+"%";
+      row.querySelector(".progress-text").textContent=Math.round(p)+"%";
+      const [label,cls]=statusFor(p);
+      const status=row.querySelector(".status");
+      status.textContent=label;
+      status.className="status "+cls;
+    });
+    document.getElementById("overallScore").textContent=Math.round(total/rows.length)+"%";
+    if(save)saveData();
+  }
+  function saveData(){
+    localStorage.setItem(DATA_KEY,JSON.stringify({
+      rows:rows.map(row=>({
+        current:row.querySelector(".current").value,
+        target:row.querySelector(".target").value,
+        owner:row.querySelector(".owner").value
+      })),
+      checks:checks.map(c=>c.checked),
+      notes:notes.value
+    }));
+  }
+  function loadData(){
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){}
+    rows.forEach((row,i)=>{
+      const data=saved.rows?.[i];
+      row.querySelector(".current").value=data?.current??row.dataset.defaultCurrent;
+      row.querySelector(".target").value=data?.target??row.dataset.defaultTarget;
+      if(data?.owner)row.querySelector(".owner").value=data.owner;
+    });
+    checks.forEach((c,i)=>c.checked=Boolean(saved.checks?.[i]));
+    notes.value=saved.notes||"";
+    updateScore(false);
+  }
+
+  document.querySelectorAll("#scoreTable input").forEach(el=>el.addEventListener("input",()=>updateScore(true)));
+  checks.forEach(c=>c.addEventListener("change",saveData));
+  notes.addEventListener("input",saveData);
+  themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+  document.getElementById("resetBtn").addEventListener("click",()=>{
+    if(confirm("确认清空本页面的指标与实施记录吗？")){
+      localStorage.removeItem(DATA_KEY);
+      loadData();
+    }
+  });
+
+  setTheme(localStorage.getItem(THEME_KEY)||"dark");
+  loadData();
+</script>
+<script id="pp-theme-sync">(function(){try{var t=localStorage.getItem('ppux-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);var o=new MutationObserver(function(){var v=document.documentElement.getAttribute('data-theme')||'dark';localStorage.setItem('ppux-theme',v)});o.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();</script></body>
+</html>

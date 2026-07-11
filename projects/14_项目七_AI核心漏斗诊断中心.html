@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>AI 核心漏斗诊断中心｜项目七</title>
+  <style>
+    :root{
+      --bg:#080808;--panel:#111;--panel-2:#171717;--panel-3:#202020;
+      --text:#f5f5f5;--muted:#9c9c9c;--line:#2b2b2b;--strong:#fff;
+      --soft:#242424;--good:#dff7df;--warn:#fff0bc;--risk:#ffd9d9;
+      --shadow:0 28px 90px rgba(0,0,0,.34);--radius:24px;
+      --danger:#ff5c5c;--accent:#e9e9e9;
+    }
+    [data-theme="light"]{
+      --bg:#f4f4f1;--panel:#fff;--panel-2:#f8f8f5;--panel-3:#ecece8;
+      --text:#151515;--muted:#6b6b67;--line:#deded8;--strong:#111;
+      --soft:#ecece7;--good:#e8f7e6;--warn:#fff3c7;--risk:#ffe5e5;
+      --shadow:0 28px 90px rgba(40,40,20,.11);--danger:#d83c3c;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 8% 0%,rgba(255,255,255,.065),transparent 30%),
+        var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.55;
+    }
+    button,input,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .shell{max-width:1460px;margin:auto;padding:22px}
+    .topbar{
+      position:sticky;top:14px;z-index:50;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px 12px 18px;border:1px solid var(--line);
+      border-radius:18px;background:color-mix(in srgb,var(--panel) 88%,transparent);
+      backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+      background:var(--strong);color:var(--bg);font-weight:900;font-size:13px;
+    }
+    .brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{
+      border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);
+      padding:8px 12px;cursor:pointer;transition:.2s ease;white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .btn.primary{background:var(--strong);color:var(--bg);border-color:var(--strong);font-weight:760}
+
+    .hero{
+      margin-top:26px;border:1px solid var(--line);border-radius:30px;overflow:hidden;
+      background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:var(--shadow);
+    }
+    .hero-grid{display:grid;grid-template-columns:1.35fr .65fr;min-height:610px}
+    .hero-copy{padding:68px 58px 48px}
+    .eyebrow{
+      display:flex;align-items:center;gap:8px;color:var(--muted);
+      font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:850;
+    }
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--strong)}
+    h1{
+      margin:22px 0 20px;font-size:clamp(46px,6.3vw,88px);
+      line-height:.98;letter-spacing:-.065em;max-width:1000px;
+    }
+    .hero-copy>p{font-size:18px;color:var(--muted);max-width:850px;margin:0}
+    .hero-summary{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .summary-chip{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}
+    .summary-chip small{display:block;color:var(--muted);font-weight:800;margin-bottom:6px}
+    .summary-chip strong{font-size:16px;line-height:1.35;display:block}
+    .hero-side{
+      border-left:1px solid var(--line);padding:34px 28px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.035),transparent 44%),
+        repeating-linear-gradient(90deg,transparent 0 49px,var(--line) 50px),
+        repeating-linear-gradient(0deg,transparent 0 49px,var(--line) 50px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .hero-side-title{font-size:12px;color:var(--muted);letter-spacing:.13em;font-weight:850}
+    .outcome-stack{display:grid;gap:12px;margin-top:18px}
+    .outcome-card{
+      border:1px solid var(--line);border-radius:16px;padding:16px;
+      background:color-mix(in srgb,var(--panel) 88%,transparent);
+    }
+    .outcome-card strong{display:block;font-size:14px;margin-bottom:4px}
+    .outcome-card span{font-size:12px;color:var(--muted)}
+    .hero-note{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+
+    .section{margin-top:58px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:20px}
+    .section-kicker{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:850}
+    h2{font-size:clamp(30px,3.4vw,50px);line-height:1.04;letter-spacing:-.045em;margin:6px 0 0}
+    .section-desc{max-width:680px;color:var(--muted);font-size:14px}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px}
+
+    .exec-summary{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .signal-board{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;
+      display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+    }
+    .signal{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .signal-label{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.08em}
+    .signal-value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:12px 0 6px}
+    .signal-desc{font-size:12px;color:var(--muted)}
+    .summary-story{
+      border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);
+      padding:28px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .summary-story small{font-size:11px;letter-spacing:.12em;font-weight:850;opacity:.55}
+    .summary-story h3{font-size:30px;line-height:1.05;letter-spacing:-.045em;margin:18px 0 14px}
+    .summary-story p{margin:0;font-size:14px;opacity:.68}
+    .summary-story .formula{
+      margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:13px;font-weight:760;
+    }
+
+    .source-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .source-card{
+      border:1px solid var(--line);border-radius:20px;background:var(--panel);
+      padding:20px;min-height:190px;
+    }
+    .source-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .source-card strong{display:block;font-size:19px;margin:18px 0 7px}
+    .source-card p{font-size:12px;color:var(--muted);margin:0}
+    .source-card .tagline{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .pipeline{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);
+      padding:clamp(16px,1.55vw,26px);overflow-x:auto;overflow-y:hidden;scrollbar-gutter:stable;
+    }
+    .pipeline-grid{
+      display:grid;
+      grid-template-columns:
+        minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px
+        minmax(180px,1fr) 24px minmax(180px,1fr) 24px minmax(180px,1fr) 24px
+        minmax(180px,1fr);
+      gap:6px;min-width:1370px;align-items:stretch;
+    }
+    .pipe-step{
+      min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--panel-2);
+      padding:18px;min-height:190px;
+    }
+    .pipe-step small{display:block;color:var(--muted);font-size:11px;font-weight:850}
+    .pipe-step strong{display:block;font-size:15px;line-height:1.42;margin:12px 0 8px;text-wrap:balance}
+    .pipe-step p{font-size:11px;line-height:1.68;color:var(--muted);margin:0}
+    .pipe-badge{margin-top:14px;display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:800}
+    .pipe-link{display:grid;place-items:center;color:var(--muted);font-size:21px}
+
+    .funnel-shell{display:grid;grid-template-columns:1.18fr .82fr;gap:16px}
+    .funnel-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .funnel-panel h3{font-size:24px;margin:0 0 20px;letter-spacing:-.035em}
+    .funnel{
+      display:flex;flex-direction:column;align-items:center;gap:9px;padding:8px 0;
+    }
+    .funnel-step{
+      min-height:64px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);
+      display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;padding:13px 16px;
+      transition:.2s ease;
+    }
+    .funnel-step:hover{transform:translateY(-1px);border-color:var(--muted)}
+    .funnel-step:nth-child(1){width:100%}
+    .funnel-step:nth-child(2){width:91%}
+    .funnel-step:nth-child(3){width:82%}
+    .funnel-step:nth-child(4){width:71%}
+    .funnel-step:nth-child(5){width:60%}
+    .funnel-copy strong{display:block;font-size:13px}
+    .funnel-copy span{font-size:11px;color:var(--muted)}
+    .funnel-metric{text-align:right}
+    .funnel-metric b{display:block;font-size:18px}
+    .funnel-metric em{font-size:10px;color:var(--danger);font-style:normal}
+    .diagnosis-side{
+      border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);
+      padding:26px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .diagnosis-side small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .diagnosis-side h3{font-size:30px;line-height:1.05;letter-spacing:-.04em;margin:18px 0 12px}
+    .diagnosis-side p{font-size:13px;opacity:.65;margin:0}
+    .diagnosis-list{display:grid;gap:9px;margin-top:22px}
+    .diagnosis-list span{padding:10px 0;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:12px}
+    .diagnosis-side .note{
+      margin-top:28px;padding-top:18px;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);
+      font-size:12px;font-weight:760;
+    }
+
+    .heatmap-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+    .heatmap-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;overflow:auto}
+    .heatmap-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .heatmap{min-width:680px;display:grid;grid-template-columns:190px repeat(5,1fr);gap:7px}
+    .heat-cell{
+      min-height:55px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);
+      padding:10px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;
+    }
+    .heat-cell.head{color:var(--muted);font-weight:850;letter-spacing:.05em}
+    .heat-cell.label{justify-content:flex-start;text-align:left;font-weight:760}
+    .heat-cell.l1{background:color-mix(in srgb,var(--panel-2) 88%,#fff 12%)}
+    .heat-cell.l2{background:color-mix(in srgb,var(--panel-2) 76%,#ffb366 24%)}
+    .heat-cell.l3{background:color-mix(in srgb,var(--panel-2) 62%,#ff7d66 38%)}
+    .heat-cell.l4{background:color-mix(in srgb,var(--panel-2) 44%,#ff4c4c 56%)}
+    .rank-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .rank-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .rank-list{display:grid;gap:10px}
+    .rank-item{
+      border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:14px;
+      display:grid;grid-template-columns:38px 1fr 64px;gap:12px;align-items:center;
+    }
+    .rank-no{
+      width:36px;height:36px;border-radius:11px;background:var(--strong);color:var(--bg);
+      display:grid;place-items:center;font-size:11px;font-weight:850;
+    }
+    .rank-copy strong{display:block;font-size:13px}
+    .rank-copy span{font-size:10px;color:var(--muted)}
+    .rank-score{text-align:right}
+    .rank-score b{display:block;font-size:17px}
+    .rank-score span{font-size:9px;color:var(--muted)}
+
+    .weekly-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .weekly-card{
+      border:1px solid var(--line);border-radius:20px;background:var(--panel);
+      padding:22px;min-height:240px;
+    }
+    .weekly-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .weekly-card strong{display:block;font-size:22px;margin:23px 0 8px;letter-spacing:-.035em}
+    .weekly-card p{font-size:12px;color:var(--muted);margin:0}
+    .weekly-card .bar{height:7px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:18px}
+    .weekly-card .bar span{display:block;height:100%;background:var(--strong);border-radius:999px}
+
+    .mvp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .week-card{
+      border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px;
+    }
+    .week-card.primary{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+    .week-card small{font-size:11px;color:var(--muted);font-weight:850;letter-spacing:.1em}
+    .week-card.primary small{color:color-mix(in srgb,var(--bg) 55%,transparent)}
+    .week-card h3{font-size:28px;letter-spacing:-.04em;margin:17px 0 8px}
+    .week-card p{font-size:12px;color:var(--muted);margin:0}
+    .week-card.primary p{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+    .mvp-list{display:grid;gap:9px;margin-top:20px}
+    .mvp-item{
+      display:grid;grid-template-columns:34px 1fr;gap:11px;padding:12px 0;border-top:1px solid var(--line);
+    }
+    .week-card.primary .mvp-item{border-color:color-mix(in srgb,var(--bg) 18%,transparent)}
+    .mvp-no{
+      width:31px;height:31px;border-radius:9px;background:var(--strong);color:var(--bg);
+      display:grid;place-items:center;font-size:10px;font-weight:850;
+    }
+    .week-card.primary .mvp-no{background:var(--bg);color:var(--strong)}
+    .mvp-item strong{display:block;font-size:13px}
+    .mvp-item span{font-size:11px;color:var(--muted)}
+    .week-card.primary .mvp-item span{color:color-mix(in srgb,var(--bg) 62%,transparent)}
+
+    .schema{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
+    .schema-panel{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:26px}
+    .schema-panel h3{font-size:24px;margin:0 0 18px;letter-spacing:-.035em}
+    .field-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .field{
+      border:1px solid var(--line);border-radius:15px;background:var(--panel-2);padding:15px;min-height:110px;
+    }
+    .field small{display:block;color:var(--muted);font-size:11px;font-weight:850;margin-bottom:7px}
+    .field strong{display:block;font-size:13px;margin-bottom:4px}
+    .field span{font-size:11px;color:var(--muted)}
+    .example-card{border:1px solid var(--line);border-radius:24px;background:var(--strong);color:var(--bg);padding:26px}
+    .example-card small{font-size:11px;font-weight:850;letter-spacing:.1em;opacity:.55}
+    .example-card h3{font-size:27px;line-height:1.08;letter-spacing:-.04em;margin:18px 0 12px}
+    .example-line{padding:11px 0;border-top:1px solid color-mix(in srgb,var(--bg) 18%,transparent);font-size:12px}
+    .example-line b{display:block;margin-bottom:3px}
+
+    .metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    .metric-card{
+      border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;min-height:210px;
+    }
+    .metric-card small{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.1em}
+    .metric-card strong{display:block;font-size:23px;margin:24px 0 8px;letter-spacing:-.04em}
+    .metric-card p{font-size:12px;color:var(--muted);margin:0}
+    .metric-card .formula{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);font-size:11px;font-weight:760}
+
+    .score-shell{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}
+    .score-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}
+    .score-summary{display:flex;align-items:baseline;gap:10px}
+    .score-number{font-size:34px;font-weight:850;letter-spacing:-.05em}
+    .score-label{font-size:13px;color:var(--muted)}
+    .table-scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1120px}
+    th,td{padding:14px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--panel-2)}
+    td{font-size:13px}
+    .metric-name{font-weight:750}
+    .metric-help{display:block;color:var(--muted);font-size:11px;margin-top:3px;max-width:360px}
+    .tag{
+      display:inline-flex;align-items:center;justify-content:center;min-width:max-content;
+      padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;line-height:1.2;
+      font-weight:750;white-space:nowrap;word-break:keep-all;
+    }
+    #scoreTable th:first-child,#scoreTable td:first-child{min-width:76px;white-space:nowrap}
+    #scoreTable th:nth-child(6),#scoreTable td:nth-child(6){min-width:72px;width:72px;white-space:nowrap;word-break:keep-all}
+    .input{width:100%;min-width:74px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:8px 9px;outline:none}
+    .input:focus{border-color:var(--muted)}
+    .progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;min-width:120px}
+    .progress>span{display:block;height:100%;background:var(--strong);width:0;border-radius:inherit;transition:.35s ease}
+    .progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+    .status{font-size:11px;font-weight:850;padding:5px 8px;border-radius:999px;display:inline-flex;white-space:nowrap}
+    .status.good{background:var(--good);color:#173617}
+    .status.warn{background:var(--warn);color:#3d3210}
+    .status.risk{background:var(--risk);color:#421a1a}
+
+    .action-grid{display:grid;grid-template-columns:1fr .9fr;gap:16px}
+    .checklist{display:grid;gap:9px}
+    .check-row{
+      display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;
+      padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);
+    }
+    .check-row input{width:18px;height:18px;margin-top:2px;accent-color:var(--strong)}
+    .check-row strong{font-size:13px;display:block}
+    .check-row span{font-size:11px;color:var(--muted)}
+    textarea{
+      width:100%;min-height:280px;border:1px solid var(--line);border-radius:14px;
+      background:var(--bg);color:var(--text);padding:14px;resize:vertical;outline:none;
+    }
+    textarea:focus{border-color:var(--muted)}
+    footer{margin:56px 0 28px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:18px}
+
+    @media(max-width:1180px){
+      .source-grid,.weekly-grid{grid-template-columns:repeat(2,1fr)}
+      .metric-grid{grid-template-columns:repeat(3,1fr)}
+    }
+    @media(max-width:1100px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-side{border-left:none;border-top:1px solid var(--line);min-height:430px}
+      .exec-summary,.funnel-shell,.heatmap-grid,.schema,.action-grid{grid-template-columns:1fr}
+      .mvp-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:860px){
+      .pipeline{overflow:visible;padding:16px}
+      .pipeline-grid{min-width:0;grid-template-columns:1fr;gap:8px}
+      .pipe-link{min-height:28px;transform:rotate(90deg)}
+      .pipe-step{min-height:auto;padding:20px}
+    }
+    @media(max-width:720px){
+      .shell{padding:12px}.topbar{top:8px;align-items:flex-start}
+      .brand-sub{display:none}.actions .btn:not(.primary){display:none}
+      .hero-copy{padding:44px 22px 32px}h1{font-size:44px}.hero-side{padding:22px}
+      .hero-summary,.signal-board,.source-grid,.weekly-grid,.metric-grid,.field-grid{grid-template-columns:1fr}
+      .section-head{align-items:start;flex-direction:column}
+      footer{flex-direction:column}
+    }
+    @media print{
+      .topbar,.actions{display:none!important}
+      body{background:#fff;color:#111}.shell{max-width:none;padding:0}
+      .hero,.panel,.signal-board,.summary-story,.source-card,.pipeline,.funnel-panel,.diagnosis-side,
+      .heatmap-panel,.rank-panel,.weekly-card,.week-card,.schema-panel,.example-card,.metric-card,.score-shell{
+        box-shadow:none;break-inside:avoid
+      }
+      .hero{margin-top:0}.section{margin-top:30px}
+      .input,textarea{border:none;background:transparent;color:#111;padding:0}
+    }
+  </style>
+<style id="pp-platform-nav-style">
+    body{padding-top:58px!important}
+    .topbar{top:72px!important}
+    .pp-platform-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;border-bottom:1px solid var(--line,#292929);background:color-mix(in srgb,var(--bg,#080808) 90%,transparent);backdrop-filter:blur(18px);font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .pp-platform-inner{max-width:1460px;height:100%;margin:auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+    .pp-platform-brand{display:flex;align-items:center;gap:10px;min-width:0;color:var(--text,#f5f5f5);text-decoration:none}
+    .pp-platform-logo{width:38px;height:32px;border:1px solid var(--line,#2b2b2b);border-radius:13px;display:grid;place-items:center;background:var(--panel,#111);flex:0 0 auto}
+    .pp-platform-logo img{width:20px;height:20px;object-fit:contain}
+    [data-theme="light"] .pp-platform-logo img{filter:invert(1)}
+    .pp-platform-title{font-size:12px;font-weight:720;white-space:nowrap}.pp-platform-crumb{font-size:11px;color:var(--muted,#999);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pp-platform-links{margin-left:auto;display:flex;align-items:center;gap:7px}.pp-platform-links a,.pp-platform-links span{height:34px;padding:0 10px;border:1px solid var(--line,#2b2b2b);border-radius:9px;display:inline-flex;align-items:center;color:var(--text,#f5f5f5);text-decoration:none;font-size:11px;background:var(--panel-2,#171717)}.pp-platform-links a:hover{border-color:var(--muted,#999)}.pp-platform-links .disabled{opacity:.35}
+    @media(max-width:720px){body{padding-top:54px!important}.topbar{top:62px!important}.pp-platform-nav{height:54px}.pp-platform-inner{padding:0 12px}.pp-platform-title,.pp-platform-links a:first-child,.pp-platform-links .disabled:first-child{display:none}.pp-platform-crumb{max-width:150px}.pp-platform-links a,.pp-platform-links span{padding:0 8px}}
+    @media print{.pp-platform-nav{display:none!important}body{padding-top:0!important}.topbar{top:0!important}}
+    </style></head>
+<body><nav class="pp-platform-nav"><div class="pp-platform-inner"><a class="pp-platform-brand" href="index.html"><span class="pp-platform-logo"><img src="data:image/png;base64,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" alt="PalmPay"></span><span class="pp-platform-title">PalmPay Design</span><span class="pp-platform-crumb">AI 项目库 / P07 AI 核心漏斗诊断中心</span></a><div class="pp-platform-links"><a href="index.html">返回项目库</a><a href="28_项目二十一_AI文案与内容治理中心.html" title="上一个项目">← 上一个</a><a href="15_项目八_AI新用户激活助手.html" title="下一个项目">下一个 →</a></div></div></nav>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P7</div>
+      <div>
+        <div class="brand-title">AI 核心漏斗诊断中心</div>
+        <div class="brand-sub">从知道指标下降，升级为定位具体步骤、用户类型与体验根因</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeBtn">切换亮色</button>
+      <button class="btn" id="resetBtn">重置记录</button>
+      <button class="btn primary" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="dot"></span> Project 07 · AI Funnel Diagnosis Center</div>
+          <h1>从“知道转化下降”，<br>升级为“知道谁、在哪一步、因为什么退出”。</h1>
+          <p>
+            很多团队能够看到注册率、认证率或交易成功率下降，却无法快速定位具体流失步骤、用户类型和失败原因。
+            AI 核心漏斗诊断中心将埋点、路径、表单错误、用户反馈、客服工单、会话录像与失败原因统一分析，
+            每周自动输出可验证的体验根因和优化实验建议。
+          </p>
+          <div class="hero-summary">
+            <div class="summary-chip"><small>现状</small><strong>指标下降可见，但具体卡点与根因不可见</strong></div>
+            <div class="summary-chip"><small>升级</small><strong>多源数据关联 + AI 诊断 + 人工校准 + 实验建议</strong></div>
+            <div class="summary-chip"><small>结果</small><strong>更快定位流失、更准判断根因、更快进入优化验证</strong></div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div>
+            <div class="hero-side-title">系统每周必须回答四个问题</div>
+            <div class="outcome-stack">
+              <div class="outcome-card"><strong>流失发生在哪里</strong><span>定位到流程、页面、步骤、字段、错误和触发条件。</span></div>
+              <div class="outcome-card"><strong>哪些用户更容易流失</strong><span>识别国家、行业、规模、角色、设备和新老用户差异。</span></div>
+              <div class="outcome-card"><strong>为什么会失败或退出</strong><span>结合错误日志、工单、反馈和录像判断体验根因。</span></div>
+              <div class="outcome-card"><strong>下一步应该验证什么</strong><span>输出优化建议、实验方案、影响范围和优先级。</span></div>
+            </div>
+          </div>
+          <div class="hero-note">系统的价值不在于生成更多漏斗图，而在于把“异常指标”转化为可行动、可验证的体验问题。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">01 · MANAGEMENT SUMMARY</div>
+          <h2>为什么团队知道指标下降，却仍然找不到问题</h2>
+        </div>
+        <div class="section-desc">单一漏斗只能告诉团队“哪里掉了多少”，无法解释“哪些用户、因为什么、在什么场景下退出”。</div>
+      </div>
+
+      <div class="exec-summary">
+        <div class="signal-board">
+          <div class="signal">
+            <div class="signal-label">数据视角</div><div class="signal-value">割裂</div>
+            <div class="signal-desc">埋点、错误、客服、反馈和录像分散在不同系统中。</div>
+          </div>
+          <div class="signal">
+            <div class="signal-label">流失定位</div><div class="signal-value">过于粗</div>
+            <div class="signal-desc">只看到页面或步骤流失，无法定位字段、错误和触发条件。</div>
+          </div>
+          <div class="signal">
+            <div class="signal-label">用户差异</div><div class="signal-value">不清晰</div>
+            <div class="signal-desc">不同国家、行业、规模和角色的流失模式被平均值掩盖。</div>
+          </div>
+          <div class="signal">
+            <div class="signal-label">优化行动</div><div class="signal-value">依赖猜测</div>
+            <div class="signal-desc">团队凭经验提出方案，缺少证据链与影响范围判断。</div>
+          </div>
+        </div>
+
+        <div class="summary-story">
+          <div>
+            <small>FUNNEL DIAGNOSIS STRATEGY</small>
+            <h3>把“漏斗异常”，转化为“用户分群、失败原因与体验根因”。</h3>
+            <p>通过行为数据与用户声音交叉验证，让设计团队从看报表升级为持续发现问题、判断原因和推动实验。</p>
+          </div>
+          <div class="formula">漏斗数据 × 用户分群 × 失败证据 × AI 聚类 × 人工确认 = 可行动诊断</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">02 · DATA SOURCES</div>
+          <h2>AI 诊断需要结合的八类信息</h2>
+        </div>
+        <div class="section-desc">只有把“发生了什么”与“用户为什么这么做”放在一起，才能形成可信诊断。</div>
+      </div>
+
+      <div class="source-grid">
+        <article class="source-card"><small>EVENT DATA</small><strong>埋点数据</strong><p>页面、按钮、字段、错误、提交与成功事件。</p><div class="tagline">回答：哪个步骤发生异常</div></article>
+        <article class="source-card"><small>PATH</small><strong>页面访问路径</strong><p>进入来源、页面顺序、回退、跳转和退出位置。</p><div class="tagline">回答：用户如何到达与离开</div></article>
+        <article class="source-card"><small>FORM ERROR</small><strong>表单错误数据</strong><p>字段校验、错误类型、重复提交和修正次数。</p><div class="tagline">回答：哪些字段造成阻断</div></article>
+        <article class="source-card"><small>FEEDBACK</small><strong>用户反馈</strong><p>访谈、问卷、NPS、产品建议和开放题。</p><div class="tagline">回答：用户如何理解问题</div></article>
+        <article class="source-card"><small>SERVICE</small><strong>客服工单</strong><p>咨询原因、解决路径、升级记录与重复来访。</p><div class="tagline">回答：问题是否需要人工补救</div></article>
+        <article class="source-card"><small>SESSION REPLAY</small><strong>会话录像</strong><p>停顿、犹豫、误点、反复操作和异常路径。</p><div class="tagline">回答：行为细节如何发生</div></article>
+        <article class="source-card"><small>FAILURE REASON</small><strong>失败原因</strong><p>系统返回码、审核驳回、交易失败和规则命中。</p><div class="tagline">回答：系统为什么拒绝或失败</div></article>
+        <article class="source-card"><small>USER SEGMENT</small><strong>用户类型</strong><p>国家、行业、规模、角色、设备、新老用户与活跃度。</p><div class="tagline">回答：哪些用户受影响最大</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">03 · AI DIAGNOSIS PIPELINE</div>
+          <h2>从漏斗异常到实验建议的诊断链路</h2>
+        </div>
+        <div class="section-desc">AI 负责全量扫描、聚类和关联，设计师负责验证证据、判断根因和决定实验方向。</div>
+      </div>
+
+      <div class="pipeline">
+        <div class="pipeline-grid">
+          <div class="pipe-step"><small>01</small><strong>发现异常</strong><p>识别完成率下降、步骤退出上升和时长异常。</p><span class="pipe-badge">指标预警</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>02</small><strong>定位步骤</strong><p>定位到页面、步骤、字段、错误和具体触发条件。</p><span class="pipe-badge">确定卡点</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>03</small><strong>用户分群</strong><p>比较国家、行业、规模、角色和设备差异。</p><span class="pipe-badge">识别受影响用户</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>04</small><strong>失败聚类</strong><p>聚类表单错误、系统失败、工单和反馈主题。</p><span class="pipe-badge">形成原因组</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>05</small><strong>行为验证</strong><p>通过路径与会话录像验证真实操作模式。</p><span class="pipe-badge">补充行为证据</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>06</small><strong>根因判断</strong><p>区分产品规则、内容理解、交互、性能与系统问题。</p><span class="pipe-badge">人工校准</span></div>
+          <div class="pipe-link">→</div>
+          <div class="pipe-step"><small>07</small><strong>实验建议</strong><p>输出优化方案、建议实验、影响范围与优先级。</p><span class="pipe-badge">进入行动</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">04 · FUNNEL DIAGNOSIS</div>
+          <h2>漏斗全景与最大流失步骤</h2>
+        </div>
+        <div class="section-desc">示例以商户认证流程为例，实际数据可替换为当前业务漏斗。</div>
+      </div>
+
+      <div class="funnel-shell">
+        <div class="funnel-panel">
+          <h3>商户认证漏斗示例</h3>
+          <div class="funnel">
+            <div class="funnel-step">
+              <div class="funnel-copy"><strong>进入认证流程</strong><span>全部进入认证页面的商户</span></div>
+              <div class="funnel-metric"><b>100%</b><em>基线</em></div>
+            </div>
+            <div class="funnel-step">
+              <div class="funnel-copy"><strong>填写企业信息</strong><span>公司名称、注册号、地址与行业</span></div>
+              <div class="funnel-metric"><b>84%</b><em>-16%</em></div>
+            </div>
+            <div class="funnel-step">
+              <div class="funnel-copy"><strong>上传认证材料</strong><span>营业执照、注册证明与补充材料</span></div>
+              <div class="funnel-metric"><b>61%</b><em>-23%</em></div>
+            </div>
+            <div class="funnel-step">
+              <div class="funnel-copy"><strong>提交审核</strong><span>完成资料校验并正式提交</span></div>
+              <div class="funnel-metric"><b>48%</b><em>-13%</em></div>
+            </div>
+            <div class="funnel-step">
+              <div class="funnel-copy"><strong>认证通过</strong><span>一次提交或补充后完成认证</span></div>
+              <div class="funnel-metric"><b>37%</b><em>-11%</em></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="diagnosis-side">
+          <div>
+            <small>WEEKLY DIAGNOSIS</small>
+            <h3>本周最大流失发生在“上传认证材料”。</h3>
+            <p>该步骤流失 23%，主要集中在首次认证、小微企业和移动设备用户。</p>
+            <div class="diagnosis-list">
+              <span>流失用户特征：首次认证、小微企业、移动端</span>
+              <span>主要失败原因：材料类型不清、文件不合规、上传失败</span>
+              <span>可能体验根因：内部术语、缺少示例、错误反馈滞后</span>
+              <span>建议实验：材料示例 + 上传前校验 + 智能错误提示</span>
+            </div>
+          </div>
+          <div class="note">预估影响范围：覆盖约 31% 的认证用户，可优先验证材料上传与错误恢复方案。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">05 · HEATMAP & RANKING</div>
+          <h2>流失问题热力图与退出原因排行榜</h2>
+        </div>
+        <div class="section-desc">热力图用于判断问题在哪些步骤和用户群中更严重，排行榜用于确定本周优先级。</div>
+      </div>
+
+      <div class="heatmap-grid">
+        <div class="heatmap-panel">
+          <h3>步骤 × 用户类型热力图</h3>
+          <div class="heatmap">
+            <div class="heat-cell head">流程步骤</div>
+            <div class="heat-cell head">首次认证</div>
+            <div class="heat-cell head">小微企业</div>
+            <div class="heat-cell head">移动端</div>
+            <div class="heat-cell head">非英语用户</div>
+            <div class="heat-cell head">历史驳回用户</div>
+
+            <div class="heat-cell label">企业信息填写</div>
+            <div class="heat-cell l2">中</div><div class="heat-cell l1">低</div><div class="heat-cell l2">中</div><div class="heat-cell l3">较高</div><div class="heat-cell l2">中</div>
+
+            <div class="heat-cell label">材料上传</div>
+            <div class="heat-cell l4">高</div><div class="heat-cell l4">高</div><div class="heat-cell l4">高</div><div class="heat-cell l3">较高</div><div class="heat-cell l3">较高</div>
+
+            <div class="heat-cell label">字段与材料校验</div>
+            <div class="heat-cell l3">较高</div><div class="heat-cell l2">中</div><div class="heat-cell l3">较高</div><div class="heat-cell l4">高</div><div class="heat-cell l4">高</div>
+
+            <div class="heat-cell label">提交审核</div>
+            <div class="heat-cell l2">中</div><div class="heat-cell l2">中</div><div class="heat-cell l1">低</div><div class="heat-cell l2">中</div><div class="heat-cell l3">较高</div>
+          </div>
+        </div>
+
+        <div class="rank-panel">
+          <h3>Top 5 退出原因</h3>
+          <div class="rank-list">
+            <div class="rank-item"><div class="rank-no">01</div><div class="rank-copy"><strong>不理解材料要求</strong><span>客服、录像、反馈三类证据一致</span></div><div class="rank-score"><b>28%</b><span>影响占比</span></div></div>
+            <div class="rank-item"><div class="rank-no">02</div><div class="rank-copy"><strong>文件格式或大小不合规</strong><span>错误日志与重复上传明显</span></div><div class="rank-score"><b>19%</b><span>影响占比</span></div></div>
+            <div class="rank-item"><div class="rank-no">03</div><div class="rank-copy"><strong>上传失败后无法恢复</strong><span>移动端与弱网用户更严重</span></div><div class="rank-score"><b>16%</b><span>影响占比</span></div></div>
+            <div class="rank-item"><div class="rank-no">04</div><div class="rank-copy"><strong>公司信息与材料不一致</strong><span>校验发生在提交后，修正成本高</span></div><div class="rank-score"><b>13%</b><span>影响占比</span></div></div>
+            <div class="rank-item"><div class="rank-no">05</div><div class="rank-copy"><strong>审核时长与状态不透明</strong><span>重复查询与客服咨询增加</span></div><div class="rank-score"><b>9%</b><span>影响占比</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">06 · WEEKLY OUTPUT</div>
+          <h2>系统每周自动输出的八类结果</h2>
+        </div>
+        <div class="section-desc">输出需要能够直接进入产品、设计、数据与运营的周度问题评审。</div>
+      </div>
+
+      <div class="weekly-grid">
+        <article class="weekly-card"><small>01</small><strong>最大流失步骤</strong><p>识别本周影响最大的流程、页面、步骤与字段。</p><div class="bar"><span style="width:92%"></span></div></article>
+        <article class="weekly-card"><small>02</small><strong>流失用户特征</strong><p>识别国家、行业、规模、角色、设备和新老用户差异。</p><div class="bar"><span style="width:86%"></span></div></article>
+        <article class="weekly-card"><small>03</small><strong>主要失败原因</strong><p>聚类错误码、驳回、表单校验、工单和反馈原因。</p><div class="bar"><span style="width:90%"></span></div></article>
+        <article class="weekly-card"><small>04</small><strong>可能体验根因</strong><p>区分理解、内容、流程、交互、性能、规则与系统问题。</p><div class="bar"><span style="width:82%"></span></div></article>
+        <article class="weekly-card"><small>05</small><strong>优化建议</strong><p>针对问题根因提出可实施的体验改进方向。</p><div class="bar"><span style="width:80%"></span></div></article>
+        <article class="weekly-card"><small>06</small><strong>建议实验</strong><p>输出假设、方案、主指标、防护指标和验证周期。</p><div class="bar"><span style="width:88%"></span></div></article>
+        <article class="weekly-card"><small>07</small><strong>预估影响范围</strong><p>估算受影响用户、覆盖步骤与潜在业务结果。</p><div class="bar"><span style="width:76%"></span></div></article>
+        <article class="weekly-card"><small>08</small><strong>证据与置信度</strong><p>标记数据来源、样本规模、冲突点和待验证内容。</p><div class="bar"><span style="width:84%"></span></div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">07 · TWO-WEEK MVP</div>
+          <h2>两周 MVP：先跑通商户认证流程</h2>
+        </div>
+        <div class="section-desc">MVP 不建设完整平台，先用近三个月数据跑通一次完整诊断与人工确认。</div>
+      </div>
+
+      <div class="mvp-grid">
+        <article class="week-card">
+          <small>WEEK 01</small>
+          <h3>数据准备与 AI 初诊断</h3>
+          <p>建立完整证据包，让 AI 完成第一轮问题聚类和流失定位。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>导出近三个月漏斗数据</strong><span>按步骤、用户类型、设备与时间拆分。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>收集认证相关客服工单</strong><span>保留问题主题、用户原声和解决方式。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>收集表单错误日志</strong><span>字段、错误类型、发生次数和重复提交。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>补充失败原因与用户分群</strong><span>审核驳回、系统失败、用户类型和设备信息。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>AI 聚类与初步诊断</strong><span>输出流失步骤、原因组、用户特征和疑似根因。</span></div></div>
+          </div>
+        </article>
+
+        <article class="week-card primary">
+          <small>WEEK 02</small>
+          <h3>人工确认与实验建议</h3>
+          <p>设计师与产品、数据、客服共同校准诊断，形成可执行结果。</p>
+          <div class="mvp-list">
+            <div class="mvp-item"><div class="mvp-no">1</div><div><strong>设计师人工确认</strong><span>抽查数据、反馈、录像和问题聚类是否一致。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">2</div><div><strong>形成 Top 10 流失原因清单</strong><span>标记影响范围、严重度、证据和置信度。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">3</div><div><strong>生成问题热力图</strong><span>展示步骤、用户类型和问题强度的交叉分布。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">4</div><div><strong>建立优化实验建议池</strong><span>输出建议方案、主指标、防护指标和优先级。</span></div></div>
+            <div class="mvp-item"><div class="mvp-no">5</div><div><strong>完成首次周报</strong><span>形成可进入周一问题评审的标准诊断报告。</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">08 · DIAGNOSIS SCHEMA</div>
+          <h2>每条漏斗问题必须包含的信息</h2>
+        </div>
+        <div class="section-desc">标准字段确保问题可比较、可排序、可追踪，并能够进入实验和上线复盘。</div>
+      </div>
+
+      <div class="schema">
+        <div class="schema-panel">
+          <h3>诊断问题字段</h3>
+          <div class="field-grid">
+            <div class="field"><small>01</small><strong>流程与步骤</strong><span>具体流程、页面、步骤、字段和触发条件。</span></div>
+            <div class="field"><small>02</small><strong>异常指标</strong><span>完成率、退出率、时长、错误率或咨询率变化。</span></div>
+            <div class="field"><small>03</small><strong>受影响用户</strong><span>国家、行业、规模、角色、设备与新老用户。</span></div>
+            <div class="field"><small>04</small><strong>失败原因</strong><span>表单、系统、审核、规则、内容和交互原因。</span></div>
+            <div class="field"><small>05</small><strong>证据来源</strong><span>埋点、路径、工单、反馈、录像和错误日志。</span></div>
+            <div class="field"><small>06</small><strong>体验根因</strong><span>当前判断、支持证据和待确认内容。</span></div>
+            <div class="field"><small>07</small><strong>影响范围</strong><span>用户数、步骤覆盖、业务指标与成本影响。</span></div>
+            <div class="field"><small>08</small><strong>建议实验</strong><span>方案、主指标、防护指标、周期和 Owner。</span></div>
+          </div>
+        </div>
+
+        <div class="example-card">
+          <small>EXAMPLE · 认证材料上传问题</small>
+          <h3>首次认证用户在材料上传步骤大量退出。</h3>
+          <div class="example-line"><b>异常指标</b>步骤退出率 23%，较上月上升 7 个百分点。</div>
+          <div class="example-line"><b>受影响用户</b>首次认证、小微企业、移动端用户更明显。</div>
+          <div class="example-line"><b>失败原因</b>材料类型不清、文件大小超限、上传失败后无法恢复。</div>
+          <div class="example-line"><b>体验根因</b>内部术语、缺少材料示例、校验反馈发生过晚。</div>
+          <div class="example-line"><b>建议实验</b>材料示例 + 上传前校验 + 失败后保留已完成内容。</div>
+          <div class="example-line"><b>影响范围</b>预计覆盖 31% 的认证用户，优先级高。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">09 · DELIVERABLES</div>
+          <h2>项目四项核心产出物</h2>
+        </div>
+        <div class="section-desc">产出必须直接支持问题评审、优先级判断、方案设计和实验执行。</div>
+      </div>
+
+      <div class="weekly-grid">
+        <article class="weekly-card"><small>REPORT</small><strong>每周漏斗诊断报告</strong><p>汇总异常指标、流失步骤、用户特征、失败原因和建议行动。</p><div class="bar"><span style="width:94%"></span></div></article>
+        <article class="weekly-card"><small>HEATMAP</small><strong>流失问题热力图</strong><p>按步骤与用户群展示问题强度和影响范围。</p><div class="bar"><span style="width:88%"></span></div></article>
+        <article class="weekly-card"><small>RANKING</small><strong>用户退出原因排行榜</strong><p>按影响、频率、严重度和证据强度排序。</p><div class="bar"><span style="width:90%"></span></div></article>
+        <article class="weekly-card"><small>EXPERIMENT POOL</small><strong>优化实验建议池</strong><p>记录方案、假设、指标、优先级、状态和结果。</p><div class="bar"><span style="width:86%"></span></div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">10 · KEY METRICS</div>
+          <h2>五个关键指标</h2>
+        </div>
+        <div class="section-desc">指标需要按总体、步骤和用户分群同时观察，避免平均值掩盖真实问题。</div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric-card"><small>01</small><strong>核心流程完成率</strong><p>进入流程并完成最终目标的用户比例。</p><div class="formula">完成用户 ÷ 进入用户</div></article>
+        <article class="metric-card"><small>02</small><strong>步骤退出率</strong><p>到达某一步后未继续下一步的用户比例。</p><div class="formula">该步退出用户 ÷ 到达用户</div></article>
+        <article class="metric-card"><small>03</small><strong>平均完成时间</strong><p>从进入流程到成功完成的平均或中位时长。</p><div class="formula">建议优先使用中位数</div></article>
+        <article class="metric-card"><small>04</small><strong>表单错误率</strong><p>发生字段校验、提交错误或重复修正的用户比例。</p><div class="formula">错误用户 ÷ 填写用户</div></article>
+        <article class="metric-card"><small>05</small><strong>客服咨询率</strong><p>流程中产生相关咨询或人工介入的用户比例。</p><div class="formula">咨询用户 ÷ 流程用户</div></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">11 · KPI SCORECARD</div>
+          <h2>可编辑的漏斗诊断指标看板</h2>
+        </div>
+        <div class="section-desc">示例值可直接修改，页面会自动保存到当前浏览器并计算目标完成度。</div>
+      </div>
+
+      <div class="score-shell">
+        <div class="score-toolbar">
+          <div class="score-summary"><div class="score-number" id="overallScore">0%</div><div class="score-label">整体目标完成度</div></div>
+          <div style="font-size:12px;color:var(--muted)">建议每周更新异常指标，按实验周期复盘结果。</div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="scoreTable">
+            <thead>
+              <tr><th>维度</th><th>指标</th><th>方向</th><th>当前值</th><th>目标值</th><th>单位</th><th>负责人</th><th>完成度</th><th>状态</th></tr>
+            </thead>
+            <tbody>
+              <tr data-direction="up" data-default-current="37" data-default-target="55">
+                <td><span class="tag">北极星</span></td>
+                <td><span class="metric-name">核心流程完成率</span><span class="metric-help">进入核心流程并完成最终目标的用户比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="核心旅程 Owner"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="23" data-default-target="12">
+                <td><span class="tag">流失</span></td>
+                <td><span class="metric-name">最大步骤退出率</span><span class="metric-help">当前核心流程中流失最严重步骤的退出比例</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="增长体验负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="18" data-default-target="10">
+                <td><span class="tag">时长</span></td>
+                <td><span class="metric-name">平均完成时间</span><span class="metric-help">用户从进入流程到完成目标的中位时长</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>分钟</td>
+                <td><input class="input owner" value="体验设计"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="31" data-default-target="15">
+                <td><span class="tag">错误</span></td>
+                <td><span class="metric-name">表单错误率</span><span class="metric-help">发生字段、校验或提交错误的用户比例</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="产品与技术"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="down" data-default-current="16" data-default-target="8">
+                <td><span class="tag">服务</span></td>
+                <td><span class="metric-name">客服咨询率</span><span class="metric-help">流程相关咨询用户占全部流程用户的比例</span></td>
+                <td>越低越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="客服与运营"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+              <tr data-direction="up" data-default-current="40" data-default-target="85">
+                <td><span class="tag">诊断</span></td>
+                <td><span class="metric-name">高价值问题进入实验率</span><span class="metric-help">Top 10 流失问题进入方案验证或实验的比例</span></td>
+                <td>越高越好</td><td><input class="input current" type="number" step="0.1"></td><td><input class="input target" type="number" step="0.1"></td><td>%</td>
+                <td><input class="input owner" value="漏斗诊断负责人"></td><td><div class="progress"><span></span></div><div class="progress-text"></div></td><td><span class="status"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">12 · EXECUTION BOARD</div>
+          <h2>项目实施记录</h2>
+        </div>
+        <div class="section-desc">用于记录试点流程、数据来源、Top 10 原因、实验与阶段结果，内容只保存在当前浏览器。</div>
+      </div>
+
+      <div class="action-grid">
+        <div class="panel">
+          <h3 style="margin:0 0 18px;font-size:23px">两周 MVP 检查清单</h3>
+          <div class="checklist" id="checklist">
+            <label class="check-row"><input type="checkbox"><span><strong>选定一个核心漏斗</strong><span>建议从商户认证、注册、首笔交易或交易查询开始。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>导出近三个月漏斗数据</strong><span>按步骤、用户类型、设备与时间拆分。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>收集客服工单与用户反馈</strong><span>保留问题主题、用户原声和解决路径。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>收集表单错误与失败日志</strong><span>包含字段、错误码、发生次数和恢复情况。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>完成 AI 聚类与人工确认</strong><span>抽查数据、路径、反馈和录像是否支持诊断。</span></span></label>
+            <label class="check-row"><input type="checkbox"><span><strong>形成 Top 10 原因与实验建议池</strong><span>标记影响范围、证据、优先级、Owner 和指标。</span></span></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin:0 0 8px;font-size:23px">试点说明</h3>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:12px">建议记录试点流程、关键异常、Top 10 原因、实验和两周结论。</p>
+          <textarea id="notes" placeholder="试点核心流程：
+数据时间范围：
+核心流程完成率：
+最大流失步骤：
+主要流失用户：
+Top 10 流失原因：
+1.
+2.
+3.
+
+首批优化实验：
+主指标：
+防护指标：
+实验 Owner：
+
+两周 MVP 结论：
+下一阶段计划："></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>AI 体验设计项目 · Project 07</span>
+    <span>诊断目标：异常可定位、用户可分群、根因有证据、优化可验证。</span>
+  </footer>
+</div>
+
+<script>
+  const DATA_KEY="project07_ai_funnel_diagnosis_v1";
+  const THEME_KEY="project07_ai_funnel_diagnosis_theme_v1";
+  const rows=[...document.querySelectorAll("#scoreTable tbody tr")];
+  const checks=[...document.querySelectorAll("#checklist input")];
+  const notes=document.getElementById("notes");
+  const themeBtn=document.getElementById("themeBtn");
+
+  function setTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    themeBtn.textContent=theme==="light"?"切换暗黑":"切换亮色";
+    localStorage.setItem(THEME_KEY,theme);
+  }
+  function calcProgress(current,target,direction){
+    if(!isFinite(current)||!isFinite(target)||target===0)return 0;
+    if(direction==="up")return Math.max(0,Math.min(130,current/target*100));
+    if(current<=0)return 130;
+    return Math.max(0,Math.min(130,target/current*100));
+  }
+  function statusFor(progress){
+    return progress>=100?["已达成","good"]:progress>=75?["接近目标","warn"]:["需关注","risk"];
+  }
+  function updateScore(save=true){
+    let total=0;
+    rows.forEach(row=>{
+      const current=parseFloat(row.querySelector(".current").value);
+      const target=parseFloat(row.querySelector(".target").value);
+      const p=calcProgress(current,target,row.dataset.direction);
+      const normalized=Math.min(100,p);
+      total+=normalized;
+      row.querySelector(".progress>span").style.width=normalized+"%";
+      row.querySelector(".progress-text").textContent=Math.round(p)+"%";
+      const [label,cls]=statusFor(p);
+      const status=row.querySelector(".status");
+      status.textContent=label;
+      status.className="status "+cls;
+    });
+    document.getElementById("overallScore").textContent=Math.round(total/rows.length)+"%";
+    if(save)saveData();
+  }
+  function saveData(){
+    localStorage.setItem(DATA_KEY,JSON.stringify({
+      rows:rows.map(row=>({
+        current:row.querySelector(".current").value,
+        target:row.querySelector(".target").value,
+        owner:row.querySelector(".owner").value
+      })),
+      checks:checks.map(c=>c.checked),
+      notes:notes.value
+    }));
+  }
+  function loadData(){
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){}
+    rows.forEach((row,i)=>{
+      const data=saved.rows?.[i];
+      row.querySelector(".current").value=data?.current??row.dataset.defaultCurrent;
+      row.querySelector(".target").value=data?.target??row.dataset.defaultTarget;
+      if(data?.owner)row.querySelector(".owner").value=data.owner;
+    });
+    checks.forEach((c,i)=>c.checked=Boolean(saved.checks?.[i]));
+    notes.value=saved.notes||"";
+    updateScore(false);
+  }
+
+  document.querySelectorAll("#scoreTable input").forEach(el=>el.addEventListener("input",()=>updateScore(true)));
+  checks.forEach(c=>c.addEventListener("change",saveData));
+  notes.addEventListener("input",saveData);
+  themeBtn.addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+  document.getElementById("resetBtn").addEventListener("click",()=>{
+    if(confirm("确认清空本页面的指标与实施记录吗？")){
+      localStorage.removeItem(DATA_KEY);
+      loadData();
+    }
+  });
+
+  setTheme(localStorage.getItem(THEME_KEY)||"dark");
+  loadData();
+</script>
+<script id="pp-theme-sync">(function(){try{var t=localStorage.getItem('ppux-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);var o=new MutationObserver(function(){var v=document.documentElement.getAttribute('data-theme')||'dark';localStorage.setItem('ppux-theme',v)});o.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();</script></body>
+</html>
