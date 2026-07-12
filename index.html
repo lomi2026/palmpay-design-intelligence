@@ -270,7 +270,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
 .preview-note small{color:var(--muted);font-size:8px;letter-spacing:.1em}
 .preview-note strong{display:block;margin-top:5px;font-size:12px}
 .note-progress{height:4px;background:var(--surface-3);border-radius:999px;margin-top:11px;overflow:hidden}
-.note-progress i{display:block;width:72%;height:100%;background:var(--text);border-radius:inherit}
+.note-progress i{display:block;width:60%;height:100%;background:var(--text);border-radius:inherit}
 
 /* Metrics */
 .metrics-wrap{padding:0 0 34px}
@@ -563,6 +563,14 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
   .modal-grid{grid-template-columns:1fr}
   .footer-meta{align-items:flex-start;flex-direction:column;gap:6px}
 }
+
+.overlay[hidden],.search-modal[hidden],.modal[hidden]{display:none!important}
+.mobile-section-toggle{display:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:9px 12px;font:650 12px/1 inherit;cursor:pointer}
+@media(max-width:720px){
+  .mobile-section-toggle{display:inline-flex;align-items:center;justify-content:center;width:100%;margin-top:14px}
+  .mobile-section-collapsible.is-mobile-collapsed .section-head~*{display:none!important}
+  .mobile-section-collapsible .section-head{margin-bottom:18px}
+}
 </style>
 </head>
 <body>
@@ -670,9 +678,9 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
                 Search assets, skills or cases
               </div>
               <div class="mock-kpis">
-                <div class="mock-kpi"><span>ASSETS</span><strong>128</strong><em>Structured</em></div>
-                <div class="mock-kpi"><span>AI SKILLS</span><strong>36</strong><em>Reusable</em></div>
-                <div class="mock-kpi"><span>REUSE</span><strong>72%</strong><em>Last 90 days</em></div>
+                <div class="mock-kpi"><span>ASSETS</span><strong>24</strong><em>Published</em></div>
+                <div class="mock-kpi"><span>AI SKILLS</span><strong>12</strong><em>Published</em></div>
+                <div class="mock-kpi"><span>REUSE</span><strong>86</strong><em>Last 30 days</em></div>
               </div>
               <div class="mock-row-head"><b>Featured knowledge</b><span>View all →</span></div>
               <div class="mock-cards">
@@ -700,8 +708,8 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
           </div>
         </div>
         <div class="preview-note">
-          <small>ASSET REUSE RATE</small>
-          <strong>72% of verified assets reused</strong>
+          <small>VERIFIED CONTENT COVERAGE</small>
+          <strong>60% of published content verified</strong>
           <div class="note-progress"><i></i></div>
         </div>
       </div>
@@ -712,20 +720,20 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
     <div class="shell">
       <div class="metrics">
         <article class="metric">
-          <div class="metric-top"><span>设计资产</span><span>Demo Data</span></div>
-          <strong>128</strong><p>已完成结构化归档</p>
+          <div class="metric-top"><span>设计资产</span><span>统一口径</span></div>
+          <strong>24</strong><p>当前已发布内容</p>
         </article>
         <article class="metric">
-          <div class="metric-top"><span>AI Skill</span><span>Demo Data</span></div>
-          <strong>36</strong><p>可复制、可持续维护</p>
+          <div class="metric-top"><span>AI Skill</span><span>统一口径</span></div>
+          <strong>12</strong><p>当前已发布内容</p>
         </article>
         <article class="metric">
-          <div class="metric-top"><span>资产复用率</span><span>近 90 天</span></div>
-          <strong>72%</strong><p>已验证资产的团队复用情况</p>
+          <div class="metric-top"><span>AI 案例</span><span>统一口径</span></div>
+          <strong>4</strong><p>当前已发布实践案例</p>
         </article>
         <article class="metric">
-          <div class="metric-top"><span>节省工时</span><span>近 90 天</span></div>
-          <strong>240h</strong><p>基于项目负责人确认的估算</p>
+          <div class="metric-top"><span>有效复用</span><span>近 30 天</span></div>
+          <strong>86</strong><p>被真实项目引用并确认</p>
         </article>
       </div>
     </div>
@@ -787,7 +795,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
           <h2>33 个 AI 体验设计探索项目</h2>
           <p>从设计生产、用户增长到金融风险与组织能力，建立一套可以逐步试点、验证和复制的 AI 项目组合。</p>
         </div>
-        <a class="text-link" href="projects/index.html">查看全部项目
+        <a class="text-link" href="workspace.html#ai-projects">进入 AI 项目库
           <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
         </a>
       </div>
@@ -798,12 +806,12 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
         <div class="project-stat"><strong>5</strong><span>风险与治理</span></div>
       </div>
       <div class="project-preview-grid">
-        <a class="project-preview-card" href="projects/12_90天执行计划.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>S05 · STRATEGY</span><span>↗</span></div><h3>90 天执行计划</h3><p>通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。</p><div class="project-preview-foot"><span>组织执行</span><span>可立项</span></div></a>
-        <a class="project-preview-card" href="projects/08_AI需求分析与体验策略中心.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>P01 · PRODUCTION</span><span>↗</span></div><h3>AI 需求分析与体验策略中心</h3><p>统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。</p><div class="project-preview-foot"><span>设计生产</span><span>可立项</span></div></a>
-        <a class="project-preview-card" href="projects/15_项目八_AI新用户激活助手.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>P08 · GROWTH</span><span>↗</span></div><h3>AI 新用户激活助手</h3><p>基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。</p><div class="project-preview-foot"><span>业务增长</span><span>可立项</span></div></a>
-        <a class="project-preview-card" href="projects/30_项目二十三_AI高风险操作体验审计.html" target="_blank" rel="noopener"><div class="project-preview-top"><span>P23 · RISK</span><span>↗</span></div><h3>AI 高风险操作体验审计</h3><p>审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。</p><div class="project-preview-foot"><span>金融风险</span><span>可立项</span></div></a>
+        <a class="project-preview-card" href="projects/12_90天执行计划.html?from=home"><div class="project-preview-top"><span>S05 · STRATEGY</span><span>↗</span></div><h3>90 天执行计划</h3><p>通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。</p><div class="project-preview-foot"><span>组织执行</span><span>可立项</span></div></a>
+        <a class="project-preview-card" href="projects/08_AI需求分析与体验策略中心.html?from=home"><div class="project-preview-top"><span>P01 · PRODUCTION</span><span>↗</span></div><h3>AI 需求分析与体验策略中心</h3><p>统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。</p><div class="project-preview-foot"><span>设计生产</span><span>可立项</span></div></a>
+        <a class="project-preview-card" href="projects/15_项目八_AI新用户激活助手.html?from=home"><div class="project-preview-top"><span>P08 · GROWTH</span><span>↗</span></div><h3>AI 新用户激活助手</h3><p>基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。</p><div class="project-preview-foot"><span>业务增长</span><span>可立项</span></div></a>
+        <a class="project-preview-card" href="projects/30_项目二十三_AI高风险操作体验审计.html?from=home"><div class="project-preview-top"><span>P23 · RISK</span><span>↗</span></div><h3>AI 高风险操作体验审计</h3><p>审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。</p><div class="project-preview-foot"><span>金融风险</span><span>可立项</span></div></a>
       </div>
-      <div class="project-actions"><a class="btn primary" href="projects/index.html">查看全部 33 个项目<svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg></a><a class="btn secondary" href="projects/12_90天执行计划.html" target="_blank" rel="noopener">查看 90 天执行路线</a></div>
+      <div class="project-actions"><a class="btn primary" href="workspace.html#ai-projects">进入 AI 项目库<svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg></a><a class="btn secondary" href="projects/12_90天执行计划.html?from=home">查看 90 天执行路线</a></div>
     </div>
   </section>
 
@@ -954,7 +962,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
     </div>
   </section>
 
-  <section class="section compact governance-section">
+  <section class="section compact governance-section" id="governance">
     <div class="shell">
       <div class="section-head">
         <div class="section-copy">
@@ -1022,18 +1030,18 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
   </div>
 </footer>
 
-<div class="overlay" id="overlay"></div>
+<div class="overlay" id="overlay" hidden></div>
 
-<section class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="全局搜索">
+<section class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="全局搜索" hidden>
   <div class="search-field">
     <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
-    <input id="globalSearch" type="search" placeholder="搜索设计资产、AI Skill 或案例…" autocomplete="off" />
+    <input id="globalSearch" type="search" placeholder="搜索资产、AI Skill、案例或 AI 项目…" autocomplete="off" />
     <button class="modal-close" type="button" data-close-search aria-label="关闭搜索">×</button>
   </div>
-  <div class="search-results" id="searchResults"></div>
+  <div class="search-results" id="searchResults" role="listbox" aria-label="搜索结果"></div>
 </section>
 
-<section class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+<section class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle" hidden>
   <div class="modal-top">
     <small id="detailType">Design Asset</small>
     <button class="modal-close" type="button" data-close-modal aria-label="关闭详情">×</button>
@@ -1056,6 +1064,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
 
 <div class="toast" id="toast">已复制</div>
 
+<script src="./projects-data.js"></script>
 <script>
 const assetDetails = [
   {
@@ -1096,6 +1105,19 @@ const assetDetails = [
   }
 ];
 
+const projectSearchItems = (window.PP_PROJECTS_DATA || []).map(project => ({
+  title:project.title,
+  code:project.code,
+  kind:'AI 项目',
+  type:'Exploration Project',
+  description:project.description,
+  team:project.owner,
+  status:project.stage,
+  scene:`${project.category} · ${project.value}`,
+  updated:'2026.07',
+  action:()=>{window.location.href=`projects/${project.file}?from=home`}
+}));
+
 const globalItems = [
   ...assetDetails.map((item,index)=>({...item,kind:'设计资产',action:()=>openAsset(index)})),
   {
@@ -1108,20 +1130,9 @@ const globalItems = [
     title:'营销活动视觉探索',kind:'AI 案例',type:'Verified AI Practice',
     description:'从 3 天首轮探索缩短到 4 小时，并沉淀为可复用工作流。',
     team:'AI 设计小组',status:'已验证案例',scene:'营销设计、视觉探索',updated:'2026.07',
-    action:()=>document.querySelector('#cases').scrollIntoView({behavior:'smooth'})
+    action:()=>{revealMobileSection(document.querySelector('#cases'));document.querySelector('#cases').scrollIntoView({behavior:'smooth'})}
   },
-  {
-    title:'90 天执行计划',kind:'AI 探索项目',type:'Exploration Project',
-    description:'通过试点完成基础建设、结果验证、标准化与复制。',
-    team:'Design Ops',status:'可立项',scene:'组织执行',updated:'2026.07',
-    action:()=>window.open('projects/12_90天执行计划.html','_blank','noopener')
-  },
-  {
-    title:'AI 新用户激活助手',kind:'AI 探索项目',type:'Exploration Project',
-    description:'基于用户状态推荐下一步最有价值的行动。',
-    team:'Growth Design',status:'可立项',scene:'用户增长',updated:'2026.07',
-    action:()=>window.open('projects/15_项目八_AI新用户激活助手.html','_blank','noopener')
-  }
+  ...projectSearchItems
 ];
 
 const root = document.documentElement;
@@ -1153,22 +1164,62 @@ document.getElementById('themeToggle').addEventListener('click',()=>{
   setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
 });
 
-function lock(open){
-  document.body.classList.toggle('locked',open);
-  overlay.classList.toggle('open',open);
+let activeDialog = null;
+let lastFocusedElement = null;
+let closeTimer = null;
+const pageRegions = [document.querySelector('header'), document.querySelector('main'), document.querySelector('footer'), mobileNav].filter(Boolean);
+
+function setBackgroundInert(value){
+  pageRegions.forEach(region => {
+    region.inert = value;
+    if(value) region.setAttribute('aria-hidden','true');
+    else region.removeAttribute('aria-hidden');
+  });
+}
+function focusableElements(dialog){
+  return [...dialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+    .filter(element => !element.hidden && element.offsetParent !== null);
+}
+function showDialog(dialog, preferredFocus){
+  clearTimeout(closeTimer);
+  [detailModal,searchModal].forEach(item=>{if(item!==dialog){item.classList.remove('open');item.hidden=true;}});
+  lastFocusedElement = document.activeElement;
+  activeDialog = dialog;
+  overlay.hidden = false;
+  dialog.hidden = false;
+  setBackgroundInert(true);
+  document.body.classList.add('locked');
+  requestAnimationFrame(()=>{overlay.classList.add('open');dialog.classList.add('open');});
+  setTimeout(()=>{
+    const target = preferredFocus || focusableElements(dialog)[0];
+    target?.focus({preventScroll:true});
+  },60);
 }
 function closeAll(){
-  detailModal.classList.remove('open');
-  searchModal.classList.remove('open');
-  lock(false);
+  if(!activeDialog) return;
+  const closing = activeDialog;
+  closing.classList.remove('open');
+  overlay.classList.remove('open');
+  activeDialog = null;
+  document.body.classList.remove('locked');
+  setBackgroundInert(false);
+  closeTimer=setTimeout(()=>{closing.hidden=true;overlay.hidden=true;},180);
+  if(lastFocusedElement?.isConnected) lastFocusedElement.focus({preventScroll:true});
 }
 overlay.addEventListener('click',closeAll);
 document.querySelectorAll('[data-close-modal],[data-close-search]').forEach(btn=>btn.addEventListener('click',closeAll));
 document.addEventListener('keydown',e=>{
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase()==='k'){
-    e.preventDefault();openSearch();
+    e.preventDefault();openSearch();return;
   }
-  if(e.key==='Escape') closeAll();
+  if(e.key==='Escape' && activeDialog){e.preventDefault();closeAll();return;}
+  if(e.key==='Tab' && activeDialog){
+    const items=focusableElements(activeDialog);
+    if(!items.length){e.preventDefault();return;}
+    const first=items[0], last=items[items.length-1];
+    if(e.shiftKey && document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first.focus();}
+  }
 });
 
 function openAsset(index){
@@ -1180,8 +1231,7 @@ function openAsset(index){
   document.getElementById('detailStatus').textContent = item.status;
   document.getElementById('detailScene').textContent = item.scene;
   document.getElementById('detailUpdated').textContent = item.updated;
-  searchModal.classList.remove('open');
-  lock(true);detailModal.classList.add('open');
+  showDialog(detailModal, document.querySelector('[data-close-modal]'));
 }
 document.querySelectorAll('.asset-card').forEach((card,index)=>card.addEventListener('click',()=>openAsset(index)));
 
@@ -1193,7 +1243,7 @@ function openSkill(){
   document.getElementById('detailStatus').textContent = '已验证 · 可复制';
   document.getElementById('detailScene').textContent = 'UI 验收、设计走查、开发协同';
   document.getElementById('detailUpdated').textContent = '2026.07';
-  lock(true);detailModal.classList.add('open');
+  showDialog(detailModal, document.querySelector('[data-close-modal]'));
 }
 document.querySelectorAll('[data-skill-card]').forEach(el=>el.addEventListener('click',openSkill));
 
@@ -1209,25 +1259,42 @@ document.querySelector('[data-copy-asset]').addEventListener('click',async()=>{
 });
 
 function openSearch(){
-  lock(true);detailModal.classList.remove('open');searchModal.classList.add('open');
   const input = document.getElementById('globalSearch');
-  input.value='';renderSearch('');setTimeout(()=>input.focus(),80);
+  input.value='';
+  renderSearch('');
+  showDialog(searchModal,input);
 }
 document.querySelectorAll('[data-open-search]').forEach(btn=>btn.addEventListener('click',openSearch));
 
 function renderSearch(query){
   const target = document.getElementById('searchResults');
   const q = query.trim().toLowerCase();
-  const items = globalItems.filter(item=>`${item.title} ${item.kind} ${item.description} ${item.team}`.toLowerCase().includes(q));
-  if(!items.length){target.innerHTML='<div class="search-empty">没有找到匹配内容。</div>';return}
+  const items = globalItems.filter(item=>`${item.code||''} ${item.title} ${item.kind} ${item.description} ${item.team} ${item.scene||''}`.toLowerCase().includes(q));
+  if(!items.length){target.innerHTML='<div class="search-empty" role="status">没有找到匹配内容。</div>';return}
   target.innerHTML = items.map((item,index)=>`
-    <button class="search-result" data-result="${index}">
+    <button class="search-result" role="option" aria-selected="false" data-result="${index}" tabindex="${index===0?'0':'-1'}">
       <span class="result-icon">
         <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h6"/></svg>
       </span>
-      <span class="result-copy"><b>${item.title}</b><span>${item.kind} · ${item.team}</span></span>
+      <span class="result-copy"><b>${item.code?`${item.code} · `:''}${item.title}</b><span>${item.kind} · ${item.team}</span></span>
     </button>`).join('');
-  target.querySelectorAll('[data-result]').forEach((button,index)=>button.addEventListener('click',()=>items[index].action()));
+  const resultButtons=[...target.querySelectorAll('[data-result]')];
+  const activate=index=>{closeAll();items[index].action();};
+  resultButtons.forEach((button,index)=>{
+    button.addEventListener('click',()=>activate(index));
+    button.addEventListener('keydown',event=>{
+      if(!['ArrowDown','ArrowUp','Home','End','Enter',' '].includes(event.key)) return;
+      event.preventDefault();
+      if(event.key==='Enter'||event.key===' '){activate(index);return;}
+      let next=index;
+      if(event.key==='ArrowDown') next=(index+1)%resultButtons.length;
+      if(event.key==='ArrowUp') next=(index-1+resultButtons.length)%resultButtons.length;
+      if(event.key==='Home') next=0;
+      if(event.key==='End') next=resultButtons.length-1;
+      resultButtons.forEach((item,i)=>{item.tabIndex=i===next?0:-1;item.setAttribute('aria-selected',i===next?'true':'false');});
+      resultButtons[next].focus();
+    });
+  });
 }
 document.getElementById('globalSearch').addEventListener('input',e=>renderSearch(e.target.value));
 
@@ -1254,7 +1321,9 @@ filterButtons.forEach(btn=>btn.addEventListener('click',()=>{
 }));
 
 document.querySelectorAll('[data-scroll-target]').forEach(card=>card.addEventListener('click',()=>{
-  document.getElementById(card.dataset.scrollTarget).scrollIntoView({behavior:'smooth'});
+  const target=document.getElementById(card.dataset.scrollTarget);
+  revealMobileSection(target);
+  target.scrollIntoView({behavior:'smooth'});
 }));
 document.querySelectorAll('[data-workspace]').forEach(btn=>btn.addEventListener('click',()=>{
   try{localStorage.setItem('pp-theme',JSON.stringify(root.dataset.theme || 'dark'));}catch{}
@@ -1263,6 +1332,47 @@ document.querySelectorAll('[data-workspace]').forEach(btn=>btn.addEventListener(
 
 document.getElementById('mobileMenuBtn').addEventListener('click',()=>mobileNav.classList.toggle('open'));
 mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mobileNav.classList.remove('open')));
+
+const mobileCollapsibleSections=[document.getElementById('assets'),document.getElementById('cases'),document.getElementById('governance')].filter(Boolean);
+const mobileMedia=window.matchMedia('(max-width: 720px)');
+function revealMobileSection(section){
+  if(!section) return;
+  section.classList.remove('is-mobile-collapsed');
+  const button=section.querySelector('[data-mobile-section-toggle]');
+  if(button){button.textContent='收起本模块';button.setAttribute('aria-expanded','true');}
+}
+function setupMobileSections(){
+  mobileCollapsibleSections.forEach(section=>{
+    section.classList.add('mobile-section-collapsible');
+    let button=section.querySelector('[data-mobile-section-toggle]');
+    if(!button){
+      button=document.createElement('button');
+      button.type='button';
+      button.className='mobile-section-toggle';
+      button.dataset.mobileSectionToggle='';
+      const head=section.querySelector('.section-head');
+      head?.appendChild(button);
+      button.addEventListener('click',()=>{
+        const collapsed=section.classList.toggle('is-mobile-collapsed');
+        button.textContent=collapsed?'展开本模块':'收起本模块';
+        button.setAttribute('aria-expanded',collapsed?'false':'true');
+      });
+    }
+    if(mobileMedia.matches){
+      section.classList.add('is-mobile-collapsed');
+      button.textContent='展开本模块';
+      button.setAttribute('aria-expanded','false');
+    }else{
+      section.classList.remove('is-mobile-collapsed');
+      button.textContent='收起本模块';
+      button.setAttribute('aria-expanded','true');
+    }
+  });
+}
+setupMobileSections();
+const initialSection = window.location.hash ? document.querySelector(window.location.hash) : null;
+if(initialSection) revealMobileSection(initialSection);
+mobileMedia.addEventListener?.('change',setupMobileSections);
 
 const sections = [...document.querySelectorAll('main section[id]')];
 const navLinks = [...document.querySelectorAll('.nav a')];
