@@ -112,7 +112,7 @@ svg{display:block}
 .icon.sm{width:15px;height:15px}
 .icon.lg{width:22px;height:22px}
 .btn{
-  min-height:46px;padding:0 18px;border-radius:12px;border:1px solid transparent;
+  min-height:40px;padding:0 18px;border-radius:10px;border:1px solid transparent;
   display:inline-flex;align-items:center;justify-content:center;gap:9px;
   cursor:pointer;font-size:13px;font-weight:700;transition:.2s ease;
 }
@@ -124,7 +124,7 @@ svg{display:block}
 .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
 .btn.ghost:hover{background:var(--soft);color:var(--text)}
 .icon-btn{
-  width:40px;height:40px;border-radius:11px;border:1px solid var(--line);
+  width:40px;height:40px;border-radius:10px;border:1px solid var(--line);
   background:var(--soft);display:grid;place-items:center;cursor:pointer;
   transition:.18s ease;
 }
@@ -147,7 +147,7 @@ svg{display:block}
 .brand{display:flex;align-items:center;gap:10px;min-width:max-content}
 .brand-mark{
   width:36px;height:36px;border:1px solid var(--line-strong);
-  border-radius:11px;display:grid;place-items:center;background:var(--surface);
+  border-radius:10px;display:grid;place-items:center;background:var(--surface);
   box-shadow:inset 0 1px rgba(255,255,255,.06);overflow:hidden;flex:0 0 auto
 }
 .brand-mark img{width:21px;height:23px;display:block;object-fit:contain}
@@ -163,7 +163,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
 .nav a:hover,.nav a.active{color:var(--text);background:var(--soft)}
 .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
 .header-search{
-  width:180px;height:40px;border:1px solid var(--line);border-radius:11px;
+  width:180px;height:40px;border:1px solid var(--line);border-radius:10px;
   background:var(--soft);display:flex;align-items:center;gap:9px;padding:0 11px;
   color:var(--muted);cursor:pointer
 }
@@ -380,7 +380,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
 .case-canvas{display:grid;grid-template-columns:1fr 36px 1fr;align-items:center}
 .case-stage{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:16px}
 .case-stage-label{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:8px}
-.stage-screen{height:205px;margin-top:12px;border:1px solid var(--line);border-radius:11px;background:var(--bg-elevated);padding:12px}
+.stage-screen{height:205px;margin-top:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elevated);padding:12px}
 .stage-screen .s-head{height:18px;border-bottom:1px solid var(--line);margin-bottom:10px}
 .s-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
 .s-grid i{height:67px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
@@ -485,7 +485,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
 .search-field input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}
 .search-results{padding:10px;max-height:420px;overflow:auto}
 .search-result{
-  width:100%;border:0;background:transparent;border-radius:11px;padding:13px;
+  width:100%;border:0;background:transparent;border-radius:10px;padding:13px;
   display:flex;align-items:center;gap:13px;text-align:left;cursor:pointer
 }
 .search-result:hover{background:var(--soft-strong)}
@@ -509,6 +509,9 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
 
 
 /* AI exploration portfolio */
+.project-showcase .section-copy{max-width:none}
+.project-showcase .project-intro{max-width:none;white-space:nowrap}
+@media(max-width:1180px){.project-showcase .project-intro{white-space:normal}}
 .project-showcase{padding:96px 0 40px}
 .project-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden;margin-bottom:18px}
 .project-stat{padding:22px 24px;border-right:1px solid var(--line)}.project-stat:last-child{border-right:0}.project-stat strong{display:block;font-size:30px;letter-spacing:-.05em}.project-stat span{display:block;margin-top:6px;color:var(--muted);font-size:10px}
@@ -744,13 +747,13 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
       <div class="section-head">
         <div class="section-copy">
           <div class="eyebrow">Start with a task</div>
-          <h2>不从栏目开始，从任务开始</h2>
-          <p>首页只保留三个高频入口，让设计师、产品经理和业务伙伴快速进入正确路径。</p>
+          <h2>高频入口，直达工作台</h2>
+          <p>三个高频入口，让设计师、产品经理和业务伙伴快速进入正确路径。</p>
         </div>
       </div>
 
       <div class="path-grid">
-        <article class="path-card" data-scroll-target="assets">
+        <a class="path-card" href="./workspace.html#assets" aria-label="进入工作台设计资产页面">
           <span class="path-index">01 / FIND</span>
           <span class="path-decor"></span>
           <div class="path-icon">
@@ -759,9 +762,9 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
           <h3>找设计资产</h3>
           <p>搜索组件、页面模板、规范和交付机制，减少重复设计与沟通成本。</p>
           <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
-        </article>
+        </a>
 
-        <article class="path-card" data-skill-card>
+        <a class="path-card" href="./workspace.html#skills" aria-label="进入工作台 AI Skill 页面">
           <span class="path-index">02 / APPLY</span>
           <span class="path-decor"></span>
           <div class="path-icon">
@@ -770,9 +773,9 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
           <h3>用 AI Skill</h3>
           <p>调用经过设计师验证的输入约束、分析维度、输出结构和判断标准。</p>
           <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
-        </article>
+        </a>
 
-        <article class="path-card" data-scroll-target="cases">
+        <a class="path-card" href="./workspace.html#value" aria-label="进入工作台价值总览页面">
           <span class="path-index">03 / PROVE</span>
           <span class="path-decor"></span>
           <div class="path-icon">
@@ -781,7 +784,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
           <h3>看业务影响</h3>
           <p>查看设计方法如何被应用、验证与复用，而不只是观看静态作品。</p>
           <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
-        </article>
+        </a>
       </div>
     </div>
   </section>
@@ -793,7 +796,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
         <div class="section-copy">
           <div class="eyebrow">AI exploration portfolio</div>
           <h2>33 个 AI 体验设计探索项目</h2>
-          <p>从设计生产、用户增长到金融风险与组织能力，建立一套可以逐步试点、验证和复制的 AI 项目组合。</p>
+          <p class="project-intro">从设计生产、用户增长到金融风险与组织能力，建立一套可以逐步试点、验证和复制的 AI 项目组合。</p>
         </div>
         <a class="text-link" href="workspace.html#ai-projects">进入 AI 项目库
           <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
@@ -820,8 +823,8 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
       <div class="section-head">
         <div class="section-copy">
           <div class="eyebrow">Latest assets</div>
-          <h2>最近更新的设计资产</h2>
-          <p>卡片只保留最关键的信息：资产类型、标题、维护团队、验证状态与更新时间。</p>
+          <h2>最新设计资产</h2>
+          <p>将组件、设计规范、品牌、AI工作流，持续沉淀为固有设计资产。</p>
         </div>
         <button class="text-link" type="button" data-workspace>进入完整资产库
           <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
@@ -915,8 +918,8 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
       <div class="section-head">
         <div class="section-copy">
           <div class="eyebrow">Verified AI practice</div>
-          <h2>一个案例，说明方法与结果</h2>
-          <p>不再平铺多张相似卡片，而是用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p>
+          <h2>AI案例-沉淀方法与结果</h2>
+          <p>用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p>
         </div>
       </div>
 
@@ -967,7 +970,7 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
       <div class="section-head">
         <div class="section-copy">
           <div class="eyebrow">Platform governance</div>
-          <h2>平台不是作品集，而是治理机制</h2>
+          <h2>从设计系统到平台机制</h2>
           <p>用三个角色形成从标准、创新到质量闭环，避免资产只上传、不维护、不复用。</p>
         </div>
       </div>

@@ -72,7 +72,7 @@
     .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .btn{
       border:1px solid var(--line);background:var(--panel-2);color:var(--text);
-      padding:8px 12px;border-radius:11px;cursor:pointer;
+      padding:8px 12px;border-radius:10px;cursor:pointer;
       transition:.2s ease;white-space:nowrap;
     }
     .btn:hover{transform:translateY(-1px);border-color:var(--muted)}
@@ -379,6 +379,7 @@
     .workspace-back{display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none}
     .workspace-back svg{width:15px;height:15px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style>
+  <link rel="stylesheet" href="../logo-unification.css">
 </head>
 <body>
 <div class="shell">
@@ -391,8 +392,8 @@
       </div>
     </div>
     <div class="actions">
-<button class="btn" id="themeBtn">切换亮色</button>
-      <button class="btn" id="resetBtn">重置数据</button>
+<button class="btn" id="themeBtn">切换至亮色模式</button>
+      <button class="btn" id="resetBtn">重置填写内容</button>
       <a class="btn primary workspace-back" href="../workspace.html#ai-projects" aria-label="返回项目库" title="返回项目库"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/><path d="M9 12h10"/></svg><span>返回项目库</span></a>
     </div>
   </header>
@@ -842,7 +843,7 @@
 
   function setTheme(theme){
     document.documentElement.setAttribute("data-theme", theme);
-    themeBtn.textContent = theme === "light" ? "切换暗黑" : "切换亮色";
+    themeBtn.textContent = theme === "light" ? "切换暗黑" : "切换至亮色模式";
     localStorage.setItem(THEME_KEY, theme);
   }
 
@@ -928,5 +929,6 @@
 </script>
 <script src="../projects-data.js"></script>
 <script src="../project-detail-nav.js"></script>
+<script src="../logo-unification.js"></script>
 </body>
 </html>
