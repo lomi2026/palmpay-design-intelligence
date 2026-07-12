@@ -10,10 +10,30 @@
   };
 
   const sourceProjects = Array.isArray(window.PP_PROJECTS_DATA) ? window.PP_PROJECTS_DATA : [];
-  const projects = sourceProjects.map(({ file, ...project }) => project);
-  const detailFiles = Object.fromEntries(sourceProjects.map(project => [project.code, project.file]));
+  const priorityFallback = {
+    P01: { priorityRank: 1, priorityReason: '输入与输出边界清晰，可直接复用现有 PRD，最快形成团队级效率样板。', impact: '高', effort: '中', readiness: '高' },
+    P04: { priorityRank: 2, priorityReason: '质量问题成本可量化，适合在上线前流程中建立明确门禁。', impact: '高', effort: '中', readiness: '高' },
+    P15: { priorityRank: 3, priorityReason: '可利用历史 PRD 回测，低风险验证规则召回率与误报率。', impact: '高', effort: '低', readiness: '高' },
+    P08: { priorityRank: 4, priorityReason: '激活链路数据基础较成熟，业务结果可通过转化率直接验证。', impact: '高', effort: '中', readiness: '中' }
+  };
+  const normalizedSourceProjects = sourceProjects.map(project => {
+    const fallback = priorityFallback[project.code];
+    const rawRank = Number(project.priorityRank);
+    if (!fallback) return { ...project, priorityRank: Number.isFinite(rawRank) ? rawRank : undefined };
+    return {
+      ...fallback,
+      ...project,
+      priorityRank: Number.isFinite(rawRank) ? rawRank : fallback.priorityRank,
+      priorityReason: project.priorityReason || fallback.priorityReason,
+      impact: project.impact || fallback.impact,
+      effort: project.effort || fallback.effort,
+      readiness: project.readiness || fallback.readiness
+    };
+  });
+  const projects = normalizedSourceProjects.map(({ file, ...project }) => project);
+  const detailFiles = Object.fromEntries(normalizedSourceProjects.map(project => [project.code, project.file]));
   const priorityProjects = projects.filter(project => Number.isFinite(project.priorityRank)).sort((a, b) => a.priorityRank - b.priorityRank).slice(0, 4);
-  window.PP_PROJECTS = sourceProjects.map(project => ({ ...project }));
+  window.PP_PROJECTS = normalizedSourceProjects.map(project => ({ ...project }));
 
   const STORAGE_KEY = 'pp-ai-project-library-state';
   const defaultState = {
