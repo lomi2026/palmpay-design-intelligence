@@ -1,0 +1,237 @@
+{
+  "version": 2,
+  "count": 33,
+  "projects": [
+    {
+      "code": "S01",
+      "title": "体验设计团队北极星指标对焦板",
+      "file": "01_体验设计团队北极星指标对焦板.html",
+      "url": "project-detail.html?id=S01",
+      "asset": "project-detail-s01-eb9c59449b1d.js"
+    },
+    {
+      "code": "S02",
+      "title": "设计团队升级为体验增长部门",
+      "file": "02_设计团队升级为体验增长部门.html",
+      "url": "project-detail.html?id=S02",
+      "asset": "project-detail-s02-823e94982557.js"
+    },
+    {
+      "code": "S03",
+      "title": "把设计指标与业务指标绑定",
+      "file": "10_把设计指标与业务指标绑定.html",
+      "url": "project-detail.html?id=S03",
+      "asset": "project-detail-s03-3233dae0bfaa.js"
+    },
+    {
+      "code": "S04",
+      "title": "设计团队组织如何调整",
+      "file": "11_设计团队组织如何调整.html",
+      "url": "project-detail.html?id=S04",
+      "asset": "project-detail-s04-8f42343337ba.js"
+    },
+    {
+      "code": "S05",
+      "title": "90 天执行计划",
+      "file": "12_90天执行计划.html",
+      "url": "project-detail.html?id=S05",
+      "asset": "project-detail-s05-10c63d30aee3.js"
+    },
+    {
+      "code": "S06",
+      "title": "设计团队固定周运行机制",
+      "file": "13_设计团队固定周运行机制.html",
+      "url": "project-detail.html?id=S06",
+      "asset": "project-detail-s06-c9b3a568d5d0.js"
+    },
+    {
+      "code": "S07",
+      "title": "设计团队 AI 转型组织与运行机制",
+      "file": "07_设计团队AI转型组织与运行机制.html",
+      "url": "project-detail.html?id=S07",
+      "asset": "project-detail-s07-5a209f8812dd.js"
+    },
+    {
+      "code": "P01",
+      "title": "AI 需求分析与体验策略中心",
+      "file": "08_AI需求分析与体验策略中心.html",
+      "url": "project-detail.html?id=P01",
+      "asset": "project-detail-p01-fbb774931e86.js"
+    },
+    {
+      "code": "P02",
+      "title": "AI 用户反馈与机会发现系统",
+      "file": "09_AI用户反馈与机会发现系统.html",
+      "url": "project-detail.html?id=P02",
+      "asset": "project-detail-p02-9bddbefb56b2.js"
+    },
+    {
+      "code": "P03",
+      "title": "AI 设计系统与设计开发一体化",
+      "file": "03_AI设计系统与设计开发一体化.html",
+      "url": "project-detail.html?id=P03",
+      "asset": "project-detail-p03-3dbb48aedc92.js"
+    },
+    {
+      "code": "P04",
+      "title": "AI 产品质量门禁",
+      "file": "04_AI产品质量门禁.html",
+      "url": "project-detail.html?id=P04",
+      "asset": "project-detail-p04-6ed25352f2a4.js"
+    },
+    {
+      "code": "P05",
+      "title": "体验增长实验工厂",
+      "file": "05_体验增长实验工厂.html",
+      "url": "project-detail.html?id=P05",
+      "asset": "project-detail-p05-d3ea13af3c49.js"
+    },
+    {
+      "code": "P06",
+      "title": "产品内 AI 体验升级",
+      "file": "06_产品内AI体验升级.html",
+      "url": "project-detail.html?id=P06",
+      "asset": "project-detail-p06-cf16f7a73488.js"
+    },
+    {
+      "code": "P15",
+      "title": "AI PRD 风险扫描器",
+      "file": "22_项目十五_AI_PRD风险扫描器.html",
+      "url": "project-detail.html?id=P15",
+      "asset": "project-detail-p15-1c7cba2cd695.js"
+    },
+    {
+      "code": "P16",
+      "title": "AI 体验债务管理系统",
+      "file": "23_项目十六_AI体验债务管理系统.html",
+      "url": "project-detail.html?id=P16",
+      "asset": "project-detail-p16-2c69cf0fd5c3.js"
+    },
+    {
+      "code": "P17",
+      "title": "AI 竞品与行业变化雷达",
+      "file": "24_项目十七_AI竞品与行业变化雷达.html",
+      "url": "project-detail.html?id=P17",
+      "asset": "project-detail-p17-d09393e0f9d1.js"
+    },
+    {
+      "code": "P18",
+      "title": "AI 用户研究助手",
+      "file": "25_项目十八_AI用户研究助手.html",
+      "url": "project-detail.html?id=P18",
+      "asset": "project-detail-p18-8529dc327272.js"
+    },
+    {
+      "code": "P19",
+      "title": "AI 页面状态生成器",
+      "file": "26_项目十九_AI页面状态生成器.html",
+      "url": "project-detail.html?id=P19",
+      "asset": "project-detail-p19-f273bf80d421.js"
+    },
+    {
+      "code": "P20",
+      "title": "AI 原型批量生成工作流",
+      "file": "27_项目二十_AI原型批量生成工作流.html",
+      "url": "project-detail.html?id=P20",
+      "asset": "project-detail-p20-20f572308165.js"
+    },
+    {
+      "code": "P21",
+      "title": "AI 文案与内容治理中心",
+      "file": "28_项目二十一_AI文案与内容治理中心.html",
+      "url": "project-detail.html?id=P21",
+      "asset": "project-detail-p21-141285eeda38.js"
+    },
+    {
+      "code": "P07",
+      "title": "AI 核心漏斗诊断中心",
+      "file": "14_项目七_AI核心漏斗诊断中心.html",
+      "url": "project-detail.html?id=P07",
+      "asset": "project-detail-p07-e3855e5d0742.js"
+    },
+    {
+      "code": "P08",
+      "title": "AI 新用户激活助手",
+      "file": "15_项目八_AI新用户激活助手.html",
+      "url": "project-detail.html?id=P08",
+      "asset": "project-detail-p08-8d56bad95ff0.js"
+    },
+    {
+      "code": "P09",
+      "title": "AI 功能渗透增长助手",
+      "file": "16_项目九_AI功能渗透增长助手.html",
+      "url": "project-detail.html?id=P09",
+      "asset": "project-detail-p09-39432e7f569f.js"
+    },
+    {
+      "code": "P10",
+      "title": "AI 流失用户召回分析",
+      "file": "17_项目十_AI流失用户召回分析.html",
+      "url": "project-detail.html?id=P10",
+      "asset": "project-detail-p10-51f10fd4977c.js"
+    },
+    {
+      "code": "P11",
+      "title": "AI 客服问题产品化系统",
+      "file": "18_项目十一_AI客服问题产品化系统.html",
+      "url": "project-detail.html?id=P11",
+      "asset": "project-detail-p11-24a283337b8f.js"
+    },
+    {
+      "code": "P12",
+      "title": "AI 运营工作台助手",
+      "file": "19_项目十二_AI运营工作台助手.html",
+      "url": "project-detail.html?id=P12",
+      "asset": "project-detail-p12-0708e251c901.js"
+    },
+    {
+      "code": "P13",
+      "title": "AI 审核材料预检",
+      "file": "20_项目十三_AI审核材料预检.html",
+      "url": "project-detail.html?id=P13",
+      "asset": "project-detail-p13-397e311c4b60.js"
+    },
+    {
+      "code": "P14",
+      "title": "AI 智能报表生成器",
+      "file": "21_项目十四_AI智能报表生成器.html",
+      "url": "project-detail.html?id=P14",
+      "asset": "project-detail-p14-130317d60c73.js"
+    },
+    {
+      "code": "P22",
+      "title": "AI 多语言与本地化体验检查",
+      "file": "29_项目二十二_AI多语言与本地化体验检查.html",
+      "url": "project-detail.html?id=P22",
+      "asset": "project-detail-p22-3e52e69d6c42.js"
+    },
+    {
+      "code": "P23",
+      "title": "AI 高风险操作体验审计",
+      "file": "30_项目二十三_AI高风险操作体验审计.html",
+      "url": "project-detail.html?id=P23",
+      "asset": "project-detail-p23-abcaf722289d.js"
+    },
+    {
+      "code": "P24",
+      "title": "AI 合规规则体验转译器",
+      "file": "31_项目二十四_AI合规规则体验转译器.html",
+      "url": "project-detail.html?id=P24",
+      "asset": "project-detail-p24-15aa57f57960.js"
+    },
+    {
+      "code": "P25",
+      "title": "AI 设计决策知识库",
+      "file": "32_项目二十五_AI设计决策知识库.html",
+      "url": "project-detail.html?id=P25",
+      "asset": "project-detail-p25-29e0b9cda076.js"
+    },
+    {
+      "code": "P26",
+      "title": "AI 团队能力诊断与培训系统",
+      "file": "33_项目二十六_AI团队能力诊断与培训系统.html",
+      "url": "project-detail.html?id=P26",
+      "asset": "project-detail-p26-46d79cc14a01.js"
+    }
+  ]
+}
