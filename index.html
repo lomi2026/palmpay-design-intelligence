@@ -1,13 +1,11 @@
-<!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<!DOCTYPE html>
+
+<html data-theme="dark" lang="zh-CN">
 <head>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="PalmPay Design Intelligence Hub — 优化版可点击首页原型" />
-<meta name="theme-color" content="#090909" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="PalmPay Design Intelligence Hub — 优化版可点击首页原型" name="description"/>
+<meta content="#090909" name="theme-color"/>
 <title>PalmPay Design Intelligence Hub · 官方展示首页</title>
 <style>
 :root{
@@ -69,7 +67,7 @@ body{
     radial-gradient(circle at 72% -10%, var(--soft-strong), transparent 31%),
     radial-gradient(circle at 5% 24%, var(--soft), transparent 24%),
     var(--bg);
-  font-family:"Inter Tight",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
   line-height:1.55;
@@ -575,819 +573,491 @@ html[data-theme="light"] .brand-mark img{filter:invert(1)}
   .mobile-section-collapsible .section-head{margin-bottom:18px}
 }
 </style>
+<style id="phase4-quality-styles">
+.pp-skip-link{position:fixed;z-index:20000;top:8px;left:8px;transform:translateY(-160%);padding:10px 14px;border-radius:10px;background:#fff;color:#090909;font:700 13px/1 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:transform .15s ease}.pp-skip-link:focus{transform:translateY(0)}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-
+<a class="pp-skip-link" href="#home">跳到主要内容</a>
 <header class="header">
-  <div class="shell header-inner">
-    <a class="brand" href="#home" aria-label="返回首页">
-      <span class="brand-mark" aria-hidden="true">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHYAAACCCAYAAACTpDweAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAACG9JREFUeAHtnY1x2zgQhVepICUoHfg60FVgXwViKjhfBUIqsFOBmAqSVEBdBU4HdAdJB++wBnmhbf2Q4gOwovnNYKxEM+KSnwiI2AW5kAkCYOn/XPt21TT99/vm7V++PTbtm2//LhaLR5mxiZf53reNbxWG8+DbuvlCzFjAy1j59hU8trPgjDRCK8Sj0m3ITBoSCH3JFvMZHA89uL6VyMcWs2Ae+P2j6CdscIdZ8Dj8AfwbdoR2qX1by8wwEMbRB9in9u1aZo6DMI5WuDy2mLvn18DeOHouG9/ey8yT1BuELm0q1DAw/i4kEwgX/xvfVjJNfvj2V6556HeSGIRu986/rGS6UhVNPujZu8XUx1/YvXyJTY3E3XOSrhih29Wz9EreNo++3fru+btEJqpYhC5oK9Pucs+h9O1TzPE3iliEn/x/+3YrvxPcM69xvn32gn8JGbpYL/VGQre7lJk+PPrmvNwvQoQm1gvV8VOFrsQOeiboAds1rxXtQfTLdy22epOdbx/NlOmguXyBPe5xZBYI+dOAh9BjmfcLB7uzRsWAfXCwR40cs1ewPVlfyEBgU66yRarJDdieZCjkTGBXbo2YZy/CWFrBLoWMBHblKluwz16ExHcNuxRCArbl1mBVTiJ0vZYphAxsy1U2MgbYvIzpUkgkMFW5CH26ZW4lMrAvdzt0hzawjZNEwL7cu747Yn1MdZIY2Jd7e2oHlrCNk0zAtlydV1geC76CXZxkBrblVoeCXsEuTowA23JX+wKuYBMnxoBdudXLQK2OrU6MArtyn1J+bfnpSuyhNUFOSCB8eWl5zia2T2KP4v9XsNcNOyGB19moGsRsCWydubqfV93gLKXhnJDA8dmzcfOtz7djQe4rqVewgxMS6DclypR7j3w8l9oEZOUyxwkJDJvnZsotkZ7XUptgbpEfJyRwXvLiUuXul9oEknt8cEIC4zJSlyb3sNSEQRzCCQlw0oyXIve41CaACnlwQgLc3PElyD29uA15xDohgTgFAZblFn03nPruLE5IIG6VB1NuBQ7FkI3WSIcTEkhT5TFaLsJdVRkUQ7abUqwTEkhbunO2XOSS2my8RnyckECeeqzBcpFTahNAbJyQQN4iu95ykVtqE0RMnJCAjcrJk3JhQWoTSCyckICtctjNkTjX4FDIWBAHJyRgs8Z5syfONTgUwgB8SiEBrtQtuM8O2HTiZKU+CyEArRQBl1JIgCu16HyuA48NglRGoUIhBBCWuz4wxZZCApGkdj6fKdecVP1AlthSSCCy1M52mHLHQFlcho5UhSG2FBJIJLWzvUnkovFCqjJWbCkkkFhqZ7u55DohgD1SlTFiSyGBTFI7208t1wkBHJCqnCu2FBLILLUTRyq5TgjgiFTlHLGlkIARqZ14Yst1QgAnpCpDxZZCAsakduKKJdcJCfSYaBkithQS4EqthAz4qUwnJNCzaqSv2FJIgD/3a12sExIYUArUR+xXIYF4E/rM+qQNeDghgYH1XafE6gBNWXqI+FkaRn3SBjyckMAZRXvHxF6S1Jazl0diQlKVQ2IvUWrLYLmYmFRln9hLltrSWy4mKFV5KXYKUltOysVEpSpdsUypVu7utj4S4wY8nJAAaXVDK5YpdY3xMG+dsN4T4wY8nJAAcclKu3bHmlQtN3Hgse7EuAEPJyRAXocUCp84ga3B4arzmUy5Or9agYcTEoiwuEwYIGLpJWzeKMsJCUT6kSljQYJ6WtiS64QEIl45yBiQsEgaNuQ6IYHIl4NyLshQ+Y68cp2QQIJrfDkHZFzOgDxynZBAmombWoYCA2tUkFauExJINxs3TCwMLTxCGrlOSCDtFGt/seBJdUICceWWQgLp580f+ga2Bo8axGe0IY7cUkggTzLkdLkQ4twdtYZduaWQQL4MV3UqMNYSwX3UsCe3FBLIm7bcHgssptSWGnbklkIC+XPR7lBgKaS21Ohzb8D+B/UcuaWQgI1bK9zuCyyl1JbTd/McdnCHyC2FBOzcL2P1MrAcUltyyC2FBGzdBOXVswFyP/QhpdxSSMCW1J/dwCxIbWHLLfB8yYZ+Pu3Zs7B3u6KqG5yF5wJ0ocpt9lGXHi6FCGzeg+qpDGjR7rT/81Ns8cu3PxeLxQ8xCMKSEif2+OCP2ePTI9D8Cz2IO7GFftkqkM9cBoal7lTqs/+B7ceM0h5ZNhbYfsz56lDQFeySXS5sS302P7x4EfjS/9GUD+2pjWQK39V8kQzAbvfb8qHbDb/rvtO8YfHRmS0lMpy5FyD1n1dj6z5gs5a3SzK5sN39Km7I/ugOlbBNdLmwL7WUc8AbPnPBrRqJwb2MAW9QLuxL5UyJIlzj1rAL864xa9ilxqFr1RE7vITtcdfSU61iUIG0MvLQzr/MlljCwlOt2FCzUacOguWzN+dTrdhUIGek+h4Qq2dvjqdaMal9u5GcIOQ572GPLY582xHivoM99FiOHksXQgLhIOp9Fy2l2TQd+c23781rbUvfVr7pZZKlOfGdhKlBSv6ZJrYFYcGVdoVLmenDowSh34QIXazSdCX6S452fTlBtPf47Nt9U+hAJYrYlqZ7dhK6vZnf7Hz72CsjcyZRxbYg/MK7k7l71vFTu92dROadJEDHD98++JcfJYwpbw3talXoHymkZgH2pybZUC5fhpKkK94HbF4eMdn59mmyZ+gpYHvu+Rxq5J41sgLCLJD1vO8pdLJe98FqIWA+cLnjb4Uck/WXhj9IN7iM7llvCbySmWHA7vibLkc6VRC6ZyvZo3kcZYP84+8W8zgaj0bwyacxEqkwj6PpQKicrBCPahaaEfC76K+zUEM0gvVX9MMZMitM7EdRtrnimCD8yFn5di0hVaitlaaZlkcJKTRt32PmRXPxHwKDoGu5jyzSAAAAAElFTkSuQmCC" alt="PalmPay Logo" />
-      </span>
-      <span class="brand-copy">
-        <strong>PalmPay Design</strong>
-        <span>Intelligence Hub</span>
-      </span>
-    </a>
-
-    <nav class="nav" aria-label="主导航">
-      <a class="active" href="#home">首页</a>
-      <a href="#assets">设计资产</a>
-      <a href="#skills">AI Skill</a>
-      <a href="#projects">探索项目</a>
-      <a href="#cases">AI 案例</a>
-      <a href="#impact">业务影响</a>
-    </nav>
-
-    <div class="header-actions">
-      <button class="header-search" type="button" data-open-search>
-        <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
-        <span>搜索资产、Skill 或案例</span>
-        <kbd>⌘K</kbd>
-      </button>
-      <button class="icon-btn" type="button" id="themeToggle" aria-label="切换明暗主题">
-        <svg class="icon theme-icon-moon" viewBox="0 0 24 24"><path d="M20 15.2A8.3 8.3 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"/></svg>
-      </button>
-      <button class="btn primary" type="button" data-workspace>进入工作台
-        <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
-      </button>
-      <button class="icon-btn mobile-menu" id="mobileMenuBtn" type="button" aria-label="打开导航">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
-      </button>
-    </div>
-  </div>
-</header>
-
-<nav class="mobile-nav" id="mobileNav">
-  <a href="#home">首页</a>
-  <a href="#assets">设计资产</a>
-  <a href="#skills">AI Skill</a>
-  <a href="#projects">探索项目</a>
-  <a href="#cases">AI 案例</a>
-  <a href="#impact">业务影响</a>
+<div class="shell header-inner">
+<a aria-label="返回首页" class="brand" href="#home">
+<span aria-hidden="true" class="brand-mark">
+<img alt="PalmPay Logo" src="data:image/png;base64,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"/>
+</span>
+<span class="brand-copy">
+<strong>PalmPay Design</strong>
+<span>Intelligence Hub</span>
+</span>
+</a>
+<nav aria-label="主导航" class="nav">
+<a class="active" href="#home">首页</a>
+<a href="#assets">设计资产</a>
+<a href="#skills">AI Skill</a>
+<a href="#projects">探索项目</a>
+<a href="#cases">AI 案例</a>
+<a href="#impact">业务影响</a>
 </nav>
-
+<div class="header-actions">
+<button class="header-search" data-open-search="" type="button">
+<svg class="icon sm" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.7-3.7"></path></svg>
+<span>搜索资产、Skill 或案例</span>
+<kbd>⌘K</kbd>
+</button>
+<button aria-label="切换明暗主题" class="icon-btn" id="themeToggle" type="button">
+<svg class="icon theme-icon-moon" viewbox="0 0 24 24"><path d="M20 15.2A8.3 8.3 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path></svg>
+</button>
+<a class="btn primary" data-workspace="" href="./workspace.html">进入工作台
+        <svg class="icon sm" viewbox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>
+</a>
+<button aria-label="打开导航" class="icon-btn mobile-menu" id="mobileMenuBtn" type="button">
+<svg class="icon" viewbox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"></path></svg>
+</button>
+</div>
+</div>
+</header>
+<nav class="mobile-nav" id="mobileNav">
+<a href="#home">首页</a>
+<a href="#assets">设计资产</a>
+<a href="#skills">AI Skill</a>
+<a href="#projects">探索项目</a>
+<a href="#cases">AI 案例</a>
+<a href="#impact">业务影响</a>
+</nav>
 <main id="home">
-  <section class="hero">
-    <div class="shell hero-grid">
-      <div class="hero-copy">
-        <div class="eyebrow">Internal Beta · Updated July 2026</div>
-        <h1>让设计资产被复用<span>让设计价值被衡量</span></h1>
-        <p>汇聚设计资产、AI Skill 与经过验证的实践案例，让团队成员可以更快发现、调用、贡献并衡量设计能力。</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="#assets">浏览设计资产
-            <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
-          </a>
-          <button class="btn secondary" type="button" data-open-search>
-            <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+<section class="hero">
+<div class="shell hero-grid">
+<div class="hero-copy">
+<div class="eyebrow">Internal Beta · Updated July 2026</div>
+<h1>让设计资产被复用<span>让设计价值被衡量</span></h1>
+<p>汇聚设计资产、AI Skill 与经过验证的实践案例，让团队成员可以更快发现、调用、贡献并衡量设计能力。</p>
+<div class="hero-actions">
+<a class="btn primary" href="#assets">浏览设计资产
+            <svg class="icon sm" viewbox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>
+</a>
+<button class="btn secondary" data-open-search="" type="button">
+<svg class="icon sm" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.7-3.7"></path></svg>
             搜索团队能力
           </button>
-        </div>
-        <div class="hero-meta">
-          <span class="badge"><i class="status-dot"></i> 内部试运行</span>
-          <span>本页数据为原型演示数据</span>
-          <span class="divider"></span>
-          <span>设计师判断 · AI 辅助执行</span>
-        </div>
-      </div>
-
-      <div class="product-preview" aria-label="平台工作台预览">
-        <div class="preview-glow"></div>
-        <div class="app-window">
-          <div class="window-top">
-            <span class="traffic"><i></i><i></i><i></i></span>
-            <span class="window-title">Design Intelligence / Workspace</span>
-            <span class="window-live"><i class="status-dot"></i> Beta online</span>
-          </div>
-          <div class="window-body">
-            <aside class="mock-side">
-              <div class="mock-brand"><span class="mock-logo">P</span>PalmPay UX</div>
-              <div class="mock-label">Workspace</div>
-              <div class="mock-nav active"><i></i>Overview</div>
-              <div class="mock-nav"><i></i>Design Assets</div>
-              <div class="mock-nav"><i></i>AI Skills</div>
-              <div class="mock-nav"><i></i>Cases</div>
-              <div class="mock-label">Operations</div>
-              <div class="mock-nav"><i></i>Contributions</div>
-              <div class="mock-nav"><i></i>Impact</div>
-            </aside>
-            <div class="mock-main">
-              <div class="mock-head">
-                <div><h3>Design intelligence overview</h3><p>Team assets, methods and verified practices</p></div>
-                <span class="mock-avatar"></span>
-              </div>
-              <div class="mock-search">
-                <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
+</div>
+<div class="hero-meta">
+<span class="badge"><i class="status-dot"></i> 内部试运行</span>
+<span>本页数据为原型演示数据</span>
+<span class="divider"></span>
+<span>设计师判断 · AI 辅助执行</span>
+</div>
+</div>
+<div aria-label="平台工作台预览" class="product-preview">
+<div class="preview-glow"></div>
+<div class="app-window">
+<div class="window-top">
+<span class="traffic"><i></i><i></i><i></i></span>
+<span class="window-title">Design Intelligence / Workspace</span>
+<span class="window-live"><i class="status-dot"></i> Beta online</span>
+</div>
+<div class="window-body">
+<aside class="mock-side">
+<div class="mock-brand"><span class="mock-logo">P</span>PalmPay UX</div>
+<div class="mock-label">Workspace</div>
+<div class="mock-nav active"><i></i>Overview</div>
+<div class="mock-nav"><i></i>Design Assets</div>
+<div class="mock-nav"><i></i>AI Skills</div>
+<div class="mock-nav"><i></i>Cases</div>
+<div class="mock-label">Operations</div>
+<div class="mock-nav"><i></i>Contributions</div>
+<div class="mock-nav"><i></i>Impact</div>
+</aside>
+<div class="mock-main">
+<div class="mock-head">
+<div><h3>Design intelligence overview</h3><p>Team assets, methods and verified practices</p></div>
+<span class="mock-avatar"></span>
+</div>
+<div class="mock-search">
+<svg class="icon sm" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.7-3.7"></path></svg>
                 Search assets, skills or cases
               </div>
-              <div class="mock-kpis">
-                <div class="mock-kpi"><span>ASSETS</span><strong>24</strong><em>Published</em></div>
-                <div class="mock-kpi"><span>AI SKILLS</span><strong>12</strong><em>Published</em></div>
-                <div class="mock-kpi"><span>REUSE</span><strong>86</strong><em>Last 30 days</em></div>
-              </div>
-              <div class="mock-row-head"><b>Featured knowledge</b><span>View all →</span></div>
-              <div class="mock-cards">
-                <div class="mock-card">
-                  <small>DESIGN ASSET</small>
-                  <b>Web 数据表格组件规范</b>
-                  <p>统一复杂业务表格的布局、状态与交付标准。</p>
-                </div>
-                <div class="mock-card">
-                  <small>AI SKILL</small>
-                  <b>UI 视觉走查 Skill</b>
-                  <p>辅助识别设计与实现的视觉偏差。</p>
-                </div>
-              </div>
-              <div class="mock-row-head"><b>Reuse trend</b><span>Past 12 weeks</span></div>
-              <div class="mock-chart">
-                <span class="chart-line">
-                  <svg viewBox="0 0 300 90" preserveAspectRatio="none">
-                    <path d="M0,77 C35,68 46,70 72,57 C102,42 121,49 150,38 C181,26 197,34 225,19 C250,8 270,12 300,5" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M0,77 C35,68 46,70 72,57 C102,42 121,49 150,38 C181,26 197,34 225,19 C250,8 270,12 300,5 L300,90 L0,90Z" fill="currentColor" opacity=".06"/>
-                  </svg>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="preview-note">
-          <small>VERIFIED CONTENT COVERAGE</small>
-          <strong>60% of published content verified</strong>
-          <div class="note-progress"><i></i></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="metrics-wrap" id="impact">
-    <div class="shell">
-      <div class="metrics">
-        <article class="metric">
-          <div class="metric-top"><span>设计资产</span><span>统一口径</span></div>
-          <strong>24</strong><p>当前已发布内容</p>
-        </article>
-        <article class="metric">
-          <div class="metric-top"><span>AI Skill</span><span>统一口径</span></div>
-          <strong>12</strong><p>当前已发布内容</p>
-        </article>
-        <article class="metric">
-          <div class="metric-top"><span>AI 案例</span><span>统一口径</span></div>
-          <strong>4</strong><p>当前已发布实践案例</p>
-        </article>
-        <article class="metric">
-          <div class="metric-top"><span>有效复用</span><span>近 30 天</span></div>
-          <strong>86</strong><p>被真实项目引用并确认</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section compact" id="skills">
-    <div class="shell">
-      <div class="section-head">
-        <div class="section-copy">
-          <div class="eyebrow">Start with a task</div>
-          <h2>高频入口，直达工作台</h2>
-          <p>三个高频入口，让设计师、产品经理和业务伙伴快速进入正确路径。</p>
-        </div>
-      </div>
-
-      <div class="path-grid">
-        <a class="path-card" href="./workspace.html#assets" aria-label="进入工作台设计资产页面">
-          <span class="path-index">01 / FIND</span>
-          <span class="path-decor"></span>
-          <div class="path-icon">
-            <svg class="icon lg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
-          </div>
-          <h3>找设计资产</h3>
-          <p>搜索组件、页面模板、规范和交付机制，减少重复设计与沟通成本。</p>
-          <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
-        </a>
-
-        <a class="path-card" href="./workspace.html#skills" aria-label="进入工作台 AI Skill 页面">
-          <span class="path-index">02 / APPLY</span>
-          <span class="path-decor"></span>
-          <div class="path-icon">
-            <svg class="icon lg" viewBox="0 0 24 24"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z"/><path d="m18.5 16 .7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3Z"/></svg>
-          </div>
-          <h3>用 AI Skill</h3>
-          <p>调用经过设计师验证的输入约束、分析维度、输出结构和判断标准。</p>
-          <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
-        </a>
-
-        <a class="path-card" href="./workspace.html#value" aria-label="进入工作台价值总览页面">
-          <span class="path-index">03 / PROVE</span>
-          <span class="path-decor"></span>
-          <div class="path-icon">
-            <svg class="icon lg" viewBox="0 0 24 24"><path d="M5 19V9M12 19V5M19 19v-7"/></svg>
-          </div>
-          <h3>看业务影响</h3>
-          <p>查看设计方法如何被应用、验证与复用，而不只是观看静态作品。</p>
-          <svg class="icon path-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></svg>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  
-  <section class="project-showcase" id="projects">
-    <div class="shell">
-      <div class="section-head">
-        <div class="section-copy">
-          <div class="eyebrow">AI exploration portfolio</div>
-          <h2>33 个 AI 体验设计探索项目</h2>
-          <p class="project-intro">从设计生产、用户增长到金融风险与组织能力，建立一套可以逐步试点、验证和复制的 AI 项目组合。</p>
-        </div>
-        <a class="text-link" href="workspace.html#ai-projects">进入 AI 项目库
-          <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
-        </a>
-      </div>
-      <div class="project-stats">
-        <div class="project-stat"><strong>7</strong><span>战略与组织</span></div>
-        <div class="project-stat"><strong>13</strong><span>设计生产</span></div>
-        <div class="project-stat"><strong>8</strong><span>增长与运营</span></div>
-        <div class="project-stat"><strong>5</strong><span>风险与治理</span></div>
-      </div>
-      <div class="project-preview-grid">
-        <a class="project-preview-card" href="projects/12_90天执行计划.html?from=home"><div class="project-preview-top"><span>S05 · STRATEGY</span><span>↗</span></div><h3>90 天执行计划</h3><p>通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。</p><div class="project-preview-foot"><span>组织执行</span><span>可立项</span></div></a>
-        <a class="project-preview-card" href="projects/08_AI需求分析与体验策略中心.html?from=home"><div class="project-preview-top"><span>P01 · PRODUCTION</span><span>↗</span></div><h3>AI 需求分析与体验策略中心</h3><p>统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。</p><div class="project-preview-foot"><span>设计生产</span><span>可立项</span></div></a>
-        <a class="project-preview-card" href="projects/15_项目八_AI新用户激活助手.html?from=home"><div class="project-preview-top"><span>P08 · GROWTH</span><span>↗</span></div><h3>AI 新用户激活助手</h3><p>基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。</p><div class="project-preview-foot"><span>业务增长</span><span>可立项</span></div></a>
-        <a class="project-preview-card" href="projects/30_项目二十三_AI高风险操作体验审计.html?from=home"><div class="project-preview-top"><span>P23 · RISK</span><span>↗</span></div><h3>AI 高风险操作体验审计</h3><p>审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。</p><div class="project-preview-foot"><span>金融风险</span><span>可立项</span></div></a>
-      </div>
-      <div class="project-actions"><a class="btn primary" href="workspace.html#ai-projects">进入 AI 项目库<svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg></a><a class="btn secondary" href="projects/12_90天执行计划.html?from=home">查看 90 天执行路线</a></div>
-    </div>
-  </section>
-
-  <section class="section" id="assets">
-    <div class="shell">
-      <div class="section-head">
-        <div class="section-copy">
-          <div class="eyebrow">Latest assets</div>
-          <h2>最新设计资产</h2>
-          <p>将组件、设计规范、品牌、AI工作流，持续沉淀为固有设计资产。</p>
-        </div>
-        <button class="text-link" type="button" data-workspace>进入完整资产库
-          <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
-        </button>
-      </div>
-
-      <div class="toolbar">
-        <label class="asset-search">
-          <svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
-          <input id="assetSearch" type="search" placeholder="搜索标题、场景或维护团队…" />
-        </label>
-        <div class="filters" role="group" aria-label="资产筛选">
-          <button class="filter active" data-filter="all">全部</button>
-          <button class="filter" data-filter="component">组件规范</button>
-          <button class="filter" data-filter="template">页面模板</button>
-          <button class="filter" data-filter="workflow">AI 工作流</button>
-          <button class="filter" data-filter="delivery">交付规范</button>
-        </div>
-      </div>
-
-      <div class="asset-grid" id="assetGrid">
-        <article class="asset-card" data-category="component" data-title="Web 数据表格组件规范 交易列表 筛选 批量操作 设计系统">
-          <div class="asset-visual">
-            <span class="asset-chip">Component system</span>
-            <div class="asset-mini-window">
-              <div class="asset-mini-bar"><i></i><i></i><i></i></div>
-              <div class="asset-mini-body">
-                <div class="asset-mini-side"><i></i><i></i><i></i></div>
-                <div class="asset-lines"><i></i><i></i><i></i><i></i></div>
-              </div>
-            </div>
-          </div>
-          <div class="asset-body">
-            <div class="asset-meta"><span>组件规范</span><span>更新于 2 天前</span></div>
-            <h3>Web 数据表格组件规范</h3>
-            <p>统一复杂业务表格的布局、筛选、批量操作、状态与空数据表达。</p>
-            <div class="asset-footer"><span>设计系统小组</span><b>已验证 · 72% 复用</b></div>
-          </div>
-        </article>
-
-        <article class="asset-card" data-category="template" data-title="业务经营看板页面模板 指标叙事 管理层 体验设计">
-          <div class="asset-visual">
-            <span class="asset-chip">Page template</span>
-            <div class="asset-chart-visual">
-              <svg viewBox="0 0 280 120" preserveAspectRatio="none">
-                <path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4" fill="none" stroke="currentColor" stroke-width="2"/>
-                <path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4 L280,120 L0,120Z" fill="currentColor" opacity=".06"/>
-              </svg>
-            </div>
-          </div>
-          <div class="asset-body">
-            <div class="asset-meta"><span>页面模板</span><span>更新于 5 天前</span></div>
-            <h3>业务经营看板页面模板</h3>
-            <p>帮助设计师快速建立指标层级、经营叙事和管理层决策视图。</p>
-            <div class="asset-footer"><span>体验设计小组</span><b>18 个模板</b></div>
-          </div>
-        </article>
-
-        <article class="asset-card" data-category="workflow" data-title="AI Skill 工具包 需求分析 体验策略 设计判断 AI设计">
-          <div class="asset-visual">
-            <span class="asset-chip">AI workflow</span>
-            <div class="asset-process"><i></i><i></i><i></i></div>
-          </div>
-          <div class="asset-body">
-            <div class="asset-meta"><span>AI 工作流</span><span>更新于 1 周前</span></div>
-            <h3>体验策略分析 AI Skill</h3>
-            <p>将输入材料、分析维度、输出结构和设计判断整合为可复用工作流。</p>
-            <div class="asset-footer"><span>AI 设计小组</span><b>评分 8.8</b></div>
-          </div>
-        </article>
-
-        <article class="asset-card" data-category="delivery" data-title="设计交付检查清单 状态覆盖 验收 走查 设计运营">
-          <div class="asset-visual">
-            <span class="asset-chip">Delivery system</span>
-            <div class="asset-checks"><i></i><i></i><i></i></div>
-          </div>
-          <div class="asset-body">
-            <div class="asset-meta"><span>交付规范</span><span>更新于 2 周前</span></div>
-            <h3>设计交付检查清单</h3>
-            <p>统一状态覆盖、交互说明、验收口径与设计走查的团队标准。</p>
-            <div class="asset-footer"><span>设计运营小组</span><b>高频使用</b></div>
-          </div>
-        </article>
-      </div>
-      <div class="empty" id="assetEmpty">没有找到匹配的设计资产。</div>
-    </div>
-  </section>
-
-  <section class="section compact" id="cases">
-    <div class="shell">
-      <div class="section-head">
-        <div class="section-copy">
-          <div class="eyebrow">Verified AI practice</div>
-          <h2>AI案例-沉淀方法与结果</h2>
-          <p>用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p>
-        </div>
-      </div>
-
-      <article class="case-card">
-        <div class="case-visual">
-          <div class="case-head"><small>Before / After</small><span class="badge">Verified case</span></div>
-          <div class="case-canvas">
-            <div class="case-stage">
-              <div class="case-stage-label"><span>传统流程</span><span>3 days</span></div>
-              <div class="stage-screen">
-                <div class="s-head"></div>
-                <div class="s-grid"><i></i><i></i><i></i></div>
-              </div>
-            </div>
-            <div class="case-arrow">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
-            </div>
-            <div class="case-stage">
-              <div class="case-stage-label"><span>AI 协同流程</span><span>4 hours</span></div>
-              <div class="stage-screen after">
-                <div class="after-side"><i></i><i></i><i></i><i></i></div>
-                <div class="after-main"><i></i><div class="after-cards"><i></i><i></i><i></i><i></i></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="case-copy">
-          <span class="badge">效率提升 · AI 精选</span>
-          <h3>营销活动视觉探索</h3>
-          <p>AI 不直接替代设计判断，而是加速参考图整理、方向扩散和方案初筛；设计师负责定义边界、选择方向并形成可复用方法。</p>
-          <div class="case-steps">
-            <div class="case-step"><span>01</span><div><b>定义输入边界</b><p>设计师确定品牌资产、参考风格和不可突破的约束。</p></div></div>
-            <div class="case-step"><span>02</span><div><b>AI 扩散与聚类</b><p>快速生成方向并按视觉语言、场景和风险进行归类。</p></div></div>
-            <div class="case-step"><span>03</span><div><b>人工筛选与沉淀</b><p>设计师完成最终选择，并把有效路径保存为下一次可调用的 Skill。</p></div></div>
-          </div>
-          <div class="case-results">
-            <div><strong>3d → 4h</strong><span>首轮视觉探索</span></div>
-            <div><strong>12</strong><span>验证方向数量</span></div>
-            <div><strong>1 Skill</strong><span>已沉淀为工作流</span></div>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <section class="section compact governance-section" id="governance">
-    <div class="shell">
-      <div class="section-head">
-        <div class="section-copy">
-          <div class="eyebrow">Platform governance</div>
-          <h2>从设计系统到平台机制</h2>
-          <p>用三个角色形成从标准、创新到质量闭环，避免资产只上传、不维护、不复用。</p>
-        </div>
-      </div>
-      <div class="governance">
-        <article class="gov-card">
-          <span class="gov-num">01 / STANDARDIZE</span>
-          <h3>设计系统</h3>
-          <p>负责组件、模式、Token 与跨业务体验标准。</p>
-          <footer>标准建立 · 资产维护 · 版本治理</footer>
-        </article>
-        <div class="gov-connector"><i></i></div>
-        <article class="gov-card">
-          <span class="gov-num">02 / EXPLORE</span>
-          <h3>AI 设计</h3>
-          <p>将实验性的 AI 产出转化为可调用、可验证的方法。</p>
-          <footer>Skill 设计 · 方法验证 · 案例沉淀</footer>
-        </article>
-        <div class="gov-connector"><i></i></div>
-        <article class="gov-card">
-          <span class="gov-num">03 / OPERATE</span>
-          <h3>设计运营</h3>
-          <p>维护审核、发布、复用反馈和影响力数据。</p>
-          <footer>质量审核 · 内容运营 · 价值度量</footer>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="shell">
-      <div class="cta">
-        <div class="cta-copy">
-          <h2>把一次优秀产出，变成团队下一次工作的起点</h2>
-          <p>本版本用于验证首页信息架构、品牌表达与核心入口，不包含真实权限和后台数据。</p>
-        </div>
-        <button class="btn primary" type="button" data-workspace>进入工作台
-          <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
-        </button>
-      </div>
-    </div>
-  </section>
+<div class="mock-kpis">
+<div class="mock-kpi"><span>ASSETS</span><strong>24</strong><em>Published</em></div>
+<div class="mock-kpi"><span>AI SKILLS</span><strong>12</strong><em>Published</em></div>
+<div class="mock-kpi"><span>REUSE</span><strong>86</strong><em>Last 30 days</em></div>
+</div>
+<div class="mock-row-head"><b>Featured knowledge</b><span>View all →</span></div>
+<div class="mock-cards">
+<div class="mock-card">
+<small>DESIGN ASSET</small>
+<b>Web 数据表格组件规范</b>
+<p>统一复杂业务表格的布局、状态与交付标准。</p>
+</div>
+<div class="mock-card">
+<small>AI SKILL</small>
+<b>UI 视觉走查 Skill</b>
+<p>辅助识别设计与实现的视觉偏差。</p>
+</div>
+</div>
+<div class="mock-row-head"><b>Reuse trend</b><span>Past 12 weeks</span></div>
+<div class="mock-chart">
+<span class="chart-line">
+<svg preserveaspectratio="none" viewbox="0 0 300 90">
+<path d="M0,77 C35,68 46,70 72,57 C102,42 121,49 150,38 C181,26 197,34 225,19 C250,8 270,12 300,5" fill="none" stroke="currentColor" stroke-width="2"></path>
+<path d="M0,77 C35,68 46,70 72,57 C102,42 121,49 150,38 C181,26 197,34 225,19 C250,8 270,12 300,5 L300,90 L0,90Z" fill="currentColor" opacity=".06"></path>
+</svg>
+</span>
+</div>
+</div>
+</div>
+</div>
+<div class="preview-note">
+<small>VERIFIED CONTENT COVERAGE</small>
+<strong>60% of published content verified</strong>
+<div class="note-progress"><i></i></div>
+</div>
+</div>
+</div>
+</section>
+<section class="metrics-wrap" id="impact">
+<div class="shell">
+<div class="metrics">
+<article class="metric">
+<div class="metric-top"><span>设计资产</span><span>统一口径</span></div>
+<strong>24</strong><p>当前已发布内容</p>
+</article>
+<article class="metric">
+<div class="metric-top"><span>AI Skill</span><span>统一口径</span></div>
+<strong>12</strong><p>当前已发布内容</p>
+</article>
+<article class="metric">
+<div class="metric-top"><span>AI 案例</span><span>统一口径</span></div>
+<strong>4</strong><p>当前已发布实践案例</p>
+</article>
+<article class="metric">
+<div class="metric-top"><span>有效复用</span><span>近 30 天</span></div>
+<strong>86</strong><p>被真实项目引用并确认</p>
+</article>
+</div>
+</div>
+</section>
+<section class="section compact" id="skills">
+<div class="shell">
+<div class="section-head">
+<div class="section-copy">
+<div class="eyebrow">Start with a task</div>
+<h2>高频入口，直达工作台</h2>
+<p>三个高频入口，让设计师、产品经理和业务伙伴快速进入正确路径。</p>
+</div>
+</div>
+<div class="path-grid">
+<a aria-label="进入工作台设计资产页面" class="path-card" href="./workspace.html#assets">
+<span class="path-index">01 / FIND</span>
+<span class="path-decor"></span>
+<div class="path-icon">
+<svg class="icon lg" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.7-3.7"></path></svg>
+</div>
+<h3>找设计资产</h3>
+<p>搜索组件、页面模板、规范和交付机制，减少重复设计与沟通成本。</p>
+<svg class="icon path-arrow" viewbox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"></path></svg>
+</a>
+<a aria-label="进入工作台 AI Skill 页面" class="path-card" href="./workspace.html#skills">
+<span class="path-index">02 / APPLY</span>
+<span class="path-decor"></span>
+<div class="path-icon">
+<svg class="icon lg" viewbox="0 0 24 24"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z"></path><path d="m18.5 16 .7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3Z"></path></svg>
+</div>
+<h3>用 AI Skill</h3>
+<p>调用经过设计师验证的输入约束、分析维度、输出结构和判断标准。</p>
+<svg class="icon path-arrow" viewbox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"></path></svg>
+</a>
+<a aria-label="进入工作台价值总览页面" class="path-card" href="./workspace.html#value">
+<span class="path-index">03 / PROVE</span>
+<span class="path-decor"></span>
+<div class="path-icon">
+<svg class="icon lg" viewbox="0 0 24 24"><path d="M5 19V9M12 19V5M19 19v-7"></path></svg>
+</div>
+<h3>看业务影响</h3>
+<p>查看设计方法如何被应用、验证与复用，而不只是观看静态作品。</p>
+<svg class="icon path-arrow" viewbox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"></path></svg>
+</a>
+</div>
+</div>
+</section>
+<section class="project-showcase" id="projects">
+<div class="shell">
+<div class="section-head">
+<div class="section-copy">
+<div class="eyebrow">AI exploration portfolio</div>
+<h2>33 个 AI 体验设计探索项目</h2>
+<p class="project-intro">从设计生产、用户增长到金融风险与组织能力，建立一套可以逐步试点、验证和复制的 AI 项目组合。</p>
+</div>
+<a class="text-link" href="workspace.html#ai-projects">进入 AI 项目库
+          <svg class="icon sm" viewbox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>
+</a>
+</div>
+<div class="project-stats">
+<div class="project-stat"><strong>7</strong><span>战略与组织</span></div>
+<div class="project-stat"><strong>13</strong><span>设计生产</span></div>
+<div class="project-stat"><strong>8</strong><span>增长与运营</span></div>
+<div class="project-stat"><strong>5</strong><span>风险与治理</span></div>
+</div>
+<div class="project-preview-grid">
+<a class="project-preview-card" href="projects/project-detail.html?id=S05&from=home"><div class="project-preview-top"><span>S05 · STRATEGY</span><span>↗</span></div><h3>90 天执行计划</h3><p>通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。</p><div class="project-preview-foot"><span>组织执行</span><span>可立项</span></div></a>
+<a class="project-preview-card" href="projects/project-detail.html?id=P01&from=home"><div class="project-preview-top"><span>P01 · PRODUCTION</span><span>↗</span></div><h3>AI 需求分析与体验策略中心</h3><p>统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。</p><div class="project-preview-foot"><span>设计生产</span><span>可立项</span></div></a>
+<a class="project-preview-card" href="projects/project-detail.html?id=P08&from=home"><div class="project-preview-top"><span>P08 · GROWTH</span><span>↗</span></div><h3>AI 新用户激活助手</h3><p>基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。</p><div class="project-preview-foot"><span>业务增长</span><span>可立项</span></div></a>
+<a class="project-preview-card" href="projects/project-detail.html?id=P23&from=home"><div class="project-preview-top"><span>P23 · RISK</span><span>↗</span></div><h3>AI 高风险操作体验审计</h3><p>审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。</p><div class="project-preview-foot"><span>金融风险</span><span>可立项</span></div></a>
+</div>
+<div class="project-actions"><a class="btn primary" href="workspace.html#ai-projects">进入 AI 项目库<svg class="icon sm" viewbox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></a><a class="btn secondary" href="projects/project-detail.html?id=S05&from=home">查看 90 天执行路线</a></div>
+</div>
+</section>
+<section class="section" id="assets">
+<div class="shell">
+<div class="section-head">
+<div class="section-copy">
+<div class="eyebrow">Latest assets</div>
+<h2>最新设计资产</h2>
+<p>将组件、设计规范、品牌、AI工作流，持续沉淀为固有设计资产。</p>
+</div>
+<a class="text-link" data-workspace="" href="./workspace.html#assets">进入完整资产库
+          <svg class="icon sm" viewbox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>
+</a>
+</div>
+<div class="toolbar">
+<label class="asset-search">
+<svg class="icon sm" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.7-3.7"></path></svg>
+<input id="assetSearch" placeholder="搜索标题、场景或维护团队…" type="search"/>
+</label>
+<div aria-label="资产筛选" class="filters" role="group">
+<button class="filter active" data-filter="all">全部</button>
+<button class="filter" data-filter="component">组件规范</button>
+<button class="filter" data-filter="template">页面模板</button>
+<button class="filter" data-filter="workflow">AI 工作流</button>
+<button class="filter" data-filter="delivery">交付规范</button>
+</div>
+</div>
+<div class="asset-grid" id="assetGrid">
+<article class="asset-card" data-category="component" data-title="Web 数据表格组件规范 交易列表 筛选 批量操作 设计系统">
+<div class="asset-visual">
+<span class="asset-chip">Component system</span>
+<div class="asset-mini-window">
+<div class="asset-mini-bar"><i></i><i></i><i></i></div>
+<div class="asset-mini-body">
+<div class="asset-mini-side"><i></i><i></i><i></i></div>
+<div class="asset-lines"><i></i><i></i><i></i><i></i></div>
+</div>
+</div>
+</div>
+<div class="asset-body">
+<div class="asset-meta"><span>组件规范</span><span>更新于 2 天前</span></div>
+<h3>Web 数据表格组件规范</h3>
+<p>统一复杂业务表格的布局、筛选、批量操作、状态与空数据表达。</p>
+<div class="asset-footer"><span>设计系统小组</span><b>已验证 · 72% 复用</b></div>
+</div>
+</article>
+<article class="asset-card" data-category="template" data-title="业务经营看板页面模板 指标叙事 管理层 体验设计">
+<div class="asset-visual">
+<span class="asset-chip">Page template</span>
+<div class="asset-chart-visual">
+<svg preserveaspectratio="none" viewbox="0 0 280 120">
+<path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4" fill="none" stroke="currentColor" stroke-width="2"></path>
+<path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4 L280,120 L0,120Z" fill="currentColor" opacity=".06"></path>
+</svg>
+</div>
+</div>
+<div class="asset-body">
+<div class="asset-meta"><span>页面模板</span><span>更新于 5 天前</span></div>
+<h3>业务经营看板页面模板</h3>
+<p>帮助设计师快速建立指标层级、经营叙事和管理层决策视图。</p>
+<div class="asset-footer"><span>体验设计小组</span><b>18 个模板</b></div>
+</div>
+</article>
+<article class="asset-card" data-category="workflow" data-title="AI Skill 工具包 需求分析 体验策略 设计判断 AI设计">
+<div class="asset-visual">
+<span class="asset-chip">AI workflow</span>
+<div class="asset-process"><i></i><i></i><i></i></div>
+</div>
+<div class="asset-body">
+<div class="asset-meta"><span>AI 工作流</span><span>更新于 1 周前</span></div>
+<h3>体验策略分析 AI Skill</h3>
+<p>将输入材料、分析维度、输出结构和设计判断整合为可复用工作流。</p>
+<div class="asset-footer"><span>AI 设计小组</span><b>评分 8.8</b></div>
+</div>
+</article>
+<article class="asset-card" data-category="delivery" data-title="设计交付检查清单 状态覆盖 验收 走查 设计运营">
+<div class="asset-visual">
+<span class="asset-chip">Delivery system</span>
+<div class="asset-checks"><i></i><i></i><i></i></div>
+</div>
+<div class="asset-body">
+<div class="asset-meta"><span>交付规范</span><span>更新于 2 周前</span></div>
+<h3>设计交付检查清单</h3>
+<p>统一状态覆盖、交互说明、验收口径与设计走查的团队标准。</p>
+<div class="asset-footer"><span>设计运营小组</span><b>高频使用</b></div>
+</div>
+</article>
+</div>
+<div class="empty" id="assetEmpty">没有找到匹配的设计资产。</div>
+</div>
+</section>
+<section class="section compact" id="cases">
+<div class="shell">
+<div class="section-head">
+<div class="section-copy">
+<div class="eyebrow">Verified AI practice</div>
+<h2>AI案例-沉淀方法与结果</h2>
+<p>用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p>
+</div>
+</div>
+<article class="case-card">
+<div class="case-visual">
+<div class="case-head"><small>Before / After</small><span class="badge">Verified case</span></div>
+<div class="case-canvas">
+<div class="case-stage">
+<div class="case-stage-label"><span>传统流程</span><span>3 days</span></div>
+<div class="stage-screen">
+<div class="s-head"></div>
+<div class="s-grid"><i></i><i></i><i></i></div>
+</div>
+</div>
+<div class="case-arrow">
+<svg class="icon" viewbox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>
+</div>
+<div class="case-stage">
+<div class="case-stage-label"><span>AI 协同流程</span><span>4 hours</span></div>
+<div class="stage-screen after">
+<div class="after-side"><i></i><i></i><i></i><i></i></div>
+<div class="after-main"><i></i><div class="after-cards"><i></i><i></i><i></i><i></i></div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="case-copy">
+<span class="badge">效率提升 · AI 精选</span>
+<h3>营销活动视觉探索</h3>
+<p>AI 不直接替代设计判断，而是加速参考图整理、方向扩散和方案初筛；设计师负责定义边界、选择方向并形成可复用方法。</p>
+<div class="case-steps">
+<div class="case-step"><span>01</span><div><b>定义输入边界</b><p>设计师确定品牌资产、参考风格和不可突破的约束。</p></div></div>
+<div class="case-step"><span>02</span><div><b>AI 扩散与聚类</b><p>快速生成方向并按视觉语言、场景和风险进行归类。</p></div></div>
+<div class="case-step"><span>03</span><div><b>人工筛选与沉淀</b><p>设计师完成最终选择，并把有效路径保存为下一次可调用的 Skill。</p></div></div>
+</div>
+<div class="case-results">
+<div><strong>3d → 4h</strong><span>首轮视觉探索</span></div>
+<div><strong>12</strong><span>验证方向数量</span></div>
+<div><strong>1 Skill</strong><span>已沉淀为工作流</span></div>
+</div>
+</div>
+</article>
+</div>
+</section>
+<section class="section compact governance-section" id="governance">
+<div class="shell">
+<div class="section-head">
+<div class="section-copy">
+<div class="eyebrow">Platform governance</div>
+<h2>从设计系统到平台机制</h2>
+<p>用三个角色形成从标准、创新到质量闭环，避免资产只上传、不维护、不复用。</p>
+</div>
+</div>
+<div class="governance">
+<article class="gov-card">
+<span class="gov-num">01 / STANDARDIZE</span>
+<h3>设计系统</h3>
+<p>负责组件、模式、Token 与跨业务体验标准。</p>
+<footer>标准建立 · 资产维护 · 版本治理</footer>
+</article>
+<div class="gov-connector"><i></i></div>
+<article class="gov-card">
+<span class="gov-num">02 / EXPLORE</span>
+<h3>AI 设计</h3>
+<p>将实验性的 AI 产出转化为可调用、可验证的方法。</p>
+<footer>Skill 设计 · 方法验证 · 案例沉淀</footer>
+</article>
+<div class="gov-connector"><i></i></div>
+<article class="gov-card">
+<span class="gov-num">03 / OPERATE</span>
+<h3>设计运营</h3>
+<p>维护审核、发布、复用反馈和影响力数据。</p>
+<footer>质量审核 · 内容运营 · 价值度量</footer>
+</article>
+</div>
+</div>
+</section>
+<section class="section">
+<div class="shell">
+<div class="cta">
+<div class="cta-copy">
+<h2>把一次优秀产出，变成团队下一次工作的起点</h2>
+<p>本版本用于验证首页信息架构、品牌表达与核心入口，不包含真实权限和后台数据。</p>
+</div>
+<a class="btn primary" data-workspace="" href="./workspace.html">进入工作台
+          <svg class="icon sm" viewbox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"></path></svg>
+</a>
+</div>
+</div>
+</section>
 </main>
-
 <footer class="footer">
-  <div class="shell footer-inner">
-    <div class="footer-left">
-      <a class="brand" href="#home" aria-label="返回首页">
-      <span class="brand-mark" aria-hidden="true">
-        <img src="data:image/png;base64,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" alt="PalmPay Logo" />
-      </span>
-      <span class="brand-copy">
-        <strong>PalmPay Design</strong>
-        <span>Intelligence Hub</span>
-      </span>
-    </a>
-    </div>
-    <div class="footer-meta">
-      <span>Demo data</span><span>Dark / Light supported</span><span>Single-file HTML</span>
-    </div>
-  </div>
+<div class="shell footer-inner">
+<div class="footer-left">
+<a aria-label="返回首页" class="brand" href="#home">
+<span aria-hidden="true" class="brand-mark">
+<img alt="PalmPay Logo" src="data:image/png;base64,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"/>
+</span>
+<span class="brand-copy">
+<strong>PalmPay Design</strong>
+<span>Intelligence Hub</span>
+</span>
+</a>
+</div>
+<div class="footer-meta">
+<span>Demo data</span><span>Dark / Light supported</span><span>Single-file HTML</span>
+</div>
+</div>
 </footer>
-
-<div class="overlay" id="overlay" hidden></div>
-
-<section class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="全局搜索" hidden>
-  <div class="search-field">
-    <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/></svg>
-    <input id="globalSearch" type="search" placeholder="搜索资产、AI Skill、案例或 AI 项目…" autocomplete="off" />
-    <button class="modal-close" type="button" data-close-search aria-label="关闭搜索">×</button>
-  </div>
-  <div class="search-results" id="searchResults" role="listbox" aria-label="搜索结果"></div>
+<div class="overlay" hidden="" id="overlay"></div>
+<section aria-label="全局搜索" aria-modal="true" class="search-modal" hidden="" id="searchModal" role="dialog">
+<div class="search-field">
+<svg class="icon" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.7-3.7"></path></svg>
+<input autocomplete="off" id="globalSearch" placeholder="搜索资产、AI Skill、案例或 AI 项目…" type="search"/>
+<button aria-label="关闭搜索" class="modal-close" data-close-search="" type="button">×</button>
+</div>
+<div aria-label="搜索结果" class="search-results" id="searchResults" role="listbox"></div>
 </section>
-
-<section class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle" hidden>
-  <div class="modal-top">
-    <small id="detailType">Design Asset</small>
-    <button class="modal-close" type="button" data-close-modal aria-label="关闭详情">×</button>
-  </div>
-  <div class="modal-body">
-    <h2 id="detailTitle">资产详情</h2>
-    <p id="detailDescription"></p>
-    <div class="modal-grid">
-      <div class="modal-item"><span>维护团队</span><b id="detailTeam"></b></div>
-      <div class="modal-item"><span>验证状态</span><b id="detailStatus"></b></div>
-      <div class="modal-item"><span>适用场景</span><b id="detailScene"></b></div>
-      <div class="modal-item"><span>最近更新</span><b id="detailUpdated"></b></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn secondary" type="button" data-close-modal>关闭</button>
-      <button class="btn primary" type="button" data-copy-asset>复制资产链接</button>
-    </div>
-  </div>
+<section aria-labelledby="detailTitle" aria-modal="true" class="modal" hidden="" id="detailModal" role="dialog">
+<div class="modal-top">
+<small id="detailType">Design Asset</small>
+<button aria-label="关闭详情" class="modal-close" data-close-modal="" type="button">×</button>
+</div>
+<div class="modal-body">
+<h2 id="detailTitle">资产详情</h2>
+<p id="detailDescription"></p>
+<div class="modal-grid">
+<div class="modal-item"><span>维护团队</span><b id="detailTeam"></b></div>
+<div class="modal-item"><span>验证状态</span><b id="detailStatus"></b></div>
+<div class="modal-item"><span>适用场景</span><b id="detailScene"></b></div>
+<div class="modal-item"><span>最近更新</span><b id="detailUpdated"></b></div>
+</div>
+<div class="modal-actions">
+<button class="btn secondary" data-close-modal="" type="button">关闭</button>
+<button class="btn primary" data-copy-asset="" type="button">复制资产链接</button>
+</div>
+</div>
 </section>
-
 <div class="toast" id="toast">已复制</div>
 
-<script src="./projects-data.js?v=11.8"></script>
-<script>
-const assetDetails = [
-  {
-    title:'Web 数据表格组件规范',
-    type:'Component System',
-    description:'统一复杂业务表格的布局、筛选、批量操作、状态、空数据与响应式规则，降低交易和运营后台中的重复设计与交付偏差。',
-    team:'设计系统小组',
-    status:'已验证 · 72% 复用',
-    scene:'交易列表、商户管理、结算明细',
-    updated:'2026.07 · 2 天前'
-  },
-  {
-    title:'业务经营看板页面模板',
-    type:'Page Template',
-    description:'面向经营分析、项目状态与指标叙事的页面模板，帮助设计师快速建立统一的信息层级和管理层决策视图。',
-    team:'体验设计小组',
-    status:'MVP 精选 · 18 个模板',
-    scene:'经营分析、项目汇报、指标复盘',
-    updated:'2026.07 · 5 天前'
-  },
-  {
-    title:'体验策略分析 AI Skill',
-    type:'AI Workflow',
-    description:'将需求材料、研究输入、分析维度、输出结构和设计判断整合为可复制的 AI Skill，支持多业务线快速复用。',
-    team:'AI 设计小组',
-    status:'已验证 · 评分 8.8',
-    scene:'需求分析、体验策略、方案评审',
-    updated:'2026.07 · 1 周前'
-  },
-  {
-    title:'设计交付检查清单',
-    type:'Delivery System',
-    description:'统一页面状态覆盖、交互说明、验收口径和设计走查标准，让设计交付从个人经验转化为团队机制。',
-    team:'设计运营小组',
-    status:'高频使用',
-    scene:'设计交付、开发验收、项目复盘',
-    updated:'2026.06 · 2 周前'
-  }
-];
 
-const projectSearchItems = (window.PP_PROJECTS_DATA || []).map(project => ({
-  title:project.title,
-  code:project.code,
-  kind:'AI 项目',
-  type:'Exploration Project',
-  description:project.description,
-  team:project.owner,
-  status:project.stage,
-  scene:`${project.category} · ${project.value}`,
-  updated:'2026.07',
-  action:()=>{window.location.href=`projects/${project.file}?from=home`}
-}));
 
-const globalItems = [
-  ...assetDetails.map((item,index)=>({...item,kind:'设计资产',action:()=>openAsset(index)})),
-  {
-    title:'UI 视觉走查 Skill',kind:'AI Skill',type:'AI Skill',
-    description:'对比设计稿与开发稿，识别布局、间距、字号、颜色、圆角与组件状态偏差。',
-    team:'AI 设计小组',status:'已验证',scene:'UI 验收、设计走查',updated:'2026.07',
-    action:()=>openSkill()
-  },
-  {
-    title:'营销活动视觉探索',kind:'AI 案例',type:'Verified AI Practice',
-    description:'从 3 天首轮探索缩短到 4 小时，并沉淀为可复用工作流。',
-    team:'AI 设计小组',status:'已验证案例',scene:'营销设计、视觉探索',updated:'2026.07',
-    action:()=>{revealMobileSection(document.querySelector('#cases'));document.querySelector('#cases').scrollIntoView({behavior:'smooth'})}
-  },
-  ...projectSearchItems
-];
 
-const root = document.documentElement;
-const overlay = document.getElementById('overlay');
-const detailModal = document.getElementById('detailModal');
-const searchModal = document.getElementById('searchModal');
-const toast = document.getElementById('toast');
-const mobileNav = document.getElementById('mobileNav');
+<style data-phase-home-styles>
+.pp-unified-nav-logo,.brand-mark.pp-unified-nav-logo,.logo.pp-unified-nav-logo,.pp-platform-logo.pp-unified-nav-logo{width:32px!important;height:32px!important;min-width:32px!important;display:grid!important;place-items:center!important;overflow:visible!important;border:0!important;border-radius:10px!important;background:transparent!important;color:transparent!important;box-shadow:none!important;line-height:0!important}.pp-unified-nav-logo img,.brand-mark.pp-unified-nav-logo img,.logo.pp-unified-nav-logo img,.pp-platform-logo.pp-unified-nav-logo img{width:24px!important;height:27px!important;max-width:24px!important;max-height:27px!important;display:block!important;border:0!important;border-radius:0!important;object-fit:contain!important;filter:none!important;opacity:1!important}html[data-theme=light] .pp-unified-nav-logo img,html:not([data-theme]):not(.dark) .pp-unified-nav-logo img{filter:invert(1)!important}.brand .pp-unified-nav-logo{margin-right:0}
 
-function getStoredTheme(){
-  try{
-    const workspaceTheme = localStorage.getItem('pp-theme');
-    if(workspaceTheme){
-      try{return JSON.parse(workspaceTheme);}catch{return workspaceTheme;}
-    }
-    return localStorage.getItem('ppux-theme');
-  } catch { return null; }
-}
-function setTheme(theme){
-  root.dataset.theme = theme;
-  try{
-    localStorage.setItem('ppux-theme',theme);
-    localStorage.setItem('pp-theme',JSON.stringify(theme));
-  }catch{}
-}
-setTheme(getStoredTheme() || 'dark');
-
-document.getElementById('themeToggle').addEventListener('click',()=>{
-  setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
-});
-
-let activeDialog = null;
-let lastFocusedElement = null;
-let closeTimer = null;
-const pageRegions = [document.querySelector('header'), document.querySelector('main'), document.querySelector('footer'), mobileNav].filter(Boolean);
-
-function setBackgroundInert(value){
-  pageRegions.forEach(region => {
-    region.inert = value;
-    if(value) region.setAttribute('aria-hidden','true');
-    else region.removeAttribute('aria-hidden');
-  });
-}
-function focusableElements(dialog){
-  return [...dialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
-    .filter(element => !element.hidden && element.offsetParent !== null);
-}
-function showDialog(dialog, preferredFocus){
-  clearTimeout(closeTimer);
-  [detailModal,searchModal].forEach(item=>{if(item!==dialog){item.classList.remove('open');item.hidden=true;}});
-  lastFocusedElement = document.activeElement;
-  activeDialog = dialog;
-  overlay.hidden = false;
-  dialog.hidden = false;
-  setBackgroundInert(true);
-  document.body.classList.add('locked');
-  requestAnimationFrame(()=>{overlay.classList.add('open');dialog.classList.add('open');});
-  setTimeout(()=>{
-    const target = preferredFocus || focusableElements(dialog)[0];
-    target?.focus({preventScroll:true});
-  },60);
-}
-function closeAll(){
-  if(!activeDialog) return;
-  const closing = activeDialog;
-  closing.classList.remove('open');
-  overlay.classList.remove('open');
-  activeDialog = null;
-  document.body.classList.remove('locked');
-  setBackgroundInert(false);
-  closeTimer=setTimeout(()=>{closing.hidden=true;overlay.hidden=true;},180);
-  if(lastFocusedElement?.isConnected) lastFocusedElement.focus({preventScroll:true});
-}
-overlay.addEventListener('click',closeAll);
-document.querySelectorAll('[data-close-modal],[data-close-search]').forEach(btn=>btn.addEventListener('click',closeAll));
-document.addEventListener('keydown',e=>{
-  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase()==='k'){
-    e.preventDefault();openSearch();return;
-  }
-  if(e.key==='Escape' && activeDialog){e.preventDefault();closeAll();return;}
-  if(e.key==='Tab' && activeDialog){
-    const items=focusableElements(activeDialog);
-    if(!items.length){e.preventDefault();return;}
-    const first=items[0], last=items[items.length-1];
-    if(e.shiftKey && document.activeElement===first){e.preventDefault();last.focus();}
-    else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first.focus();}
-  }
-});
-
-function openAsset(index){
-  const item = assetDetails[index];
-  document.getElementById('detailType').textContent = item.type;
-  document.getElementById('detailTitle').textContent = item.title;
-  document.getElementById('detailDescription').textContent = item.description;
-  document.getElementById('detailTeam').textContent = item.team;
-  document.getElementById('detailStatus').textContent = item.status;
-  document.getElementById('detailScene').textContent = item.scene;
-  document.getElementById('detailUpdated').textContent = item.updated;
-  showDialog(detailModal, document.querySelector('[data-close-modal]'));
-}
-document.querySelectorAll('.asset-card').forEach((card,index)=>card.addEventListener('click',()=>openAsset(index)));
-
-function openSkill(){
-  document.getElementById('detailType').textContent = 'AI Skill';
-  document.getElementById('detailTitle').textContent = 'UI 视觉走查 Skill';
-  document.getElementById('detailDescription').textContent = '通过设计稿与开发稿对比，识别布局、间距、字号、颜色、圆角、阴影、图标、对齐方式和组件状态偏差，并生成分级问题清单。';
-  document.getElementById('detailTeam').textContent = 'AI 设计小组';
-  document.getElementById('detailStatus').textContent = '已验证 · 可复制';
-  document.getElementById('detailScene').textContent = 'UI 验收、设计走查、开发协同';
-  document.getElementById('detailUpdated').textContent = '2026.07';
-  showDialog(detailModal, document.querySelector('[data-close-modal]'));
-}
-document.querySelectorAll('[data-skill-card]').forEach(el=>el.addEventListener('click',openSkill));
-
-function showToast(message){
-  toast.textContent = message;
-  toast.classList.add('show');
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=>toast.classList.remove('show'),1800);
-}
-document.querySelector('[data-copy-asset]').addEventListener('click',async()=>{
-  try{await navigator.clipboard.writeText(location.href);showToast('资产链接已复制');}
-  catch{showToast('已模拟复制资产链接');}
-});
-
-function openSearch(){
-  const input = document.getElementById('globalSearch');
-  input.value='';
-  renderSearch('');
-  showDialog(searchModal,input);
-}
-document.querySelectorAll('[data-open-search]').forEach(btn=>btn.addEventListener('click',openSearch));
-
-function renderSearch(query){
-  const target = document.getElementById('searchResults');
-  const q = query.trim().toLowerCase();
-  const items = globalItems.filter(item=>`${item.code||''} ${item.title} ${item.kind} ${item.description} ${item.team} ${item.scene||''}`.toLowerCase().includes(q));
-  if(!items.length){target.innerHTML='<div class="search-empty" role="status">没有找到匹配内容。</div>';return}
-  target.innerHTML = items.map((item,index)=>`
-    <button class="search-result" role="option" aria-selected="false" data-result="${index}" tabindex="${index===0?'0':'-1'}">
+</style>
+<script data-phase-home-entry>
+var PalmPayHome=(()=>{window.PP_PROJECTS_DATA=[{code:"S01",title:"\u4F53\u9A8C\u8BBE\u8BA1\u56E2\u961F\u5317\u6781\u661F\u6307\u6807\u5BF9\u7126\u677F",description:"\u7EDF\u4E00\u56E2\u961F\u7684\u4E1A\u52A1\u4EF7\u503C\u3001\u4F53\u9A8C\u7ED3\u679C\u548C\u7EC4\u7EC7\u80FD\u529B\u6307\u6807\u3002",category:"\u6218\u7565\u4E0E\u7EC4\u7EC7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u8BBE\u8BA1\u7BA1\u7406 / Design Ops",file:"01_\u4F53\u9A8C\u8BBE\u8BA1\u56E2\u961F\u5317\u6781\u661F\u6307\u6807\u5BF9\u7126\u677F.html",nextStep:"\u4E0E\u4E1A\u52A1\u8D1F\u8D23\u4EBA\u5BF9\u9F50 3 \u4E2A\u5317\u6781\u661F\u7EF4\u5EA6\uFF0C\u9009\u53D6\u4E00\u4E2A\u5B63\u5EA6\u9879\u76EE\u56DE\u586B\u57FA\u7EBF\u6570\u636E\u3002"},{code:"S02",title:"\u8BBE\u8BA1\u56E2\u961F\u5347\u7EA7\u4E3A\u4F53\u9A8C\u589E\u957F\u90E8\u95E8",description:"\u4ECE\u9700\u6C42\u4EA4\u4ED8\u5347\u7EA7\u4E3A\u6301\u7EED\u53D1\u73B0\u673A\u4F1A\u5E76\u63A8\u52A8\u4E1A\u52A1\u7ED3\u679C\u3002",category:"\u6218\u7565\u4E0E\u7EC4\u7EC7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u8BBE\u8BA1\u7BA1\u7406 / Design Ops",file:"02_\u8BBE\u8BA1\u56E2\u961F\u5347\u7EA7\u4E3A\u4F53\u9A8C\u589E\u957F\u90E8\u95E8.html",nextStep:"\u9009\u62E9\u4E00\u6761\u5173\u952E\u4E1A\u52A1\u65C5\u7A0B\uFF0C\u660E\u786E\u8BBE\u8BA1\u56E2\u961F\u4ECE\u9700\u6C42\u4EA4\u4ED8\u5230\u589E\u957F\u5171\u521B\u7684\u804C\u8D23\u8FB9\u754C\u3002"},{code:"S03",title:"\u628A\u8BBE\u8BA1\u6307\u6807\u4E0E\u4E1A\u52A1\u6307\u6807\u7ED1\u5B9A",description:"\u5EFA\u7ACB\u4E1A\u52A1\u7ED3\u679C\u3001\u4F53\u9A8C\u7ED3\u679C\u4E0E\u8BBE\u8BA1\u8FC7\u7A0B\u7684\u4E09\u7EA7\u6307\u6807\u4F53\u7CFB\u3002",category:"\u6218\u7565\u4E0E\u7EC4\u7EC7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u8BBE\u8BA1\u7BA1\u7406 / Design Ops",file:"10_\u628A\u8BBE\u8BA1\u6307\u6807\u4E0E\u4E1A\u52A1\u6307\u6807\u7ED1\u5B9A.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u5DF2\u4E0A\u7EBF\u9879\u76EE\uFF0C\u8865\u9F50\u4E1A\u52A1\u3001\u4F53\u9A8C\u548C\u8BBE\u8BA1\u8FC7\u7A0B\u4E09\u7EA7\u6307\u6807\u5E76\u9A8C\u8BC1\u5173\u8054\u6027\u3002"},{code:"S04",title:"\u8BBE\u8BA1\u56E2\u961F\u7EC4\u7EC7\u5982\u4F55\u8C03\u6574",description:"\u91CD\u6784\u8D1F\u8D23\u4EBA\u3001\u6838\u5FC3\u65C5\u7A0B\u3001\u589E\u957F\u3001AI \u4E0E\u5E73\u53F0\u80FD\u529B\u89D2\u8272\u3002",category:"\u6218\u7565\u4E0E\u7EC4\u7EC7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u8BBE\u8BA1\u7BA1\u7406 / Design Ops",file:"11_\u8BBE\u8BA1\u56E2\u961F\u7EC4\u7EC7\u5982\u4F55\u8C03\u6574.html",nextStep:"\u76D8\u70B9\u73B0\u6709\u89D2\u8272\u4E0E\u5173\u952E\u65C5\u7A0B\uFF0C\u786E\u5B9A\u8D1F\u8D23\u4EBA\u3001\u589E\u957F\u3001AI \u548C\u5E73\u53F0\u80FD\u529B\u7684\u6700\u5C0F\u7F16\u7EC4\u3002"},{code:"S05",title:"90 \u5929\u6267\u884C\u8BA1\u5212",description:"\u901A\u8FC7\u8BD5\u70B9\u5B8C\u6210\u57FA\u7840\u5EFA\u8BBE\u3001\u7ED3\u679C\u9A8C\u8BC1\u3001\u6807\u51C6\u5316\u4E0E\u590D\u5236\u3002",category:"\u6218\u7565\u4E0E\u7EC4\u7EC7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u53EF\u7ACB\u9879",owner:"\u8BBE\u8BA1\u7BA1\u7406 / Design Ops",file:"12_90\u5929\u6267\u884C\u8BA1\u5212.html",nextStep:"\u786E\u8BA4\u9996\u6279 3 \u4E2A\u8BD5\u70B9\u9879\u76EE\u3001\u8D1F\u8D23\u4EBA\u548C 30 / 60 / 90 \u5929\u9A8C\u6536\u8282\u70B9\u3002"},{code:"S06",title:"\u8BBE\u8BA1\u56E2\u961F\u56FA\u5B9A\u5468\u8FD0\u884C\u673A\u5236",description:"\u5C06\u95EE\u9898\u8BC4\u5BA1\u3001\u65B9\u6848\u5B9E\u9A8C\u3001\u8DE8\u804C\u80FD\u51B3\u7B56\u548C\u8D44\u4EA7\u6C89\u6DC0\u56FA\u5B9A\u5316\u3002",category:"\u6218\u7565\u4E0E\u7EC4\u7EC7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u8BBE\u8BA1\u7BA1\u7406 / Design Ops",file:"13_\u8BBE\u8BA1\u56E2\u961F\u56FA\u5B9A\u5468\u8FD0\u884C\u673A\u5236.html",nextStep:"\u7528\u4E00\u4E2A\u771F\u5B9E\u9879\u76EE\u8BD5\u8FD0\u884C\u5468\u4E00\u95EE\u9898\u8BC4\u5BA1\u3001\u5468\u4E09\u5B9E\u9A8C\u51B3\u7B56\u3001\u5468\u4E94\u8D44\u4EA7\u6C89\u6DC0\u8282\u594F\u3002"},{code:"S07",title:"\u8BBE\u8BA1\u56E2\u961F AI \u8F6C\u578B\u7EC4\u7EC7\u4E0E\u8FD0\u884C\u673A\u5236",description:"\u5EFA\u7ACB\u56F4\u7ED5\u4E1A\u52A1\u7ED3\u679C\u3001AI \u80FD\u529B\u548C\u7EC4\u7EC7\u8D44\u4EA7\u7684\u957F\u671F\u8FD0\u884C\u6A21\u578B\u3002",category:"\u6218\u7565\u4E0E\u7EC4\u7EC7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u8BBE\u8BA1\u7BA1\u7406 / Design Ops",file:"07_\u8BBE\u8BA1\u56E2\u961FAI\u8F6C\u578B\u7EC4\u7EC7\u4E0E\u8FD0\u884C\u673A\u5236.html",nextStep:"\u5B8C\u6210\u56E2\u961F AI \u80FD\u529B\u76D8\u70B9\uFF0C\u9009\u5B9A\u4E00\u4E2A\u9AD8\u9891\u4EFB\u52A1\u4F5C\u4E3A\u9996\u4E2A\u7EC4\u7EC7\u7EA7\u5DE5\u4F5C\u6D41\u8BD5\u70B9\u3002"},{code:"P01",title:"AI \u9700\u6C42\u5206\u6790\u4E0E\u4F53\u9A8C\u7B56\u7565\u4E2D\u5FC3",description:"\u7EDF\u4E00\u5438\u6536\u9879\u76EE\u4E0A\u4E0B\u6587\uFF0C\u81EA\u52A8\u751F\u6210\u8BBE\u8BA1\u5206\u6790\u4E0E\u4F53\u9A8C\u7B56\u7565\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u6548\u7387",stage:"\u53EF\u7ACB\u9879",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"08_AI\u9700\u6C42\u5206\u6790\u4E0E\u4F53\u9A8C\u7B56\u7565\u4E2D\u5FC3.html",nextStep:"\u9009\u53D6\u4E00\u4E2A\u771F\u5B9E PRD\uFF0C\u9A8C\u8BC1\u7B56\u7565\u4EA7\u51FA\u8D28\u91CF\u3001\u8986\u76D6\u7387\u4E0E\u8282\u7701\u65F6\u957F\u3002",priorityRank:1,priorityReason:"\u8F93\u5165\u4E0E\u8F93\u51FA\u8FB9\u754C\u6E05\u6670\uFF0C\u53EF\u76F4\u63A5\u590D\u7528\u73B0\u6709 PRD\uFF0C\u6700\u5FEB\u5F62\u6210\u56E2\u961F\u7EA7\u6548\u7387\u6837\u677F\u3002",impact:"\u9AD8",effort:"\u4E2D",readiness:"\u9AD8"},{code:"P02",title:"AI \u7528\u6237\u53CD\u9988\u4E0E\u673A\u4F1A\u53D1\u73B0\u7CFB\u7EDF",description:"\u5C06\u5206\u6563\u53CD\u9988\u8F6C\u5316\u4E3A\u7ED3\u6784\u5316\u3001\u53EF\u6392\u5E8F\u3001\u53EF\u884C\u52A8\u7684\u673A\u4F1A\u6C60\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u53EF\u7ACB\u9879",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"09_AI\u7528\u6237\u53CD\u9988\u4E0E\u673A\u4F1A\u53D1\u73B0\u7CFB\u7EDF.html",nextStep:"\u6C47\u603B\u8FD1 30 \u5929\u5BA2\u670D\u3001\u8BBF\u8C08\u548C\u8FD0\u8425\u53CD\u9988\uFF0C\u9A8C\u8BC1\u673A\u4F1A\u805A\u7C7B\u4E0E\u4F18\u5148\u7EA7\u6392\u5E8F\u51C6\u786E\u6027\u3002",priorityRank:6,priorityReason:"\u53CD\u9988\u6570\u636E\u5206\u6563\u4F46\u53EF\u5FEB\u901F\u6C47\u603B\uFF0C\u80FD\u5F62\u6210\u6301\u7EED\u673A\u4F1A\u53D1\u73B0\u80FD\u529B\u3002",impact:"\u4E2D",effort:"\u4E2D",readiness:"\u4E2D"},{code:"P03",title:"AI \u8BBE\u8BA1\u7CFB\u7EDF\u4E0E\u8BBE\u8BA1\u5F00\u53D1\u4E00\u4F53\u5316",description:"\u8FDE\u63A5\u89C4\u8303\u3001\u7EC4\u4EF6\u3001Token\u3001\u4EE3\u7801\u4E0E AI \u751F\u4EA7\u6D41\u7A0B\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u6548\u7387",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"03_AI\u8BBE\u8BA1\u7CFB\u7EDF\u4E0E\u8BBE\u8BA1\u5F00\u53D1\u4E00\u4F53\u5316.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u9AD8\u9891\u7EC4\u4EF6\uFF0C\u6253\u901A Token\u3001Figma\u3001\u4EE3\u7801\u548C AI \u751F\u6210\u7684\u6700\u5C0F\u95ED\u73AF\u3002"},{code:"P04",title:"AI \u4EA7\u54C1\u8D28\u91CF\u95E8\u7981",description:"\u5EFA\u7ACB\u9700\u6C42\u3001\u8BBE\u8BA1\u3001\u5F00\u53D1\u548C\u4E0A\u7EBF\u524D\u540E\u7684\u81EA\u52A8\u5316\u8D28\u91CF\u63A7\u5236\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u8D28\u91CF",stage:"\u53EF\u7ACB\u9879",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"04_AI\u4EA7\u54C1\u8D28\u91CF\u95E8\u7981.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u5373\u5C06\u4E0A\u7EBF\u9879\u76EE\uFF0C\u5EFA\u7ACB\u9700\u6C42\u3001\u8BBE\u8BA1\u3001\u5F00\u53D1\u4E09\u9636\u6BB5\u8D28\u91CF\u95E8\u7981\u5E76\u56DE\u6D4B\u95EE\u9898\u53EC\u56DE\u7387\u3002",priorityRank:2,priorityReason:"\u8D28\u91CF\u95EE\u9898\u6210\u672C\u53EF\u91CF\u5316\uFF0C\u9002\u5408\u5728\u4E0A\u7EBF\u524D\u6D41\u7A0B\u4E2D\u5EFA\u7ACB\u660E\u786E\u95E8\u7981\u3002",impact:"\u9AD8",effort:"\u4E2D",readiness:"\u9AD8"},{code:"P05",title:"\u4F53\u9A8C\u589E\u957F\u5B9E\u9A8C\u5DE5\u5382",description:"\u5C06\u7528\u6237\u95EE\u9898\u6301\u7EED\u8F6C\u5316\u4E3A\u53EF\u9A8C\u8BC1\u3001\u53EF\u590D\u76D8\u7684\u589E\u957F\u5B9E\u9A8C\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u6548\u7387",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"05_\u4F53\u9A8C\u589E\u957F\u5B9E\u9A8C\u5DE5\u5382.html",nextStep:"\u56F4\u7ED5\u4E00\u4E2A\u6838\u5FC3\u6F0F\u6597\u5EFA\u7ACB\u95EE\u9898\u2014\u5047\u8BBE\u2014\u5B9E\u9A8C\u2014\u590D\u76D8\u7684\u4E24\u5468\u8BD5\u8FD0\u884C\u673A\u5236\u3002"},{code:"P06",title:"\u4EA7\u54C1\u5185 AI \u4F53\u9A8C\u5347\u7EA7",description:"\u628A AI \u5D4C\u5165\u5173\u952E\u4EFB\u52A1\uFF0C\u63D0\u5347\u6548\u7387\u3001\u6210\u529F\u7387\u548C\u53EF\u89E3\u91CA\u6027\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u6548\u7387",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"06_\u4EA7\u54C1\u5185AI\u4F53\u9A8C\u5347\u7EA7.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u9AD8\u9891\u4EFB\u52A1\uFF0C\u5C06 AI \u5EFA\u8BAE\u5D4C\u5165\u6D41\u7A0B\u5E76\u9A8C\u8BC1\u5B8C\u6210\u65F6\u957F\u3001\u6210\u529F\u7387\u548C\u53EF\u89E3\u91CA\u6027\u3002"},{code:"P15",title:"AI PRD \u98CE\u9669\u626B\u63CF\u5668",description:"\u5728\u8BBE\u8BA1\u542F\u52A8\u524D\u8BC6\u522B\u89C4\u5219\u3001\u72B6\u6001\u3001\u6743\u9650\u3001\u6570\u636E\u548C\u5F02\u5E38\u6D41\u7A0B\u98CE\u9669\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u8D28\u91CF",stage:"\u53EF\u7ACB\u9879",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"22_\u9879\u76EE\u5341\u4E94_AI_PRD\u98CE\u9669\u626B\u63CF\u5668.html",nextStep:"\u9009\u53D6 3 \u4EFD\u5DF2\u5B8C\u6210 PRD\uFF0C\u56DE\u6D4B\u89C4\u5219\u3001\u72B6\u6001\u3001\u6743\u9650\u548C\u5F02\u5E38\u6D41\u7A0B\u7684\u53EC\u56DE\u7387\u4E0E\u8BEF\u62A5\u7387\u3002",priorityRank:3,priorityReason:"\u53EF\u5229\u7528\u5386\u53F2 PRD \u56DE\u6D4B\uFF0C\u4F4E\u98CE\u9669\u9A8C\u8BC1\u89C4\u5219\u53EC\u56DE\u7387\u4E0E\u8BEF\u62A5\u7387\u3002",impact:"\u9AD8",effort:"\u4F4E",readiness:"\u9AD8"},{code:"P16",title:"AI \u4F53\u9A8C\u503A\u52A1\u7BA1\u7406\u7CFB\u7EDF",description:"\u6301\u7EED\u8BC6\u522B\u3001\u5206\u7EA7\u548C\u5173\u95ED\u5386\u53F2\u4F53\u9A8C\u95EE\u9898\u4E0E\u4E00\u81F4\u6027\u503A\u52A1\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u8D28\u91CF",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"23_\u9879\u76EE\u5341\u516D_AI\u4F53\u9A8C\u503A\u52A1\u7BA1\u7406\u7CFB\u7EDF.html",nextStep:"\u4ECE\u73B0\u6709\u4EA7\u54C1\u4E2D\u6536\u96C6 20 \u4E2A\u4F53\u9A8C\u503A\u52A1\uFF0C\u5B8C\u6210\u5206\u7EA7\u3001\u5F52\u56E0\u548C\u5173\u95ED\u4F18\u5148\u7EA7\u8BD5\u7B97\u3002"},{code:"P17",title:"AI \u7ADE\u54C1\u4E0E\u884C\u4E1A\u53D8\u5316\u96F7\u8FBE",description:"\u6301\u7EED\u8FFD\u8E2A\u7ADE\u54C1\u3001\u884C\u4E1A\u3001\u5408\u89C4\u548C\u8BBE\u8BA1\u8D8B\u52BF\uFF0C\u53D1\u73B0\u6709\u6548\u673A\u4F1A\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"24_\u9879\u76EE\u5341\u4E03_AI\u7ADE\u54C1\u4E0E\u884C\u4E1A\u53D8\u5316\u96F7\u8FBE.html",nextStep:"\u5B9A\u4E49 5 \u4E2A\u6838\u5FC3\u7ADE\u54C1\u4E0E 3 \u7C7B\u884C\u4E1A\u4FE1\u53F7\uFF0C\u8FD0\u884C\u4E24\u5468\u5E76\u8BC4\u4F30\u673A\u4F1A\u53D1\u73B0\u8D28\u91CF\u3002"},{code:"P18",title:"AI \u7528\u6237\u7814\u7A76\u52A9\u624B",description:"\u8986\u76D6\u7814\u7A76\u524D\u3001\u4E2D\u3001\u540E\u7684\u8BA1\u5212\u3001\u8BB0\u5F55\u3001\u805A\u7C7B\u4E0E\u6D1E\u5BDF\u751F\u4EA7\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"25_\u9879\u76EE\u5341\u516B_AI\u7528\u6237\u7814\u7A76\u52A9\u624B.html",nextStep:"\u7528\u4E00\u6B21\u771F\u5B9E\u8BBF\u8C08\u9A8C\u8BC1\u7814\u7A76\u8BA1\u5212\u3001\u8F6C\u5F55\u3001\u805A\u7C7B\u548C\u6D1E\u5BDF\u6458\u8981\u7684\u7AEF\u5230\u7AEF\u6548\u7387\u3002"},{code:"P19",title:"AI \u9875\u9762\u72B6\u6001\u751F\u6210\u5668",description:"\u6839\u636E PRD \u548C\u9875\u9762\u7ED3\u6784\u81EA\u52A8\u8865\u9F50\u7EC4\u4EF6\u4E0E\u4E1A\u52A1\u72B6\u6001\u77E9\u9635\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u8D28\u91CF",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"26_\u9879\u76EE\u5341\u4E5D_AI\u9875\u9762\u72B6\u6001\u751F\u6210\u5668.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u590D\u6742\u8868\u5355\u9875\u9762\uFF0C\u81EA\u52A8\u751F\u6210\u7A7A\u3001\u9519\u3001\u52A0\u8F7D\u3001\u6743\u9650\u548C\u8FB9\u754C\u72B6\u6001\u5E76\u4E0E\u4EBA\u5DE5\u7ED3\u679C\u5BF9\u6BD4\u3002"},{code:"P20",title:"AI \u539F\u578B\u6279\u91CF\u751F\u6210\u5DE5\u4F5C\u6D41",description:"\u5148\u751F\u6210\u7ED3\u6784\u3001\u4FE1\u606F\u67B6\u6784\u3001\u72B6\u6001\u548C\u591A\u65B9\u6848\u4F4E\u4FDD\u771F\u539F\u578B\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u6548\u7387",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"27_\u9879\u76EE\u4E8C\u5341_AI\u539F\u578B\u6279\u91CF\u751F\u6210\u5DE5\u4F5C\u6D41.html",nextStep:"\u9009\u53D6\u4E00\u4E2A\u65B0\u529F\u80FD\uFF0C\u7528\u540C\u4E00\u9700\u6C42\u6279\u91CF\u751F\u6210 3 \u5957\u4F4E\u4FDD\u771F\u65B9\u6848\u5E76\u8BC4\u4F30\u53EF\u7528\u6027\u3002"},{code:"P21",title:"AI \u6587\u6848\u4E0E\u5185\u5BB9\u6CBB\u7406\u4E2D\u5FC3",description:"\u7EDF\u4E00\u4EA7\u54C1\u672F\u8BED\u3001\u72B6\u6001\u6587\u6848\u3001\u9519\u8BEF\u63D0\u793A\u548C\u591A\u8BED\u8A00\u5185\u5BB9\u89C4\u5219\u3002",category:"\u8BBE\u8BA1\u751F\u4EA7",value:"\u63D0\u5347\u8D28\u91CF",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"28_\u9879\u76EE\u4E8C\u5341\u4E00_AI\u6587\u6848\u4E0E\u5185\u5BB9\u6CBB\u7406\u4E2D\u5FC3.html",nextStep:"\u4ECE\u9519\u8BEF\u63D0\u793A\u548C\u9AD8\u98CE\u9669\u64CD\u4F5C\u6587\u6848\u5165\u624B\uFF0C\u5EFA\u7ACB\u9996\u6279\u672F\u8BED\u4E0E\u72B6\u6001\u6587\u6848\u89C4\u5219\u5E93\u3002"},{code:"P07",title:"AI \u6838\u5FC3\u6F0F\u6597\u8BCA\u65AD\u4E2D\u5FC3",description:"\u5B9A\u4F4D\u6838\u5FC3\u6D41\u7A0B\u6700\u5927\u6D41\u5931\u6B65\u9AA4\u3001\u5931\u8D25\u539F\u56E0\u548C\u4F18\u5316\u5B9E\u9A8C\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"14_\u9879\u76EE\u4E03_AI\u6838\u5FC3\u6F0F\u6597\u8BCA\u65AD\u4E2D\u5FC3.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u5173\u952E\u6F0F\u6597\uFF0C\u63A5\u5165\u4E8B\u4EF6\u6570\u636E\u5E76\u9A8C\u8BC1\u6D41\u5931\u5B9A\u4F4D\u4E0E\u5B9E\u9A8C\u5EFA\u8BAE\u7684\u51C6\u786E\u6027\u3002"},{code:"P08",title:"AI \u65B0\u7528\u6237\u6FC0\u6D3B\u52A9\u624B",description:"\u57FA\u4E8E\u7528\u6237\u72B6\u6001\u63A8\u8350\u6700\u6709\u4EF7\u503C\u7684\u4E0B\u4E00\u6B65\u884C\u52A8\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u53EF\u7ACB\u9879",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"15_\u9879\u76EE\u516B_AI\u65B0\u7528\u6237\u6FC0\u6D3B\u52A9\u624B.html",nextStep:"\u9009\u62E9\u6CE8\u518C\u5B8C\u6210\u4F46\u672A\u5B8C\u6210\u8BA4\u8BC1\u7684\u7528\u6237\uFF0C\u9A8C\u8BC1\u4EFB\u52A1\u63A8\u8350\u5BF9\u8BA4\u8BC1\u5B8C\u6210\u7387\u7684\u63D0\u5347\u3002",priorityRank:4,priorityReason:"\u6FC0\u6D3B\u94FE\u8DEF\u6570\u636E\u57FA\u7840\u8F83\u6210\u719F\uFF0C\u4E1A\u52A1\u7ED3\u679C\u53EF\u901A\u8FC7\u8F6C\u5316\u7387\u76F4\u63A5\u9A8C\u8BC1\u3002",impact:"\u9AD8",effort:"\u4E2D",readiness:"\u4E2D"},{code:"P09",title:"AI \u529F\u80FD\u6E17\u900F\u589E\u957F\u52A9\u624B",description:"\u6839\u636E\u884C\u4E3A\u8BC6\u522B\u6F5C\u5728\u9700\u6C42\uFF0C\u5728\u5408\u9002\u65F6\u673A\u63A8\u8350\u76F8\u5173\u529F\u80FD\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"16_\u9879\u76EE\u4E5D_AI\u529F\u80FD\u6E17\u900F\u589E\u957F\u52A9\u624B.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u4F4E\u6E17\u900F\u9AD8\u4EF7\u503C\u529F\u80FD\uFF0C\u9A8C\u8BC1\u884C\u4E3A\u89E6\u53D1\u63A8\u8350\u7684\u70B9\u51FB\u7387\u4E0E\u4F7F\u7528\u8F6C\u5316\u3002"},{code:"P10",title:"AI \u6D41\u5931\u7528\u6237\u53EC\u56DE\u5206\u6790",description:"\u8BC6\u522B\u6D41\u5931\u539F\u56E0\u3001\u7528\u6237\u7C7B\u578B\u548C\u53EF\u6267\u884C\u7684\u53EC\u56DE\u7B56\u7565\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"17_\u9879\u76EE\u5341_AI\u6D41\u5931\u7528\u6237\u53EC\u56DE\u5206\u6790.html",nextStep:"\u62BD\u53D6\u8FD1 90 \u5929\u6D41\u5931\u7528\u6237\uFF0C\u9A8C\u8BC1\u6D41\u5931\u5206\u7FA4\u3001\u539F\u56E0\u89E3\u91CA\u548C\u53EC\u56DE\u7B56\u7565\u7684\u53EF\u6267\u884C\u6027\u3002"},{code:"P11",title:"AI \u5BA2\u670D\u95EE\u9898\u4EA7\u54C1\u5316\u7CFB\u7EDF",description:"\u628A\u9AD8\u9891\u54A8\u8BE2\u6301\u7EED\u8F6C\u5316\u4E3A\u4EA7\u54C1\u3001\u6D41\u7A0B\u3001\u6587\u6848\u548C\u5E2E\u52A9\u5185\u5BB9\u4F18\u5316\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"18_\u9879\u76EE\u5341\u4E00_AI\u5BA2\u670D\u95EE\u9898\u4EA7\u54C1\u5316\u7CFB\u7EDF.html",nextStep:"\u5206\u6790\u8FD1 30 \u5929 Top 20 \u5BA2\u670D\u95EE\u9898\uFF0C\u5F62\u6210\u4EA7\u54C1\u3001\u6D41\u7A0B\u548C\u5E2E\u52A9\u5185\u5BB9\u7684\u6539\u8FDB\u6E05\u5355\u3002"},{code:"P12",title:"AI \u8FD0\u8425\u5DE5\u4F5C\u53F0\u52A9\u624B",description:"\u91CD\u6784\u8FD0\u8425\u5DE5\u4F5C\u53F0\u7684\u4FE1\u606F\u67B6\u6784\u3001\u4EFB\u52A1\u4F18\u5148\u7EA7\u548C\u98CE\u9669\u63D0\u9192\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"19_\u9879\u76EE\u5341\u4E8C_AI\u8FD0\u8425\u5DE5\u4F5C\u53F0\u52A9\u624B.html",nextStep:"\u9009\u62E9\u4E00\u4E2A\u9AD8\u9891\u8FD0\u8425\u89D2\u8272\uFF0C\u91CD\u6392\u4EFB\u52A1\u4F18\u5148\u7EA7\u5E76\u9A8C\u8BC1\u5904\u7406\u65F6\u957F\u4E0E\u98CE\u9669\u9057\u6F0F\u53D8\u5316\u3002"},{code:"P13",title:"AI \u5BA1\u6838\u6750\u6599\u9884\u68C0",description:"\u5728\u7528\u6237\u63D0\u4EA4\u524D\u53D1\u73B0\u7F3A\u5931\u3001\u6A21\u7CCA\u3001\u8FC7\u671F\u548C\u5B57\u6BB5\u51B2\u7A81\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"20_\u9879\u76EE\u5341\u4E09_AI\u5BA1\u6838\u6750\u6599\u9884\u68C0.html",nextStep:"\u4EE5\u4F01\u4E1A\u8BA4\u8BC1\u6750\u6599\u4E3A\u6837\u672C\uFF0C\u9A8C\u8BC1\u7F3A\u5931\u3001\u6A21\u7CCA\u3001\u8FC7\u671F\u548C\u5B57\u6BB5\u51B2\u7A81\u7684\u9884\u68C0\u51C6\u786E\u7387\u3002"},{code:"P14",title:"AI \u667A\u80FD\u62A5\u8868\u751F\u6210\u5668",description:"\u81EA\u52A8\u751F\u6210\u4EA4\u6613\u3001\u8D39\u7528\u3001\u98CE\u9669\u548C\u8FD0\u8425\u5206\u6790\u62A5\u544A\u3002",category:"\u589E\u957F\u4E0E\u8FD0\u8425",value:"\u63D0\u5347\u589E\u957F",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u4EA7\u54C1",file:"21_\u9879\u76EE\u5341\u56DB_AI\u667A\u80FD\u62A5\u8868\u751F\u6210\u5668.html",nextStep:"\u9009\u62E9\u4E00\u4EFD\u5468\u5EA6\u8FD0\u8425\u62A5\u8868\uFF0C\u9A8C\u8BC1\u6570\u636E\u5F52\u96C6\u3001\u5F02\u5E38\u89E3\u91CA\u548C\u7ED3\u8BBA\u751F\u6210\u7684\u51C6\u786E\u6027\u3002"},{code:"P22",title:"AI \u591A\u8BED\u8A00\u4E0E\u672C\u5730\u5316\u4F53\u9A8C\u68C0\u67E5",description:"\u68C0\u67E5\u8BED\u8A00\u3001\u683C\u5F0F\u3001\u5B57\u6BB5\u3001\u91D1\u878D\u672F\u8BED\u3001\u6587\u5316\u8868\u8FBE\u548C RTL \u5E03\u5C40\u3002",category:"\u98CE\u9669\u4E0E\u6CBB\u7406",value:"\u964D\u4F4E\u98CE\u9669",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u98CE\u63A7\u5408\u89C4",file:"29_\u9879\u76EE\u4E8C\u5341\u4E8C_AI\u591A\u8BED\u8A00\u4E0E\u672C\u5730\u5316\u4F53\u9A8C\u68C0\u67E5.html",nextStep:"\u9009\u62E9\u82F1\u8BED\u3001\u6CD5\u8BED\u548C\u963F\u62C9\u4F2F\u8BED\u4E09\u4E2A\u5E02\u573A\uFF0C\u68C0\u67E5\u91D1\u878D\u672F\u8BED\u3001\u683C\u5F0F\u548C RTL \u5E03\u5C40\u95EE\u9898\u3002"},{code:"P23",title:"AI \u9AD8\u98CE\u9669\u64CD\u4F5C\u4F53\u9A8C\u5BA1\u8BA1",description:"\u5BA1\u8BA1\u8D44\u91D1\u3001\u6743\u9650\u3001\u5B89\u5168\u548C\u654F\u611F\u64CD\u4F5C\u7684\u4FDD\u62A4\u4E0E\u53EF\u8FFD\u6EAF\u6027\u3002",category:"\u98CE\u9669\u4E0E\u6CBB\u7406",value:"\u964D\u4F4E\u98CE\u9669",stage:"\u53EF\u7ACB\u9879",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u98CE\u63A7\u5408\u89C4",file:"30_\u9879\u76EE\u4E8C\u5341\u4E09_AI\u9AD8\u98CE\u9669\u64CD\u4F5C\u4F53\u9A8C\u5BA1\u8BA1.html",nextStep:"\u5148\u8986\u76D6\u9000\u6B3E\u3001\u6743\u9650\u53D8\u66F4\u548C\u6536\u6B3E\u8D26\u6237\u4FEE\u6539\uFF0C\u5EFA\u7ACB\u9996\u6279\u9AD8\u98CE\u9669\u64CD\u4F5C\u5BA1\u8BA1\u89C4\u5219\u3002",priorityRank:5,priorityReason:"\u9AD8\u98CE\u9669\u64CD\u4F5C\u8303\u56F4\u660E\u786E\uFF0C\u5408\u89C4\u4E0E\u7528\u6237\u4FDD\u62A4\u4EF7\u503C\u7A81\u51FA\u3002",impact:"\u9AD8",effort:"\u4E2D",readiness:"\u4E2D"},{code:"P24",title:"AI \u5408\u89C4\u89C4\u5219\u4F53\u9A8C\u8F6C\u8BD1\u5668",description:"\u628A\u4E13\u4E1A\u89C4\u5219\u8F6C\u5316\u4E3A\u7528\u6237\u53EF\u7406\u89E3\u3001\u53EF\u51C6\u5907\u3001\u53EF\u6267\u884C\u7684\u5185\u5BB9\u3002",category:"\u98CE\u9669\u4E0E\u6CBB\u7406",value:"\u964D\u4F4E\u98CE\u9669",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u98CE\u63A7\u5408\u89C4",file:"31_\u9879\u76EE\u4E8C\u5341\u56DB_AI\u5408\u89C4\u89C4\u5219\u4F53\u9A8C\u8F6C\u8BD1\u5668.html",nextStep:"\u9009\u62E9\u4E00\u6761\u590D\u6742\u5408\u89C4\u89C4\u5219\uFF0C\u5C06\u5176\u8F6C\u8BD1\u4E3A\u7528\u6237\u51C6\u5907\u6E05\u5355\u5E76\u8FDB\u884C\u53EF\u7406\u89E3\u6027\u6D4B\u8BD5\u3002"},{code:"P25",title:"AI \u8BBE\u8BA1\u51B3\u7B56\u77E5\u8BC6\u5E93",description:"\u8BA9\u5173\u952E\u51B3\u7B56\u53EF\u68C0\u7D22\u3001\u53EF\u590D\u7528\u3001\u53EF\u8FFD\u6EAF\u5E76\u6301\u7EED\u9A8C\u8BC1\u3002",category:"\u98CE\u9669\u4E0E\u6CBB\u7406",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u98CE\u63A7\u5408\u89C4",file:"32_\u9879\u76EE\u4E8C\u5341\u4E94_AI\u8BBE\u8BA1\u51B3\u7B56\u77E5\u8BC6\u5E93.html",nextStep:"\u6574\u7406 10 \u4E2A\u5DF2\u5B8C\u6210\u9879\u76EE\u7684\u5173\u952E\u8BBE\u8BA1\u51B3\u7B56\uFF0C\u9A8C\u8BC1\u68C0\u7D22\u3001\u590D\u7528\u548C\u8FFD\u6EAF\u6548\u7387\u3002"},{code:"P26",title:"AI \u56E2\u961F\u80FD\u529B\u8BCA\u65AD\u4E0E\u57F9\u8BAD\u7CFB\u7EDF",description:"\u57FA\u4E8E\u771F\u5B9E\u9879\u76EE\u8BC6\u522B\u80FD\u529B\u77ED\u677F\u5E76\u751F\u6210\u4E2A\u6027\u5316\u6210\u957F\u8BA1\u5212\u3002",category:"\u98CE\u9669\u4E0E\u6CBB\u7406",value:"\u63D0\u5347\u7EC4\u7EC7\u80FD\u529B",stage:"\u63A2\u7D22\u65B9\u6848",owner:"\u4F53\u9A8C\u8BBE\u8BA1 / \u98CE\u63A7\u5408\u89C4",file:"33_\u9879\u76EE\u4E8C\u5341\u516D_AI\u56E2\u961F\u80FD\u529B\u8BCA\u65AD\u4E0E\u57F9\u8BAD\u7CFB\u7EDF.html",nextStep:"\u57FA\u4E8E 3 \u4E2A\u771F\u5B9E\u9879\u76EE\u5B8C\u6210\u56E2\u961F\u80FD\u529B\u8BCA\u65AD\uFF0C\u751F\u6210\u4E2A\u6027\u5316\u5B66\u4E60\u8BA1\u5212\u5E76\u9A8C\u8BC1\u6539\u8FDB\u3002"}];(()=>{let e="data:image/png;base64,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",t=!1,o=!!document.querySelector('script[src$="project-detail-nav.js"]'),i=()=>{if(!t){t=!0;try{document.querySelectorAll(".brand-mark, .logo, .pp-platform-logo").forEach(r=>{if(o&&r.classList.contains("brand-mark")&&r.closest(".topbar"))return;r.classList.add("pp-unified-nav-logo");let n=r.querySelector("img");n||(n=document.createElement("img"),r.replaceChildren(n)),n.getAttribute("src")!==e&&(n.src=e),n.alt="PalmPay Design",n.decoding="async",n.draggable=!1,n.addEventListener("error",()=>{n.src!==e&&(n.src=e)},{once:!0})})}finally{t=!1}}};i();let l=document.getElementById("root")||document.body;l&&new MutationObserver(i).observe(l,{childList:!0,subtree:!0}),window.setTimeout(i,0)})();var L=[{title:"Web \u6570\u636E\u8868\u683C\u7EC4\u4EF6\u89C4\u8303",type:"Component System",description:"\u7EDF\u4E00\u590D\u6742\u4E1A\u52A1\u8868\u683C\u7684\u5E03\u5C40\u3001\u7B5B\u9009\u3001\u6279\u91CF\u64CD\u4F5C\u3001\u72B6\u6001\u3001\u7A7A\u6570\u636E\u4E0E\u54CD\u5E94\u5F0F\u89C4\u5219\uFF0C\u964D\u4F4E\u4EA4\u6613\u548C\u8FD0\u8425\u540E\u53F0\u4E2D\u7684\u91CD\u590D\u8BBE\u8BA1\u4E0E\u4EA4\u4ED8\u504F\u5DEE\u3002",team:"\u8BBE\u8BA1\u7CFB\u7EDF\u5C0F\u7EC4",status:"\u5DF2\u9A8C\u8BC1 \xB7 72% \u590D\u7528",scene:"\u4EA4\u6613\u5217\u8868\u3001\u5546\u6237\u7BA1\u7406\u3001\u7ED3\u7B97\u660E\u7EC6",updated:"2026.07 \xB7 2 \u5929\u524D"},{title:"\u4E1A\u52A1\u7ECF\u8425\u770B\u677F\u9875\u9762\u6A21\u677F",type:"Page Template",description:"\u9762\u5411\u7ECF\u8425\u5206\u6790\u3001\u9879\u76EE\u72B6\u6001\u4E0E\u6307\u6807\u53D9\u4E8B\u7684\u9875\u9762\u6A21\u677F\uFF0C\u5E2E\u52A9\u8BBE\u8BA1\u5E08\u5FEB\u901F\u5EFA\u7ACB\u7EDF\u4E00\u7684\u4FE1\u606F\u5C42\u7EA7\u548C\u7BA1\u7406\u5C42\u51B3\u7B56\u89C6\u56FE\u3002",team:"\u4F53\u9A8C\u8BBE\u8BA1\u5C0F\u7EC4",status:"MVP \u7CBE\u9009 \xB7 18 \u4E2A\u6A21\u677F",scene:"\u7ECF\u8425\u5206\u6790\u3001\u9879\u76EE\u6C47\u62A5\u3001\u6307\u6807\u590D\u76D8",updated:"2026.07 \xB7 5 \u5929\u524D"},{title:"\u4F53\u9A8C\u7B56\u7565\u5206\u6790 AI Skill",type:"AI Workflow",description:"\u5C06\u9700\u6C42\u6750\u6599\u3001\u7814\u7A76\u8F93\u5165\u3001\u5206\u6790\u7EF4\u5EA6\u3001\u8F93\u51FA\u7ED3\u6784\u548C\u8BBE\u8BA1\u5224\u65AD\u6574\u5408\u4E3A\u53EF\u590D\u5236\u7684 AI Skill\uFF0C\u652F\u6301\u591A\u4E1A\u52A1\u7EBF\u5FEB\u901F\u590D\u7528\u3002",team:"AI \u8BBE\u8BA1\u5C0F\u7EC4",status:"\u5DF2\u9A8C\u8BC1 \xB7 \u8BC4\u5206 8.8",scene:"\u9700\u6C42\u5206\u6790\u3001\u4F53\u9A8C\u7B56\u7565\u3001\u65B9\u6848\u8BC4\u5BA1",updated:"2026.07 \xB7 1 \u5468\u524D"},{title:"\u8BBE\u8BA1\u4EA4\u4ED8\u68C0\u67E5\u6E05\u5355",type:"Delivery System",description:"\u7EDF\u4E00\u9875\u9762\u72B6\u6001\u8986\u76D6\u3001\u4EA4\u4E92\u8BF4\u660E\u3001\u9A8C\u6536\u53E3\u5F84\u548C\u8BBE\u8BA1\u8D70\u67E5\u6807\u51C6\uFF0C\u8BA9\u8BBE\u8BA1\u4EA4\u4ED8\u4ECE\u4E2A\u4EBA\u7ECF\u9A8C\u8F6C\u5316\u4E3A\u56E2\u961F\u673A\u5236\u3002",team:"\u8BBE\u8BA1\u8FD0\u8425\u5C0F\u7EC4",status:"\u9AD8\u9891\u4F7F\u7528",scene:"\u8BBE\u8BA1\u4EA4\u4ED8\u3001\u5F00\u53D1\u9A8C\u6536\u3001\u9879\u76EE\u590D\u76D8",updated:"2026.06 \xB7 2 \u5468\u524D"}],Q=(window.PP_PROJECTS_DATA||[]).map(e=>({title:e.title,code:e.code,kind:"AI \u9879\u76EE",type:"Exploration Project",description:e.description,team:e.owner,status:e.stage,scene:`${e.category} \xB7 ${e.value}`,updated:"2026.07",action:()=>{window.location.href=`projects/project-detail.html?id=${encodeURIComponent(e.code)}&from=home`}})),F=[...L.map((e,t)=>({...e,kind:"\u8BBE\u8BA1\u8D44\u4EA7",action:()=>U(t)})),{title:"UI \u89C6\u89C9\u8D70\u67E5 Skill",kind:"AI Skill",type:"AI Skill",description:"\u5BF9\u6BD4\u8BBE\u8BA1\u7A3F\u4E0E\u5F00\u53D1\u7A3F\uFF0C\u8BC6\u522B\u5E03\u5C40\u3001\u95F4\u8DDD\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5706\u89D2\u4E0E\u7EC4\u4EF6\u72B6\u6001\u504F\u5DEE\u3002",team:"AI \u8BBE\u8BA1\u5C0F\u7EC4",status:"\u5DF2\u9A8C\u8BC1",scene:"UI \u9A8C\u6536\u3001\u8BBE\u8BA1\u8D70\u67E5",updated:"2026.07",action:()=>q()},{title:"\u8425\u9500\u6D3B\u52A8\u89C6\u89C9\u63A2\u7D22",kind:"AI \u6848\u4F8B",type:"Verified AI Practice",description:"\u4ECE 3 \u5929\u9996\u8F6E\u63A2\u7D22\u7F29\u77ED\u5230 4 \u5C0F\u65F6\uFF0C\u5E76\u6C89\u6DC0\u4E3A\u53EF\u590D\u7528\u5DE5\u4F5C\u6D41\u3002",team:"AI \u8BBE\u8BA1\u5C0F\u7EC4",status:"\u5DF2\u9A8C\u8BC1\u6848\u4F8B",scene:"\u8425\u9500\u8BBE\u8BA1\u3001\u89C6\u89C9\u63A2\u7D22",updated:"2026.07",action:()=>{v(document.querySelector("#cases")),document.querySelector("#cases").scrollIntoView({behavior:"smooth"})}},...Q],h=document.documentElement,p=document.getElementById("overlay"),I=document.getElementById("detailModal"),B=document.getElementById("searchModal"),f=document.getElementById("toast"),g=document.getElementById("mobileNav");function Z(){try{let e=localStorage.getItem("pp-theme");if(e)try{return JSON.parse(e)}catch(t){return e}return localStorage.getItem("ppux-theme")}catch(e){return null}}function P(e){h.dataset.theme=e;try{localStorage.setItem("ppux-theme",e),localStorage.setItem("pp-theme",JSON.stringify(e))}catch(t){}}P(Z()||"dark");document.getElementById("themeToggle").addEventListener("click",()=>{P(h.dataset.theme==="dark"?"light":"dark")});var d=null,u=null,T=null,N=[document.querySelector("header"),document.querySelector("main"),document.querySelector("footer"),g].filter(Boolean);function R(e){N.forEach(t=>{t.inert=e,e?t.setAttribute("aria-hidden","true"):t.removeAttribute("aria-hidden")})}function D(e){return[...e.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(t=>!t.hidden&&t.offsetParent!==null)}function S(e,t){clearTimeout(T),[I,B].forEach(o=>{o!==e&&(o.classList.remove("open"),o.hidden=!0)}),u=document.activeElement,d=e,p.hidden=!1,e.hidden=!1,R(!0),document.body.classList.add("locked"),requestAnimationFrame(()=>{p.classList.add("open"),e.classList.add("open")}),setTimeout(()=>{let o=t||D(e)[0];o==null||o.focus({preventScroll:!0})},60)}function y(){if(!d)return;let e=d;e.classList.remove("open"),p.classList.remove("open"),d=null,document.body.classList.remove("locked"),R(!1),T=setTimeout(()=>{e.hidden=!0,p.hidden=!0},180),u!=null&&u.isConnected&&u.focus({preventScroll:!0})}p.addEventListener("click",y);document.querySelectorAll("[data-close-modal],[data-close-search]").forEach(e=>e.addEventListener("click",y));document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault(),J();return}if(e.key==="Escape"&&d){e.preventDefault(),y();return}if(e.key==="Tab"&&d){let t=D(d);if(!t.length){e.preventDefault();return}let o=t[0],i=t[t.length-1];e.shiftKey&&document.activeElement===o?(e.preventDefault(),i.focus()):!e.shiftKey&&document.activeElement===i&&(e.preventDefault(),o.focus())}});function U(e){let t=L[e];document.getElementById("detailType").textContent=t.type,document.getElementById("detailTitle").textContent=t.title,document.getElementById("detailDescription").textContent=t.description,document.getElementById("detailTeam").textContent=t.team,document.getElementById("detailStatus").textContent=t.status,document.getElementById("detailScene").textContent=t.scene,document.getElementById("detailUpdated").textContent=t.updated,S(I,document.querySelector("[data-close-modal]"))}document.querySelectorAll(".asset-card").forEach((e,t)=>e.addEventListener("click",()=>U(t)));function q(){document.getElementById("detailType").textContent="AI Skill",document.getElementById("detailTitle").textContent="UI \u89C6\u89C9\u8D70\u67E5 Skill",document.getElementById("detailDescription").textContent="\u901A\u8FC7\u8BBE\u8BA1\u7A3F\u4E0E\u5F00\u53D1\u7A3F\u5BF9\u6BD4\uFF0C\u8BC6\u522B\u5E03\u5C40\u3001\u95F4\u8DDD\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5706\u89D2\u3001\u9634\u5F71\u3001\u56FE\u6807\u3001\u5BF9\u9F50\u65B9\u5F0F\u548C\u7EC4\u4EF6\u72B6\u6001\u504F\u5DEE\uFF0C\u5E76\u751F\u6210\u5206\u7EA7\u95EE\u9898\u6E05\u5355\u3002",document.getElementById("detailTeam").textContent="AI \u8BBE\u8BA1\u5C0F\u7EC4",document.getElementById("detailStatus").textContent="\u5DF2\u9A8C\u8BC1 \xB7 \u53EF\u590D\u5236",document.getElementById("detailScene").textContent="UI \u9A8C\u6536\u3001\u8BBE\u8BA1\u8D70\u67E5\u3001\u5F00\u53D1\u534F\u540C",document.getElementById("detailUpdated").textContent="2026.07",S(I,document.querySelector("[data-close-modal]"))}document.querySelectorAll("[data-skill-card]").forEach(e=>e.addEventListener("click",q));function b(e){f.textContent=e,f.classList.add("show"),clearTimeout(window.__toastTimer),window.__toastTimer=setTimeout(()=>f.classList.remove("show"),1800)}document.querySelector("[data-copy-asset]").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(location.href),b("\u8D44\u4EA7\u94FE\u63A5\u5DF2\u590D\u5236")}catch(e){b("\u5DF2\u6A21\u62DF\u590D\u5236\u8D44\u4EA7\u94FE\u63A5")}});function J(){let e=document.getElementById("globalSearch");e.value="",_(""),S(B,e)}document.querySelectorAll("[data-open-search]").forEach(e=>e.addEventListener("click",J));function _(e){let t=document.getElementById("searchResults"),o=e.trim().toLowerCase(),i=F.filter(a=>`${a.code||""} ${a.title} ${a.kind} ${a.description} ${a.team} ${a.scene||""}`.toLowerCase().includes(o));if(!i.length){t.innerHTML='<div class="search-empty" role="status">\u6CA1\u6709\u627E\u5230\u5339\u914D\u5185\u5BB9\u3002</div>';return}t.innerHTML=i.map((a,n)=>`
+    <button class="search-result" role="option" aria-selected="false" data-result="${n}" tabindex="${n===0?"0":"-1"}">
       <span class="result-icon">
         <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h6"/></svg>
       </span>
-      <span class="result-copy"><b>${item.code?`${item.code} · `:''}${item.title}</b><span>${item.kind} · ${item.team}</span></span>
-    </button>`).join('');
-  const resultButtons=[...target.querySelectorAll('[data-result]')];
-  const activate=index=>{closeAll();items[index].action();};
-  resultButtons.forEach((button,index)=>{
-    button.addEventListener('click',()=>activate(index));
-    button.addEventListener('keydown',event=>{
-      if(!['ArrowDown','ArrowUp','Home','End','Enter',' '].includes(event.key)) return;
-      event.preventDefault();
-      if(event.key==='Enter'||event.key===' '){activate(index);return;}
-      let next=index;
-      if(event.key==='ArrowDown') next=(index+1)%resultButtons.length;
-      if(event.key==='ArrowUp') next=(index-1+resultButtons.length)%resultButtons.length;
-      if(event.key==='Home') next=0;
-      if(event.key==='End') next=resultButtons.length-1;
-      resultButtons.forEach((item,i)=>{item.tabIndex=i===next?0:-1;item.setAttribute('aria-selected',i===next?'true':'false');});
-      resultButtons[next].focus();
-    });
-  });
-}
-document.getElementById('globalSearch').addEventListener('input',e=>renderSearch(e.target.value));
+      <span class="result-copy"><b>${a.code?`${a.code} \xB7 `:""}${a.title}</b><span>${a.kind} \xB7 ${a.team}</span></span>
+    </button>`).join("");let l=[...t.querySelectorAll("[data-result]")],r=a=>{y(),i[a].action()};l.forEach((a,n)=>{a.addEventListener("click",()=>r(n)),a.addEventListener("keydown",c=>{if(!["ArrowDown","ArrowUp","Home","End","Enter"," "].includes(c.key))return;if(c.preventDefault(),c.key==="Enter"||c.key===" "){r(n);return}let s=n;c.key==="ArrowDown"&&(s=(n+1)%l.length),c.key==="ArrowUp"&&(s=(n-1+l.length)%l.length),c.key==="Home"&&(s=0),c.key==="End"&&(s=l.length-1),l.forEach((w,E)=>{w.tabIndex=E===s?0:-1,w.setAttribute("aria-selected",E===s?"true":"false")}),l[s].focus()})})}document.getElementById("globalSearch").addEventListener("input",e=>_(e.target.value));var M=document.getElementById("assetSearch"),x=[...document.querySelectorAll(".filter")],A="all";function O(){let e=M.value.trim().toLowerCase(),t=0;document.querySelectorAll(".asset-card").forEach(o=>{let i=A==="all"||o.dataset.category===A,l=o.dataset.title.toLowerCase().includes(e),r=i&&l;o.style.display=r?"":"none",r&&t++}),document.getElementById("assetEmpty").style.display=t?"none":"block"}M.addEventListener("input",O);x.forEach(e=>e.addEventListener("click",()=>{x.forEach(t=>t.classList.remove("active")),e.classList.add("active"),A=e.dataset.filter,O()}));document.querySelectorAll("[data-scroll-target]").forEach(e=>e.addEventListener("click",()=>{let t=document.getElementById(e.dataset.scrollTarget);v(t),t.scrollIntoView({behavior:"smooth"})}));document.querySelectorAll("[data-workspace]").forEach(e=>e.addEventListener("click",()=>{try{localStorage.setItem("pp-theme",JSON.stringify(h.dataset.theme||"dark"))}catch(t){}e.tagName!=="A"&&(window.location.href=e.getAttribute("data-href")||"./workspace.html")}));document.getElementById("mobileMenuBtn").addEventListener("click",()=>g.classList.toggle("open"));g.querySelectorAll("a").forEach(e=>e.addEventListener("click",()=>g.classList.remove("open")));var H=[document.getElementById("assets"),document.getElementById("cases"),document.getElementById("governance")].filter(Boolean),m=window.matchMedia("(max-width: 720px)");function v(e){if(!e)return;e.classList.remove("is-mobile-collapsed");let t=e.querySelector("[data-mobile-section-toggle]");t&&(t.textContent="\u6536\u8D77\u672C\u6A21\u5757",t.setAttribute("aria-expanded","true"))}function Y(){H.forEach(e=>{e.classList.add("mobile-section-collapsible");let t=e.querySelector("[data-mobile-section-toggle]");if(!t){t=document.createElement("button"),t.type="button",t.className="mobile-section-toggle",t.dataset.mobileSectionToggle="";let o=e.querySelector(".section-head");o==null||o.appendChild(t),t.addEventListener("click",()=>{let i=e.classList.toggle("is-mobile-collapsed");t.textContent=i?"\u5C55\u5F00\u672C\u6A21\u5757":"\u6536\u8D77\u672C\u6A21\u5757",t.setAttribute("aria-expanded",i?"false":"true")})}m.matches?(e.classList.add("is-mobile-collapsed"),t.textContent="\u5C55\u5F00\u672C\u6A21\u5757",t.setAttribute("aria-expanded","false")):(e.classList.remove("is-mobile-collapsed"),t.textContent="\u6536\u8D77\u672C\u6A21\u5757",t.setAttribute("aria-expanded","true"))})}Y();var k=window.location.hash?document.querySelector(window.location.hash):null;k&&v(k);var C;(C=m.addEventListener)==null||C.call(m,"change",Y);var X=[...document.querySelectorAll("main section[id]")],z=[...document.querySelectorAll(".nav a")];window.addEventListener("scroll",()=>{let e="home";X.forEach(t=>{window.scrollY>=t.offsetTop-140&&(e=t.id)}),z.forEach(t=>t.classList.toggle("active",t.getAttribute("href")==="#"+e))},{passive:!0});})();
 
-const assetSearch = document.getElementById('assetSearch');
-const filterButtons = [...document.querySelectorAll('.filter')];
-let activeFilter='all';
-
-function filterAssets(){
-  const q = assetSearch.value.trim().toLowerCase();
-  let visible=0;
-  document.querySelectorAll('.asset-card').forEach(card=>{
-    const matchType = activeFilter==='all' || card.dataset.category===activeFilter;
-    const matchText = card.dataset.title.toLowerCase().includes(q);
-    const show = matchType && matchText;
-    card.style.display = show ? '' : 'none';
-    if(show) visible++;
-  });
-  document.getElementById('assetEmpty').style.display = visible ? 'none' : 'block';
-}
-assetSearch.addEventListener('input',filterAssets);
-filterButtons.forEach(btn=>btn.addEventListener('click',()=>{
-  filterButtons.forEach(item=>item.classList.remove('active'));
-  btn.classList.add('active');activeFilter=btn.dataset.filter;filterAssets();
-}));
-
-document.querySelectorAll('[data-scroll-target]').forEach(card=>card.addEventListener('click',()=>{
-  const target=document.getElementById(card.dataset.scrollTarget);
-  revealMobileSection(target);
-  target.scrollIntoView({behavior:'smooth'});
-}));
-document.querySelectorAll('[data-workspace]').forEach(btn=>btn.addEventListener('click',()=>{
-  try{localStorage.setItem('pp-theme',JSON.stringify(root.dataset.theme || 'dark'));}catch{}
-  window.location.href = './workspace.html';
-}));
-
-document.getElementById('mobileMenuBtn').addEventListener('click',()=>mobileNav.classList.toggle('open'));
-mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mobileNav.classList.remove('open')));
-
-const mobileCollapsibleSections=[document.getElementById('assets'),document.getElementById('cases'),document.getElementById('governance')].filter(Boolean);
-const mobileMedia=window.matchMedia('(max-width: 720px)');
-function revealMobileSection(section){
-  if(!section) return;
-  section.classList.remove('is-mobile-collapsed');
-  const button=section.querySelector('[data-mobile-section-toggle]');
-  if(button){button.textContent='收起本模块';button.setAttribute('aria-expanded','true');}
-}
-function setupMobileSections(){
-  mobileCollapsibleSections.forEach(section=>{
-    section.classList.add('mobile-section-collapsible');
-    let button=section.querySelector('[data-mobile-section-toggle]');
-    if(!button){
-      button=document.createElement('button');
-      button.type='button';
-      button.className='mobile-section-toggle';
-      button.dataset.mobileSectionToggle='';
-      const head=section.querySelector('.section-head');
-      head?.appendChild(button);
-      button.addEventListener('click',()=>{
-        const collapsed=section.classList.toggle('is-mobile-collapsed');
-        button.textContent=collapsed?'展开本模块':'收起本模块';
-        button.setAttribute('aria-expanded',collapsed?'false':'true');
-      });
-    }
-    if(mobileMedia.matches){
-      section.classList.add('is-mobile-collapsed');
-      button.textContent='展开本模块';
-      button.setAttribute('aria-expanded','false');
-    }else{
-      section.classList.remove('is-mobile-collapsed');
-      button.textContent='收起本模块';
-      button.setAttribute('aria-expanded','true');
-    }
-  });
-}
-setupMobileSections();
-const initialSection = window.location.hash ? document.querySelector(window.location.hash) : null;
-if(initialSection) revealMobileSection(initialSection);
-mobileMedia.addEventListener?.('change',setupMobileSections);
-
-const sections = [...document.querySelectorAll('main section[id]')];
-const navLinks = [...document.querySelectorAll('.nav a')];
-window.addEventListener('scroll',()=>{
-  let current='home';
-  sections.forEach(section=>{
-    if(window.scrollY >= section.offsetTop - 140) current=section.id;
-  });
-  navLinks.forEach(link=>link.classList.toggle('active',link.getAttribute('href')==='#'+current));
-},{passive:true});
-</script>
-<link rel="stylesheet" href="./logo-unification.css">
-<script src="./logo-unification.js"></script>
-</body>
+</script></body>
 </html>
