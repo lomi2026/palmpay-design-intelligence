@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../database/prisma.service';
 import { Prisma } from '../generated/prisma/client';
-import { ContentStatus } from '../generated/prisma/enums';
+import { AttachmentEntityType, AttachmentUsageType, ContentStatus, UploadStatus } from '../generated/prisma/enums';
 import type { AutosaveDraftDto, CreateDraftDto } from './drafts.dto';
 
 @Injectable()
@@ -81,12 +81,29 @@ export class DraftsService {
         },
       }),
     ]);
+    if (input.attachmentFileIds !== undefined) {
+      const fileIds = [...new Set(input.attachmentFileIds)];
+      const files = await this.prisma.fileAttachment.findMany({
+        where: { id: { in: fileIds }, organizationId: user.organizationId, uploadStatus: UploadStatus.READY, deletedAt: null },
+        select: { id: true, uploadedById: true },
+      });
+      const canManageAll = user.permissions.includes("content.edit_all");
+      if (files.length !== fileIds.length || files.some((file) => file.uploadedById !== user.id && !canManageAll)) {
+        throw new BadRequestException("Each attachment must be a ready file that you can manage.");
+      }
+      await this.prisma.$transaction([
+        this.prisma.attachmentRelation.deleteMany({ where: { entityType: AttachmentEntityType.VERSION, entityId: draft.id } }),
+        ...(fileIds.length ? [this.prisma.attachmentRelation.createMany({ data: fileIds.map((fileId, sortOrder) => ({ fileId, entityType: AttachmentEntityType.VERSION, entityId: draft.id, usageType: AttachmentUsageType.ATTACHMENT, sortOrder })) })] : []),
+      ]);
+    }
+
     return { content: this.serialize(updatedContent), version: this.serialize(updatedVersion) };
   }
 
   async get(user: AuthenticatedUser, contentId: string) {
     const content = await this.findEditableDraft(user, contentId);
-    return this.serialize(content);
+    const attachments = content.draftVersion ? await this.prisma.attachmentRelation.findMany({ where: { entityType: AttachmentEntityType.VERSION, entityId: content.draftVersion.id }, include: { file: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] }) : [];
+    return { ...this.serialize(content), attachments: attachments.map((attachment) => ({ ...attachment, file: { ...attachment.file, sizeBytes: attachment.file.sizeBytes.toString() } })) };
   }
 
   async versions(user: AuthenticatedUser, contentId: string) {

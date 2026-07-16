@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsObject, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsArray, IsEnum, IsObject, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { ContentType, ContentVisibility } from '../generated/prisma/enums';
 
 export class CreateDraftDto {
@@ -69,4 +69,9 @@ export class AutosaveDraftDto {
   @IsObject()
   @Type(() => Object)
   body?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  attachmentFileIds?: string[];
 }
