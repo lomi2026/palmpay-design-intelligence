@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -14,6 +14,18 @@ import { ReviewsService } from './reviews.service';
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviews: ReviewsService) {}
+
+  @Get('queue')
+  @RequirePermissions('review.process')
+  queue(@CurrentUser() user: AuthenticatedUser) {
+    return this.reviews.queue(user);
+  }
+
+  @Get('reviewers')
+  @RequirePermissions('review.process')
+  reviewers(@CurrentUser() user: AuthenticatedUser) {
+    return this.reviews.reviewers(user);
+  }
 
   @Post('content/:contentId/submit')
   @RequirePermissions('content.submit')

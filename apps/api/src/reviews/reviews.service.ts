@@ -88,6 +88,34 @@ export class ReviewsService {
     );
   }
 
+  async queue(user: AuthenticatedUser) {
+    const items = await this.prisma.reviewRequest.findMany({
+      where: { content: { organizationId: user.organizationId, deletedAt: null } },
+      include: {
+        content: { select: { id: true, title: true, contentType: true, status: true } },
+        version: { select: { id: true, versionNumber: true, versionLabel: true, title: true, summary: true } },
+        submittedBy: { select: { id: true, name: true, email: true } },
+        assignedReviewer: { select: { id: true, name: true, email: true } },
+        actions: { orderBy: { createdAt: "asc" }, select: { id: true, action: true, comment: true, createdAt: true, actorId: true } },
+      },
+      orderBy: [{ status: "asc" }, { submittedAt: "asc" }],
+    });
+    return { items };
+  }
+
+  async reviewers(user: AuthenticatedUser) {
+    const items = await this.prisma.user.findMany({
+      where: {
+        organizationId: user.organizationId,
+        status: UserStatus.ACTIVE,
+        userRoles: { some: { role: { rolePermissions: { some: { permission: { code: "review.process" } } } } } },
+      },
+      select: { id: true, name: true, email: true },
+      orderBy: { name: "asc" },
+    });
+    return { items };
+  }
+
   private async finishReview(
     user: AuthenticatedUser,
     review: { id: string; contentId: string; versionId: string },

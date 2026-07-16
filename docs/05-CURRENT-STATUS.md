@@ -59,7 +59,7 @@ The next engineering objective is:
 - Verified signed local-development attachment storage: upload intent, size and checksum validation, short-lived download and cleanup; files remain outside the repository on the current Mac
 - Phase 3 draft API foundation: explicit team selection, draft creation, autosave, draft recovery and per-content version history, with organization and owner-or-`content.edit_all` enforcement
 - v9-1-aligned workspace entry for 提交内容: content-type selector, four dedicated type-specific draft forms and shared draft editor shell backed by server actions and formal APIs
-- Review workflow data migration and protected APIs for submit, reviewer assignment, approval and request-changes; draft editor can submit a draft for review
+- Review workflow data migration and protected APIs for submit, reviewer assignment, approval and request-changes; protected reviewer queue and eligible-reviewer APIs are available, and the draft editor can submit a draft for review
 - Draft attachment binding: only ready, organization-scoped files that the editor can manage may be attached to a draft version and are returned on draft recovery
 
 ## Validated Product Modules
@@ -96,13 +96,13 @@ The next engineering objective is:
 
 ## In Progress
 
-- Phase 3 draft API, dedicated four-type draft forms, attachment-binding API, editor shell and review transition APIs are verified; reviewer workbench, attachment upload UI and immutable published-version editing remain to be implemented. Cloudflare R2 activation remains deferred until a payment method is available
+- Phase 3 draft API, dedicated four-type draft forms, attachment-binding API, editor shell and review queue APIs are verified; reviewer workbench, attachment upload UI and immutable published-version editing remain to be implemented. Cloudflare R2 activation remains deferred until a payment method is available
 
 ## Next Task
 
 Codex should:
 
-1. Implement the review center: reviewer queue, assignment and decision UI.
+1. Implement the review center UI: reviewer queue, assignment and decision controls.
 2. Create a new editable draft version when published content is edited.
 3. Add attachment upload and selection controls to the shared editor shell.
 4. Configure Cloudflare R2 later using `docs/08-CLOUDFLARE-R2-SETUP.md` when a payment method is available.
