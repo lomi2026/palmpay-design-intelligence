@@ -4,8 +4,9 @@ import { useActionState } from 'react';
 import { autosaveDraftAction, type ActionState } from './actions';
 import { ReviewSubmission } from './review-submission';
 import { ContentTypeFields } from './content-type-fields';
+import { DraftAttachments } from './draft-attachments';
 
-type Draft = { id: string; status: string; contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT'; title: string; summary: string | null; draftVersion: { body: unknown; changeSummary: string | null; versionNumber: number } | null };
+type Draft = { id: string; status: string; contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT'; title: string; summary: string | null; draftVersion: { body: unknown; changeSummary: string | null; versionNumber: number } | null; attachments: Array<{ id: string; fileId: string; file: { originalName: string; mimeType: string; sizeBytes: string } }> };
 
 const initialState: ActionState = {};
 
@@ -20,6 +21,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
     {state.error ? <p className="text-sm text-red-400">{state.error}</p> : null}
     <div className="flex items-center justify-between border-t border-[var(--border)] pt-4"><p className="text-xs text-neutral-500">草稿 v{draft.draftVersion?.versionNumber ?? 1}{state.savedAt ? ` · 已保存 ${state.savedAt}` : ''}</p><button className="h-9 rounded-md bg-white px-4 text-sm font-medium text-black disabled:opacity-50" disabled={pending} type="submit">{pending ? '保存中…' : '保存草稿'}</button></div>
   </form>
+    <DraftAttachments attachments={draft.attachments} contentId={draft.id} />
     <ReviewSubmission contentId={draft.id} status={draft.status} />
   </>;
 }
