@@ -9,6 +9,17 @@ const contentCardInclude = {
   category: { select: { id: true, name: true, code: true } },
   owner: { select: { id: true, name: true, avatarUrl: true } },
   team: { select: { id: true, name: true, code: true } },
+  projectDetail: {
+    select: {
+      projectCode: true,
+      domain: true,
+      targetValue: true,
+      projectStage: true,
+      priority: true,
+    },
+  },
+  skillDetail: { select: { applicableRoles: true } },
+  caseDetail: { select: { metricName: true } },
   coverFile: true,
   tags: { include: { tag: true } },
 } as const;

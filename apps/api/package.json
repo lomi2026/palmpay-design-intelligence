@@ -12,7 +12,9 @@
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:import:v9-1-projects": "tsx prisma/import-v9-1-ai-projects.ts",
+    "prisma:import:v9-1-ai-catalog": "tsx prisma/import-v9-1-ai-catalog.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "latest",

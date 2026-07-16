@@ -217,7 +217,15 @@ For the GPT collaboration workflow around this project:
 - For PalmPay code modifications, use the latest clean code baseline as the only code baseline.
 - Do not reintroduce older code versions.
 
-## 19. Decision change process
+## 19. Approved v9-1 code baseline (2026-07-16)
+
+- The deployed website at `https://lomi2026.github.io/palmpay-design-intelligence/` is the sole approved v9-1 legacy code baseline.
+- Its public home, workspace and all module pages define the approved visual system, layout, information architecture and validated interactions.
+- The current V1 placeholder pages do not establish a replacement visual direction.
+- V1 must migrate the deployed v9-1 experience into the formal Next.js application while replacing static/localStorage-only implementation with the approved backend and database architecture.
+- Do not treat an incomplete local legacy snapshot as a reason to redesign, omit or simplify a deployed v9-1 page.
+
+## 20. Decision change process
 
 When a new explicit user decision changes this file:
 

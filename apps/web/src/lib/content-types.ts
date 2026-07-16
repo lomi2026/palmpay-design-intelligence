@@ -19,6 +19,13 @@ export interface ContentCard {
   category: { id: string; name: string; code: string } | null;
   owner: { id: string; name: string; avatarUrl: string | null };
   team: { id: string; name: string; code: string };
+  projectDetail?: {
+    projectCode: string;
+    domain: string | null;
+    targetValue: string | null;
+    projectStage: "EXPLORING" | "READY" | "PILOTING" | "CONVERTED" | "ARCHIVED";
+    priority: string;
+  } | null;
   coverFile: ContentFile | null;
   tags: Array<{ tag: { id: string; name: string; normalizedName: string } }>;
 }

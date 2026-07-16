@@ -4,10 +4,10 @@
 
 This repository contains **PalmPay体验设计Hub / PalmPay Design Intelligence Hub V1.0**.
 
-The approved legacy baseline is `legacy/v9-1/`.
+The approved legacy baseline is the deployed final v9-1 website: `https://lomi2026.github.io/palmpay-design-intelligence/`.
 
-`legacy/v9-1/` is the approved visual, information-architecture and interaction reference.  
-It is **not** the target production architecture.
+The deployed v9-1 code is the only approved visual, information-architecture and interaction reference. `legacy/v9-1/` is a local archival snapshot; if it differs from or omits a deployed v9-1 page, the deployed website and its matching historical source take precedence.
+The v9-1 code is **not** the target production architecture.
 
 The V1.0 application must be implemented in the formal frontend and backend projects.
 
@@ -37,7 +37,7 @@ For UI, wording, density, branding or visual changes, also read:
 
 ## Core rules
 
-- Treat final v9-1 as the only approved legacy product baseline.
+- Treat the deployed final v9-1 website code as the only approved legacy product baseline.
 - Do not mix older v5, v6, v8, v9 or temporary variants into implementation decisions.
 - Do not continue adding production features to the legacy static HTML, compiled scripts or localStorage architecture.
 - Do not change product scope, information architecture, database entities, core status models, role definitions or approved design decisions without explicitly reporting the conflict first.

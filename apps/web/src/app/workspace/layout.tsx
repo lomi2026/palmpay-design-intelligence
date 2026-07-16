@@ -12,6 +12,9 @@ export default async function WorkspaceLayout({
   const navigation = [
     { href: '/workspace', label: '工作台' },
     { href: '/workspace/design-assets', label: '设计资产' },
+    { href: '/workspace/ai-projects', label: 'AI 项目库' },
+    { href: '/workspace/ai-skills', label: 'AI Skill' },
+    { href: '/workspace/ai-cases', label: 'AI 案例' },
   ];
 
   return (

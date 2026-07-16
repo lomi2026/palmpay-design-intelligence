@@ -4,21 +4,22 @@ Last Updated: 2026-07-16
 
 ## Current Phase
 
-**Phase 1 engineering and identity foundation — verified**
+**Phase 2 content catalog foundation — core catalogs verified**
 
 ## Current Objective
 
-Begin the Phase 2 content center with the approved unified content model and permission-safe read APIs.
+Complete the remaining Phase 2 content-catalog boundary after the core catalogs have been verified.
 
 The next engineering objective is:
 
-> Establish unified content persistence, content-type detail models and permission-safe catalog APIs before migrating content pages.
+> Confirm an object-storage provider and implement real attachment acceptance without weakening the formal content, permission or version model.
 
 ## Approved Product Baseline
 
-- Final v9-1 only.
+- The deployed final v9-1 website at `https://lomi2026.github.io/palmpay-design-intelligence/` is the only approved legacy code baseline.
 - Older v5, v6, v8 and v9 variants are not implementation baselines.
-- v9-1 is the approved visual, information architecture and interaction reference.
+- The deployed v9-1 public home, workspace and module pages are the approved visual, information architecture and interaction reference.
+- `legacy/v9-1/` is an archival local snapshot and cannot override or narrow the deployed baseline when it is incomplete.
 - v9-1 is not the production architecture.
 
 ## Completed
@@ -47,6 +48,12 @@ The next engineering objective is:
 - Applied Phase 2 content catalog migration
 - Permission-filtered published-content list and detail APIs
 - Formal design-asset list, search, empty state and detail pages
+- Audited deployed v9-1 source commit `bf39748` and created an idempotent AI-project migration script
+- Imported 33 v9-1 AI projects (P01–P26 and S01–S07) into PostgreSQL with formal versions, categories, tags, source traceability and organization-safe visibility
+- Created the `PalmPay Experience Design` umbrella team; all imported projects are initially owned by `lomi2026@126.com` per the explicit migration decision
+- Formal AI project catalog list and detail pages backed by the permission-filtered API, with v9-1 project-library visual and information hierarchy
+- Imported 6 v9-1 AI Skills and 4 v9-1 AI cases into PostgreSQL, retaining source traceability and their original verification states
+- Formal AI Skill and AI case catalog list/detail pages backed by the permission-filtered API, using the deployed v9-1 information hierarchy
 
 ## Validated Product Modules
 
@@ -82,17 +89,15 @@ The next engineering objective is:
 
 ## In Progress
 
-- v9-1 content migration source and ownership mapping review
+- Confirm an object-storage provider and implement the formal attachment upload boundary; do not claim attachment acceptance before this is available
 
 ## Next Task
 
 Codex should:
 
-1. Resolve whether commit `bf39748` (labelled “Deploy Phase 4 v9.1”) is an approved source for the 33 AI projects missing from `legacy/v9-1/`.
-2. Confirm formal owner-user and team mappings for legacy content; do not create placeholder owners.
-3. Confirm an object-storage provider before claiming real attachment acceptance.
-4. After source approval, migrate verified content idempotently and implement the remaining three catalog list/detail pages.
-5. Keep draft creation, autosave and version-history workflows in Phase 3 per the development plan.
+1. Confirm an object-storage provider before implementing or claiming real attachment acceptance.
+2. Add catalog-level filtering and pagination once real content volume requires it.
+3. Keep draft creation, autosave and version-history workflows in Phase 3.
 
 ## Next Milestone
 
@@ -108,7 +113,7 @@ Milestone definition:
 
 ## Not Started
 
-- Formal content center (in progress)
+- Formal content center core catalogs (verified; real attachments remain)
 - Content version workflow
 - Review workflow
 - Real file storage
@@ -133,7 +138,6 @@ The following decisions may affect later implementation:
 - Enterprise SSO / OIDC provider is not yet confirmed.
 - Production hosting and database provider are not yet confirmed.
 - Object storage provider is not yet confirmed.
-- The approved `legacy/v9-1/` directory does not contain the 33 AI projects required by Phase 2 acceptance; a matching v9.1 Git commit contains them but is outside the approved baseline directory.
 - Legacy examples contain team labels but no formal owner-user identity mapping required by the V1.0 ER model.
 - The ER defines `restricted` visibility but does not define a user/group ACL entity; current catalog access is limited to the owner or `content.edit_all` users.
 - The local development PostgreSQL instance is extracted under `/private/tmp` and is not a persistent system service.
