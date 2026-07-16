@@ -1,0 +1,45 @@
+{
+  "name": "@palmpay/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "prisma generate && tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "start:dev": "node --watch --require ts-node/register src/main.ts",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "typecheck": "prisma generate && tsc --noEmit",
+    "test": "pnpm build && node --test test/**/*.test.mjs",
+    "prisma:validate": "prisma validate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "latest",
+    "@nestjs/common": "latest",
+    "@nestjs/config": "latest",
+    "@nestjs/core": "latest",
+    "@nestjs/platform-express": "latest",
+    "@nestjs/swagger": "latest",
+    "@prisma/client": "latest",
+    "class-transformer": "latest",
+    "class-validator": "latest",
+    "dotenv": "latest",
+    "pg": "latest",
+    "reflect-metadata": "latest",
+    "rxjs": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "eslint": "9.39.1",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-prettier": "latest",
+    "prettier": "latest",
+    "prisma": "latest",
+    "source-map-support": "latest",
+    "ts-node": "latest",
+    "tsx": "latest",
+    "typescript-eslint": "latest",
+    "typescript": "5.9.3"
+  }
+}
