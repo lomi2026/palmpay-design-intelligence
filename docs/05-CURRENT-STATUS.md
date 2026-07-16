@@ -58,7 +58,7 @@ The next engineering objective is:
 - Cloudflare R2 configuration guide that keeps the Bucket private and credentials out of source control
 - Verified signed local-development attachment storage: upload intent, size and checksum validation, short-lived download and cleanup; files remain outside the repository on the current Mac
 - Phase 3 draft API foundation: explicit team selection, draft creation, autosave, draft recovery and per-content version history, with organization and owner-or-`content.edit_all` enforcement
-- v9-1-aligned workspace entry for 提交内容: content-type selector, structured draft form and shared draft editor shell backed by server actions and formal APIs
+- v9-1-aligned workspace entry for 提交内容: content-type selector, four dedicated type-specific draft forms and shared draft editor shell backed by server actions and formal APIs
 - Review workflow data migration and protected APIs for submit, reviewer assignment, approval and request-changes; draft editor can submit a draft for review
 
 ## Validated Product Modules
@@ -95,7 +95,7 @@ The next engineering objective is:
 
 ## In Progress
 
-- Phase 3 draft API, initial editor shell and review transition APIs are verified; reviewer workbench and immutable published-version editing remain to be implemented. Cloudflare R2 activation remains deferred until a payment method is available
+- Phase 3 draft API, dedicated four-type draft forms, editor shell and review transition APIs are verified; reviewer workbench, attachment binding and immutable published-version editing remain to be implemented. Cloudflare R2 activation remains deferred until a payment method is available
 
 ## Next Task
 
@@ -103,7 +103,7 @@ Codex should:
 
 1. Implement the review center: reviewer queue, assignment and decision UI.
 2. Create a new editable draft version when published content is edited.
-3. Add per-content-type editor fields and attachment binding to the shared editor shell.
+3. Bind attachments to the shared editor shell.
 4. Configure Cloudflare R2 later using `docs/08-CLOUDFLARE-R2-SETUP.md` when a payment method is available.
 
 ## Next Milestone

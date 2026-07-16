@@ -10,11 +10,17 @@ function optionalText(value: FormDataEntryValue | null) {
   return result || undefined;
 }
 
-function parseBody(value: FormDataEntryValue | null) {
-  const source = typeof value === 'string' && value.trim() ? value : '{}';
-  const parsed: unknown = JSON.parse(source);
-  if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw new Error('内容结构需为 JSON 对象。');
-  return parsed;
+function lines(formData: FormData, key: string) {
+  const value = optionalText(formData.get(key));
+  return value ? value.split('\n').map((item) => item.trim()).filter(Boolean) : [];
+}
+
+function structuredBody(contentType: string, formData: FormData) {
+  const text = (key: string) => optionalText(formData.get(key));
+  if (contentType === 'DESIGN_ASSET') return { assetType: text('assetType'), platforms: lines(formData, 'platforms'), scenarios: lines(formData, 'scenarios'), problemStatement: text('problemStatement'), usageGuide: text('usageGuide') };
+  if (contentType === 'AI_SKILL') return { applicableRoles: lines(formData, 'applicableRoles'), inputRequirements: text('inputRequirements'), outputSchema: text('outputSchema'), promptTemplate: text('promptTemplate'), executionSteps: text('executionSteps'), humanReviewRules: text('humanReviewRules') };
+  if (contentType === 'AI_CASE') return { background: text('background'), originalProcess: text('originalProcess'), aiResponsibilities: text('aiResponsibilities'), humanResponsibilities: text('humanResponsibilities'), resultSummary: text('resultSummary'), limitations: text('limitations') };
+  return { projectCode: text('projectCode'), domain: text('domain'), targetValue: text('targetValue'), problemStatement: text('problemStatement'), solutionHypothesis: text('solutionHypothesis'), expectedOutcome: text('expectedOutcome') };
 }
 
 export async function createDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
@@ -27,7 +33,7 @@ export async function createDraftAction(_: ActionState, formData: FormData): Pro
         teamId: formData.get('teamId'),
         title: formData.get('title'),
         summary: optionalText(formData.get('summary')),
-        body: parseBody(formData.get('body')),
+        body: structuredBody(String(formData.get('contentType') ?? ''), formData),
       }),
     });
     return { id: draft.id };
@@ -60,7 +66,7 @@ export async function autosaveDraftAction(_: ActionState, formData: FormData): P
         title: formData.get('title'),
         summary: optionalText(formData.get('summary')),
         changeSummary: optionalText(formData.get('changeSummary')),
-        body: parseBody(formData.get('body')),
+        body: structuredBody(String(formData.get('contentType') ?? ''), formData),
       }),
     });
     return { savedAt: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) };

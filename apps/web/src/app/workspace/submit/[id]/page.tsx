@@ -3,7 +3,7 @@ import { serverApiFetch } from '@/lib/api';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { DraftEditor } from '../draft-editor';
 
-type Draft = { id: string; title: string; summary: string | null; contentType: string; status: string; draftVersion: { body: unknown; changeSummary: string | null; versionNumber: number } | null };
+type Draft = { id: string; title: string; summary: string | null; contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT'; status: string; draftVersion: { body: unknown; changeSummary: string | null; versionNumber: number } | null };
 
 export default async function DraftPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
