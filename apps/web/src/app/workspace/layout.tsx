@@ -16,6 +16,7 @@ export default async function WorkspaceLayout({
     { href: '/workspace/ai-skills', label: 'AI Skill' },
     { href: '/workspace/ai-cases', label: 'AI 案例' },
     { href: '/workspace/submit', label: '提交内容' },
+    ...(user.permissions.includes('review.process') ? [{ href: '/workspace/reviews', label: '审核中心' }] : []),
   ];
 
   return (
