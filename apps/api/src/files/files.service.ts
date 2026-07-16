@@ -1,0 +1,190 @@
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import type { IncomingMessage } from 'node:http';
+import { extname } from 'node:path';
+import type { AuthenticatedUser } from '../auth/auth.types';
+import { PrismaService } from '../database/prisma.service';
+import { FileAccessLevel, UploadStatus } from '../generated/prisma/enums';
+import type { CreateUploadIntentDto } from './files.dto';
+import { FileStorageService } from './file-storage.service';
+
+const allowedMimeTypes = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/zip',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'text/csv',
+  'text/plain',
+]);
+
+@Injectable()
+export class FilesService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: FileStorageService,
+  ) {}
+
+  async createUploadIntent(user: AuthenticatedUser, input: CreateUploadIntentDto) {
+    if (!allowedMimeTypes.has(input.mimeType)) {
+      throw new BadRequestException('Unsupported file type.');
+    }
+
+    const extension = this.safeExtension(input.originalName);
+    const storageKey = `organizations/${user.organizationId}/uploads/${randomUUID()}${extension ? `.${extension}` : ''}`;
+    const preparedUpload = this.storage.isLocal()
+      ? undefined
+      : await this.storage.createUploadUrl({
+          storageKey,
+          mimeType: input.mimeType,
+          checksumSha256: input.checksumSha256,
+        });
+    const file = await this.prisma.fileAttachment.create({
+      data: {
+        organizationId: user.organizationId,
+        originalName: input.originalName,
+        storageKey,
+        mimeType: input.mimeType,
+        extension: extension || null,
+        sizeBytes: BigInt(input.sizeBytes),
+        checksum: `sha256:${input.checksumSha256}`,
+        accessLevel: FileAccessLevel.RESTRICTED,
+        uploadStatus: UploadStatus.UPLOADING,
+        uploadedById: user.id,
+      },
+    });
+    const upload =
+      preparedUpload ??
+      (await this.storage.createUploadUrl({
+        fileId: file.id,
+        storageKey,
+        mimeType: input.mimeType,
+        checksumSha256: input.checksumSha256,
+      }));
+
+    return {
+      file: this.serialize(file),
+      upload: {
+        url: upload.url,
+        method: 'PUT' as const,
+        headers: this.storage.isLocal()
+          ? { 'Content-Type': input.mimeType }
+          : {
+              'Content-Type': input.mimeType,
+              'x-amz-checksum-sha256': input.checksumSha256,
+            },
+        expiresAt: new Date(Date.now() + upload.expiresInSeconds * 1000).toISOString(),
+      },
+    };
+  }
+
+  async completeUpload(user: AuthenticatedUser, fileId: string) {
+    const file = await this.findManageableFile(user, fileId);
+    if (file.uploadStatus !== UploadStatus.UPLOADING) {
+      throw new ConflictException('Only an uploading file can be completed.');
+    }
+
+    let object;
+    try {
+      object = await this.storage.readObjectMetadata(file.storageKey, file.mimeType);
+    } catch {
+      throw new BadRequestException('The uploaded object was not found in configured file storage.');
+    }
+
+    const expectedChecksum = file.checksum.replace(/^sha256:/, '');
+    if (
+      object.sizeBytes !== Number(file.sizeBytes) ||
+      object.checksumSha256 !== expectedChecksum ||
+      object.mimeType !== file.mimeType
+    ) {
+      await this.prisma.fileAttachment.update({
+        where: { id: file.id },
+        data: { uploadStatus: UploadStatus.FAILED },
+      });
+      throw new BadRequestException('The stored object does not match the declared file metadata.');
+    }
+
+    const completed = await this.prisma.fileAttachment.update({
+      where: { id: file.id },
+      data: { uploadStatus: UploadStatus.READY },
+    });
+    return { file: this.serialize(completed) };
+  }
+
+  async createDownloadUrl(user: AuthenticatedUser, fileId: string) {
+    const file = await this.findManageableFile(user, fileId);
+    if (file.uploadStatus !== UploadStatus.READY || file.deletedAt) {
+      throw new ConflictException('This file is not ready to download.');
+    }
+    const download = await this.storage.createDownloadUrl({ fileId: file.id, storageKey: file.storageKey });
+    return {
+      url: download.url,
+      expiresAt: new Date(Date.now() + download.expiresInSeconds * 1000).toISOString(),
+    };
+  }
+
+  async deleteFile(user: AuthenticatedUser, fileId: string) {
+    const file = await this.findManageableFile(user, fileId);
+    if (file.deletedAt) return { deleted: true };
+    await this.storage.deleteObject(file.storageKey);
+    await this.prisma.fileAttachment.update({
+      where: { id: file.id },
+      data: { uploadStatus: UploadStatus.DELETED, deletedAt: new Date() },
+    });
+    return { deleted: true };
+  }
+
+  async uploadLocalObject(fileId: string, token: string, body: IncomingMessage) {
+    const file = await this.prisma.fileAttachment.findUnique({ where: { id: fileId } });
+    if (!file || file.deletedAt || file.uploadStatus !== UploadStatus.UPLOADING) {
+      throw new NotFoundException("An uploading file was not found.");
+    }
+    const mimeType = Array.isArray(body.headers["content-type"])
+      ? body.headers["content-type"][0]
+      : body.headers["content-type"];
+    if (mimeType !== file.mimeType) {
+      throw new BadRequestException("The uploaded file type does not match the upload intent.");
+    }
+    await this.storage.writeLocalObject({
+      fileId,
+      storageKey: file.storageKey,
+      token,
+      mimeType: file.mimeType,
+      expectedSizeBytes: Number(file.sizeBytes),
+      body,
+    });
+  }
+
+  async readLocalObject(fileId: string, token: string) {
+    const file = await this.prisma.fileAttachment.findUnique({ where: { id: fileId } });
+    if (!file || file.deletedAt || file.uploadStatus !== UploadStatus.READY) {
+      throw new NotFoundException("A ready file was not found.");
+    }
+    const bytes = await this.storage.readLocalObject({ fileId, storageKey: file.storageKey, token });
+    return { bytes, mimeType: file.mimeType, originalName: file.originalName };
+  }
+
+  private async findManageableFile(user: AuthenticatedUser, fileId: string) {
+    const file = await this.prisma.fileAttachment.findFirst({
+      where: { id: fileId, organizationId: user.organizationId },
+    });
+    if (!file) throw new NotFoundException('File not found.');
+    const canManageAll = user.permissions.includes('content.edit_all');
+    if (file.uploadedById !== user.id && !canManageAll) {
+      throw new ForbiddenException('You cannot access this file.');
+    }
+    return file;
+  }
+
+  private safeExtension(originalName: string) {
+    const value = extname(originalName).replace('.', '').toLowerCase();
+    return /^[a-z0-9]{1,12}$/.test(value) ? value : '';
+  }
+
+  private serialize<T extends { sizeBytes: bigint }>(file: T) {
+    return { ...file, sizeBytes: file.sizeBytes.toString() };
+  }
+}

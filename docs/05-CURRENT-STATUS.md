@@ -4,15 +4,15 @@ Last Updated: 2026-07-16
 
 ## Current Phase
 
-**Phase 2 content catalog foundation — core catalogs verified**
+**Phase 3 — Draft, version and review (initial backend boundary in progress)**
 
 ## Current Objective
 
-Complete the remaining Phase 2 content-catalog boundary after the core catalogs have been verified.
+Start the Phase 3 content-lifecycle workflow from the approved draft, autosave and version model.
 
 The next engineering objective is:
 
-> Confirm an object-storage provider and implement real attachment acceptance without weakening the formal content, permission or version model.
+> Build the formal content draft workflow without weakening organization isolation, ownership, version immutability or the deployed v9-1 visual baseline.
 
 ## Approved Product Baseline
 
@@ -54,6 +54,12 @@ The next engineering objective is:
 - Formal AI project catalog list and detail pages backed by the permission-filtered API, with v9-1 project-library visual and information hierarchy
 - Imported 6 v9-1 AI Skills and 4 v9-1 AI cases into PostgreSQL, retaining source traceability and their original verification states
 - Formal AI Skill and AI case catalog list/detail pages backed by the permission-filtered API, using the deployed v9-1 information hierarchy
+- Cloudflare R2 S3-compatible attachment adapter, protected upload intents, checksum verification, short-lived download URLs and cleanup endpoints
+- Cloudflare R2 configuration guide that keeps the Bucket private and credentials out of source control
+- Verified signed local-development attachment storage: upload intent, size and checksum validation, short-lived download and cleanup; files remain outside the repository on the current Mac
+- Phase 3 draft API foundation: explicit team selection, draft creation, autosave, draft recovery and per-content version history, with organization and owner-or-`content.edit_all` enforcement
+- v9-1-aligned workspace entry for 提交内容: content-type selector, structured draft form and shared draft editor shell backed by server actions and formal APIs
+- Review workflow data migration and protected APIs for submit, reviewer assignment, approval and request-changes; draft editor can submit a draft for review
 
 ## Validated Product Modules
 
@@ -89,26 +95,27 @@ The next engineering objective is:
 
 ## In Progress
 
-- Confirm an object-storage provider and implement the formal attachment upload boundary; do not claim attachment acceptance before this is available
+- Phase 3 draft API, initial editor shell and review transition APIs are verified; reviewer workbench and immutable published-version editing remain to be implemented. Cloudflare R2 activation remains deferred until a payment method is available
 
 ## Next Task
 
 Codex should:
 
-1. Confirm an object-storage provider before implementing or claiming real attachment acceptance.
-2. Add catalog-level filtering and pagination once real content volume requires it.
-3. Keep draft creation, autosave and version-history workflows in Phase 3.
+1. Implement the review center: reviewer queue, assignment and decision UI.
+2. Create a new editable draft version when published content is edited.
+3. Add per-content-type editor fields and attachment binding to the shared editor shell.
+4. Configure Cloudflare R2 later using `docs/08-CLOUDFLARE-R2-SETUP.md` when a payment method is available.
 
 ## Next Milestone
 
-**Phase 2 content catalog foundation**
+**Phase 3 — Draft, version and review**
 
 Milestone definition:
 
-- Four content types and their formal detail records can be persisted in PostgreSQL.
-- Published catalog lists and details load from permission-filtered APIs.
-- Category and tag relationships use formal entities.
-- File metadata uses an explicit storage adapter boundary; localStorage is not used.
+- A contributor can create, autosave and resume a draft across sessions.
+- Draft history is tied to a formal content version.
+- Review and publish transitions remain permission-controlled and traceable.
+- Published content is never mutated in place.
 - Type check, lint, relevant integration tests and production build pass.
 
 ## Not Started
@@ -116,7 +123,7 @@ Milestone definition:
 - Formal content center core catalogs (verified; real attachments remain)
 - Content version workflow
 - Review workflow
-- Real file storage
+- Cloudflare R2 production object storage (local development storage is verified)
 - Full search
 - Favorites persistence
 - Usage confirmation
@@ -137,7 +144,7 @@ The following decisions may affect later implementation:
 
 - Enterprise SSO / OIDC provider is not yet confirmed.
 - Production hosting and database provider are not yet confirmed.
-- Object storage provider is not yet confirmed.
+- Cloudflare R2 remains the approved production storage target, but activation is deferred because no payment method is currently available. Local signed filesystem storage is development-only.
 - Legacy examples contain team labels but no formal owner-user identity mapping required by the V1.0 ER model.
 - The ER defines `restricted` visibility but does not define a user/group ACL entity; current catalog access is limited to the owner or `content.edit_all` users.
 - The local development PostgreSQL instance is extracted under `/private/tmp` and is not a persistent system service.

@@ -6,7 +6,7 @@
 - ORM: Prisma
 - Cache: Redis
 - Search MVP: PostgreSQL Full Text Search
-- File storage: Object Storage
+- File storage: Cloudflare R2 through the S3-compatible API in production; a signed local filesystem adapter is permitted for development only
 - Primary Key: UUID
 - Time storage: UTC
 - Formal business data uses database persistence

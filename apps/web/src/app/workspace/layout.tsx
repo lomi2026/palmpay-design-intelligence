@@ -15,6 +15,7 @@ export default async function WorkspaceLayout({
     { href: '/workspace/ai-projects', label: 'AI 项目库' },
     { href: '/workspace/ai-skills', label: 'AI Skill' },
     { href: '/workspace/ai-cases', label: 'AI 案例' },
+    { href: '/workspace/submit', label: '提交内容' },
   ];
 
   return (
