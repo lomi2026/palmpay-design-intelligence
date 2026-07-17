@@ -6,8 +6,11 @@ export interface AISkillDetail extends ContentCard {
     inputRequirements: { description?: string } | null;
     outputSchema: { description?: string } | null;
     promptTemplate: string | null;
-    executionSteps: { duration?: string; complexity?: string } | null;
+    executionSteps: { duration?: string; complexity?: string; description?: string } | null;
+    exampleInput: unknown;
+    exampleOutput: unknown;
     humanReviewRules: { note?: string } | null;
+    limitations: string | null;
     recommendedModels: string[];
     dataSecurityLevel: string;
     promptVersion: string | null;

@@ -52,18 +52,18 @@ enum ContentStatus {
 }
 
 enum ReviewRequestStatus {
-  PENDING @map("pending")
-  APPROVED @map("approved")
+  PENDING           @map("pending")
+  APPROVED          @map("approved")
   CHANGES_REQUESTED @map("changes_requested")
-  CANCELLED @map("cancelled")
+  CANCELLED         @map("cancelled")
 }
 
 enum ReviewActionType {
-  ASSIGN @map("assign")
-  COMMENT @map("comment")
-  APPROVE @map("approve")
+  ASSIGN          @map("assign")
+  COMMENT         @map("comment")
+  APPROVE         @map("approve")
   REQUEST_CHANGES @map("request_changes")
-  CANCEL @map("cancel")
+  CANCEL          @map("cancel")
 }
 
 enum NotificationChannel {
@@ -177,13 +177,16 @@ model Organization {
   createdAt DateTime           @default(now()) @map("created_at")
   updatedAt DateTime           @updatedAt @map("updated_at")
 
-  teams      Team[]
-  users      User[]
-  roles      Role[]
-  categories Category[]
-  contents   Content[]
-  tags       Tag[]
-  files      FileAttachment[]
+  teams       Team[]
+  users       User[]
+  roles       Role[]
+  categories  Category[]
+  contents    Content[]
+  tags        Tag[]
+  files       FileAttachment[]
+  usageEvents UsageEvent[]
+  searchLogs  SearchLog[]
+  auditLogs   AuditLog[]
 
   @@map("organizations")
 }
@@ -240,10 +243,15 @@ model User {
   createdContentTags      ContentTag[]
   verifiedCaseEvidence    CaseEvidence[]
   createdContentRelations ContentRelation[]
-  submittedReviewRequests  ReviewRequest[] @relation("SubmittedReviews")
-  assignedReviewRequests   ReviewRequest[] @relation("AssignedReviews")
-  reviewActions            ReviewAction[]
-  notifications            Notification[]
+  submittedReviewRequests ReviewRequest[]   @relation("SubmittedReviews")
+  assignedReviewRequests  ReviewRequest[]   @relation("AssignedReviews")
+  reviewActions           ReviewAction[]
+  notifications           Notification[]
+  favorites               Favorite[]
+  recentViews             RecentView[]
+  usageEvents             UsageEvent[]
+  searchLogs              SearchLog[]
+  auditLogs               AuditLog[]
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -361,25 +369,29 @@ model Content {
   archivedAt         DateTime?          @map("archived_at")
   deletedAt          DateTime?          @map("deleted_at")
 
-  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  category         Category?         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  owner            User              @relation("ContentOwner", fields: [ownerId], references: [id], onDelete: Restrict)
-  team             Team              @relation(fields: [teamId], references: [id], onDelete: Restrict)
-  createdBy        User              @relation("ContentCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  coverFile        FileAttachment?   @relation("ContentCover", fields: [coverFileId], references: [id], onDelete: SetNull)
-  versions         ContentVersion[]  @relation("ContentVersions")
-  currentVersion   ContentVersion?   @relation("CurrentContentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
-  draftVersion     ContentVersion?   @relation("DraftContentVersion", fields: [draftVersionId], references: [id], onDelete: SetNull)
-  assetDetail      AssetDetail?
-  skillDetail      SkillDetail?
-  caseDetail       CaseDetail?       @relation("CaseContent")
-  projectDetail    AIProjectDetail?
-  tags             ContentTag[]
-  sourceRelations  ContentRelation[] @relation("SourceContent")
-  targetRelations  ContentRelation[] @relation("TargetContent")
-  relatedAsSkill   CaseDetail[]      @relation("RelatedSkill")
-  relatedAsProject CaseDetail[]      @relation("RelatedProject")
-  reviewRequests  ReviewRequest[]
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  category          Category?         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  owner             User              @relation("ContentOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  team              Team              @relation(fields: [teamId], references: [id], onDelete: Restrict)
+  createdBy         User              @relation("ContentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  coverFile         FileAttachment?   @relation("ContentCover", fields: [coverFileId], references: [id], onDelete: SetNull)
+  versions          ContentVersion[]  @relation("ContentVersions")
+  currentVersion    ContentVersion?   @relation("CurrentContentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  draftVersion      ContentVersion?   @relation("DraftContentVersion", fields: [draftVersionId], references: [id], onDelete: SetNull)
+  assetDetail       AssetDetail?
+  skillDetail       SkillDetail?
+  caseDetail        CaseDetail?       @relation("CaseContent")
+  projectDetail     AIProjectDetail?
+  tags              ContentTag[]
+  sourceRelations   ContentRelation[] @relation("SourceContent")
+  targetRelations   ContentRelation[] @relation("TargetContent")
+  relatedAsSkill    CaseDetail[]      @relation("RelatedSkill")
+  relatedAsProject  CaseDetail[]      @relation("RelatedProject")
+  reviewRequests    ReviewRequest[]
+  favorites         Favorite[]
+  recentViews       RecentView[]
+  usageEvents       UsageEvent[]
+  clickedSearchLogs SearchLog[]
 
   @@index([organizationId, contentType, status])
   @@index([categoryId])
@@ -687,4 +699,97 @@ model ContentRelation {
   @@unique([sourceContentId, targetContentId, relationType])
   @@index([targetContentId])
   @@map("content_relations")
+}
+
+model Favorite {
+  userId    String   @map("user_id") @db.Uuid
+  contentId String   @map("content_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, contentId])
+  @@index([contentId])
+  @@map("favorites")
+}
+
+model RecentView {
+  userId        String   @map("user_id") @db.Uuid
+  contentId     String   @map("content_id") @db.Uuid
+  viewCount     Int      @default(1) @map("view_count")
+  firstViewedAt DateTime @default(now()) @map("first_viewed_at")
+  lastViewedAt  DateTime @default(now()) @map("last_viewed_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, contentId])
+  @@index([userId, lastViewedAt])
+  @@map("recent_views")
+}
+
+model UsageEvent {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String   @map("organization_id") @db.Uuid
+  userId           String?  @map("user_id") @db.Uuid
+  sessionId        String?  @map("session_id") @db.VarChar(100)
+  contentId        String?  @map("content_id") @db.Uuid
+  eventType        String   @map("event_type") @db.VarChar(100)
+  projectReference String?  @map("project_reference") @db.VarChar(500)
+  sourcePage       String?  @map("source_page") @db.VarChar(500)
+  metadata         Json?
+  occurredAt       DateTime @default(now()) @map("occurred_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  content      Content?     @relation(fields: [contentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, occurredAt])
+  @@index([contentId, eventType, occurredAt])
+  @@index([userId, occurredAt])
+  @@map("usage_events")
+}
+
+model SearchLog {
+  id                String   @id @default(uuid()) @db.Uuid
+  organizationId    String   @map("organization_id") @db.Uuid
+  userId            String?  @map("user_id") @db.Uuid
+  keyword           String   @db.VarChar(200)
+  normalizedKeyword String   @map("normalized_keyword") @db.VarChar(200)
+  filters           Json?
+  resultCount       Int      @map("result_count")
+  clickedContentId  String?  @map("clicked_content_id") @db.Uuid
+  sessionId         String?  @map("session_id") @db.VarChar(100)
+  searchedAt        DateTime @default(now()) @map("searched_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clickedContent Content?     @relation(fields: [clickedContentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, searchedAt])
+  @@index([normalizedKeyword])
+  @@map("search_logs")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  actorId        String?  @map("actor_id") @db.Uuid
+  action         String   @db.VarChar(100)
+  entityType     String   @map("entity_type") @db.VarChar(100)
+  entityId       String   @map("entity_id") @db.Uuid
+  beforeData     Json?    @map("before_data")
+  afterData      Json?    @map("after_data")
+  ipAddress      String?  @map("ip_address") @db.VarChar(100)
+  userAgent      String?  @map("user_agent") @db.VarChar(500)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  actor        User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
 }

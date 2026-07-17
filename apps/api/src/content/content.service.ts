@@ -4,6 +4,7 @@ import { PrismaService } from '../database/prisma.service';
 import { Prisma } from '../generated/prisma/client';
 import { AttachmentEntityType, ContentStatus, ContentVisibility } from '../generated/prisma/enums';
 import type { ContentListQueryDto } from './content.dto';
+import { EngagementService } from '../engagement/engagement.service';
 
 const contentCardInclude = {
   category: { select: { id: true, name: true, code: true } },
@@ -46,7 +47,10 @@ const contentDetailInclude = {
 
 @Injectable()
 export class ContentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly engagement: EngagementService,
+  ) {}
 
   async list(query: ContentListQueryDto, user?: AuthenticatedUser) {
     const where: Prisma.ContentWhereInput = {
@@ -98,6 +102,8 @@ export class ContentService {
       include: contentDetailInclude,
     });
     if (!content) throw new NotFoundException('Content not found.');
+
+    if (user) await this.engagement.recordContentView(user, content.id);
 
     const attachments = await this.prisma.attachmentRelation.findMany({
       where: { entityType: AttachmentEntityType.CONTENT, entityId: content.id },

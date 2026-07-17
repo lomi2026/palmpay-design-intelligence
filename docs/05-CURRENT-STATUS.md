@@ -4,7 +4,7 @@ Last Updated: 2026-07-17
 
 ## Current Phase
 
-**Phase 4 — Search, favorite and usage (in progress); Phase 5 follows before final visual-parity remediation**
+**Phase 4 and Phase 5 capability verification complete; final v9-1 visual-parity remediation is in progress**
 
 ## Current Objective
 
@@ -67,10 +67,15 @@ The next engineering objective is:
 - Permission-controlled unpublish and archive operations are available from each published content detail page; active draft, review and approved versions block lifecycle changes
 - Review center now supports content preview, internal reviewer notes, traceable assignment/decision history and the required pending/handled/overdue filters; contributors have a dedicated My Submissions view
 - In-app review notifications are persisted through a Prisma migration and sent on submission, assignment and decisions; users can retrieve and mark their own notifications as read
+- The workspace notification badge now reads the current user’s persisted unread count rather than a static value; the notification center supports single-item and bulk read acknowledgement through the formal API.
+- The workspace shell now derives the displayed role and AI-project count from the authenticated user and permission-filtered API data; it no longer uses a static member label or fixed project total.
+- The workspace search affordance now supports the deployed `⌘/Ctrl + K` shortcut and opens the formal permission-filtered search page.
 - Draft editor now debounces field changes into server-side autosave and exposes saving, saved and failure feedback
 - Created `docs/09-V9-1-PARITY-INVENTORY.md` to track the mandatory deployed v9-1 page-by-page visual and interaction restoration gate
 - v9-1 parity implementation must use shadcn/ui conventions and token-driven variants; custom replacement primitives or arbitrary component behavior changes are not permitted
 - API development startup now compiles TypeScript to `dist` and watches that output before restarting Node, avoiding direct runtime loading of Prisma-generated TypeScript files
+- Applied and Prisma-recorded the local `review_notifications` migration that was absent from the restored database, then applied and recorded the Phase 4/5 engagement-and-analytics migration; `prisma migrate status` now reports the local schema is up to date.
+- Created `docs/10-MACHINE-TRANSFER-HANDOFF.md` with the current dirty-worktree warning, setup sequence, validation commands and next-computer Codex prompt.
 
 ## Validated Product Modules
 
@@ -86,7 +91,6 @@ The next engineering objective is:
 - 数据洞察
 - 管理中心
 - 演示模式
-- 明暗主题
 - 全局搜索
 
 ## Known Legacy Limitations
@@ -107,18 +111,22 @@ The next engineering objective is:
 ## In Progress
 
 - By explicit user decision, Phase 4 and Phase 5 now take priority over the remaining visual-parity gate. The team will return to and complete the mandatory deployed-v9-1 page, state and responsive comparison work after those formal capabilities are implemented and verified.
+- Phase 4/5 implementation is in the working tree: the additive Prisma migration introduces persisted favorites, recent views, unified usage events, search logs and audit logs. The API provides permission-filtered PostgreSQL full-text search, search-click/no-result logging, favorites, recent views, real AI-project usage confirmation, content relations, analytics aggregates, taxonomy/content administration and audit-log endpoints. The workspace exposes global search, personal saved/recent pages, usage and relation flows, overview/insights and RBAC-gated administration pages. API strict typecheck, lint, Prisma validation/migration status and ten PostgreSQL integration tests pass; Web typecheck, lint, production build and an unauthenticated local browser preview now also pass. The protected workspace correctly redirects to formal development login rather than substituting a static role.
 - Phase 3 is verified functionally. The public home, workspace shell, catalog lists, submit/draft flow, notifications, my submissions, review center, login and access-denied pages have been moved onto the v9-1 dark visual language using shadcn/ui primitives while retaining the formal API and RBAC behavior.
-- The mandatory v9-1 parity gate is still open: formal detail pages need a final visual pass, and every deployed counterpart still needs reliable side-by-side screenshot acceptance. Cloudflare R2 activation remains deferred until a payment method is available.
+- The mandatory v9-1 parity gate is still open: the public home has now received a complete desktop structure restoration against deployed source commit `bf39748` (hero, metric panel, task paths, AI project portfolio, asset toolbar/grid, verified case, governance and CTA), while the deployed workspace and project counterparts still need complete responsive and permission-state acceptance. Direct deployment checks established that several archived deep links (Design Assets, submit, demo workspace and AI Skill pages) are 404 and therefore are formal-only V1 routes rather than current deployed parity targets. Cloudflare R2 activation remains deferred until a payment method is available.
+- The formal AI Project detail now uses the deployed project-template information hierarchy while binding every displayed signal to the persisted AIProjectDetail, ContentVersion, owner/team, priority and engagement models. It retains RBAC-gated lifecycle actions instead of copying the legacy static reset/action behavior.
+- The formal AI Case detail now uses the deployed verified-practice information hierarchy while binding the before/after comparison, AI and human responsibilities, result and validation evidence to CaseDetail and ContentVersion data. Missing limits are explicitly marked as incomplete rather than presented as verified production evidence.
+- The formal Design Asset detail now puts applicability and constraints ahead of implementation detail, while preserving persisted usage guidance, version, maintenance metadata, attachments, related content and engagement actions.
+- The formal AI Skill detail now exposes the approved reusable-method model from `SkillDetail`: scope, input/output, Prompt, execution conditions, examples, human review, limitations, version and owner. It does not invent missing examples or limitations. Direct deployment checks confirm that the archived Skill catalog/detail filenames return 404, so these formal pages inherit the deployed workspace system instead of claiming a missing v9-1 counterpart.
 - The deployed workspace desktop baseline has been checksum-verified against the matching historical source and compared side by side with an authenticated formal local workspace at `1280 x 720`. The sidebar, top bar, dashboard hero, metric, update and todo layout has received a source-informed correction pass; matching reviewer/admin test identity and the remaining page/state captures are still required for acceptance.
-- The workspace Design Assets module has a direct `1280 x 720` source/local comparison and now uses 8 formally imported, source-traceable v9-1 assets instead of an empty catalog. Its header, filters, card-cover hierarchy and metadata have been restored with shadcn/ui composition. Formal favorite persistence and a matching reviewer/admin visual state remain parity blockers.
+- The workspace Design Assets module uses 8 formally imported, source-traceable v9-1 assets instead of an empty catalog. Its header, filters, card-cover hierarchy and metadata use the deployed workspace component language with shadcn/ui composition. The historical `design-assets.html` URL is 404 on the current deployment, so it is not a separate parity blocker.
 
 ## Next Task
 
 Codex should:
 
-1. Complete Phase 4: permission-filtered full-text search and logs, favorites, recent views, usage confirmation and content relations.
-2. Complete Phase 5: event recording/aggregation, value and analytics APIs, administration, taxonomy, user-role management and audit log.
-3. Return to the visual-parity inventory, complete every required source/local desktop and mobile comparison, then accept the v9-1 gate. Configure Cloudflare R2 later using `docs/08-CLOUDFLARE-R2-SETUP.md` when a payment method is available.
+1. Return to the visual-parity inventory and complete every required deployed-v9-1/local desktop and mobile comparison, then accept the v9-1 gate.
+2. Configure Cloudflare R2 later using `docs/08-CLOUDFLARE-R2-SETUP.md` when a payment method is available.
 
 ## Next Milestone
 
@@ -134,19 +142,20 @@ Milestone definition:
 
 - Formal content center core catalogs (verified; real attachments remain)
 - Cloudflare R2 production object storage (local development storage is verified)
-- Full search
-- Favorites persistence
-- Usage confirmation
-- Analytics event pipeline
-- Value overview with real data
-- Admin center
-- Audit log
+- Full search (verified)
+- Favorites persistence (verified)
+- Usage confirmation (verified)
+- Analytics event pipeline (verified)
+- Value overview with real data (verified)
+- Admin center (verified)
+- Audit log (verified)
 - AI Gateway
 - Online AI Skill execution
 - Figma integration
 - Yuque integration
 - Jira integration
 - GitHub integration
+- Full light-theme token migration
 
 ## Current Blockers / Decisions Needed
 

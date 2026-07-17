@@ -2,100 +2,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ArrowRight,
-  Blocks,
-  ChevronRight,
-  LayoutTemplate,
   Moon,
   Search,
+  Sparkles,
+  BarChart3,
+  ArrowUpRight,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { MarketingMobileMenu } from '@/components/marketing/marketing-mobile-menu';
 
-const capabilities = [
-  {
-    icon: LayoutTemplate,
-    title: '结构化展示',
-    body: '从能力介绍到具体资产、精选案例、团队分工，页面按真实使用路径组织，不需要来回跳转就能找到想要的内容。',
-    tags: ['Hero First', 'Clear Sections', 'SaaS Flow'],
-  },
-  {
-    icon: Blocks,
-    title: '统一卡片系统',
-    body: '无论是组件规范、AI 工作流还是页面模板，都遵循同一套视觉语言，跨团队浏览和复用时不需要重新适应风格差异。',
-    tags: ['Dark UI', 'Soft Glow', 'Rounded System'],
-  },
-  {
-    icon: ArrowRight,
-    title: '业务价值表达',
-    body: '重点不再只是“这个资产是什么”，而是“它带来了什么价值”——每一份资产都关联具体的应用场景、复用路径和实际效果。',
-    tags: ['Impact', 'Adoption', 'Reuse'],
-  },
-];
-
-const assets = [
-  {
-    index: '01',
-    title: 'AI 设计组件规范',
-    description: '复杂列表、筛选体系、批量操作、空状态治理',
-    category: '组件资产',
-    palette: 'from-cyan-300/25 via-slate-800 to-violet-400/20',
-  },
-  {
-    index: '02',
-    title: 'AI SKILL 工具包',
-    description: '输入材料、分析维度、输出结构、设计判断',
-    category: 'AI 工作流',
-    palette: 'from-violet-400/25 via-slate-900 to-cyan-300/15',
-  },
-  {
-    index: '03',
-    title: '业务看板页面模板',
-    description: '经营分析、价值汇报、项目状态与指标叙事',
-    category: '页面模板',
-    palette: 'from-cyan-300/20 via-slate-900 to-white/15',
-  },
-  {
-    index: '04',
-    title: '设计交付检查清单',
-    description: '状态覆盖、交互说明、验收口径、走查标准',
-    category: '交付规范',
-    palette: 'from-violet-400/25 via-slate-950 to-cyan-300/15',
-  },
-];
-
-const collections = [
-  ['设计系统套件', '组件、模式、规范与高频后台场景治理。', '42 个资产'],
-  ['AI 指令库', '可复用的 Prompt、输入约束和产出模板。', '28 条指令'],
-  ['业务看板模板', '面向经营分析、项目状态和指标叙事的页面资产。', '18 个模板'],
-  ['项目案例沉淀', '将一次优秀交付固化成团队下次可直接调用的方法。', '16 个案例'],
-];
-
-const teams = [
-  ['DS', '组件治理 / 体验一致性', '设计系统小组', '负责组件资产、模式一致性和跨业务设计标准沉淀。', '42 项资产', '72% 复用'],
-  ['AI', 'Prompt / AI 工作流', 'AI 设计小组', '将实验性的 AI 设计产出沉淀为可规模化复用的方法包。', '36 项产出', '节省 240h'],
-  ['OP', '质量标准 / 交付流程', '设计运营小组', '维护交付检查、评审节奏和资产归档规范，保证平台持续可用。', '18 项规范', '归类 86%'],
-];
-
-function SectionHeading({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
-  return (
-    <header className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-      <Badge variant="outline" className="border-white/15 bg-white/5 px-3 text-[11px] tracking-[0.16em] text-violet-200">
-        {eyebrow}
-      </Badge>
-      <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] text-white md:text-5xl">{title}</h2>
-      <p className="mt-4 text-sm leading-7 text-white/60 md:text-base">{body}</p>
-    </header>
-  );
-}
+const featuredAssets = [
+  ['Component system', '组件规范', '更新于 2 天前', 'Web 数据表格组件规范', '统一复杂业务表格的布局、筛选、批量操作、状态与空数据表达。', '设计系统小组', '已验证 · 72% 复用', 'window'],
+  ['Page template', '页面模板', '更新于 5 天前', '业务经营看板页面模板', '帮助设计师快速建立指标层级、经营叙事和管理层决策视图。', '体验设计小组', '18 个模板', 'chart'],
+  ['AI workflow', 'AI 工作流', '更新于 1 周前', '体验策略分析 AI Skill', '将输入材料、分析维度、输出结构和设计判断整合为可复用工作流。', 'AI 设计小组', '评分 8.8', 'process'],
+  ['Delivery system', '交付规范', '更新于 2 周前', '设计交付检查清单', '统一状态覆盖、交互说明、验收口径与设计走查的团队标准。', '设计运营小组', '高频使用', 'checks'],
+] as const;
 
 export function V9Home() {
   return (
@@ -115,11 +38,10 @@ export function V9Home() {
             <a className="rounded-lg px-3 py-2 hover:bg-white/[.06] hover:text-white" href="#impact">业务影响</a>
           </nav>
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="outline" size="sm" className="hidden h-10 w-[150px] justify-start rounded-[10px] border-white/[.1] bg-white/[.035] px-3 text-[12px] font-normal text-white/45 hover:bg-white/[.08] hover:text-white md:inline-flex">
-              <Search className="size-3.5" /> 搜索资产、Skill 或… <kbd className="ml-auto rounded border border-white/[.1] px-1.5 text-[10px]">⌘K</kbd>
-            </Button>
+            <Button asChild variant="outline" size="sm" className="hidden h-10 w-[150px] justify-start rounded-[10px] border-white/[.1] bg-white/[.035] px-3 text-[12px] font-normal text-white/45 hover:bg-white/[.08] hover:text-white md:inline-flex"><Link href="/workspace/search"><Search className="size-3.5" /> 搜索资产、Skill 或… <kbd className="ml-auto rounded border border-white/[.1] px-1.5 text-[10px]">⌘K</kbd></Link></Button>
+            <MarketingMobileMenu />
             <Button variant="outline" size="icon-sm" aria-label="切换明暗主题" className="size-10 rounded-[10px] border-white/[.1] bg-white/[.035] text-white hover:bg-white/[.08] hover:text-white"><Moon className="size-4" /></Button>
-            <Button asChild size="sm" className="h-10 rounded-[10px] bg-[#f4f4f4] px-5 text-[13px] font-bold !text-[#090909] hover:bg-white">
+            <Button asChild size="sm" className="hidden h-10 rounded-[10px] bg-[#f4f4f4] px-5 text-[13px] font-bold !text-[#090909] hover:bg-white min-[561px]:inline-flex">
               <Link href="/workspace">进入工作台 <ArrowRight className="size-4" /></Link>
             </Button>
           </div>
@@ -129,17 +51,17 @@ export function V9Home() {
       <section id="home" className="relative min-h-[648px] overflow-hidden border-b border-white/[.06] px-6 py-16 lg:px-6">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.025)_1px,transparent_1px)] bg-[size:64px_64px] opacity-80" />
         <div className="relative mx-auto grid max-w-[1232px] items-center gap-[76px] pt-[62px] lg:grid-cols-[510px_minmax(0,1fr)]">
-          <div className="relative z-10 lg:pt-3">
-            <p className="mb-7 text-[11px] font-semibold uppercase tracking-[.24em] text-white/60 before:mr-3 before:inline-block before:h-px before:w-6 before:bg-white/45 before:align-middle before:content-['']">Internal Beta · Updated July 2026</p>
-            <h1 className="max-w-[510px] text-[48px] font-[670] leading-[1.1] tracking-[-.06em] text-[#f4f4f5] lg:text-[64px]">让设计资产被复用<br />让设计价值被衡量</h1>
-            <p className="mt-4 max-w-[510px] text-[17px] leading-[1.72] text-[#d0d0d4]">汇聚设计资产、AI Skill 与经过验证的实践案例，让团队成员可以更快发现、调用、贡献并衡量设计能力。</p>
-            <div className="mt-8 flex flex-wrap gap-3">
+          <div className="relative z-10 lg:pt-[14px]">
+            <p className="mb-[31px] text-[11px] font-semibold uppercase tracking-[.24em] text-white/60 before:mr-3 before:inline-block before:h-px before:w-6 before:bg-white/45 before:align-middle before:content-['']">Internal Beta · Updated July 2026</p>
+            <h1 className="max-w-[510px] text-[44px] font-[670] leading-[1.1] tracking-[-.06em] text-[#f4f4f5] sm:text-[48px] lg:text-[64px]">让设计资产被复用<br />让设计价值被衡量</h1>
+            <p className="mt-[30px] max-w-[510px] text-[17px] leading-[1.72] text-[#d0d0d4]">汇聚设计资产、AI Skill 与经过验证的实践案例，让团队成员可以更快发现、调用、贡献并衡量设计能力。</p>
+            <div className="mt-[34px] flex flex-wrap gap-3">
               <Button asChild className="h-10 rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white"><a href="#assets">浏览设计资产 <ArrowRight className="size-4" /></a></Button>
-              <Button variant="outline" className="h-10 rounded-[10px] border-white/[.12] bg-white/[.035] px-[18px] text-[13px] font-bold text-white hover:bg-white/[.08] hover:text-white"><Search className="size-4" /> 搜索团队能力</Button>
+              <Button asChild variant="outline" className="h-10 rounded-[10px] border-white/[.12] bg-white/[.035] px-[18px] text-[13px] font-bold text-white hover:bg-white/[.08] hover:text-white"><Link href="/workspace/search"><Search className="size-4" /> 搜索团队能力</Link></Button>
             </div>
             <div className="mt-7 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-white/45"><span className="rounded-full border border-white/[.08] bg-white/[.04] px-2.5 py-1">● 内部试运行</span><span>本页数据为原型演示数据</span><span>设计师判断 · AI 辅助执行</span></div>
           </div>
-          <div className="relative hidden min-h-[520px] overflow-hidden rounded-[25px] border border-white/[.15] bg-[#0c0c0d] shadow-2xl shadow-black/40 lg:block" aria-label="平台工作台预览">
+          <div className="relative min-h-[520px] overflow-hidden rounded-[25px] border border-white/[.15] bg-[#0c0c0d] shadow-2xl shadow-black/40" aria-label="平台工作台预览">
             <div className="flex h-12 items-center border-b border-white/[.1] px-4 text-[10px] uppercase tracking-[.2em] text-white/45"><span className="mr-5 flex gap-1"><i className="size-1.5 rounded-full bg-white/35" /><i className="size-1.5 rounded-full bg-white/35" /><i className="size-1.5 rounded-full bg-white/35" /></span>Design intelligence / workspace <span className="ml-auto normal-case tracking-normal">● Beta online</span></div>
             <div className="grid min-h-[468px] grid-cols-[142px_1fr]">
               <aside className="border-r border-white/[.1] p-4 text-[10px] text-white/45"><div className="mb-7 flex items-center gap-2 font-semibold text-white"><span className="grid size-6 place-items-center rounded-md bg-white text-black">P</span>PalmPay UX</div><p className="mb-3 text-[8px] uppercase tracking-[.16em]">Workspace</p>{['Overview','Design Assets','AI Skills','Cases','','Contributions','Impact'].map((label) => label ? <p className={`mb-1 rounded-md px-2 py-2 ${label === 'Overview' ? 'bg-white/[.1] text-white' : ''}`} key={label}>▢&nbsp;&nbsp;{label}</p> : <div className="h-5" key="gap" />)}</aside>
@@ -150,110 +72,113 @@ export function V9Home() {
         </div>
       </section>
 
-      <section className="px-5 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-[1180px]">
-          <SectionHeading eyebrow="Core Capabilities" title="平台核心设计理念" body="克制的深色界面、清晰的信息层级和统一的卡片系统，让每一份设计资产都以专业、可信的方式呈现，而不是零散的作品集拼贴。" />
-          <div className="grid gap-4 md:grid-cols-3">
-            {capabilities.map(({ icon: Icon, title, body, tags }) => (
-              <Card key={title} className="border border-white/10 bg-white/[0.045] py-6 shadow-none backdrop-blur-sm">
-                <CardHeader>
-                  <span className="mb-3 grid size-10 place-items-center rounded-xl bg-violet-300/15 text-violet-200"><Icon className="size-5" /></span>
-                  <CardTitle className="text-xl text-white">{title}</CardTitle>
-                  <CardDescription className="leading-7 text-white/55">{body}</CardDescription>
-                </CardHeader>
-                <CardFooter className="mt-3 gap-2 border-0 bg-transparent px-6 pb-0 pt-0">
-                  {tags.map((tag) => <Badge key={tag} variant="outline" className="border-white/10 bg-white/5 text-white/55">{tag}</Badge>)}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-
-          <Card className="mt-5 overflow-hidden border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(167,139,250,.22),transparent_32%),rgba(255,255,255,.045)] py-0 shadow-none">
-            <CardContent className="p-6 md:p-10">
-              <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-white/50">
-                <span className="tracking-[0.14em]">PLATFORM SNAPSHOT</span><span>上线 18 个月 · 持续迭代</span>
-              </div>
-              <h2 className="mt-7 max-w-2xl text-3xl font-semibold tracking-[-0.045em] text-white md:text-4xl">把分散的设计成果，变成统一表达的资产现场</h2>
-              <div className="mt-10 grid grid-cols-2 gap-7 border-t border-white/10 pt-7 md:grid-cols-4">
-                {['128|设计资产', '36|AI 案例', '72%|资产复用', '240h|近 3 个月节省工时'].map((metric) => {
-                  const [value, label] = metric.split('|');
-                  return <div key={label}><strong className="block text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">{value}</strong><span className="mt-1 block text-sm text-white/55">{label}</span></div>;
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className="px-5 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-[1180px]">
-          <SectionHeading eyebrow="Latest Assets" title="可复用设计资产" body="每一个入选资产都经过场景、质量和复用价值筛选。这里不是文件列表，而是团队判断力的索引。" />
-          <div className="grid gap-4 lg:grid-cols-[1.35fr_.65fr]">
-            <div className="space-y-3">
-              {assets.map((asset, index) => (
-                <Link key={asset.index} href="/workspace/design-assets" className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4 transition hover:border-white/25 hover:bg-white/[0.07] md:gap-6 md:p-5">
-                  <span className="text-sm font-medium text-white/35">{asset.index}</span>
-                  <span className="min-w-0 flex-1"><strong className="block truncate text-base text-white">{asset.title}</strong><span className="mt-1 block truncate text-sm text-white/50">{asset.description}</span></span>
-                  <Badge variant="outline" className="hidden border-white/10 text-white/55 md:inline-flex">{asset.category}</Badge>
-                  <ChevronRight className="size-4 text-white/40 transition group-hover:translate-x-0.5 group-hover:text-white" />
-                </Link>
-              ))}
+      <section id="impact" className="px-5 pb-[34px] pt-0 md:px-6">
+        <div className="mx-auto grid max-w-[1232px] overflow-hidden rounded-[18px] border border-white/[.1] bg-white/[.035] sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ['设计资产', '统一口径', '24', '当前已发布内容'],
+            ['AI Skill', '统一口径', '12', '当前已发布内容'],
+            ['AI 案例', '统一口径', '4', '当前已发布实践案例'],
+            ['有效复用', '近 30 天', '86', '被真实项目引用并确认'],
+          ].map(([label, qualifier, value, description], index) => (
+            <div className={`border-white/[.1] p-[26px] sm:px-7 ${index % 2 === 0 ? 'sm:border-r lg:border-r' : 'sm:border-b lg:border-b-0'} ${index < 2 ? 'sm:border-b' : ''} ${index === 3 ? 'border-0' : 'lg:border-r'}`} key={label}>
+              <div className="flex items-center justify-between text-[10px] text-white/45"><span>{label}</span><span>{qualifier}</span></div>
+              <strong className="mt-3 block text-[34px] leading-none tracking-[-.055em] text-white">{value}</strong>
+              <p className="mt-2 text-[10px] text-white/45">{description}</p>
             </div>
-            <Card className={`min-h-72 border border-white/10 bg-gradient-to-br ${assets[0]?.palette ?? 'from-cyan-300/25 via-slate-800 to-violet-400/20'} py-0 shadow-none`}>
-              <CardContent className="flex h-full min-h-72 flex-col justify-end p-6 md:p-8">
-                <Badge variant="outline" className="mb-4 border-white/15 bg-black/15 text-white/70">组件资产 / 评分 9.1</Badge>
-                <h3 className="text-2xl font-semibold text-white">数据表格组件规范</h3>
-                <p className="mt-3 max-w-sm leading-7 text-white/70">来自设计系统小组。让高频后台场景拥有统一体验，减少重复设计和交付偏差。</p>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="mt-7 text-center"><Button asChild variant="outline" className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link href="/workspace/design-assets">查看更多资产 <ArrowRight /></Link></Button></div>
+          ))}
         </div>
       </section>
 
-      <section className="px-5 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-[1180px]">
-          <SectionHeading eyebrow="AI Highlights" title="AI 探索相关案例" body="精选不是展示 AI 会生成什么，而是展示设计团队如何判断、筛选、修正，并把 AI 产出转化成业务结果。" />
-          <div className="grid gap-4 md:grid-cols-2">
+      <section id="skills" className="px-5 py-[58px] md:px-6 md:py-[72px]">
+        <div className="mx-auto max-w-[1232px]">
+          <div className="mb-10 max-w-[560px]">
+            <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Start with a task</p>
+            <h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">高频入口，直达工作台</h2>
+            <p className="mt-3 text-[14px] leading-6 text-white/50">三个高频入口，让设计师、产品经理和业务伙伴快速进入正确路径。</p>
+          </div>
+          <div className="grid gap-[14px] md:grid-cols-3">
             {[
-              ['效率提升', '营销活动视觉探索', '从 3 天首轮探索压缩到 4 小时。设计师定义参考图、筛选方向，并把有效路径沉淀为下一次活动可复用的方法。', '已沉淀为可复用工作流'],
-              ['质量提升', '设计走查自动摘要', 'AI 先完成问题聚类，设计师再判断优先级。评审会从“逐条找错”转向“聚焦高风险体验决策”。', '评审问题归类准确率 86%'],
-            ].map(([tag, title, body, note]) => (
-              <Card key={title} className="border border-white/10 bg-white/[0.045] py-7 shadow-none">
-                <CardHeader><Badge variant="outline" className="border-cyan-200/15 bg-cyan-200/5 text-cyan-100">{tag} · AI 精选</Badge><CardTitle className="mt-4 text-2xl text-white">{title}</CardTitle><CardDescription className="leading-7 text-white/60">{body}</CardDescription></CardHeader>
-                <CardFooter className="mt-4 justify-between border-white/10 bg-transparent px-6 pt-4 text-sm text-white/50"><Link className="inline-flex items-center gap-1 text-white transition hover:text-violet-200" href="/workspace/ai-cases">查看案例 <ArrowRight className="size-4" /></Link><span>{note}</span></CardFooter>
-              </Card>
-            ))}
+              ['01 / FIND', Search, '找设计资产', '搜索组件、页面模板、规范和交付机制，减少重复设计与沟通成本。', '/workspace/design-assets'],
+              ['02 / APPLY', Sparkles, '用 AI Skill', '调用经过设计师验证的输入约束、分析维度、输出结构和判断标准。', '/workspace/ai-skills'],
+              ['03 / PROVE', BarChart3, '看业务影响', '查看设计方法如何被应用、验证与复用，而不只是观看静态作品。', '/workspace/overview'],
+            ].map(([index, Icon, title, body, href]) => {
+              const PathIcon = Icon as typeof Search;
+              return <Link key={title as string} href={href as string} className="group relative min-h-[300px] overflow-hidden rounded-[20px] border border-white/[.1] bg-white/[.035] p-7 transition duration-200 hover:-translate-y-1 hover:border-white/[.2] hover:bg-white/[.06]">
+                <span className="absolute -right-14 -top-14 size-[150px] rounded-full border border-white/[.1] after:absolute after:inset-[25px] after:rounded-full after:border after:border-white/[.1]" />
+                <span className="text-[11px] tracking-[.16em] text-white/45">{index as string}</span>
+                <span className="relative mt-[52px] grid size-[50px] place-items-center rounded-[14px] border border-white/[.16] bg-white/[.06] text-white"><PathIcon className="size-5" /></span>
+                <h3 className="relative mt-6 text-[24px] font-semibold tracking-[-.035em] text-white">{title as string}</h3>
+                <p className="relative mt-2 max-w-[320px] text-[13px] leading-6 text-white/50">{body as string}</p>
+                <ArrowUpRight className="absolute bottom-6 right-6 size-5 text-white/45 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" />
+              </Link>;
+            })}
           </div>
         </div>
       </section>
 
-      <section className="px-5 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-[1180px]">
-          <SectionHeading eyebrow="Collections" title="被策展的设计智能" body="集合按照业务场景策展，让非设计同事也能理解这些资产适合何时使用、如何复用。" />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {collections.map(([title, body, meta]) => <Card key={title} className="border border-white/10 bg-white/[0.04] py-6 shadow-none"><CardHeader><Badge variant="outline" className="w-fit border-white/10 text-white/45">资产集合</Badge><CardTitle className="mt-3 text-lg text-white">{title}</CardTitle><CardDescription className="leading-7 text-white/55">{body}</CardDescription></CardHeader><CardFooter className="mt-auto justify-between border-white/10 bg-transparent px-6 pt-4 text-xs text-white/45"><span>{meta}</span><span>查看</span></CardFooter></Card>)}
+      <section id="projects" className="px-5 pb-10 pt-[72px] md:px-6 md:pt-[96px]">
+        <div className="mx-auto max-w-[1232px]">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">AI exploration portfolio</p>
+              <h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">33 个 AI 体验设计探索项目</h2>
+              <p className="mt-3 text-[14px] leading-6 text-white/50">从设计生产、用户增长到金融风险与组织能力，建立一套可以逐步试点、验证和复制的 AI 项目组合。</p>
+            </div>
+            <Link className="inline-flex items-center gap-2 text-[12px] font-semibold text-white/70 transition hover:text-white" href="/workspace/ai-projects">进入 AI 项目库 <ArrowRight className="size-4" /></Link>
+          </div>
+          <div className="grid overflow-hidden rounded-[18px] border border-white/[.1] bg-white/[.035] sm:grid-cols-2 lg:grid-cols-4">
+            {['7|战略与组织', '13|设计生产', '8|增长与运营', '5|风险与治理'].map((item, index) => {
+              const [value, label] = item.split('|');
+              return <div className={`p-[22px] px-6 ${index !== 3 ? 'border-b border-white/[.1] lg:border-b-0 lg:border-r' : ''}`} key={label}><strong className="block text-[30px] tracking-[-.05em] text-white">{value}</strong><span className="mt-1.5 block text-[10px] text-white/45">{label}</span></div>;
+            })}
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['S05 · STRATEGY', '90 天执行计划', '通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。', '组织执行', '/workspace/ai-projects'],
+              ['P01 · PRODUCTION', 'AI 需求分析与体验策略中心', '统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。', '设计生产', '/workspace/ai-projects'],
+              ['P08 · GROWTH', 'AI 新用户激活助手', '基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。', '业务增长', '/workspace/ai-projects'],
+              ['P23 · RISK', 'AI 高风险操作体验审计', '审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。', '金融风险', '/workspace/ai-projects'],
+            ].map(([code, title, body, category, href]) => <Link key={code} href={href!} className="group flex min-h-[260px] flex-col rounded-[18px] border border-white/[.1] bg-white/[.035] p-[22px] transition hover:-translate-y-1 hover:border-white/[.2] hover:bg-white/[.06]"><div className="flex items-center justify-between text-[9px] tracking-[.1em] text-white/45"><span>{code}</span><ArrowUpRight className="size-3.5" /></div><h3 className="mt-11 text-[18px] font-semibold leading-[1.34] tracking-[-.025em] text-white">{title}</h3><p className="mt-2.5 text-[11px] leading-[1.65] text-white/50">{body}</p><div className="mt-auto flex items-center justify-between border-t border-white/[.1] pt-[18px] text-[9px] text-white/45"><span>{category}</span><span>可立项</span></div></Link>)}
+          </div>
+          <div className="mt-[18px] flex flex-wrap gap-3"><Button asChild className="h-10 rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white"><Link href="/workspace/ai-projects">进入 AI 项目库 <ArrowRight className="size-4" /></Link></Button><Button asChild variant="outline" className="h-10 rounded-[10px] border-white/[.12] bg-white/[.035] px-[18px] text-[13px] font-bold text-white hover:bg-white/[.08] hover:text-white"><Link href="/workspace/ai-projects">查看 90 天执行路线</Link></Button></div>
+        </div>
+      </section>
+
+      <section id="assets" className="px-5 py-20 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1232px]">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+            <div className="max-w-[560px]"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Latest assets</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">最新设计资产</h2><p className="mt-3 text-[14px] leading-6 text-white/50">将组件、设计规范、品牌、AI 工作流，持续沉淀为固有设计资产。</p></div>
+            <Link className="inline-flex items-center gap-2 text-[12px] font-semibold text-white/70 transition hover:text-white" href="/workspace/design-assets">进入完整资产库 <ArrowRight className="size-4" /></Link>
+          </div>
+          <div className="mb-[18px] flex flex-wrap items-center gap-[10px] rounded-[15px] border border-white/[.1] bg-white/[.035] p-3">
+            <form action="/workspace/search" className="flex h-10 min-w-[260px] flex-1 items-center gap-2 rounded-[10px] border border-white/[.1] bg-black/20 px-3 text-white/45"><Search className="size-4" /><input aria-label="搜索设计资产" className="min-w-0 flex-1 bg-transparent text-[12px] text-white outline-none placeholder:text-white/35" name="q" placeholder="搜索标题、场景或维护团队…" type="search" /></form>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="资产筛选">{['全部', '组件规范', '页面模板', 'AI 工作流', '交付规范'].map((filter, index) => <Link className={`h-[34px] rounded-[9px] border px-[11px] text-[10px] font-semibold leading-[32px] transition ${index === 0 ? 'border-white/[.1] bg-white/[.1] text-white' : 'border-transparent text-white/45 hover:border-white/[.1] hover:bg-white/[.08] hover:text-white'}`} href="/workspace/design-assets" key={filter}>{filter}</Link>)}</div>
+          </div>
+          <div className="grid gap-[14px] sm:grid-cols-2 lg:grid-cols-4">
+            {featuredAssets.map(([chip, category, updated, title, description, team, status, visual]) => <Link key={title} href="/workspace/design-assets" className="group overflow-hidden rounded-[18px] border border-white/[.1] bg-white/[.035] transition hover:-translate-y-1 hover:border-white/[.2] hover:shadow-2xl hover:shadow-black/20">
+              <div className="relative h-44 overflow-hidden border-b border-white/[.1] bg-black/20 p-[18px]"><span className="inline-flex rounded-full border border-white/[.1] bg-white/[.035] px-2 py-1 text-[8px] uppercase tracking-[.1em] text-white/50">{chip}</span>
+                {visual === 'window' && <div className="absolute bottom-[-12px] left-7 right-7 h-[125px] overflow-hidden rounded-t-[12px] border border-white/[.16] bg-white/[.035]"><div className="flex h-[23px] items-center gap-1 border-b border-white/[.1] px-2"><i className="size-1 rounded-full bg-white/30" /><i className="size-1 rounded-full bg-white/30" /><i className="size-1 rounded-full bg-white/30" /></div><div className="grid h-[102px] grid-cols-[30%_1fr]"><div className="border-r border-white/[.1] p-2"><i className="mb-1.5 block h-1 rounded bg-white/[.13]" /><i className="mb-1.5 block h-1 w-3/4 rounded bg-white/[.13]" /><i className="block h-1 rounded bg-white/[.13]" /></div><div className="p-3"><i className="block h-1.5 w-1/2 rounded bg-white/[.2]" /><i className="mt-3 block h-1 w-full rounded bg-white/[.13]" /><i className="mt-1.5 block h-1 w-4/5 rounded bg-white/[.13]" /><i className="mt-1.5 block h-1 w-[90%] rounded bg-white/[.13]" /></div></div></div>}
+                {visual === 'chart' && <svg className="absolute inset-x-5 bottom-4 top-12 text-white/70" preserveAspectRatio="none" viewBox="0 0 280 120"><path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M0,104 C28,91 40,93 65,79 C94,63 110,68 138,49 C165,31 185,41 208,24 C236,4 252,19 280,4 L280,120 L0,120Z" fill="currentColor" opacity=".06" /></svg>}
+                {visual === 'process' && <div className="absolute bottom-5 left-[22px] right-[22px] grid grid-cols-3 gap-2"><i className="h-[58px] rounded-[9px] border border-white/[.1] bg-white/[.035]" /><i className="h-[58px] -translate-y-2.5 rounded-[9px] border border-white/[.1] bg-white/[.06]" /><i className="h-[58px] rounded-[9px] border border-white/[.1] bg-white/[.035]" /></div>}
+                {visual === 'checks' && <div className="absolute inset-x-6 bottom-[22px] top-[54px] grid gap-2">{[1, 2, 3].map((number) => <i className="relative rounded-[7px] border border-white/[.1] bg-white/[.035] before:absolute before:left-2 before:top-2 before:size-2 before:rounded-[3px] before:border before:border-white/[.18] after:absolute after:left-6 after:top-2.5 after:h-1 after:w-[54%] after:rounded after:bg-white/[.13]" key={number} />)}</div>}
+              </div>
+              <div className="p-[19px]"><div className="flex items-center justify-between gap-2 text-[9px] text-white/45"><span>{category}</span><span>{updated}</span></div><h3 className="mt-3 text-[16px] font-semibold leading-[1.35] tracking-[-.025em] text-white">{title}</h3><p className="mt-2 min-h-[52px] text-[11px] leading-[1.62] text-white/50">{description}</p><div className="mt-[18px] flex items-center justify-between border-t border-white/[.1] pt-[14px] text-[9px] text-white/45"><span>{team}</span><b className="font-semibold text-white/70">{status}</b></div></div>
+            </Link>)}
           </div>
         </div>
       </section>
 
-      <section className="px-5 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-[1180px]">
-          <SectionHeading eyebrow="Team Directory" title="设计资产创造者" body="每个资产背后都有负责人、维护机制和质量标准。平台展示的不只是成果，也是团队如何持续创造成果。" />
-          <div className="grid gap-4 md:grid-cols-3">
-            {teams.map(([initials, label, title, body, output, impact]) => <Card key={title} className="border border-white/10 bg-white/[0.04] py-6 shadow-none"><CardHeader><span className="mb-2 grid size-11 place-items-center rounded-full bg-gradient-to-br from-violet-300/70 to-cyan-200/50 text-xs font-semibold text-black">{initials}</span><Badge variant="outline" className="w-fit border-white/10 text-white/45">{label}</Badge><CardTitle className="mt-3 text-xl text-white">{title}</CardTitle><CardDescription className="leading-7 text-white/55">{body}</CardDescription></CardHeader><CardFooter className="mt-3 justify-between border-white/10 bg-transparent px-6 pt-4 text-sm text-white/50"><span>{output}</span><span>{impact}</span></CardFooter></Card>)}
-          </div>
-          <Card className="mt-4 border border-white/10 bg-white/[0.035] py-0 shadow-none"><CardContent className="p-0 text-sm"><div className="grid grid-cols-[1.25fr_1.55fr_.7fr_.7fr] gap-4 border-b border-white/10 px-5 py-4 text-xs font-medium text-white/40 md:px-7"><span>团队</span><span>职责</span><span>产出</span><span>影响</span></div>{teams.map(([, , title, , output, impact], index) => <div key={title} className="grid grid-cols-[1.25fr_1.55fr_.7fr_.7fr] gap-4 px-5 py-4 text-white/60 md:px-7"><strong className="font-medium text-white">{title}</strong><span>{['组件治理与体验一致性', 'Prompt 与 AI 工作流', '质量标准与交付流程'][index]}</span><span>{output}</span><span>{impact}</span></div>)}</CardContent></Card>
+      <section id="cases" className="px-5 py-[58px] md:px-6 md:py-[72px]">
+        <div className="mx-auto max-w-[1232px]"><div className="mb-10 max-w-[560px]"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Verified AI practice</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">AI案例-沉淀方法与结果</h2><p className="mt-3 text-[14px] leading-6 text-white/50">用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p></div>
+          <article className="grid overflow-hidden rounded-[24px] border border-white/[.1] bg-white/[.035] lg:grid-cols-[1.08fr_.92fr]"><div className="border-b border-white/[.1] bg-black/20 p-6 lg:border-b-0 lg:border-r lg:p-9"><div className="mb-7 flex items-center justify-between text-[9px] uppercase tracking-[.13em] text-white/45"><span>Before / After</span><Badge variant="outline" className="border-white/[.14] bg-white/[.04] text-[9px] text-white/60">Verified case</Badge></div><div className="grid items-center gap-4 md:grid-cols-[1fr_36px_1fr]"><div className="rounded-2xl border border-white/[.1] bg-white/[.035] p-4"><div className="flex justify-between text-[8px] text-white/45"><span>传统流程</span><span>3 days</span></div><div className="mt-3 h-[205px] rounded-[10px] border border-white/[.1] bg-black/20 p-3"><i className="mb-3 block h-[18px] border-b border-white/[.1]" /><div className="grid grid-cols-2 gap-2"><i className="h-[67px] rounded-[7px] border border-white/[.1] bg-white/[.035]" /><i className="h-[67px] rounded-[7px] border border-white/[.1] bg-white/[.035]" /><i className="col-span-2 h-12 rounded-[7px] border border-white/[.1] bg-white/[.035]" /></div></div></div><ArrowRight className="mx-auto size-5 text-white/45" /><div className="rounded-2xl border border-white/[.1] bg-white/[.035] p-4"><div className="flex justify-between text-[8px] text-white/45"><span>AI 协同流程</span><span>4 hours</span></div><div className="mt-3 grid h-[205px] grid-cols-[40px_1fr] overflow-hidden rounded-[10px] border border-white/[.1] bg-black/20"><div className="border-r border-white/[.1] p-2">{[1,2,3,4].map((item) => <i className="my-2 block h-1.5 rounded bg-white/[.13]" key={item} />)}</div><div className="p-3"><i className="mb-3 block h-2 w-[45%] rounded bg-white/[.18]" /><div className="grid grid-cols-2 gap-2">{[1,2,3,4].map((item) => <i className="h-14 rounded-[7px] border border-white/[.1] bg-white/[.035]" key={item} />)}</div></div></div></div></div></div><div className="p-7 md:p-[42px]"><Badge variant="outline" className="border-white/[.14] bg-white/[.04] text-[10px] text-white/65">效率提升 · AI 精选</Badge><h3 className="mt-[18px] text-[34px] font-semibold leading-[1.12] tracking-[-.045em] text-white">营销活动视觉探索</h3><p className="mt-3 text-[13px] leading-[1.75] text-white/50">AI 不直接替代设计判断，而是加速参考图整理、方向扩散和方案初筛；设计师负责定义边界、选择方向并形成可复用方法。</p><div className="my-7 grid gap-3">{[['01','定义输入边界','设计师确定品牌资产、参考风格和不可突破的约束。'],['02','AI 扩散与聚类','快速生成方向并按视觉语言、场景和风险进行归类。'],['03','人工筛选与沉淀','设计师完成最终选择，并把有效路径保存为下一次可调用的 Skill。']].map(([number,title,body]) => <div className="grid grid-cols-[28px_1fr] gap-3" key={number}><span className="grid size-7 place-items-center rounded-lg border border-white/[.1] bg-white/[.04] text-[9px] text-white/45">{number}</span><div><b className="block text-[11px] text-white">{title}</b><p className="mt-0.5 text-[10px] text-white/50">{body}</p></div></div>)}</div><div className="grid grid-cols-3 gap-4 border-t border-white/[.1] pt-[23px]">{[['3d → 4h','首轮视觉探索'],['12','验证方向数量'],['1 Skill','已沉淀为工作流']].map(([value,label]) => <div key={label}><strong className="block text-[22px] tracking-[-.04em] text-white">{value}</strong><span className="mt-1 block text-[8px] text-white/45">{label}</span></div>)}</div></div></article>
         </div>
       </section>
 
-      <section className="px-5 pb-24 pt-8 md:px-10 md:pb-32">
-        <Card className="mx-auto max-w-[1180px] border border-violet-200/15 bg-[radial-gradient(circle_at_top_left,rgba(167,139,250,.28),transparent_34%),linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.035))] py-0 shadow-none">
-          <CardContent className="grid gap-8 p-7 md:grid-cols-2 md:p-12"><div><Badge variant="outline" className="border-white/15 bg-white/5 text-violet-100">Start creating</Badge><h2 className="mt-5 text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">把一次优秀产出，变成下一次团队复用的起点</h2></div><div className="flex flex-col justify-end"><p className="leading-7 text-white/65">当一次项目产出被命名、归档、评选和复用，它就不再只是交付物，而会成为团队下一次创新的起点。</p><div className="mt-6 flex flex-wrap gap-3"><Button asChild className="bg-white text-black hover:bg-white/85"><Link href="/workspace/submit">提交资产 <ArrowRight /></Link></Button><Button asChild variant="outline" className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link href="#home">回到顶部</Link></Button></div></div></CardContent>
-        </Card>
-      </section>
+      <section id="governance" className="px-5 py-[58px] md:px-6 md:py-[72px]"><div className="mx-auto max-w-[1232px]"><div className="mb-10"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Platform governance</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">从设计系统到平台机制</h2><p className="mt-3 text-[14px] leading-6 text-white/50">用三个角色形成从标准、创新到质量闭环，避免资产只上传、不维护、不复用。</p></div><div className="grid gap-4 lg:grid-cols-[1fr_76px_1fr_76px_1fr] lg:gap-0">{[['01 / STANDARDIZE','设计系统','负责组件、模式、Token 与跨业务体验标准。','标准建立 · 资产维护 · 版本治理'],['02 / EXPLORE','AI 设计','将实验性的 AI 产出转化为可调用、可验证的方法。','Skill 设计 · 方法验证 · 案例沉淀'],['03 / OPERATE','设计运营','维护审核、发布、复用反馈和影响力数据。','质量审核 · 内容运营 · 价值度量']].flatMap(([index,title,body,footer], position) => [<article className="relative min-h-[210px] rounded-[18px] border border-white/[.1] bg-white/[.035] p-[27px]" key={title}><span className="text-[10px] tracking-[.14em] text-white/45">{index}</span><h3 className="mt-[50px] text-[21px] font-semibold tracking-[-.03em] text-white">{title}</h3><p className="mt-2 text-[11px] text-white/50">{body}</p><footer className="absolute bottom-[22px] left-[27px] right-[27px] border-t border-white/[.1] pt-3 text-[9px] text-white/45">{footer}</footer></article>, position < 2 ? <div aria-hidden="true" className="hidden place-items-center lg:grid" key={`${title}-connector`}><span className="relative h-px w-full bg-white/[.16] after:absolute after:-right-px after:-top-[3px] after:size-[6px] after:rotate-45 after:border-r after:border-t after:border-white/45" /></div> : null])}</div></div></section>
 
-      <footer className="border-t border-white/10 px-5 py-8 text-center text-sm text-white/35">PalmPay UX Design · Design Intelligence Hub</footer>
+      <section className="px-5 py-20 md:px-6"><div className="relative mx-auto flex max-w-[1232px] flex-col justify-between gap-9 overflow-hidden rounded-[28px] border border-white/[.16] bg-white/[.035] p-8 md:flex-row md:items-center md:p-[54px]"><span className="absolute -right-20 -top-[120px] size-[320px] rounded-full border border-white/[.1] shadow-[0_0_0_40px_rgba(255,255,255,.035)]" /><div className="relative z-10 max-w-[720px]"><h2 className="text-[32px] font-semibold leading-[1.08] tracking-[-.05em] text-white md:text-[54px]">把一次优秀产出，变成团队下一次工作的起点</h2><p className="mt-4 text-[13px] text-white/50">本版本用于验证首页信息架构、品牌表达与核心入口，不包含真实权限和后台数据。</p></div><Button asChild className="relative z-10 h-10 min-w-[154px] rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white"><Link href="/workspace">进入工作台 <ArrowRight className="size-4" /></Link></Button></div></section>
+
+      <footer className="border-t border-white/[.1] px-5 py-[38px] md:px-6"><div className="mx-auto flex max-w-[1232px] flex-col justify-between gap-7 text-[9px] text-white/45 md:flex-row md:items-center"><Link href="#home" className="flex items-center gap-3 text-white"><Image src="/v9-1/assets/nav-logo-20260710.png" alt="PalmPay Logo" className="size-7 object-contain" height={28} width={28} /><span className="text-[12px] font-semibold">PalmPay Design<br /><span className="text-[9px] font-medium tracking-[.16em] text-white/55">INTELLIGENCE HUB</span></span></Link><div className="flex gap-[18px]"><span>Demo data</span><span>Dark / Light supported</span><span>Formal workspace enabled</span></div></div></footer>
     </main>
   );
 }

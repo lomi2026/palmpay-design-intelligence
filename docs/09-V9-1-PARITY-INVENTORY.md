@@ -22,16 +22,16 @@ For every deployed v9-1 page:
 
 | Deployed v9-1 source | Formal V1 counterpart | Current parity status |
 | --- | --- | --- |
-| `index.html` — public home | `/` | Implemented; local visual smoke check complete; deployed screenshot comparison pending |
-| `design-intelligence-hub-demo.html` — workspace / presentation structure | `/workspace` and workspace shell | Implemented visual shell; deployed screenshot comparison pending |
-| `workspace.html` — Design Assets module state | `/workspace/design-assets` | Source/local side-by-side captured at `1280 x 720`; formal page now uses the 8 approved PostgreSQL-backed v9-1 assets and source-aligned catalog layout. Acceptance blocked by favorite persistence and role-state mismatch. |
-| v9-1 asset-detail interaction | `/workspace/design-assets/[slug]` | Existing formal detail retained; visual final pass and deployed comparison pending |
-| `ai-skill-toolkit.html` — Skill catalog | `/workspace/ai-skills` | Implemented visual shell and real catalog data; deployed screenshot comparison pending |
-| `skill-detail-*.html` — Skill detail | `/workspace/ai-skills/[slug]` | Existing formal detail retained; visual final pass and deployed comparison pending |
-| `upload-asset.html` — submit flow | `/workspace/submit` and `/workspace/submit/[id]` | Implemented with formal draft workflow; deployed screenshot comparison pending |
-| deployed AI project library | `/workspace/ai-projects` and `/workspace/ai-projects/[slug]` | List implemented; formal detail visual final pass and deployed comparison pending |
-| deployed AI case pages | `/workspace/ai-cases` and `/workspace/ai-cases/[slug]` | List implemented; formal detail visual final pass and deployed comparison pending |
-| deployed review-center experience | `/workspace/reviews` | Implemented with formal queue actions; deployed screenshot comparison pending |
+| `index.html` — public home | `/` | Deployed/local desktop first-viewport pair captured at `1280 x 720`; the full deployed section order and desktop composition were then restored from matching source commit `bf39748` (metrics, task paths, project portfolio, assets, case, governance and CTA). Local `390 x 844` responsive verification restored the source mobile preview, 44px hero title rule and openable navigation menu; deployed same-viewport capture and full interaction-state acceptance remain pending. |
+| `workspace.html` — workspace / presentation structure | `/workspace` and workspace shell | Direct deployment check confirms this is the live workspace counterpart. Source/local desktop evidence exists; mobile and matching permission-state evidence remain pending. The historical `design-intelligence-hub-demo.html` deep link itself returns 404. |
+| No current deployed Design Assets catalog counterpart | `/workspace/design-assets` | Direct deployment check on 2026-07-17 confirmed `design-assets.html` returns GitHub Pages 404. The formal catalog remains database-backed and inherits the deployed workspace system; archival page geometry is not a parity authority. |
+| No current deployed Design Asset detail counterpart | `/workspace/design-assets/[slug]` | The decision-first formal detail retains persisted version, owner/team, applicability, constraints, usage guide, attachments and content relations. No matching detail artifact exists in the verified release tree; this is not a separate deployed-page parity target. |
+| No current deployed v9-1 Skill catalog counterpart | `/workspace/ai-skills` | Direct deployment check on 2026-07-17 confirmed `ai-skill-toolkit.html` returns GitHub Pages 404. The formal catalog is a V1 page and must inherit the deployed workspace shell rather than treating the archival file as a visual authority. |
+| No current deployed v9-1 Skill detail counterpart | `/workspace/ai-skills/[slug]` | Direct deployment check on 2026-07-17 confirmed `skill-detail-component-governance.html` returns GitHub Pages 404, matching the absence of `skill-detail-*` in the verified `bf39748` release tree. The formal detail uses Design Decision 12 and persisted `SkillDetail` fields (goal, scope, input/output, Prompt, steps, examples, human review, limits, version and owner). |
+| No current deployed submit-flow counterpart | `/workspace/submit` and `/workspace/submit/[id]` | Direct deployment check on 2026-07-17 confirmed `upload-asset.html` returns GitHub Pages 404. The formal draft workflow inherits the deployed workspace system. |
+| `projects/index.html` and `projects/project-detail.html` — AI project library/detail | `/workspace/ai-projects` and `/workspace/ai-projects/[slug]` | Direct deployment check confirms both routes are live. The detail page maps the deployed project-template hierarchy (exploration hero, outcomes, management summary, priority and traceability) to formal project/version fields while retaining lifecycle and engagement controls. Matched authenticated desktop/mobile comparison remains pending. |
+| Home-page verified-practice surface (not a standalone case page) | `/workspace/ai-cases` and `/workspace/ai-cases/[slug]` | List implemented. The detail page borrows only the approved home-page visual language for the before/after, responsibility, result, validation and evidence hierarchy; it has no confirmed standalone deployed counterpart. |
+| No confirmed current deployed review-center counterpart | `/workspace/reviews` | Implemented with formal queue actions and the deployed workspace system; a deployed counterpart has not been confirmed in the verified release tree. |
 
 ## Formal-only pages
 
@@ -40,6 +40,15 @@ The following pages have no confirmed v9-1 counterpart. They must inherit the de
 - `/login`
 - `/workspace/submissions`
 - `/workspace/notifications`
+- `/workspace/ai-skills`
+- `/workspace/ai-skills/[slug]`
+- `/workspace/design-assets`
+- `/workspace/design-assets/[slug]`
+- `/workspace/submit`
+- `/workspace/submit/[id]`
+- `/workspace/ai-cases`
+- `/workspace/ai-cases/[slug]`
+- `/workspace/reviews`
 
 ## Current evidence status
 
@@ -47,4 +56,4 @@ The following pages have no confirmed v9-1 counterpart. They must inherit the de
 - Browser automation did not reliably return a DOM snapshot or screenshot during the initial connection. Screenshot evidence remains pending and must be captured before page acceptance.
 - The local `legacy/v9-1/` pages are a supporting source only. Any mismatch or missing page must be resolved in favour of the deployed site.
 - Local visual smoke checks completed on `/` and `/workspace/ai-cases`: the public hero, workspace shell, data-backed catalog cards and search controls render at the local desktop viewport. This is not equivalent to deployed side-by-side acceptance.
-- The source workspace's Design Assets state was captured at `1280 x 720` and compared directly against the authenticated formal route. Header title, filter-frame start, source wording, categories, 3-column card density, metadata and official v9-1 asset examples are now restored with database persistence. `design-qa.md` retains the blocking favorite and role-state differences; this row is not accepted yet.
+- Direct deployment checks on 2026-07-17 confirmed that the historical deep links `design-assets.html`, `upload-asset.html`, `design-intelligence-hub-demo.html`, `ai-skill-toolkit.html` and `skill-detail-component-governance.html` return GitHub Pages 404. They are archival references only, not current deployed parity targets.

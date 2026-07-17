@@ -12,6 +12,7 @@ import type {
   UpdateUserStatusDto,
   UserListQueryDto,
 } from './identity.dto';
+import { AuditService } from '../governance/audit.service';
 
 const userDetails = {
   primaryTeam: { select: { id: true, name: true, code: true } },
@@ -24,7 +25,10 @@ const userDetails = {
 
 @Injectable()
 export class IdentityService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   async getOrganization(organizationId: string) {
     const organization = await this.prisma.organization.findUnique({
@@ -45,7 +49,7 @@ export class IdentityService {
     });
   }
 
-  async updateTeam(organizationId: string, teamId: string, input: UpdateTeamDto) {
+  async updateTeam(organizationId: string, teamId: string, input: UpdateTeamDto, actorId: string) {
     if (input.name === undefined && input.ownerId === undefined && input.status === undefined) {
       throw new BadRequestException('At least one team field must be provided.');
     }
@@ -60,10 +64,20 @@ export class IdentityService {
       if (!owner) throw new BadRequestException('Team owner must belong to the same organization.');
     }
 
-    return this.prisma.team.update({
+    const updated = await this.prisma.team.update({
       where: { id: teamId },
       data: { name: input.name, ownerId: input.ownerId, status: input.status },
     });
+    await this.audit.write({
+      organizationId,
+      actorId,
+      action: 'team.update',
+      entityType: 'team',
+      entityId: teamId,
+      beforeData: team,
+      afterData: updated,
+    });
+    return updated;
   }
 
   async listUsers(organizationId: string, query: UserListQueryDto) {
@@ -105,9 +119,27 @@ export class IdentityService {
     return user;
   }
 
-  async updateUserStatus(organizationId: string, userId: string, input: UpdateUserStatusDto) {
-    await this.getUser(organizationId, userId);
-    return this.prisma.user.update({ where: { id: userId }, data: { status: input.status } });
+  async updateUserStatus(
+    organizationId: string,
+    userId: string,
+    input: UpdateUserStatusDto,
+    actorId: string,
+  ) {
+    const existing = await this.getUser(organizationId, userId);
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status: input.status },
+    });
+    await this.audit.write({
+      organizationId,
+      actorId,
+      action: 'user.status.update',
+      entityType: 'user',
+      entityId: userId,
+      beforeData: existing,
+      afterData: updated,
+    });
+    return updated;
   }
 
   listPermissions() {
@@ -140,7 +172,7 @@ export class IdentityService {
     await this.validateRoleScope(organizationId, input.scopeType, input.scopeId);
 
     try {
-      return await this.prisma.userRole.create({
+      const assignment = await this.prisma.userRole.create({
         data: {
           userId,
           roleId: input.roleId,
@@ -150,6 +182,15 @@ export class IdentityService {
         },
         include: { role: true },
       });
+      await this.audit.write({
+        organizationId,
+        actorId,
+        action: 'user.role.assign',
+        entityType: 'user_role',
+        entityId: assignment.id,
+        afterData: assignment,
+      });
+      return assignment;
     } catch (error: unknown) {
       if (typeof error === 'object' && error && 'code' in error && error.code === 'P2002') {
         throw new ConflictException('User role assignment already exists.');
@@ -158,12 +199,25 @@ export class IdentityService {
     }
   }
 
-  async removeUserRole(organizationId: string, userId: string, userRoleId: string) {
+  async removeUserRole(
+    organizationId: string,
+    userId: string,
+    userRoleId: string,
+    actorId: string,
+  ) {
     const assignment = await this.prisma.userRole.findFirst({
       where: { id: userRoleId, userId, user: { organizationId, deletedAt: null } },
     });
     if (!assignment) throw new NotFoundException('User role assignment not found.');
     await this.prisma.userRole.delete({ where: { id: userRoleId } });
+    await this.audit.write({
+      organizationId,
+      actorId,
+      action: 'user.role.remove',
+      entityType: 'user_role',
+      entityId: userRoleId,
+      beforeData: assignment,
+    });
     return { deleted: true };
   }
 

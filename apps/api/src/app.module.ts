@@ -8,6 +8,8 @@ import { FilesModule } from './files/files.module';
 import { IdentityModule } from './identity/identity.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { EngagementModule } from './engagement/engagement.module';
+import { GovernanceModule } from './governance/governance.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     FilesModule,
     ReviewsModule,
     NotificationsModule,
+    EngagementModule,
+    GovernanceModule,
   ],
   controllers: [HealthController],
 })

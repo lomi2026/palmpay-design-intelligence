@@ -5,9 +5,11 @@ import { ContentService } from './content.service';
 import { DraftsController } from './drafts.controller';
 import { DraftTeamsController } from './draft-teams.controller';
 import { DraftsService } from './drafts.service';
+import { EngagementModule } from '../engagement/engagement.module';
+import { GovernanceModule } from '../governance/governance.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, EngagementModule, GovernanceModule],
   controllers: [ContentController, DraftsController, DraftTeamsController],
   providers: [ContentService, DraftsService],
 })

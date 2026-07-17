@@ -19,7 +19,10 @@ let adminUser;
 let memberUser;
 let team;
 let publishedContent;
+let memberRestrictedContent;
+let adminRestrictedContent;
 const contentIds = [];
+const categoryIds = [];
 let serverOutput = '';
 
 async function waitForServer() {
@@ -89,7 +92,7 @@ before(async () => {
     data: { primaryTeamId: team.id },
   });
 
-  async function createAsset(slug, visibility, status = 'PUBLISHED') {
+  async function createAsset(slug, visibility, status = 'PUBLISHED', ownerId = memberUser.id) {
     const content = await prisma.content.create({
       data: {
         organizationId: organization.id,
@@ -97,9 +100,9 @@ before(async () => {
         title: `Integration ${visibility}`,
         slug,
         summary: 'Integration catalog fixture',
-        ownerId: memberUser.id,
+        ownerId,
         teamId: team.id,
-        createdById: memberUser.id,
+        createdById: ownerId,
         status,
         visibility,
         publishedAt: status === 'PUBLISHED' ? new Date() : null,
@@ -115,7 +118,7 @@ before(async () => {
         title: content.title,
         summary: content.summary,
         body: { blocks: [] },
-        createdById: memberUser.id,
+        createdById: ownerId,
         publishedAt: status === 'PUBLISHED' ? new Date() : null,
       },
     });
@@ -137,7 +140,13 @@ before(async () => {
   publishedContent = await createAsset(`integration-public-${runId}`, 'PUBLIC');
   await createAsset(`integration-organization-${runId}`, 'ORGANIZATION');
   await createAsset(`integration-team-${runId}`, 'TEAM');
-  await createAsset(`integration-restricted-${runId}`, 'RESTRICTED');
+  memberRestrictedContent = await createAsset(`integration-restricted-${runId}`, 'RESTRICTED');
+  adminRestrictedContent = await createAsset(
+    `integration-admin-restricted-${runId}`,
+    'RESTRICTED',
+    'PUBLISHED',
+    adminUser.id,
+  );
   await createAsset(`integration-draft-${runId}`, 'ORGANIZATION', 'DRAFT');
 
   server = spawn(process.execPath, ['dist/main.js'], {
@@ -164,9 +173,35 @@ before(async () => {
 after(async () => {
   if (!integrationEnabled) return;
   server?.kill('SIGTERM');
+  await prisma.favorite.deleteMany({
+    where: {
+      OR: [{ contentId: { in: contentIds } }, { userId: { in: [adminUser.id, memberUser.id] } }],
+    },
+  });
+  await prisma.recentView.deleteMany({
+    where: {
+      OR: [{ contentId: { in: contentIds } }, { userId: { in: [adminUser.id, memberUser.id] } }],
+    },
+  });
+  await prisma.usageEvent.deleteMany({
+    where: {
+      OR: [{ contentId: { in: contentIds } }, { userId: { in: [adminUser.id, memberUser.id] } }],
+    },
+  });
+  await prisma.searchLog.deleteMany({
+    where: {
+      OR: [
+        { clickedContentId: { in: contentIds } },
+        { userId: { in: [adminUser.id, memberUser.id] } },
+      ],
+    },
+  });
   await prisma.content.deleteMany({ where: { id: { in: contentIds } } });
+  if (categoryIds.length) await prisma.category.deleteMany({ where: { id: { in: categoryIds } } });
   if (team) await prisma.team.delete({ where: { id: team.id } });
-  await prisma.notification.deleteMany({ where: { receiverId: { in: [adminUser.id, memberUser.id] } } });
+  await prisma.notification.deleteMany({
+    where: { receiverId: { in: [adminUser.id, memberUser.id] } },
+  });
   await prisma.user.deleteMany({ where: { email: { in: [adminEmail, memberEmail] } } });
   await prisma.$disconnect();
 });
@@ -212,6 +247,160 @@ test(
 );
 
 test(
+  'search, favorites, recent views and usage confirmation persist formal engagement data',
+  { skip: !integrationEnabled },
+  async () => {
+    const project = await prisma.content.create({
+      data: {
+        organizationId: organization.id,
+        contentType: 'AI_PROJECT',
+        title: 'Integration reuse project',
+        slug: `integration-project-${runId}`,
+        ownerId: memberUser.id,
+        teamId: team.id,
+        createdById: memberUser.id,
+        status: 'PUBLISHED',
+        visibility: 'ORGANIZATION',
+        publishedAt: new Date(),
+        projectDetail: { create: { projectCode: `IT-${runId}` } },
+      },
+    });
+    const projectVersion = await prisma.contentVersion.create({
+      data: {
+        contentId: project.id,
+        versionNumber: 1,
+        versionStatus: 'PUBLISHED',
+        title: project.title,
+        body: {},
+        createdById: memberUser.id,
+        publishedAt: new Date(),
+      },
+    });
+    await prisma.content.update({
+      where: { id: project.id },
+      data: { currentVersionId: projectVersion.id },
+    });
+    contentIds.push(project.id);
+
+    const search = await fetch(`${baseUrl}/search?q=Integration&pageSize=100`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(search.status, 200);
+    const searchBody = await search.json();
+    assert.equal(
+      searchBody.items.some((item) => item.id === publishedContent.id),
+      true,
+    );
+    assert.equal(
+      searchBody.items.some((item) => item.id === memberRestrictedContent.id),
+      true,
+    );
+    assert.equal(
+      searchBody.items.some((item) => item.id === adminRestrictedContent.id),
+      false,
+    );
+    const click = await fetch(`${baseUrl}/search/${searchBody.searchLogId}/click`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ contentId: publishedContent.id }),
+    });
+    assert.equal(click.status, 200);
+    const searchLog = await prisma.searchLog.findUniqueOrThrow({
+      where: { id: searchBody.searchLogId },
+    });
+    assert.equal(searchLog.clickedContentId, publishedContent.id);
+
+    const favorite = await fetch(`${baseUrl}/contents/${publishedContent.id}/favorite`, {
+      method: 'POST',
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(favorite.status, 201);
+    const favorites = await fetch(`${baseUrl}/me/favorites`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(favorites.status, 200);
+    assert.equal(
+      (await favorites.json()).items.some((item) => item.content.id === publishedContent.id),
+      true,
+    );
+
+    const detail = await fetch(`${baseUrl}/contents/${publishedContent.slug}`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(detail.status, 200);
+    const recent = await fetch(`${baseUrl}/me/recent-views`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(recent.status, 200);
+    assert.equal(
+      (await recent.json()).items.some((item) => item.content.id === publishedContent.id),
+      true,
+    );
+
+    const usage = await fetch(`${baseUrl}/contents/${publishedContent.id}/usage-confirmations`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ projectContentId: project.id, note: 'Integration reuse evidence.' }),
+    });
+    assert.equal(usage.status, 201);
+    const usageSummary = await fetch(`${baseUrl}/contents/${publishedContent.id}/usage-summary`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(usageSummary.status, 200);
+    assert.equal((await usageSummary.json()).usageCount, 1);
+  },
+);
+
+test(
+  'event, analytics and administration APIs retain RBAC and organization boundaries',
+  { skip: !integrationEnabled },
+  async () => {
+    const rejectedEvent = await fetch(`${baseUrl}/events`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ eventType: 'content_share', contentId: adminRestrictedContent.id }),
+    });
+    assert.equal(rejectedEvent.status, 404);
+
+    const recordedEvent = await fetch(`${baseUrl}/events`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ eventType: 'content_share', contentId: publishedContent.id }),
+    });
+    assert.equal(recordedEvent.status, 201);
+    assert.equal(
+      await prisma.usageEvent.count({
+        where: {
+          userId: memberUser.id,
+          contentId: publishedContent.id,
+          eventType: 'content_share',
+        },
+      }),
+      1,
+    );
+
+    const memberOverview = await fetch(`${baseUrl}/analytics/overview`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(memberOverview.status, 403);
+
+    for (const path of [
+      '/analytics/overview',
+      '/analytics/insights',
+      '/admin/contents?pageSize=20',
+      '/admin/categories',
+      '/admin/tags',
+      '/admin/audit-logs?pageSize=20',
+    ]) {
+      const response = await fetch(`${baseUrl}${path}`, {
+        headers: { 'x-dev-user-email': adminEmail },
+      });
+      assert.equal(response.status, 200, `Expected admin access to ${path}`);
+    }
+  },
+);
+
+test(
   'editing published content creates an immutable next draft version',
   { skip: !integrationEnabled },
   async () => {
@@ -219,10 +408,13 @@ test(
       where: { id: publishedContent.id },
       include: { currentVersion: true },
     });
-    const createDraft = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/from-published`, {
-      method: 'POST',
-      headers: { 'x-dev-user-email': memberEmail },
-    });
+    const createDraft = await fetch(
+      `${baseUrl}/content-drafts/${publishedContent.id}/from-published`,
+      {
+        method: 'POST',
+        headers: { 'x-dev-user-email': memberEmail },
+      },
+    );
     assert.equal(createDraft.status, 201);
     const draftContent = await createDraft.json();
     assert.equal(draftContent.status, 'PUBLISHED');
@@ -262,7 +454,9 @@ test(
     assert.equal(afterSubmit.currentVersionId, original.currentVersionId);
     assert.equal(afterSubmit.draftVersion.versionStatus, 'IN_REVIEW');
 
-    const review = await prisma.reviewRequest.findFirstOrThrow({ where: { versionId: afterSubmit.draftVersionId } });
+    const review = await prisma.reviewRequest.findFirstOrThrow({
+      where: { versionId: afterSubmit.draftVersionId },
+    });
     const assign = await fetch(`${baseUrl}/reviews/${review.id}/assign`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
@@ -275,15 +469,32 @@ test(
       body: JSON.stringify({ comment: 'Internal reviewer note.' }),
     });
     assert.equal(comment.status, 201);
-    const submissions = await fetch(`${baseUrl}/reviews/mine`, { headers: { 'x-dev-user-email': memberEmail } });
+    const submissions = await fetch(`${baseUrl}/reviews/mine`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
     assert.equal(submissions.status, 200);
     const submissionItems = (await submissions.json()).items;
-    assert.equal(submissionItems.some((item) => item.id === review.id), true);
-    assert.equal(submissionItems.find((item) => item.id === review.id).actions.some((item) => item.action === 'COMMENT'), true);
-    const reviewerNotifications = await fetch(`${baseUrl}/notifications`, { headers: { 'x-dev-user-email': adminEmail } });
+    assert.equal(
+      submissionItems.some((item) => item.id === review.id),
+      true,
+    );
+    assert.equal(
+      submissionItems
+        .find((item) => item.id === review.id)
+        .actions.some((item) => item.action === 'COMMENT'),
+      true,
+    );
+    const reviewerNotifications = await fetch(`${baseUrl}/notifications`, {
+      headers: { 'x-dev-user-email': adminEmail },
+    });
     assert.equal(reviewerNotifications.status, 200);
     const reviewerNotificationItems = (await reviewerNotifications.json()).items;
-    assert.equal(reviewerNotificationItems.some((item) => item.relatedEntityId === review.id && item.type === 'review_submitted'), true);
+    assert.equal(
+      reviewerNotificationItems.some(
+        (item) => item.relatedEntityId === review.id && item.type === 'review_submitted',
+      ),
+      true,
+    );
     const diffResponse = await fetch(`${baseUrl}/reviews/${review.id}/diff`, {
       headers: { 'x-dev-user-email': adminEmail },
     });
@@ -291,12 +502,22 @@ test(
     const diff = await diffResponse.json();
     assert.equal(diff.baseVersion.versionNumber, 1);
     assert.equal(diff.version.versionNumber, 2);
-    assert.deepEqual(diff.changes.find((change) => change.path === 'title'), {
-      path: 'title', before: original.title, after: 'Edited draft title',
-    });
-    assert.deepEqual(diff.changes.find((change) => change.path === 'body.blocks'), {
-      path: 'body.blocks', before: [], after: ['new draft only'],
-    });
+    assert.deepEqual(
+      diff.changes.find((change) => change.path === 'title'),
+      {
+        path: 'title',
+        before: original.title,
+        after: 'Edited draft title',
+      },
+    );
+    assert.deepEqual(
+      diff.changes.find((change) => change.path === 'body.blocks'),
+      {
+        path: 'body.blocks',
+        before: [],
+        after: ['new draft only'],
+      },
+    );
     const memberDiff = await fetch(`${baseUrl}/reviews/${review.id}/diff`, {
       headers: { 'x-dev-user-email': memberEmail },
     });
@@ -307,10 +528,17 @@ test(
       body: JSON.stringify({ comment: 'Approved integration version.' }),
     });
     assert.equal(approve.status, 201);
-    const submitterNotifications = await fetch(`${baseUrl}/notifications`, { headers: { 'x-dev-user-email': memberEmail } });
+    const submitterNotifications = await fetch(`${baseUrl}/notifications`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
     assert.equal(submitterNotifications.status, 200);
     const submitterNotificationItems = (await submitterNotifications.json()).items;
-    assert.equal(submitterNotificationItems.some((item) => item.relatedEntityId === review.id && item.type === 'review_approved'), true);
+    assert.equal(
+      submitterNotificationItems.some(
+        (item) => item.relatedEntityId === review.id && item.type === 'review_approved',
+      ),
+      true,
+    );
 
     const memberPublish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/publish`, {
       method: 'POST',
@@ -336,22 +564,129 @@ test(
     assert.equal(afterPublish.versions[1].versionStatus, 'PUBLISHED');
     assert.equal(afterPublish.versions[1].publishedAt instanceof Date, true);
 
-    const memberUnpublish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/unpublish`, {
-      method: 'POST', headers: { 'x-dev-user-email': memberEmail },
-    });
+    const memberUnpublish = await fetch(
+      `${baseUrl}/content-drafts/${publishedContent.id}/unpublish`,
+      {
+        method: 'POST',
+        headers: { 'x-dev-user-email': memberEmail },
+      },
+    );
     assert.equal(memberUnpublish.status, 403);
     const unpublish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/unpublish`, {
-      method: 'POST', headers: { 'x-dev-user-email': adminEmail },
+      method: 'POST',
+      headers: { 'x-dev-user-email': adminEmail },
     });
     assert.equal(unpublish.status, 201);
-    assert.equal((await prisma.content.findUniqueOrThrow({ where: { id: publishedContent.id } })).status, 'UNPUBLISHED');
+    assert.equal(
+      (await prisma.content.findUniqueOrThrow({ where: { id: publishedContent.id } })).status,
+      'UNPUBLISHED',
+    );
     const archive = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/archive`, {
-      method: 'POST', headers: { 'x-dev-user-email': adminEmail },
+      method: 'POST',
+      headers: { 'x-dev-user-email': adminEmail },
     });
     assert.equal(archive.status, 201);
     const archived = await prisma.content.findUniqueOrThrow({ where: { id: publishedContent.id } });
     assert.equal(archived.status, 'ARCHIVED');
     assert.equal(archived.archivedAt instanceof Date, true);
+  },
+);
+
+test(
+  'taxonomy administration records create and status changes in the audit log',
+  { skip: !integrationEnabled },
+  async () => {
+    const categoryCode = `integration-category-${runId}`;
+    const created = await fetch(`${baseUrl}/admin/categories`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({
+        name: 'Integration Category',
+        code: categoryCode,
+        contentTypes: ['DESIGN_ASSET'],
+      }),
+    });
+    assert.equal(created.status, 201);
+    const category = await created.json();
+    categoryIds.push(category.id);
+
+    const updated = await fetch(`${baseUrl}/admin/categories/${category.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ status: 'DISABLED' }),
+    });
+    assert.equal(updated.status, 200);
+    assert.equal((await updated.json()).status, 'DISABLED');
+
+    const auditEntries = await prisma.auditLog.findMany({
+      where: { organizationId: organization.id, entityType: 'category', entityId: category.id },
+      select: { action: true, actorId: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    assert.deepEqual(
+      auditEntries.map((entry) => entry.action),
+      ['taxonomy.category.create', 'taxonomy.category.update'],
+    );
+    assert.equal(auditEntries.every((entry) => entry.actorId === adminUser.id), true);
+  },
+);
+
+test(
+  'notifications are private and support individual and bulk read acknowledgement',
+  { skip: !integrationEnabled },
+  async () => {
+    const [memberNotification, adminNotification] = await Promise.all([
+      prisma.notification.create({
+        data: {
+          receiverId: memberUser.id,
+          type: 'integration_notification',
+          title: 'Member integration notification',
+          message: 'This notification belongs to the integration member.',
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          receiverId: adminUser.id,
+          type: 'integration_notification',
+          title: 'Admin integration notification',
+          message: 'This notification belongs to the integration admin.',
+        },
+      }),
+    ]);
+
+    const memberNotifications = await fetch(`${baseUrl}/notifications`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(memberNotifications.status, 200);
+    const memberList = await memberNotifications.json();
+    assert.equal(memberList.items.some((item) => item.id === memberNotification.id), true);
+    assert.equal(memberList.items.some((item) => item.id === adminNotification.id), false);
+
+    const markOwnRead = await fetch(`${baseUrl}/notifications/${memberNotification.id}/read`, {
+      method: 'PATCH',
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(markOwnRead.status, 200);
+    assert.equal(
+      (await prisma.notification.findUniqueOrThrow({ where: { id: memberNotification.id } })).readAt instanceof Date,
+      true,
+    );
+
+    const markForeignRead = await fetch(`${baseUrl}/notifications/${adminNotification.id}/read`, {
+      method: 'PATCH',
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(markForeignRead.status, 403);
+
+    const bulkRead = await fetch(`${baseUrl}/notifications/read-all`, {
+      method: 'PATCH',
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(bulkRead.status, 200);
+    assert.equal(
+      await prisma.notification.count({ where: { receiverId: memberUser.id, readAt: null } }),
+      0,
+    );
   },
 );
 

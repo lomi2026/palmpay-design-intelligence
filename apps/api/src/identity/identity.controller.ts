@@ -60,7 +60,7 @@ export class IdentityController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     this.assertOrganization(user, organizationId);
-    return this.identity.updateTeam(organizationId, teamId, input);
+    return this.identity.updateTeam(organizationId, teamId, input, user.id);
   }
 
   @Get('users')
@@ -94,7 +94,7 @@ export class IdentityController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     this.assertOrganization(user, organizationId);
-    return this.identity.updateUserStatus(organizationId, userId, input);
+    return this.identity.updateUserStatus(organizationId, userId, input, user.id);
   }
 
   @Get('roles')
@@ -128,7 +128,7 @@ export class IdentityController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     this.assertOrganization(user, organizationId);
-    return this.identity.removeUserRole(organizationId, userId, userRoleId);
+    return this.identity.removeUserRole(organizationId, userId, userRoleId, user.id);
   }
 
   private assertOrganization(user: AuthenticatedUser, organizationId: string) {
