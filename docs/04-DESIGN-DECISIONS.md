@@ -225,7 +225,19 @@ For the GPT collaboration workflow around this project:
 - V1 must migrate the deployed v9-1 experience into the formal Next.js application while replacing static/localStorage-only implementation with the approved backend and database architecture.
 - Do not treat an incomplete local legacy snapshot as a reason to redesign, omit or simplify a deployed v9-1 page.
 
-## 20. Decision change process
+## 20. Mandatory v9-1 visual parity gate (2026-07-16)
+
+- The deployed v9-1 pages are not only a loose reference: every V1 page that has a v9-1 counterpart must restore the same approved layout, visual hierarchy, information density, wording, interaction behavior and responsive presentation before it is accepted.
+- Formal Next.js, API, authentication, RBAC, PostgreSQL, versioning and review implementations must sit behind that approved experience; they must not introduce a substitute visual direction or simplified placeholder page.
+- No Phase 4 feature work may begin until the v9-1 counterpart pages have been inspected side by side and their visual/interaction parity is verified with screenshots.
+- New formal-only pages such as notifications and personal submissions must inherit the v9-1 workspace shell, density and component language. They cannot redefine the system style.
+
+## 21. Delivery order override (2026-07-17)
+
+- By explicit user decision, complete formal Phase 4 and Phase 5 capabilities before resuming the final v9-1 visual-parity remediation.
+- The deployed v9-1 visual and interaction baseline remains mandatory for final acceptance and launch; this decision changes delivery order only.
+
+## 22. Decision change process
 
 When a new explicit user decision changes this file:
 
@@ -234,3 +246,10 @@ When a new explicit user decision changes this file:
 3. Remove or clearly mark the replaced decision.
 4. Update implementation if needed.
 5. Do not keep two conflicting active rules.
+
+## 23. shadcn/ui implementation constraint (2026-07-16)
+
+- All formal V1 UI primitives must follow shadcn/ui component conventions, accessibility behavior and token-driven styling.
+- Do not invent replacement Button, Input, Select, Dialog, Tabs, Sheet, Card, Badge, Toast or navigation primitives when an appropriate shadcn/ui component exists.
+- v9-1 visual parity must be achieved through approved composition, theme tokens, spacing and variants; do not fork or arbitrarily alter shadcn/ui component behavior to imitate the legacy static implementation.
+- Any required component extension must preserve the upstream shadcn/ui API and accessibility contract, be isolated as an explicit variant, and be documented before use.

@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ApiError, serverApiFetch } from '@/lib/api';
-import { authenticatedApiHeaders } from '@/lib/auth';
+import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
+import { PublishedEdit } from '../../published-edit';
+import { ContentLifecycle } from '../../content-lifecycle';
 import type { DesignAssetDetail } from '@/lib/content-types';
 
 function TextList({ items, empty }: { items: string[]; empty: string }) {
@@ -45,6 +47,10 @@ export default async function DesignAssetDetailPage({
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
   }
+  const currentUser = await loadCurrentUser();
+  const canEdit = currentUser?.id === content.owner.id || currentUser?.permissions.includes('content.edit_all');
+  const canUnpublish = currentUser?.permissions.includes('content.unpublish') ?? false;
+  const canArchive = currentUser?.permissions.includes('content.archive') ?? false;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-7 md:px-10">
@@ -66,7 +72,7 @@ export default async function DesignAssetDetailPage({
               `版本 ${content.currentVersion?.versionNumber ?? '-'}`}
           </span>
         </div>
-        <h1 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight">{content.title}</h1>
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-4"><h1 className="max-w-4xl text-3xl font-semibold leading-tight">{content.title}</h1><div className="flex flex-wrap items-start justify-end gap-3">{canEdit ? <PublishedEdit contentId={content.id} /> : null}<ContentLifecycle canArchive={canArchive} canUnpublish={canUnpublish} contentId={content.id} /></div></div>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-400">
           {content.summary ?? '暂无摘要'}
         </p>

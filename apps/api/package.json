@@ -5,7 +5,7 @@
   "scripts": {
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
-    "start:dev": "node --watch --require ts-node/register src/main.ts",
+    "start:dev": "node scripts/dev.mjs",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "typecheck": "prisma generate && tsc --noEmit",
     "test": "pnpm build && node --test test/**/*.test.mjs",
@@ -14,7 +14,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:import:v9-1-projects": "tsx prisma/import-v9-1-ai-projects.ts",
-    "prisma:import:v9-1-ai-catalog": "tsx prisma/import-v9-1-ai-catalog.ts"
+    "prisma:import:v9-1-ai-catalog": "tsx prisma/import-v9-1-ai-catalog.ts",
+    "prisma:import:v9-1-design-assets": "tsx prisma/import-v9-1-design-assets.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1087.0",

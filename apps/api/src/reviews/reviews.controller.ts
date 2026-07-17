@@ -27,6 +27,18 @@ export class ReviewsController {
     return this.reviews.reviewers(user);
   }
 
+  @Get('mine')
+  @RequirePermissions('content.submit')
+  mine(@CurrentUser() user: AuthenticatedUser) {
+    return this.reviews.mine(user);
+  }
+
+  @Get(':id/diff')
+  @RequirePermissions('review.process')
+  diff(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.reviews.diff(user, id);
+  }
+
   @Post('content/:contentId/submit')
   @RequirePermissions('content.submit')
   submit(@CurrentUser() user: AuthenticatedUser, @Param('contentId') contentId: string, @Body() body: SubmitReviewDto) {
@@ -49,5 +61,11 @@ export class ReviewsController {
   @RequirePermissions('review.process')
   requestChanges(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: ReviewDecisionDto) {
     return this.reviews.requestChanges(user, id, body);
+  }
+
+  @Post(':id/comment')
+  @RequirePermissions('review.process')
+  comment(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: ReviewDecisionDto) {
+    return this.reviews.comment(user, id, body);
   }
 }

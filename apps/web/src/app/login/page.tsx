@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { developmentLogin } from './actions';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const errorMessages: Record<string, string> = {
   'invalid-email': '请输入有效的企业邮箱。',
@@ -14,21 +16,21 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <main className="grid min-h-screen place-items-center px-6 py-12">
-      <section className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 shadow-2xl">
-        <p className="text-xs tracking-[0.2em] text-neutral-500">PALMPAY DESIGN HUB</p>
-        <h1 className="mt-4 text-2xl font-semibold">登录体验设计 Hub</h1>
-        <p className="mt-2 text-sm leading-6 text-neutral-400">
+    <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_right,rgba(167,139,250,.16),transparent_30%),#0b0b0b] px-6 py-12">
+      <section className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.045] p-7 shadow-2xl shadow-black/30 backdrop-blur-sm">
+        <p className="text-xs tracking-[0.2em] text-violet-200/75">PALMPAY DESIGN HUB</p>
+        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.045em] text-white">登录体验设计 Hub</h1>
+        <p className="mt-2 text-sm leading-6 text-white/55">
           当前为隔离的开发认证入口。正式环境接入企业 SSO 后将替换此表单。
         </p>
 
         <form action={developmentLogin} className="mt-7 space-y-4">
-          <label className="block text-sm text-neutral-300" htmlFor="email">
+          <label className="block text-sm text-white/75" htmlFor="email">
             企业邮箱
           </label>
-          <input
+          <Input
             autoComplete="email"
-            className="h-11 w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-black/30 px-3 outline-none transition focus:border-neutral-500"
+            className="h-11 w-full border-white/15 bg-black/25 text-white placeholder:text-white/35"
             id="email"
             name="email"
             placeholder="name@palmpay.com"
@@ -38,15 +40,15 @@ export default async function LoginPage({
           {error ? (
             <p className="text-sm text-red-400">{errorMessages[error] ?? '登录失败，请重试。'}</p>
           ) : null}
-          <button
-            className="h-11 w-full rounded-[var(--radius-md)] bg-white px-4 text-sm font-medium text-black transition hover:bg-neutral-200"
+          <Button
+            className="h-11 w-full bg-white text-black hover:bg-white/85"
             type="submit"
           >
             继续
-          </button>
+          </Button>
         </form>
 
-        <Link className="mt-6 inline-flex text-sm text-neutral-500 hover:text-neutral-300" href="/">
+        <Link className="mt-6 inline-flex text-sm text-white/45 hover:text-white/75" href="/">
           返回公开首页
         </Link>
       </section>

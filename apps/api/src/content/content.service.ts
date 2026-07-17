@@ -20,6 +20,8 @@ const contentCardInclude = {
   },
   skillDetail: { select: { applicableRoles: true } },
   caseDetail: { select: { metricName: true } },
+  assetDetail: { select: { platforms: true, scenarios: true } },
+  currentVersion: { select: { versionLabel: true, body: true } },
   coverFile: true,
   tags: { include: { tag: true } },
 } as const;

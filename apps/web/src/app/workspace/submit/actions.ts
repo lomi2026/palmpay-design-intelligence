@@ -42,6 +42,19 @@ export async function createDraftAction(_: ActionState, formData: FormData): Pro
   }
 }
 
+export async function createPublishedEditDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
+  const id = String(formData.get('id') ?? '');
+  try {
+    const draft = await serverApiFetch<{ id: string }>(`/api/content-drafts/${id}/from-published`, {
+      method: 'POST',
+      headers: await authenticatedApiHeaders(),
+    });
+    return { id: draft.id };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : '无法创建编辑草稿。' };
+  }
+}
+
 export async function submitReviewAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const id = String(formData.get("id") ?? "");
   try {
@@ -72,5 +85,20 @@ export async function autosaveDraftAction(_: ActionState, formData: FormData): P
     return { savedAt: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) };
   } catch (error) {
     return { error: error instanceof Error ? error.message : '自动保存失败。' };
+  }
+}
+
+export async function contentLifecycleAction(_: ActionState, formData: FormData): Promise<ActionState> {
+  const id = String(formData.get('id') ?? '');
+  const operation = String(formData.get('operation') ?? '');
+  if (!new Set(['unpublish', 'archive']).has(operation)) return { error: '无效的内容生命周期操作。' };
+  try {
+    await serverApiFetch(`/api/content-drafts/${id}/${operation}`, {
+      method: 'POST',
+      headers: await authenticatedApiHeaders(),
+    });
+    return { savedAt: operation === 'unpublish' ? '内容已下架。' : '内容已归档。' };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : '内容状态更新失败。' };
   }
 }

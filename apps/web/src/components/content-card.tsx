@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import type { ContentCard as ContentCardData } from '@/lib/content-types';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const verificationLabels: Record<string, string> = {
   UNVERIFIED: '未验证',
@@ -11,36 +13,41 @@ const verificationLabels: Record<string, string> = {
 
 export function ContentCard({ content }: { content: ContentCardData }) {
   return (
-    <article className="flex min-h-52 flex-col rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 transition hover:border-neutral-600">
+    <Card className="min-h-56 border border-white/10 bg-white/[0.035] py-5 shadow-none transition hover:border-white/25 hover:bg-white/[0.055]">
+      <CardHeader>
       <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
-        <span>{content.category?.name ?? '未分类'}</span>
+        <Badge variant="outline" className="border-white/10 text-white/55">{content.category?.name ?? '未分类'}</Badge>
         <span>{verificationLabels[content.verificationStatus] ?? content.verificationStatus}</span>
       </div>
-      <h2 className="mt-4 text-lg font-medium leading-7">
+      <CardTitle className="mt-3 text-lg font-medium leading-7 text-white">
         <Link
-          className="hover:underline hover:underline-offset-4"
+          className="hover:text-violet-200 hover:underline hover:underline-offset-4"
           href={`/workspace/design-assets/${content.slug}`}
         >
           {content.title}
         </Link>
-      </h2>
-      <p className="mt-2 line-clamp-3 text-sm leading-6 text-neutral-400">
+      </CardTitle>
+      <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/55">
         {content.summary ?? '暂无摘要'}
       </p>
+      </CardHeader>
+      <CardContent>
       <div className="mt-4 flex flex-wrap gap-1.5">
         {content.tags.map(({ tag }) => (
-          <span
-            className="rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-neutral-400"
+          <Badge
+            variant="outline"
+            className="border-white/10 text-white/45"
             key={tag.id}
           >
             {tag.name}
-          </span>
+          </Badge>
         ))}
       </div>
-      <div className="mt-auto flex items-center justify-between pt-5 text-xs text-neutral-500">
+      </CardContent>
+      <CardFooter className="mt-auto flex items-center justify-between border-white/10 bg-transparent px-5 pt-5 text-xs text-white/40">
         <span>{content.owner.name}</span>
         <span>{content.team.name}</span>
-      </div>
-    </article>
+      </CardFooter>
+    </Card>
   );
 }

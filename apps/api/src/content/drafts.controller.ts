@@ -21,20 +21,40 @@ export class DraftsController {
     return this.drafts.create(user, body);
   }
 
+  @Post(':id/from-published')
+  createFromPublished(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.drafts.createFromPublished(user, id);
+  }
+
+  @Post(':id/publish')
+  @RequirePermissions('content.publish')
+  publishApproved(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.drafts.publishApproved(user, id);
+  }
+
+  @Post(':id/unpublish')
+  @RequirePermissions('content.unpublish')
+  unpublish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.drafts.unpublish(user, id);
+  }
+
+  @Post(':id/archive')
+  @RequirePermissions('content.archive')
+  archive(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.drafts.archive(user, id);
+  }
+
   @Get(':id')
-  @RequirePermissions('content.create')
   get(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.drafts.get(user, id);
   }
 
   @Patch(':id')
-  @RequirePermissions('content.create')
   autosave(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: AutosaveDraftDto) {
     return this.drafts.autosave(user, id, body);
   }
 
   @Get(':id/versions')
-  @RequirePermissions('content.create')
   versions(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.drafts.versions(user, id);
   }

@@ -55,6 +55,133 @@ export class DraftsService {
     return this.serialize(draft);
   }
 
+  async createFromPublished(user: AuthenticatedUser, contentId: string) {
+    const content = await this.prisma.content.findFirst({
+      where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
+      include: { currentVersion: true, draftVersion: true },
+    });
+    if (!content) throw new NotFoundException('Content was not found.');
+    if (content.ownerId !== user.id && !user.permissions.includes('content.edit_all')) {
+      throw new ForbiddenException('You cannot edit this content.');
+    }
+    if (content.status !== ContentStatus.PUBLISHED || !content.currentVersion) {
+      throw new ConflictException('Only published content with a current version can create an edit draft.');
+    }
+    const publishedVersion = content.currentVersion;
+    const publishedVersionId = content.currentVersionId;
+    if (!publishedVersionId) throw new ConflictException('Published content is missing its current version reference.');
+    if (content.draftVersion) {
+      if (new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED]).has(content.draftVersion.versionStatus)) {
+        return this.serialize(content);
+      }
+      throw new ConflictException('This content already has a draft version in review or awaiting publication.');
+    }
+
+    const draft = await this.prisma.$transaction(async (tx) => {
+      const latestVersion = await tx.contentVersion.findFirst({
+        where: { contentId: content.id },
+        orderBy: { versionNumber: 'desc' },
+        select: { versionNumber: true },
+      });
+      const version = await tx.contentVersion.create({
+        data: {
+          contentId: content.id,
+          versionNumber: (latestVersion?.versionNumber ?? 0) + 1,
+          versionStatus: ContentStatus.DRAFT,
+          baseVersionId: publishedVersionId,
+          title: publishedVersion.title,
+          summary: publishedVersion.summary,
+          body: publishedVersion.body === null ? Prisma.JsonNull : (publishedVersion.body as Prisma.InputJsonValue),
+          createdById: user.id,
+        },
+      });
+      const attachments = await tx.attachmentRelation.findMany({
+        where: { entityType: AttachmentEntityType.VERSION, entityId: publishedVersionId },
+        select: { fileId: true, usageType: true, sortOrder: true },
+      });
+      if (attachments.length) {
+        await tx.attachmentRelation.createMany({
+          data: attachments.map((attachment) => ({
+            ...attachment,
+            entityType: AttachmentEntityType.VERSION,
+            entityId: version.id,
+          })),
+        });
+      }
+      return tx.content.update({
+        where: { id: content.id },
+        data: { draftVersionId: version.id },
+        include: { draftVersion: true },
+      });
+    });
+    return this.serialize(draft);
+  }
+
+  async publishApproved(user: AuthenticatedUser, contentId: string) {
+    const content = await this.prisma.content.findFirst({
+      where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
+      include: { draftVersion: true },
+    });
+    if (!content) throw new NotFoundException('Content was not found.');
+    if (!content.draftVersion) throw new ConflictException('This content does not have a version awaiting publication.');
+    if (content.draftVersion.versionStatus !== ContentStatus.APPROVED) {
+      throw new ConflictException('Only an approved draft version can be published.');
+    }
+    if (!new Set<ContentStatus>([ContentStatus.APPROVED, ContentStatus.PUBLISHED]).has(content.status)) {
+      throw new ConflictException('This content cannot be published in its current state.');
+    }
+
+    const now = new Date();
+    return this.prisma.$transaction(async (tx) => {
+      const promoted = await tx.contentVersion.updateMany({
+        where: { id: content.draftVersion!.id, contentId: content.id, versionStatus: ContentStatus.APPROVED },
+        data: { versionStatus: ContentStatus.PUBLISHED, publishedAt: now },
+      });
+      if (promoted.count !== 1) throw new ConflictException('This draft version is no longer awaiting publication.');
+
+      const published = await tx.content.updateMany({
+        where: { id: content.id, draftVersionId: content.draftVersion!.id },
+        data: {
+          currentVersionId: content.draftVersion!.id,
+          draftVersionId: null,
+          status: ContentStatus.PUBLISHED,
+          title: content.draftVersion!.title,
+          summary: content.draftVersion!.summary,
+          publishedAt: now,
+          lastReviewedAt: now,
+        },
+      });
+      if (published.count !== 1) throw new ConflictException('This content version was changed before it could be published.');
+
+      return tx.content.findUniqueOrThrow({
+        where: { id: content.id },
+        include: { currentVersion: true },
+      });
+    });
+  }
+
+  async unpublish(user: AuthenticatedUser, contentId: string) {
+    const content = await this.findLifecycleContent(user, contentId);
+    if (content.status !== ContentStatus.PUBLISHED) {
+      throw new ConflictException('Only published content can be unpublished.');
+    }
+    return this.prisma.content.update({
+      where: { id: content.id },
+      data: { status: ContentStatus.UNPUBLISHED },
+    });
+  }
+
+  async archive(user: AuthenticatedUser, contentId: string) {
+    const content = await this.findLifecycleContent(user, contentId);
+    if (!new Set<ContentStatus>([ContentStatus.PUBLISHED, ContentStatus.UNPUBLISHED]).has(content.status)) {
+      throw new ConflictException('Only published or unpublished content can be archived.');
+    }
+    return this.prisma.content.update({
+      where: { id: content.id },
+      data: { status: ContentStatus.ARCHIVED, archivedAt: new Date() },
+    });
+  }
+
   async autosave(user: AuthenticatedUser, contentId: string, input: AutosaveDraftDto) {
     const content = await this.findEditableDraft(user, contentId);
     const draft = content.draftVersion;
@@ -64,10 +191,14 @@ export class DraftsService {
       this.prisma.content.update({
         where: { id: content.id },
         data: {
-          ...(input.title !== undefined ? { title: input.title } : {}),
-          ...(input.summary !== undefined ? { summary: input.summary } : {}),
-          ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
-          ...(input.visibility !== undefined ? { visibility: input.visibility } : {}),
+          ...(content.status === ContentStatus.PUBLISHED
+            ? {}
+            : {
+                ...(input.title !== undefined ? { title: input.title } : {}),
+                ...(input.summary !== undefined ? { summary: input.summary } : {}),
+                ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
+                ...(input.visibility !== undefined ? { visibility: input.visibility } : {}),
+              }),
         },
       }),
       this.prisma.contentVersion.update({
@@ -133,8 +264,23 @@ export class DraftsService {
     if (content.ownerId !== user.id && !user.permissions.includes('content.edit_all')) {
       throw new ForbiddenException('You cannot edit this content.');
     }
-    if (!new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED]).has(content.status)) {
-      throw new ConflictException('Only draft or change-requested content can be autosaved.');
+    if (!content.draftVersion || !new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED]).has(content.draftVersion.versionStatus)) {
+      throw new ConflictException('Only a draft or change-requested version can be autosaved.');
+    }
+    if (!new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED, ContentStatus.PUBLISHED]).has(content.status)) {
+      throw new ConflictException('This content cannot be edited in its current state.');
+    }
+    return content;
+  }
+
+  private async findLifecycleContent(user: AuthenticatedUser, contentId: string) {
+    const content = await this.prisma.content.findFirst({
+      where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
+      include: { draftVersion: true },
+    });
+    if (!content) throw new NotFoundException('Content was not found.');
+    if (content.draftVersion) {
+      throw new ConflictException('Content with an active draft, review or approved version cannot change lifecycle state.');
     }
     return content;
   }

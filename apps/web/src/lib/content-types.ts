@@ -26,6 +26,14 @@ export interface ContentCard {
     projectStage: "EXPLORING" | "READY" | "PILOTING" | "CONVERTED" | "ARCHIVED";
     priority: string;
   } | null;
+  assetDetail?: {
+    platforms: string[];
+    scenarios: string[];
+  } | null;
+  currentVersion?: {
+    versionLabel: string | null;
+    body: unknown;
+  } | null;
   coverFile: ContentFile | null;
   tags: Array<{ tag: { id: string; name: string; normalizedName: string } }>;
 }

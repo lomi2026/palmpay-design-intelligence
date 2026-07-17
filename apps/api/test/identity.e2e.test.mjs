@@ -18,6 +18,7 @@ let organization;
 let adminUser;
 let memberUser;
 let team;
+let publishedContent;
 const contentIds = [];
 let serverOutput = '';
 
@@ -133,7 +134,7 @@ before(async () => {
     return content;
   }
 
-  await createAsset(`integration-public-${runId}`, 'PUBLIC');
+  publishedContent = await createAsset(`integration-public-${runId}`, 'PUBLIC');
   await createAsset(`integration-organization-${runId}`, 'ORGANIZATION');
   await createAsset(`integration-team-${runId}`, 'TEAM');
   await createAsset(`integration-restricted-${runId}`, 'RESTRICTED');
@@ -165,6 +166,7 @@ after(async () => {
   server?.kill('SIGTERM');
   await prisma.content.deleteMany({ where: { id: { in: contentIds } } });
   if (team) await prisma.team.delete({ where: { id: team.id } });
+  await prisma.notification.deleteMany({ where: { receiverId: { in: [adminUser.id, memberUser.id] } } });
   await prisma.user.deleteMany({ where: { email: { in: [adminEmail, memberEmail] } } });
   await prisma.$disconnect();
 });
@@ -206,6 +208,150 @@ test(
     const detail = await memberOrganizationDetail.json();
     assert.equal(detail.currentVersion.versionNumber, 1);
     assert.equal(detail.assetDetail.assetType, 'COMPONENT_STANDARD');
+  },
+);
+
+test(
+  'editing published content creates an immutable next draft version',
+  { skip: !integrationEnabled },
+  async () => {
+    const original = await prisma.content.findUniqueOrThrow({
+      where: { id: publishedContent.id },
+      include: { currentVersion: true },
+    });
+    const createDraft = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/from-published`, {
+      method: 'POST',
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(createDraft.status, 201);
+    const draftContent = await createDraft.json();
+    assert.equal(draftContent.status, 'PUBLISHED');
+    assert.equal(draftContent.currentVersionId, original.currentVersionId);
+    assert.equal(draftContent.draftVersion.versionNumber, 2);
+    assert.equal(draftContent.draftVersion.baseVersionId, original.currentVersionId);
+    assert.deepEqual(draftContent.draftVersion.body, original.currentVersion.body);
+
+    const autosave = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ title: 'Edited draft title', body: { blocks: ['new draft only'] } }),
+    });
+    assert.equal(autosave.status, 200);
+
+    const afterAutosave = await prisma.content.findUniqueOrThrow({
+      where: { id: publishedContent.id },
+      include: { currentVersion: true, draftVersion: true },
+    });
+    assert.equal(afterAutosave.status, 'PUBLISHED');
+    assert.equal(afterAutosave.title, original.title);
+    assert.equal(afterAutosave.currentVersion.title, original.currentVersion.title);
+    assert.equal(afterAutosave.draftVersion.title, 'Edited draft title');
+    assert.deepEqual(afterAutosave.draftVersion.body, { blocks: ['new draft only'] });
+
+    const submit = await fetch(`${baseUrl}/reviews/content/${publishedContent.id}/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ message: 'Please review v2.' }),
+    });
+    assert.equal(submit.status, 201);
+    const afterSubmit = await prisma.content.findUniqueOrThrow({
+      where: { id: publishedContent.id },
+      include: { currentVersion: true, draftVersion: true },
+    });
+    assert.equal(afterSubmit.status, 'PUBLISHED');
+    assert.equal(afterSubmit.currentVersionId, original.currentVersionId);
+    assert.equal(afterSubmit.draftVersion.versionStatus, 'IN_REVIEW');
+
+    const review = await prisma.reviewRequest.findFirstOrThrow({ where: { versionId: afterSubmit.draftVersionId } });
+    const assign = await fetch(`${baseUrl}/reviews/${review.id}/assign`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ reviewerId: adminUser.id }),
+    });
+    assert.equal(assign.status, 200);
+    const comment = await fetch(`${baseUrl}/reviews/${review.id}/comment`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ comment: 'Internal reviewer note.' }),
+    });
+    assert.equal(comment.status, 201);
+    const submissions = await fetch(`${baseUrl}/reviews/mine`, { headers: { 'x-dev-user-email': memberEmail } });
+    assert.equal(submissions.status, 200);
+    const submissionItems = (await submissions.json()).items;
+    assert.equal(submissionItems.some((item) => item.id === review.id), true);
+    assert.equal(submissionItems.find((item) => item.id === review.id).actions.some((item) => item.action === 'COMMENT'), true);
+    const reviewerNotifications = await fetch(`${baseUrl}/notifications`, { headers: { 'x-dev-user-email': adminEmail } });
+    assert.equal(reviewerNotifications.status, 200);
+    const reviewerNotificationItems = (await reviewerNotifications.json()).items;
+    assert.equal(reviewerNotificationItems.some((item) => item.relatedEntityId === review.id && item.type === 'review_submitted'), true);
+    const diffResponse = await fetch(`${baseUrl}/reviews/${review.id}/diff`, {
+      headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(diffResponse.status, 200);
+    const diff = await diffResponse.json();
+    assert.equal(diff.baseVersion.versionNumber, 1);
+    assert.equal(diff.version.versionNumber, 2);
+    assert.deepEqual(diff.changes.find((change) => change.path === 'title'), {
+      path: 'title', before: original.title, after: 'Edited draft title',
+    });
+    assert.deepEqual(diff.changes.find((change) => change.path === 'body.blocks'), {
+      path: 'body.blocks', before: [], after: ['new draft only'],
+    });
+    const memberDiff = await fetch(`${baseUrl}/reviews/${review.id}/diff`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(memberDiff.status, 403);
+    const approve = await fetch(`${baseUrl}/reviews/${review.id}/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ comment: 'Approved integration version.' }),
+    });
+    assert.equal(approve.status, 201);
+    const submitterNotifications = await fetch(`${baseUrl}/notifications`, { headers: { 'x-dev-user-email': memberEmail } });
+    assert.equal(submitterNotifications.status, 200);
+    const submitterNotificationItems = (await submitterNotifications.json()).items;
+    assert.equal(submitterNotificationItems.some((item) => item.relatedEntityId === review.id && item.type === 'review_approved'), true);
+
+    const memberPublish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/publish`, {
+      method: 'POST',
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(memberPublish.status, 403);
+    const publish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/publish`, {
+      method: 'POST',
+      headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(publish.status, 201);
+
+    const afterPublish = await prisma.content.findUniqueOrThrow({
+      where: { id: publishedContent.id },
+      include: { currentVersion: true, versions: { orderBy: { versionNumber: 'asc' } } },
+    });
+    assert.equal(afterPublish.status, 'PUBLISHED');
+    assert.equal(afterPublish.draftVersionId, null);
+    assert.equal(afterPublish.currentVersion.versionNumber, 2);
+    assert.equal(afterPublish.currentVersion.title, 'Edited draft title');
+    assert.equal(afterPublish.title, 'Edited draft title');
+    assert.equal(afterPublish.versions[0].versionStatus, 'PUBLISHED');
+    assert.equal(afterPublish.versions[1].versionStatus, 'PUBLISHED');
+    assert.equal(afterPublish.versions[1].publishedAt instanceof Date, true);
+
+    const memberUnpublish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/unpublish`, {
+      method: 'POST', headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(memberUnpublish.status, 403);
+    const unpublish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/unpublish`, {
+      method: 'POST', headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(unpublish.status, 201);
+    assert.equal((await prisma.content.findUniqueOrThrow({ where: { id: publishedContent.id } })).status, 'UNPUBLISHED');
+    const archive = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/archive`, {
+      method: 'POST', headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(archive.status, 201);
+    const archived = await prisma.content.findUniqueOrThrow({ where: { id: publishedContent.id } });
+    assert.equal(archived.status, 'ARCHIVED');
+    assert.equal(archived.archivedAt instanceof Date, true);
   },
 );
 

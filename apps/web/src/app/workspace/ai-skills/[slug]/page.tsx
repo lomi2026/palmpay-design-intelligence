@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ApiError, serverApiFetch } from '@/lib/api';
 import { getImportedCatalogBody, type AISkillDetail } from '@/lib/ai-catalog';
-import { authenticatedApiHeaders } from '@/lib/auth';
+import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
+import { PublishedEdit } from '../../published-edit';
+import { ContentLifecycle } from '../../content-lifecycle';
 
 function Field({ label, value }: { label: string; value: string | undefined }) {
   return <div className="grid grid-cols-[90px_minmax(0,1fr)] gap-3 py-3 text-sm"><dt className="text-neutral-500">{label}</dt><dd className="text-neutral-200">{value ?? '暂无'}</dd></div>;
@@ -13,6 +15,10 @@ export default async function AISkillDetailPage({ params }: { params: Promise<{ 
   let skill: AISkillDetail;
   try { skill = await serverApiFetch<AISkillDetail>(`/api/contents/${encodeURIComponent(slug)}`, { headers: await authenticatedApiHeaders() }); }
   catch (error: unknown) { if (error instanceof ApiError && error.status === 404) notFound(); throw error; }
+  const currentUser = await loadCurrentUser();
+  const canEdit = currentUser?.id === skill.owner.id || currentUser?.permissions.includes('content.edit_all');
+  const canUnpublish = currentUser?.permissions.includes('content.unpublish') ?? false;
+  const canArchive = currentUser?.permissions.includes('content.archive') ?? false;
   const detail = skill.skillDetail;
   const body = getImportedCatalogBody(skill.currentVersion?.body);
   return (
@@ -20,7 +26,7 @@ export default async function AISkillDetailPage({ params }: { params: Promise<{ 
       <Link className="text-sm text-neutral-500 hover:text-neutral-300" href="/workspace/ai-skills">← 返回 AI Skill</Link>
       <header className="mt-6 border-b border-[var(--border)] pb-7">
         <p className="text-xs tracking-[0.18em] text-neutral-500">{skill.category?.name ?? 'AI CAPABILITY'}</p>
-        <h1 className="mt-3 text-3xl font-semibold leading-tight">{skill.title}</h1>
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-4"><h1 className="text-3xl font-semibold leading-tight">{skill.title}</h1><div className="flex flex-wrap items-start justify-end gap-3">{canEdit ? <PublishedEdit contentId={skill.id} /> : null}<ContentLifecycle canArchive={canArchive} canUnpublish={canUnpublish} contentId={skill.id} /></div></div>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-400">{skill.summary ?? '暂无说明'}</p>
         <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-neutral-500"><span>适用角色：{detail?.applicableRoles.join(' / ') || '待补充'}</span><span>版本：{skill.currentVersion?.versionLabel ?? 'v1'}</span><span>仅供人工复核后使用</span></div>
       </header>

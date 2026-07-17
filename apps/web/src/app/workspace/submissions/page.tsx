@@ -1,0 +1,16 @@
+import { redirect } from 'next/navigation';
+import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
+import { serverApiFetch } from '@/lib/api';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+type Submission = { id: string; status: string; submitMessage: string | null; submittedAt: string; content: { title: string; contentType: string; status: string }; version: { versionNumber: number; title: string; versionStatus: string; changeSummary: string | null }; assignedReviewer: { name: string; email: string } | null; actions: Array<{ id: string; action: string; comment: string | null; createdAt: string; actor: { name: string } }> };
+const labels: Record<string, string> = { PENDING: '审核中', APPROVED: '已通过', CHANGES_REQUESTED: '退回修改', CANCELLED: '已取消' };
+
+export default async function SubmissionsPage() {
+  const user = await loadCurrentUser();
+  if (!user) redirect('/login');
+  if (!user.permissions.includes('content.submit')) return <main className="px-5 py-8 md:px-8 md:py-10"><p className="text-xs tracking-[0.18em] text-violet-200/75">MY SUBMISSIONS</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-white">我的投稿</h1><p className="mt-3 text-sm text-white/55">此页面仅对拥有投稿权限的成员开放。</p></main>;
+  const submissions = await serverApiFetch<{ items: Submission[] }>('/api/reviews/mine', { headers: await authenticatedApiHeaders() });
+  return <main className="px-5 py-8 md:px-8 md:py-10"><header className="border-b border-white/10 pb-7"><p className="text-xs tracking-[0.18em] text-violet-200/75">MY SUBMISSIONS</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-white">我的投稿</h1><p className="mt-2 text-sm text-white/55">追踪已提交版本、审核人及历史意见。</p></header>{submissions.items.length ? <div className="mt-6 grid gap-4">{submissions.items.map((submission) => <Card className="border border-white/10 bg-white/[0.035] py-5 shadow-none" key={submission.id}><CardHeader><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs tracking-[0.14em] text-white/40">{submission.content.contentType} · v{submission.version.versionNumber}</p><CardTitle className="mt-1 text-lg text-white">{submission.version.title}</CardTitle><p className="mt-2 text-sm text-white/50">提交于 {new Date(submission.submittedAt).toLocaleString('zh-CN')} · 审核人：{submission.assignedReviewer?.name ?? '待分配'}</p></div><Badge variant="outline" className="border-white/15 text-white/70">{labels[submission.status] ?? submission.status}</Badge></div></CardHeader>{submission.submitMessage || submission.version.changeSummary ? <CardContent className="text-sm leading-6 text-white/65">{submission.submitMessage ?? submission.version.changeSummary}</CardContent> : null}<CardFooter className="mt-4 block border-white/10 bg-transparent px-5 pt-4"><ol className="space-y-2">{submission.actions.map((action) => <li className="text-sm" key={action.id}><span className="text-white/75">{action.actor.name} · {labels[action.action] ?? action.action}</span>{action.comment ? <span className="text-white/50">：{action.comment}</span> : null}</li>)}</ol></CardFooter></Card>)}</div> : <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-8 text-sm text-white/45">你还没有提交审核的内容。</div>}</main>;
+}

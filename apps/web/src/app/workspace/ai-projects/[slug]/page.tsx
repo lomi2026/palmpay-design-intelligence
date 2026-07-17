@@ -7,7 +7,9 @@ import {
   verificationLabels,
   type AIProjectDetail,
 } from '@/lib/ai-projects';
-import { authenticatedApiHeaders } from '@/lib/auth';
+import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
+import { PublishedEdit } from '../../published-edit';
+import { ContentLifecycle } from '../../content-lifecycle';
 
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -33,6 +35,10 @@ export default async function AIProjectDetailPage({
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
   }
+  const currentUser = await loadCurrentUser();
+  const canEdit = currentUser?.id === project.owner.id || currentUser?.permissions.includes('content.edit_all');
+  const canUnpublish = currentUser?.permissions.includes('content.unpublish') ?? false;
+  const canArchive = currentUser?.permissions.includes('content.archive') ?? false;
 
   const detail = project.projectDetail;
   const body = getImportedProjectBody(project.currentVersion?.body);
@@ -53,7 +59,7 @@ export default async function AIProjectDetailPage({
           <span>·</span>
           <span>{detail?.targetValue ?? '目标待补充'}</span>
         </div>
-        <h1 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight">{project.title}</h1>
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-4"><h1 className="max-w-4xl text-3xl font-semibold leading-tight">{project.title}</h1><div className="flex flex-wrap items-start justify-end gap-3">{canEdit ? <PublishedEdit contentId={project.id} /> : null}<ContentLifecycle canArchive={canArchive} canUnpublish={canUnpublish} contentId={project.id} /></div></div>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-400">{project.summary ?? '暂无项目摘要'}</p>
         <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-neutral-500">
           <span>阶段：{stage}</span>

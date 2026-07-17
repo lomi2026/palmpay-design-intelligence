@@ -66,6 +66,17 @@ enum ReviewActionType {
   CANCEL @map("cancel")
 }
 
+enum NotificationChannel {
+  IN_APP @map("in_app")
+  EMAIL  @map("email")
+}
+
+enum NotificationStatus {
+  PENDING @map("pending")
+  SENT    @map("sent")
+  FAILED  @map("failed")
+}
+
 enum ContentVisibility {
   PUBLIC       @map("public")
   ORGANIZATION @map("organization")
@@ -232,6 +243,7 @@ model User {
   submittedReviewRequests  ReviewRequest[] @relation("SubmittedReviews")
   assignedReviewRequests   ReviewRequest[] @relation("AssignedReviews")
   reviewActions            ReviewAction[]
+  notifications            Notification[]
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -448,6 +460,27 @@ model ReviewAction {
   @@index([reviewRequestId, createdAt])
   @@index([actorId])
   @@map("review_actions")
+}
+
+model Notification {
+  id                String              @id @default(uuid()) @db.Uuid
+  receiverId        String              @map("receiver_id") @db.Uuid
+  type              String              @db.VarChar(100)
+  title             String              @db.VarChar(200)
+  message           String
+  relatedEntityType String?             @map("related_entity_type") @db.VarChar(100)
+  relatedEntityId   String?             @map("related_entity_id") @db.Uuid
+  channel           NotificationChannel @default(IN_APP)
+  status            NotificationStatus  @default(SENT)
+  readAt            DateTime?           @map("read_at")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  sentAt            DateTime?           @map("sent_at")
+
+  receiver User @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([receiverId, readAt, createdAt])
+  @@index([relatedEntityType, relatedEntityId])
+  @@map("notifications")
 }
 
 model AssetDetail {

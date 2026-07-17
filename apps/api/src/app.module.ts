@@ -7,6 +7,7 @@ import { HealthController } from './health/health.controller';
 import { FilesModule } from './files/files.module';
 import { IdentityModule } from './identity/identity.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     ContentModule,
     FilesModule,
     ReviewsModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
 })
