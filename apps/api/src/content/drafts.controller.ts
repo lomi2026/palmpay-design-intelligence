@@ -15,6 +15,12 @@ import { DraftsService } from './drafts.service';
 export class DraftsController {
   constructor(private readonly drafts: DraftsService) {}
 
+  @Get()
+  @RequirePermissions('content.read')
+  listMine(@CurrentUser() user: AuthenticatedUser) {
+    return this.drafts.listMine(user);
+  }
+
   @Post()
   @RequirePermissions('content.create')
   create(@CurrentUser() user: AuthenticatedUser, @Body() body: CreateDraftDto) {

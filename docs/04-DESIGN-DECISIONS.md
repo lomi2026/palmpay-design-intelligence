@@ -253,3 +253,11 @@ When a new explicit user decision changes this file:
 - Do not invent replacement Button, Input, Select, Dialog, Tabs, Sheet, Card, Badge, Toast or navigation primitives when an appropriate shadcn/ui component exists.
 - v9-1 visual parity must be achieved through approved composition, theme tokens, spacing and variants; do not fork or arbitrarily alter shadcn/ui component behavior to imitate the legacy static implementation.
 - Any required component extension must preserve the upstream shadcn/ui API and accessibility contract, be isolated as an explicit variant, and be documented before use.
+
+## 24. Functional interface completion before final pixel parity (2026-07-17)
+
+- By explicit user decision, pause the remaining pixel-level v9-1 remediation and complete the formal workspace functional interface first.
+- Add a Phase 5.5 functional-interface completion pass before Phase 6 acceptance.
+- Phase 5.5 must expose the implemented modules through a complete permission-aware desktop and mobile navigation system, remove inert controls, bind the workspace dashboard to formal APIs, and complete the missing personal, governance, analytics and administration surfaces.
+- RBAC remains authoritative: a menu item may be absent for a user who does not have its permission, and no visual completion work may bypass API or page authorization.
+- Final v9-1 parity remains a launch gate after functional-interface and critical-flow completion.

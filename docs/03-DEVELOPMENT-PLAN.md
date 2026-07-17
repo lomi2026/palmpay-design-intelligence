@@ -375,6 +375,37 @@ Acceptance:
 - Role and content status changes apply immediately.
 - Demo mode hides sensitive personal data.
 
+## 10.5 Phase 5.5 — Functional interface completion
+
+This phase was added by explicit user decision on 2026-07-17. It precedes the final pixel-level v9-1 remediation and Phase 6 acceptance.
+
+Workspace shell:
+
+- complete permission-aware desktop navigation
+- complete mobile navigation drawer
+- route-aware active navigation state
+- dynamic workspace breadcrumb
+- working global entry points with no inert primary controls
+
+Functional surfaces:
+
+- real workspace metrics, recent content and personal tasks
+- complete personal-space entry points
+- complete contribution, submission and review entry points
+- complete analytics entry points for authorized users
+- complete administration information architecture
+- loading, empty, error and unauthorized states
+
+Acceptance:
+
+- Every implemented formal module is reachable from an authorized navigation path.
+- A member can complete discovery, favorite, usage and contribution flows.
+- A reviewer can complete assignment, decision and history flows.
+- An administrator can manage content, taxonomy, users, roles and audit records.
+- Desktop and mobile navigation expose the same authorized capabilities.
+- The workspace dashboard does not present static demo metrics as formal data.
+- Primary actions are either functional or clearly unavailable; no inert primary controls remain.
+
 ## 11. Phase 6 — Migration, QA and launch
 
 ### Data migration

@@ -12,13 +12,18 @@ const baseUrl = `http://127.0.0.1:${port}/api`;
 const runId = `${process.pid}-${Date.now()}`;
 const adminEmail = `codex-admin-${runId}@example.test`;
 const memberEmail = `codex-member-${runId}@example.test`;
+const reviewerEmail = `codex-reviewer-${runId}@example.test`;
+const managerEmail = `codex-manager-${runId}@example.test`;
 let prisma;
 let server;
 let organization;
 let adminUser;
 let memberUser;
+let reviewerUser;
+let managerUser;
 let team;
 let publishedContent;
+let memberDraftContent;
 let memberRestrictedContent;
 let adminRestrictedContent;
 const contentIds = [];
@@ -45,9 +50,11 @@ before(async () => {
   organization = await prisma.organization.findUniqueOrThrow({
     where: { code: 'palmpay-experience-design' },
   });
-  const [adminRole, memberRole] = await Promise.all([
+  const [adminRole, memberRole, reviewerRole, managerRole] = await Promise.all([
     prisma.role.findUniqueOrThrow({ where: { code: 'admin' } }),
     prisma.role.findUniqueOrThrow({ where: { code: 'member' } }),
+    prisma.role.findUniqueOrThrow({ where: { code: 'reviewer' } }),
+    prisma.role.findUniqueOrThrow({ where: { code: 'manager' } }),
   ]);
   adminUser = await prisma.user.create({
     data: {
@@ -79,6 +86,36 @@ before(async () => {
       },
     },
   });
+  reviewerUser = await prisma.user.create({
+    data: {
+      organizationId: organization.id,
+      name: 'Integration Reviewer',
+      email: reviewerEmail,
+      status: 'ACTIVE',
+      userRoles: {
+        create: {
+          roleId: reviewerRole.id,
+          scopeType: 'ORGANIZATION',
+          scopeId: organization.id,
+        },
+      },
+    },
+  });
+  managerUser = await prisma.user.create({
+    data: {
+      organizationId: organization.id,
+      name: 'Integration Manager',
+      email: managerEmail,
+      status: 'ACTIVE',
+      userRoles: {
+        create: {
+          roleId: managerRole.id,
+          scopeType: 'ORGANIZATION',
+          scopeId: organization.id,
+        },
+      },
+    },
+  });
   team = await prisma.team.create({
     data: {
       organizationId: organization.id,
@@ -88,7 +125,7 @@ before(async () => {
     },
   });
   await prisma.user.updateMany({
-    where: { id: { in: [adminUser.id, memberUser.id] } },
+    where: { id: { in: [adminUser.id, memberUser.id, reviewerUser.id, managerUser.id] } },
     data: { primaryTeamId: team.id },
   });
 
@@ -147,7 +184,7 @@ before(async () => {
     'PUBLISHED',
     adminUser.id,
   );
-  await createAsset(`integration-draft-${runId}`, 'ORGANIZATION', 'DRAFT');
+  memberDraftContent = await createAsset(`integration-draft-${runId}`, 'ORGANIZATION', 'DRAFT');
 
   server = spawn(process.execPath, ['dist/main.js'], {
     cwd: new URL('../', import.meta.url),
@@ -158,6 +195,7 @@ before(async () => {
       AUTH_AUTO_PROVISION: 'false',
       NODE_ENV: 'test',
       PORT: String(port),
+      WEB_ORIGIN: 'http://localhost:3000',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -200,9 +238,11 @@ after(async () => {
   if (categoryIds.length) await prisma.category.deleteMany({ where: { id: { in: categoryIds } } });
   if (team) await prisma.team.delete({ where: { id: team.id } });
   await prisma.notification.deleteMany({
-    where: { receiverId: { in: [adminUser.id, memberUser.id] } },
+    where: { receiverId: { in: [adminUser.id, memberUser.id, reviewerUser.id, managerUser.id] } },
   });
-  await prisma.user.deleteMany({ where: { email: { in: [adminEmail, memberEmail] } } });
+  await prisma.user.deleteMany({
+    where: { email: { in: [adminEmail, memberEmail, reviewerEmail, managerEmail] } },
+  });
   await prisma.$disconnect();
 });
 
@@ -384,6 +424,19 @@ test(
     });
     assert.equal(memberOverview.status, 403);
 
+    for (const path of ['/analytics/overview', '/analytics/insights']) {
+      const response = await fetch(`${baseUrl}${path}`, {
+        headers: { 'x-dev-user-email': managerEmail },
+      });
+      assert.equal(response.status, 200, `Expected manager access to ${path}`);
+    }
+    for (const path of ['/reviews/queue', '/admin/contents?pageSize=20']) {
+      const response = await fetch(`${baseUrl}${path}`, {
+        headers: { 'x-dev-user-email': managerEmail },
+      });
+      assert.equal(response.status, 403, `Expected manager denial for ${path}`);
+    }
+
     for (const path of [
       '/analytics/overview',
       '/analytics/insights',
@@ -397,6 +450,93 @@ test(
       });
       assert.equal(response.status, 200, `Expected admin access to ${path}`);
     }
+  },
+);
+
+test(
+  'a contributor can revise and resubmit after an independent reviewer requests changes',
+  { skip: !integrationEnabled },
+  async () => {
+    const submit = await fetch(`${baseUrl}/reviews/content/${memberDraftContent.id}/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ message: 'Please review the first draft.' }),
+    });
+    assert.equal(submit.status, 201);
+    const firstReview = await prisma.reviewRequest.findFirstOrThrow({
+      where: { contentId: memberDraftContent.id, status: 'PENDING' },
+    });
+
+    const assign = await fetch(`${baseUrl}/reviews/${firstReview.id}/assign`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ reviewerId: reviewerUser.id }),
+    });
+    assert.equal(assign.status, 200);
+    const requestChanges = await fetch(`${baseUrl}/reviews/${firstReview.id}/request-changes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
+      body: JSON.stringify({ comment: 'Please add a concrete usage guide.' }),
+    });
+    assert.equal(requestChanges.status, 201);
+
+    const afterRequestChanges = await prisma.content.findUniqueOrThrow({
+      where: { id: memberDraftContent.id },
+      include: { draftVersion: true },
+    });
+    assert.equal(afterRequestChanges.status, 'CHANGES_REQUESTED');
+    assert.equal(afterRequestChanges.draftVersion.versionStatus, 'CHANGES_REQUESTED');
+
+    const revise = await fetch(`${baseUrl}/content-drafts/${memberDraftContent.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({
+        title: 'Revised integration draft',
+        changeSummary: 'Added the requested usage guide.',
+        body: { usageGuide: 'Use this checked workflow before handoff.' },
+      }),
+    });
+    assert.equal(revise.status, 200);
+    const resubmit = await fetch(`${baseUrl}/reviews/content/${memberDraftContent.id}/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({ message: 'Updated according to the reviewer feedback.' }),
+    });
+    assert.equal(resubmit.status, 201);
+
+    const reviews = await prisma.reviewRequest.findMany({
+      where: { contentId: memberDraftContent.id },
+      orderBy: { createdAt: 'asc' },
+    });
+    assert.equal(reviews.length, 2);
+    assert.equal(reviews[0].status, 'CHANGES_REQUESTED');
+    assert.equal(reviews[1].status, 'PENDING');
+
+    const reassign = await fetch(`${baseUrl}/reviews/${reviews[1].id}/assign`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ reviewerId: reviewerUser.id }),
+    });
+    assert.equal(reassign.status, 200);
+    const approve = await fetch(`${baseUrl}/reviews/${reviews[1].id}/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
+      body: JSON.stringify({ comment: 'Revision is complete and approved.' }),
+    });
+    assert.equal(approve.status, 201);
+    const publish = await fetch(`${baseUrl}/content-drafts/${memberDraftContent.id}/publish`, {
+      method: 'POST',
+      headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(publish.status, 201);
+
+    const published = await prisma.content.findUniqueOrThrow({
+      where: { id: memberDraftContent.id },
+      include: { currentVersion: true },
+    });
+    assert.equal(published.status, 'PUBLISHED');
+    assert.equal(published.draftVersionId, null);
+    assert.equal(published.currentVersion.title, 'Revised integration draft');
   },
 );
 
@@ -422,6 +562,21 @@ test(
     assert.equal(draftContent.draftVersion.versionNumber, 2);
     assert.equal(draftContent.draftVersion.baseVersionId, original.currentVersionId);
     assert.deepEqual(draftContent.draftVersion.body, original.currentVersion.body);
+
+    const memberContributions = await fetch(`${baseUrl}/content-drafts`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(memberContributions.status, 200);
+    const memberContributionData = await memberContributions.json();
+    assert.equal(memberContributionData.items.some((item) => item.id === publishedContent.id), true);
+    assert.equal(memberContributionData.total, memberContributionData.items.length);
+
+    const adminContributions = await fetch(`${baseUrl}/content-drafts`, {
+      headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(adminContributions.status, 200);
+    const adminContributionData = await adminContributions.json();
+    assert.equal(adminContributionData.items.some((item) => item.id === publishedContent.id), false);
 
     const autosave = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}`, {
       method: 'PATCH',
@@ -460,12 +615,12 @@ test(
     const assign = await fetch(`${baseUrl}/reviews/${review.id}/assign`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
-      body: JSON.stringify({ reviewerId: adminUser.id }),
+      body: JSON.stringify({ reviewerId: reviewerUser.id }),
     });
     assert.equal(assign.status, 200);
     const comment = await fetch(`${baseUrl}/reviews/${review.id}/comment`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
       body: JSON.stringify({ comment: 'Internal reviewer note.' }),
     });
     assert.equal(comment.status, 201);
@@ -485,7 +640,7 @@ test(
       true,
     );
     const reviewerNotifications = await fetch(`${baseUrl}/notifications`, {
-      headers: { 'x-dev-user-email': adminEmail },
+      headers: { 'x-dev-user-email': reviewerEmail },
     });
     assert.equal(reviewerNotifications.status, 200);
     const reviewerNotificationItems = (await reviewerNotifications.json()).items;
@@ -496,7 +651,7 @@ test(
       true,
     );
     const diffResponse = await fetch(`${baseUrl}/reviews/${review.id}/diff`, {
-      headers: { 'x-dev-user-email': adminEmail },
+      headers: { 'x-dev-user-email': reviewerEmail },
     });
     assert.equal(diffResponse.status, 200);
     const diff = await diffResponse.json();
@@ -524,7 +679,7 @@ test(
     assert.equal(memberDiff.status, 403);
     const approve = await fetch(`${baseUrl}/reviews/${review.id}/approve`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
       body: JSON.stringify({ comment: 'Approved integration version.' }),
     });
     assert.equal(approve.status, 201);
@@ -687,6 +842,55 @@ test(
       await prisma.notification.count({ where: { receiverId: memberUser.id, readAt: null } }),
       0,
     );
+  },
+);
+
+test(
+  'request validation, CORS and search input preserve security boundaries',
+  { skip: !integrationEnabled },
+  async () => {
+    const crossOriginPreflight = await fetch(`${baseUrl}/content-drafts`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://attacker.example',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'content-type,x-dev-user-email',
+      },
+    });
+    assert.notEqual(crossOriginPreflight.headers.get('access-control-allow-origin'), 'https://attacker.example');
+
+    const massAssignment = await fetch(`${baseUrl}/content-drafts`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({
+        contentType: 'DESIGN_ASSET',
+        title: 'Rejected mass assignment',
+        teamId: team.id,
+        body: {},
+        ownerId: adminUser.id,
+      }),
+    });
+    assert.equal(massAssignment.status, 400);
+
+    const spoofedFile = await fetch(`${baseUrl}/files/upload-intents`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
+      body: JSON.stringify({
+        originalName: 'unsafe.svg',
+        mimeType: 'image/svg+xml',
+        sizeBytes: 48,
+        checksumSha256: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+      }),
+    });
+    assert.equal(spoofedFile.status, 400);
+
+    const injectionLikeSearch = await fetch(
+      `${baseUrl}/search?q=${encodeURIComponent("' OR 1=1 --")}&pageSize=100`,
+      { headers: { 'x-dev-user-email': memberEmail } },
+    );
+    assert.equal(injectionLikeSearch.status, 200);
+    const searchResults = await injectionLikeSearch.json();
+    assert.equal(searchResults.items.some((item) => item.id === adminRestrictedContent.id), false);
   },
 );
 

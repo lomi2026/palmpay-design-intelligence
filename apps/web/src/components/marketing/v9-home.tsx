@@ -24,10 +24,10 @@ export function V9Home() {
   return (
     <main className="v9-source-home overflow-hidden bg-[#090909] text-[#f4f4f5]">
       <header className="sticky top-0 z-30 h-[72px] border-b border-white/[0.08] bg-[#090909]/[.82] backdrop-blur-xl">
-        <div className="flex h-full items-center gap-8 px-6">
-          <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="返回首页">
+        <div className="flex h-full items-center gap-8 px-4 md:px-6">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5 md:gap-3" aria-label="返回首页">
             <Image src="/v9-1/assets/nav-logo-20260710.png" alt="PalmPay Design Intelligence Hub" className="size-7 object-contain" height={28} width={28} priority />
-            <span className="leading-[1.05] text-[13px] font-semibold tracking-[-.02em]">PalmPay Design<br /><span className="text-[9px] font-medium tracking-[.18em] text-white/60">INTELLIGENCE HUB</span></span>
+            <span className="leading-[1.05] text-[13px] font-semibold tracking-[-.02em]">PalmPay Design<br className="hidden min-[561px]:block" /><span className="hidden text-[9px] font-medium tracking-[.18em] text-white/60 min-[561px]:inline">INTELLIGENCE HUB</span></span>
           </Link>
           <nav className="hidden h-full items-center gap-1 text-[13px] text-white/55 lg:flex" aria-label="主导航">
             <a className="rounded-lg bg-white/[.08] px-3 py-2 font-medium text-white" href="#home">首页</a>
@@ -39,8 +39,8 @@ export function V9Home() {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <Button asChild variant="outline" size="sm" className="hidden h-10 w-[150px] justify-start rounded-[10px] border-white/[.1] bg-white/[.035] px-3 text-[12px] font-normal text-white/45 hover:bg-white/[.08] hover:text-white md:inline-flex"><Link href="/workspace/search"><Search className="size-3.5" /> 搜索资产、Skill 或… <kbd className="ml-auto rounded border border-white/[.1] px-1.5 text-[10px]">⌘K</kbd></Link></Button>
-            <MarketingMobileMenu />
             <Button variant="outline" size="icon-sm" aria-label="切换明暗主题" className="size-10 rounded-[10px] border-white/[.1] bg-white/[.035] text-white hover:bg-white/[.08] hover:text-white"><Moon className="size-4" /></Button>
+            <MarketingMobileMenu />
             <Button asChild size="sm" className="hidden h-10 rounded-[10px] bg-[#f4f4f4] px-5 text-[13px] font-bold !text-[#090909] hover:bg-white min-[561px]:inline-flex">
               <Link href="/workspace">进入工作台 <ArrowRight className="size-4" /></Link>
             </Button>
@@ -48,23 +48,23 @@ export function V9Home() {
         </div>
       </header>
 
-      <section id="home" className="relative min-h-[648px] overflow-hidden border-b border-white/[.06] px-6 py-16 lg:px-6">
+      <section id="home" className="relative min-h-[648px] overflow-hidden border-b border-white/[.06] px-3 py-16 lg:px-6">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.025)_1px,transparent_1px)] bg-[size:64px_64px] opacity-80" />
-        <div className="relative mx-auto grid max-w-[1232px] items-center gap-[76px] pt-[62px] lg:grid-cols-[510px_minmax(0,1fr)]">
+        <div className="relative mx-auto grid max-w-[1232px] items-center gap-7 pt-[14px] lg:grid-cols-[510px_minmax(0,1fr)] lg:gap-[76px] lg:pt-[62px]">
           <div className="relative z-10 lg:pt-[14px]">
-            <p className="mb-[31px] text-[11px] font-semibold uppercase tracking-[.24em] text-white/60 before:mr-3 before:inline-block before:h-px before:w-6 before:bg-white/45 before:align-middle before:content-['']">Internal Beta · Updated July 2026</p>
+            <p className="mb-[23px] text-[11px] font-semibold uppercase tracking-[.24em] text-white/60 before:mr-3 before:inline-block before:h-px before:w-6 before:bg-white/45 before:align-middle before:content-[''] lg:mb-[31px]">Internal Beta · Updated July 2026</p>
             <h1 className="max-w-[510px] text-[44px] font-[670] leading-[1.1] tracking-[-.06em] text-[#f4f4f5] sm:text-[48px] lg:text-[64px]">让设计资产被复用<br />让设计价值被衡量</h1>
-            <p className="mt-[30px] max-w-[510px] text-[17px] leading-[1.72] text-[#d0d0d4]">汇聚设计资产、AI Skill 与经过验证的实践案例，让团队成员可以更快发现、调用、贡献并衡量设计能力。</p>
-            <div className="mt-[34px] flex flex-wrap gap-3">
-              <Button asChild className="h-10 rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white"><a href="#assets">浏览设计资产 <ArrowRight className="size-4" /></a></Button>
-              <Button asChild variant="outline" className="h-10 rounded-[10px] border-white/[.12] bg-white/[.035] px-[18px] text-[13px] font-bold text-white hover:bg-white/[.08] hover:text-white"><Link href="/workspace/search"><Search className="size-4" /> 搜索团队能力</Link></Button>
+            <p className="mt-[23px] max-w-[510px] text-[14px] leading-[1.72] text-[#d0d0d4] md:mt-[30px] md:text-[17px]">汇聚设计资产、AI Skill 与经过验证的实践案例，让团队成员可以更快发现、调用、贡献并衡量设计能力。</p>
+            <div className="mt-[34px] flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-3">
+              <Button asChild className="h-10 w-full rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white sm:w-auto"><a href="#assets">浏览设计资产 <ArrowRight className="size-4" /></a></Button>
+              <Button asChild variant="outline" className="h-10 w-full rounded-[10px] border-white/[.12] bg-white/[.035] px-[18px] text-[13px] font-bold text-white hover:bg-white/[.08] hover:text-white sm:w-auto"><Link href="/workspace/search"><Search className="size-4" /> 搜索团队能力</Link></Button>
             </div>
             <div className="mt-7 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-white/45"><span className="rounded-full border border-white/[.08] bg-white/[.04] px-2.5 py-1">● 内部试运行</span><span>本页数据为原型演示数据</span><span>设计师判断 · AI 辅助执行</span></div>
           </div>
           <div className="relative min-h-[520px] overflow-hidden rounded-[25px] border border-white/[.15] bg-[#0c0c0d] shadow-2xl shadow-black/40" aria-label="平台工作台预览">
             <div className="flex h-12 items-center border-b border-white/[.1] px-4 text-[10px] uppercase tracking-[.2em] text-white/45"><span className="mr-5 flex gap-1"><i className="size-1.5 rounded-full bg-white/35" /><i className="size-1.5 rounded-full bg-white/35" /><i className="size-1.5 rounded-full bg-white/35" /></span>Design intelligence / workspace <span className="ml-auto normal-case tracking-normal">● Beta online</span></div>
-            <div className="grid min-h-[468px] grid-cols-[142px_1fr]">
-              <aside className="border-r border-white/[.1] p-4 text-[10px] text-white/45"><div className="mb-7 flex items-center gap-2 font-semibold text-white"><span className="grid size-6 place-items-center rounded-md bg-white text-black">P</span>PalmPay UX</div><p className="mb-3 text-[8px] uppercase tracking-[.16em]">Workspace</p>{['Overview','Design Assets','AI Skills','Cases','','Contributions','Impact'].map((label) => label ? <p className={`mb-1 rounded-md px-2 py-2 ${label === 'Overview' ? 'bg-white/[.1] text-white' : ''}`} key={label}>▢&nbsp;&nbsp;{label}</p> : <div className="h-5" key="gap" />)}</aside>
+            <div className="grid min-h-[468px] grid-cols-1 md:grid-cols-[142px_1fr]">
+              <aside className="hidden border-r border-white/[.1] p-4 text-[10px] text-white/45 md:block"><div className="mb-7 flex items-center gap-2 font-semibold text-white"><span className="grid size-6 place-items-center rounded-md bg-white text-black">P</span>PalmPay UX</div><p className="mb-3 text-[8px] uppercase tracking-[.16em]">Workspace</p>{['Overview','Design Assets','AI Skills','Cases','','Contributions','Impact'].map((label) => label ? <p className={`mb-1 rounded-md px-2 py-2 ${label === 'Overview' ? 'bg-white/[.1] text-white' : ''}`} key={label}>▢&nbsp;&nbsp;{label}</p> : <div className="h-5" key="gap" />)}</aside>
               <div className="p-5"><h2 className="text-[16px] font-bold">Design intelligence overview</h2><p className="mt-1 text-[10px] text-white/45">Team assets, methods and verified practices</p><div className="mt-4 flex h-8 items-center rounded-lg border border-white/[.1] px-3 text-[10px] text-white/45"><Search className="mr-2 size-3" />Search assets, skills or cases</div><div className="mt-3 grid grid-cols-3 gap-2">{['ASSETS|24|Published','AI SKILLS|12|Published','REUSE|86|Last 30 days'].map((item) => { const [label,value,meta] = item.split('|'); return <div key={label} className="rounded-xl border border-white/[.1] p-3"><p className="text-[8px] tracking-[.15em] text-white/45">{label}</p><strong className="mt-2 block text-[22px]">{value}</strong><em className="text-[8px] not-italic text-white/40">{meta}</em></div>; })}</div><div className="mt-4 text-[10px] font-semibold">Featured knowledge <span className="float-right text-white/40">View all →</span></div><div className="mt-2 grid grid-cols-2 gap-2">{['Web 数据表格组件规范','UI 视觉走查 Skill'].map((title, index) => <div className="rounded-xl border border-white/[.1] p-3" key={title}><p className="text-[8px] tracking-[.13em] text-white/45">{index ? 'AI SKILL' : 'DESIGN ASSET'}</p><strong className="mt-3 block text-[11px]">{title}</strong><p className="mt-1 text-[8px] text-white/40">统一复杂业务表格的布局、状态与交付标准。</p></div>)}</div><p className="mt-5 text-[10px] font-semibold">Reuse trend <span className="float-right text-white/40">Past 12 weeks</span></p><div className="mt-4 h-px bg-gradient-to-r from-white/10 via-white/80 to-white/10" /></div>
             <div className="absolute bottom-1 -right-5 w-60 rounded-2xl border border-white/[.16] bg-[#111113] p-4 shadow-2xl shadow-black/50"><p className="text-[8px] tracking-[.2em] text-white/45">VERIFIED CONTENT COVERAGE</p><strong className="mt-2 block text-[13px] leading-5">60% of published content verified</strong><div className="mt-3 h-1 rounded-full bg-white/[.09]"><div className="h-full w-3/5 rounded-full bg-[#f4f4f4]" /></div></div>
           </div>

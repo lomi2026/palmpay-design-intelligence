@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
@@ -10,6 +11,7 @@ import {
   createTagAction,
   removeUserRoleAction,
   updateCategoryStatusAction,
+  updateTeamAction,
   updateTagStatusAction,
   updateUserStatusAction,
 } from './actions';
@@ -33,9 +35,25 @@ type User = {
   name: string;
   email: string;
   status: string;
+  primaryTeam: { id: string; name: string; code: string } | null;
   userRoles: Array<{ id: string; role: { name: string; code: string } }>;
 };
-type Role = { id: string; name: string; code: string };
+type Role = {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  rolePermissions: Array<{ permission: { id: string; code: string; name: string; module: string } }>;
+};
+type Organization = { id: string; name: string; code: string; status: string; settings: unknown };
+type Team = {
+  id: string;
+  name: string;
+  code: string;
+  status: string;
+  owner: { id: string; name: string; email: string; status: string } | null;
+  _count: { members: number };
+};
 type Audit = {
   items: Array<{
     id: string;
@@ -71,7 +89,8 @@ export default async function AdminPage({
     redirect('/unauthorized');
   const headers = await authenticatedApiHeaders();
   const organizationPath = `/api/organizations/${user.organizationId}`;
-  const [contents, categories, tags, users, roles, audit] = await Promise.all([
+  const [organization, contents, categories, tags, users, teams, roles, audit] = await Promise.all([
+    serverApiFetch<Organization>(organizationPath, { headers }),
     user.permissions.includes('content.edit_all')
       ? serverApiFetch<AdminContent>('/api/admin/contents?pageSize=100', { headers })
       : Promise.resolve({ items: [], total: 0 }),
@@ -85,6 +104,9 @@ export default async function AdminPage({
       ? serverApiFetch<{ items: User[] }>(`${organizationPath}/users?pageSize=100`, { headers })
       : Promise.resolve({ items: [] }),
     user.permissions.includes('user.manage')
+      ? serverApiFetch<Team[]>(`${organizationPath}/teams`, { headers })
+      : Promise.resolve([]),
+    user.permissions.includes('user.manage')
       ? serverApiFetch<Role[]>(`${organizationPath}/roles`, { headers })
       : Promise.resolve([]),
     user.permissions.includes('audit.read')
@@ -94,8 +116,11 @@ export default async function AdminPage({
   const nav = [
     ['content', '内容管理'],
     ['taxonomy', '分类与标签'],
-    ['users', '用户与角色'],
+    ['teams', '团队管理'],
+    ['users', '用户管理'],
+    ['roles', '角色权限'],
     ['audit', '审计日志'],
+    ['settings', '平台设置'],
   ];
   return (
     <main className="mx-auto max-w-6xl px-6 py-8 md:px-10">
@@ -246,39 +271,37 @@ export default async function AdminPage({
           </div>
         </section>
       ) : null}
+      {tab === 'teams' ? (
+        <section className="mt-7 rounded-xl border border-white/10 bg-white/[.035] p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div><h2 className="text-base font-medium">团队管理</h2><p className="mt-1 text-xs text-white/45">维护团队名称、负责人和启用状态。</p></div>
+            <span className="text-sm text-white/45">{teams.length} 个团队</span>
+          </div>
+          <div className="mt-4 divide-y divide-white/10">
+            {teams.map((team) => (
+              <form action={updateTeamAction} className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_180px_160px_auto] lg:items-end" key={team.id}>
+                <div><label className="text-xs text-white/45" htmlFor={`team-name-${team.id}`}>团队名称</label><Input id={`team-name-${team.id}`} name="name" defaultValue={team.name} required className="mt-1 border-white/15 bg-white/[.04] text-white" /><p className="mt-1 text-xs text-white/35">{team.code} · {team._count.members} 名成员</p></div>
+                <div><label className="text-xs text-white/45" htmlFor={`team-owner-${team.id}`}>负责人</label><select id={`team-owner-${team.id}`} name="ownerId" defaultValue={team.owner?.id ?? ''} className="mt-1 h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white">{team.owner ? null : <option value="">暂未指定</option>}{users.items.filter((member) => member.status === 'ACTIVE').map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}</select></div>
+                <div><label className="text-xs text-white/45" htmlFor={`team-status-${team.id}`}>状态</label><select id={`team-status-${team.id}`} name="status" defaultValue={team.status} className="mt-1 h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white"><option value="ACTIVE">启用</option><option value="DISABLED">停用</option></select></div>
+                <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><Button type="submit" size="sm">保存</Button>
+              </form>
+            ))}
+          </div>
+        </section>
+      ) : null}
       {tab === 'users' ? (
         <section className="mt-7 rounded-xl border border-white/10 bg-white/[.035] p-5">
-          <h2 className="text-base font-medium">用户与角色</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-base font-medium">用户管理</h2><p className="mt-1 text-xs text-white/45">管理账号状态；角色授权在“角色权限”中完成。</p></div><span className="text-sm text-white/45">{users.items.length} 个用户</span></div>
           <div className="mt-4 divide-y divide-white/10">
             {users.items.map((member) => (
               <div
-                className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_180px_220px]"
+                className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center"
                 key={member.id}
               >
                 <div>
                   <p className="text-sm">{member.name}</p>
                   <p className="text-xs text-white/45">{member.email}</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {member.userRoles.length ? (
-                      member.userRoles.map((entry) => (
-                        <form action={removeUserRoleAction} key={entry.id}>
-                          <input type="hidden" name="organizationId" value={user.organizationId} />
-                          <input type="hidden" name="userId" value={member.id} />
-                          <input type="hidden" name="userRoleId" value={entry.id} />
-                          <Button
-                            type="submit"
-                            size="sm"
-                            variant="outline"
-                            className="h-6 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white"
-                          >
-                            {entry.role.name} ×
-                          </Button>
-                        </form>
-                      ))
-                    ) : (
-                      <span className="text-xs text-white/45">无角色</span>
-                    )}
-                  </div>
+                  <p className="mt-2 text-xs text-white/40">{member.primaryTeam?.name ?? '尚未加入主团队'} · {member.userRoles.map((entry) => entry.role.name).join('、') || '无角色'}</p>
                 </div>
                 <form action={updateUserStatusAction} className="flex gap-2">
                   <input type="hidden" name="organizationId" value={user.organizationId} />
@@ -296,37 +319,16 @@ export default async function AdminPage({
                     更新
                   </Button>
                 </form>
-                <form action={assignRoleAction} className="flex gap-2">
-                  <input type="hidden" name="organizationId" value={user.organizationId} />
-                  <input type="hidden" name="userId" value={member.id} />
-                  <select
-                    name="roleId"
-                    defaultValue=""
-                    className="h-8 min-w-0 rounded-lg border border-white/15 bg-white/[.04] px-2 text-sm text-white"
-                  >
-                    {' '}
-                    <option value="" disabled>
-                      添加角色
-                    </option>
-                    {roles.map((role) => (
-                      <option value={role.id} key={role.id}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    variant="outline"
-                    className="border-white/15 bg-transparent text-white"
-                  >
-                    授予
-                  </Button>
-                </form>
               </div>
             ))}
           </div>
         </section>
+      ) : null}
+      {tab === 'roles' ? (
+        <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)]">
+          <section className="rounded-xl border border-white/10 bg-white/[.035] p-5"><h2 className="text-base font-medium">系统角色权限</h2><p className="mt-1 text-xs text-white/45">权限矩阵由系统角色定义，授权后立即应用于页面和 API。</p><div className="mt-4 space-y-3">{roles.map((role) => <article className="rounded-xl border border-white/10 p-4" key={role.id}><div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-medium">{role.name}</h3><p className="mt-1 text-xs text-white/40">{role.code}</p></div><Badge variant="outline" className="border-white/15 text-white/60">{role.rolePermissions.length} 项权限</Badge></div><div className="mt-3 flex flex-wrap gap-1.5">{role.rolePermissions.map(({ permission }) => <Badge variant="outline" className="border-white/10 text-[10px] text-white/45" key={permission.id}>{permission.code}</Badge>)}</div></article>)}</div></section>
+          <section className="rounded-xl border border-white/10 bg-white/[.035] p-5"><h2 className="text-base font-medium">用户角色授权</h2><p className="mt-1 text-xs text-white/45">一个用户可以拥有多个组织级角色。</p><div className="mt-4 divide-y divide-white/10">{users.items.map((member) => <div className="py-4" key={member.id}><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm">{member.name}</p><p className="text-xs text-white/40">{member.email}</p></div><form action={assignRoleAction} className="flex gap-2"><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><select name="roleId" defaultValue="" required className="h-8 min-w-0 rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white"><option value="" disabled>添加角色</option>{roles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}</select><Button type="submit" size="sm" variant="outline" className="border-white/15 bg-transparent text-white">授予</Button></form></div><div className="mt-3 flex flex-wrap gap-1.5">{member.userRoles.length ? member.userRoles.map((entry) => <form action={removeUserRoleAction} key={entry.id}><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><input type="hidden" name="userRoleId" value={entry.id} /><Button type="submit" size="sm" variant="outline" className="h-7 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white">{entry.role.name} ×</Button></form>) : <span className="text-xs text-white/45">无角色</span>}</div></div>)}</div></section>
+        </div>
       ) : null}
       {tab === 'audit' ? (
         <section className="mt-7 rounded-xl border border-white/10 bg-white/[.035] p-5">
@@ -345,6 +347,12 @@ export default async function AdminPage({
               </div>
             ))}
           </div>
+        </section>
+      ) : null}
+      {tab === 'settings' ? (
+        <section className="mt-7 grid gap-5 lg:grid-cols-2">
+          <article className="rounded-xl border border-white/10 bg-white/[.035] p-5"><p className="text-xs tracking-[.15em] text-white/40">ORGANIZATION</p><h2 className="mt-2 text-base font-medium">组织配置</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织名称</dt><dd>{organization.name}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织代码</dt><dd>{organization.code}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">运行状态</dt><dd>{organization.status}</dd></div></dl></article>
+          <article className="rounded-xl border border-white/10 bg-white/[.035] p-5"><p className="text-xs tracking-[.15em] text-white/40">RUNTIME BOUNDARY</p><h2 className="mt-2 text-base font-medium">当前环境边界</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">认证</dt><dd>隔离开发认证</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">数据库</dt><dd>PostgreSQL 17</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">附件存储</dt><dd>本地签名存储</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">AI Gateway</dt><dd className="text-white/45">尚未配置</dd></div></dl><p className="mt-4 text-xs leading-5 text-white/40">生产 SSO、Cloudflare R2 和 AI 数据边界确认后，才会开放对应的可写配置。</p></article>
         </section>
       ) : null}
     </main>

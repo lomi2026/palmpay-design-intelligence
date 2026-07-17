@@ -64,6 +64,21 @@ export async function updateUserStatusAction(formData: FormData) {
   });
   redirect('/workspace/admin?tab=users');
 }
+export async function updateTeamAction(formData: FormData) {
+  const organizationId = String(formData.get('organizationId'));
+  const teamId = String(formData.get('teamId'));
+  const ownerId = String(formData.get('ownerId') ?? '');
+  await api(`/api/organizations/${organizationId}/teams/${teamId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: String(formData.get('name') ?? ''),
+      status: String(formData.get('status') ?? 'ACTIVE'),
+      ...(ownerId ? { ownerId } : {}),
+    }),
+  });
+  redirect('/workspace/admin?tab=teams');
+}
 export async function assignRoleAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
   const userId = String(formData.get('userId'));
@@ -76,7 +91,7 @@ export async function assignRoleAction(formData: FormData) {
       scopeId: organizationId,
     }),
   });
-  redirect('/workspace/admin?tab=users');
+  redirect('/workspace/admin?tab=roles');
 }
 
 export async function removeUserRoleAction(formData: FormData) {
@@ -87,5 +102,5 @@ export async function removeUserRoleAction(formData: FormData) {
   await api(`/api/organizations/${organizationId}/users/${userId}/roles/${userRoleId}`, {
     method: 'DELETE',
   });
-  redirect('/workspace/admin?tab=users');
+  redirect('/workspace/admin?tab=roles');
 }

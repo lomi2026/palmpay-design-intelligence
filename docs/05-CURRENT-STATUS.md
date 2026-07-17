@@ -4,15 +4,15 @@ Last Updated: 2026-07-17
 
 ## Current Phase
 
-**Phase 4 and Phase 5 capability verification complete; final v9-1 visual-parity remediation is in progress**
+**Phase 5.5 functional-interface acceptance is complete; Phase 6 non-visual QA and delivery preparation is next; final v9-1 pixel-parity remediation remains paused**
 
 ## Current Objective
 
-Complete the remaining formal Phase 4 and Phase 5 product capabilities before returning to the final v9-1 page-by-page visual-parity remediation.
+Complete non-visual Phase 6 QA and delivery preparation while keeping the final v9-1 page-by-page visual-parity remediation paused by explicit user decision.
 
 The next engineering objective is:
 
-> Phase 3 is complete. By explicit user decision on 2026-07-17, Phase 4 and Phase 5 proceed before the final visual-parity pass. Visual parity remains a required launch gate, not a prerequisite for this implementation order.
+> By explicit user decision on 2026-07-17, pause pixel-level parity work and complete Phase 5.5 functional-interface coverage first. Visual parity remains a required launch gate after the formal flows are complete.
 
 ## Approved Product Baseline
 
@@ -76,6 +76,12 @@ The next engineering objective is:
 - API development startup now compiles TypeScript to `dist` and watches that output before restarting Node, avoiding direct runtime loading of Prisma-generated TypeScript files
 - Applied and Prisma-recorded the local `review_notifications` migration that was absent from the restored database, then applied and recorded the Phase 4/5 engagement-and-analytics migration; `prisma migrate status` now reports the local schema is up to date.
 - Created `docs/10-MACHINE-TRANSFER-HANDOFF.md` with the current dirty-worktree warning, setup sequence, validation commands and next-computer Codex prompt.
+- By explicit user decision, the restored `lomi2026@126.com` development identity now also holds the organization-scoped system `admin` role in addition to `member`; all 16 seeded permissions resolve through the formal RBAC model, and the bootstrap assignment is recorded in `audit_logs`.
+- The personal contribution surface is now backed by a formal `GET /api/content-drafts` query scoped to the current organization and owner. It lists each owned draft, review version and published item with the correct next action, and an integration assertion confirms that even an administrator does not receive another user's items from this personal endpoint.
+- The protected workspace now has shared loading feedback and a recoverable error boundary, so slow or failed formal API reads do not leave an unexplained blank interface.
+- Role-flow acceptance now uses four isolated, temporary PostgreSQL identities: member, reviewer, manager and administrator. The integration suite verifies independent reviewer assignment, request-changes, contributor revision and resubmission, approval, administrator publishing/lifecycle authority, and manager analytics-only access; all temporary test records are removed after execution.
+- Phase 5.5 functional-interface acceptance is complete: all implemented formal modules are reachable through permission-aware desktop/mobile navigation or contextual actions; primary controls are functional or explicitly unavailable; dashboard values come from formal APIs; and the core member, reviewer, manager and administrator workflows have automated PostgreSQL evidence.
+- Phase 6 local QA has verified Prisma schema/migration status, production builds, 12 PostgreSQL integration checks, security-boundary assertions and authorized runtime smoke paths. During this verification, the restored database was found to be missing the approved design-asset import; the existing idempotent v9-1 import script added the missing 8 assets and the formal catalog now contains 8 assets, 6 Skills, 4 cases and 33 projects.
 
 ## Validated Product Modules
 
@@ -87,6 +93,8 @@ The next engineering objective is:
 - AI 项目库
 - AI 案例
 - 提交内容
+- 我的贡献
+- 我的提交
 - 审核中心
 - 数据洞察
 - 管理中心
@@ -110,8 +118,9 @@ The next engineering objective is:
 
 ## In Progress
 
-- By explicit user decision, Phase 4 and Phase 5 now take priority over the remaining visual-parity gate. The team will return to and complete the mandatory deployed-v9-1 page, state and responsive comparison work after those formal capabilities are implemented and verified.
-- Phase 4/5 implementation is in the working tree: the additive Prisma migration introduces persisted favorites, recent views, unified usage events, search logs and audit logs. The API provides permission-filtered PostgreSQL full-text search, search-click/no-result logging, favorites, recent views, real AI-project usage confirmation, content relations, analytics aggregates, taxonomy/content administration and audit-log endpoints. The workspace exposes global search, personal saved/recent pages, usage and relation flows, overview/insights and RBAC-gated administration pages. API strict typecheck, lint, Prisma validation/migration status and ten PostgreSQL integration tests pass; Web typecheck, lint, production build and an unauthenticated local browser preview now also pass. The protected workspace correctly redirects to formal development login rather than substituting a static role.
+- Phase 6 non-visual QA and delivery preparation is next. Phase 5.5 delivered one permission-aware navigation model across desktop and mobile, route-aware active states, dynamic breadcrumbs, real dashboard data, personal contribution/submission surfaces and explicit unavailable-state behavior for unfinished controls.
+- The administration surface is now separated into content, taxonomy, team, user, role-permission, audit and platform-settings modules. Team updates, user status changes and role assignment/removal use the protected formal APIs and retain audit logging; the platform-settings module reports the current environment boundary without presenting unavailable production integrations as active controls.
+- Phase 4/5 implementation is in the working tree: the additive Prisma migration introduces persisted favorites, recent views, unified usage events, search logs and audit logs. The API provides permission-filtered PostgreSQL full-text search, search-click/no-result logging, favorites, recent views, real AI-project usage confirmation, content relations, analytics aggregates, taxonomy/content administration and audit-log endpoints. The workspace exposes global search, personal saved/recent pages, usage and relation flows, overview/insights and RBAC-gated administration pages. API strict typecheck, lint, Prisma validation/migration status and twelve PostgreSQL integration tests pass, including separate member/reviewer/manager/admin workflow coverage and input/CORS/file boundary assertions; Web typecheck, lint and production build also pass. The protected workspace correctly redirects to formal development login rather than substituting a static role.
 - Phase 3 is verified functionally. The public home, workspace shell, catalog lists, submit/draft flow, notifications, my submissions, review center, login and access-denied pages have been moved onto the v9-1 dark visual language using shadcn/ui primitives while retaining the formal API and RBAC behavior.
 - The mandatory v9-1 parity gate is still open: the public home has now received a complete desktop structure restoration against deployed source commit `bf39748` (hero, metric panel, task paths, AI project portfolio, asset toolbar/grid, verified case, governance and CTA), while the deployed workspace and project counterparts still need complete responsive and permission-state acceptance. Direct deployment checks established that several archived deep links (Design Assets, submit, demo workspace and AI Skill pages) are 404 and therefore are formal-only V1 routes rather than current deployed parity targets. Cloudflare R2 activation remains deferred until a payment method is available.
 - The formal AI Project detail now uses the deployed project-template information hierarchy while binding every displayed signal to the persisted AIProjectDetail, ContentVersion, owner/team, priority and engagement models. It retains RBAC-gated lifecycle actions instead of copying the legacy static reset/action behavior.
@@ -125,12 +134,13 @@ The next engineering objective is:
 
 Codex should:
 
-1. Return to the visual-parity inventory and complete every required deployed-v9-1/local desktop and mobile comparison, then accept the v9-1 gate.
-2. Configure Cloudflare R2 later using `docs/08-CLOUDFLARE-R2-SETUP.md` when a payment method is available.
+1. Begin Phase 6 non-visual QA: broaden security and authorization checks, record release evidence and resolve production-delivery prerequisites without resuming pixel parity.
+2. Return to the visual-parity inventory only when the user resumes it, then complete required deployed/local desktop and mobile comparisons.
+3. Configure Cloudflare R2 later using `docs/08-CLOUDFLARE-R2-SETUP.md` when a payment method is available.
 
 ## Next Milestone
 
-**Phase 4 and Phase 5 capability completion; then v9-1 visual and interaction parity gate**
+**Phase 6 non-visual QA and delivery preparation; then v9-1 visual and interaction parity gate when resumed**
 
 Milestone definition:
 
@@ -167,6 +177,7 @@ The following decisions may affect later implementation:
 - Legacy examples contain team labels but no formal owner-user identity mapping required by the V1.0 ER model.
 - The ER defines `restricted` visibility but does not define a user/group ACL entity; current catalog access is limited to the owner or `content.edit_all` users.
 - PostgreSQL 17 is installed locally through Postgres.app. The `palmpay_design_hub` database was restored on 2026-07-17 from the supplied old-computer dump and brought up to date with the current Prisma migration set; the development API is available on port 3001.
+- GitHub source delivery can proceed, but a GitHub Pages push alone cannot deploy the formal V1 Next.js + NestJS + PostgreSQL application. `docs/11-RELEASE-READINESS.md` records the verified local release evidence and the outstanding production-hosting, database, SSO, R2 and CI/CD prerequisites.
 - AI input data policy and approved external model boundary are not yet confirmed.
 - Single-reviewer or multi-reviewer formal publishing policy is not yet confirmed.
 - The mandatory v9-1 visual-parity gate cannot be accepted yet: workspace desktop now has validated source/local side-by-side evidence, but mobile, other routes and matching reviewer/admin state captures remain outstanding. `design-qa.md` records this as a blocking launch-verification issue; no route may be called 100% restored until every required state has evidence. By explicit user decision, it no longer blocks Phase 4 or Phase 5 implementation.

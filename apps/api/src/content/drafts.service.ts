@@ -27,6 +27,43 @@ export class DraftsService {
     private readonly engagement: EngagementService,
   ) {}
 
+  async listMine(user: AuthenticatedUser) {
+    const items = await this.prisma.content.findMany({
+      where: {
+        organizationId: user.organizationId,
+        ownerId: user.id,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        contentType: true,
+        title: true,
+        slug: true,
+        summary: true,
+        status: true,
+        visibility: true,
+        verificationStatus: true,
+        updatedAt: true,
+        publishedAt: true,
+        category: { select: { id: true, name: true } },
+        team: { select: { id: true, name: true } },
+        currentVersion: {
+          select: { id: true, versionNumber: true, versionStatus: true, versionLabel: true },
+        },
+        draftVersion: {
+          select: { id: true, versionNumber: true, versionStatus: true, versionLabel: true },
+        },
+        reviewRequests: {
+          orderBy: { submittedAt: 'desc' },
+          take: 1,
+          select: { id: true, status: true, submittedAt: true },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return { items, total: items.length };
+  }
+
   async create(user: AuthenticatedUser, input: CreateDraftDto) {
     const teamId = input.teamId ?? user.primaryTeamId;
     if (!teamId) throw new BadRequestException('Select a team before creating content.');
