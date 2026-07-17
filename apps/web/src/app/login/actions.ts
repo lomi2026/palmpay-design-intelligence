@@ -4,9 +4,13 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { serverApiFetch } from '@/lib/api';
-import { DEVELOPMENT_USER_COOKIE, type CurrentUser } from '@/lib/auth';
+import { DEVELOPMENT_USER_COOKIE, TEST_SESSION_COOKIE, type CurrentUser } from '@/lib/auth';
 
 const loginSchema = z.object({ email: z.email().max(320) });
+const testLoginSchema = z.object({
+  email: z.email().max(320),
+  accessCode: z.string().min(1).max(256),
+});
 
 export async function developmentLogin(formData: FormData) {
   const result = loginSchema.safeParse({ email: formData.get('email') });
@@ -30,8 +34,40 @@ export async function developmentLogin(formData: FormData) {
   redirect('/workspace');
 }
 
+export async function testLogin(formData: FormData) {
+  const result = testLoginSchema.safeParse({
+    email: formData.get('email'),
+    accessCode: formData.get('accessCode'),
+  });
+  if (!result.success) redirect('/login?error=invalid-credentials');
+
+  try {
+    const session = await serverApiFetch<{ accessToken: string; expiresAt: string }>('/api/auth/test-sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: result.data.email.trim().toLowerCase(),
+        accessCode: result.data.accessCode,
+      }),
+    });
+    const expiresAt = new Date(session.expiresAt);
+    const cookieStore = await cookies();
+    cookieStore.set(TEST_SESSION_COOKIE, session.accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+      path: '/',
+      expires: Number.isNaN(expiresAt.valueOf()) ? undefined : expiresAt,
+    });
+  } catch {
+    redirect('/login?error=invalid-credentials');
+  }
+  redirect('/workspace');
+}
+
 export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete(DEVELOPMENT_USER_COOKIE);
+  cookieStore.delete(TEST_SESSION_COOKIE);
   redirect('/login');
 }

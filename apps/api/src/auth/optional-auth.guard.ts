@@ -15,7 +15,7 @@ export class OptionalAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    if (!request.headers['x-dev-user-email']) return true;
+    if (!request.headers['x-dev-user-email'] && !request.headers.authorization) return true;
 
     const identity = await this.adapter.authenticate(request);
     request.user = await this.authService.resolveUser(identity);

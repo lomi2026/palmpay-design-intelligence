@@ -7,6 +7,7 @@ import { AUTHENTICATION_ADAPTER } from './auth.types';
 import { DevelopmentAuthAdapter } from './development-auth.adapter';
 import { OptionalAuthGuard } from './optional-auth.guard';
 import { RbacGuard } from './rbac.guard';
+import { TestAuthAdapter } from './test-auth.adapter';
 
 @Module({
   controllers: [AuthController],
@@ -16,17 +17,24 @@ import { RbacGuard } from './rbac.guard';
     RbacGuard,
     OptionalAuthGuard,
     DevelopmentAuthAdapter,
+    TestAuthAdapter,
     {
       provide: AUTHENTICATION_ADAPTER,
-      inject: [ConfigService, DevelopmentAuthAdapter],
-      useFactory: (config: ConfigService, developmentAdapter: DevelopmentAuthAdapter) => {
+      inject: [ConfigService, DevelopmentAuthAdapter, TestAuthAdapter],
+      useFactory: (
+        config: ConfigService,
+        developmentAdapter: DevelopmentAuthAdapter,
+        testAdapter: TestAuthAdapter,
+      ) => {
         const mode = config.get('AUTH_MODE') ?? 'development';
-        if (mode !== 'development') {
+        if (mode === 'development') return developmentAdapter;
+        if (mode === 'test') return testAdapter;
+        if (mode !== 'oidc') {
           throw new Error(
-            `Unsupported AUTH_MODE: ${mode}. Configure the future enterprise OIDC adapter before use.`,
+            `Unsupported AUTH_MODE: ${mode}. Configure an enterprise OIDC adapter before use.`,
           );
         }
-        return developmentAdapter;
+        throw new Error('AUTH_MODE=oidc is reserved until the enterprise OIDC adapter is configured.');
       },
     },
   ],

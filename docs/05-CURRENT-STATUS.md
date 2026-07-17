@@ -4,7 +4,7 @@ Last Updated: 2026-07-18
 
 ## Current Phase
 
-**Phase 5.5 functional-interface acceptance is complete; Phase 6 non-visual QA and delivery preparation is next; final v9-1 pixel-parity remediation remains paused**
+**Phase 5.5 functional-interface acceptance is complete; Phase 6 test-environment delivery preparation is in progress; final v9-1 pixel-parity remediation remains paused**
 
 ## Current Objective
 
@@ -83,6 +83,8 @@ The next engineering objective is:
 - Role-flow acceptance now uses four isolated, temporary PostgreSQL identities: member, reviewer, manager and administrator. The integration suite verifies independent reviewer assignment, request-changes, contributor revision and resubmission, approval, administrator publishing/lifecycle authority, and manager analytics-only access; all temporary test records are removed after execution.
 - Phase 5.5 functional-interface acceptance is complete: all implemented formal modules are reachable through permission-aware desktop/mobile navigation or contextual actions; primary controls are functional or explicitly unavailable; dashboard values come from formal APIs; and the core member, reviewer, manager and administrator workflows have automated PostgreSQL evidence.
 - Phase 6 local QA has verified Prisma schema/migration status, production builds, 12 PostgreSQL integration checks, security-boundary assertions and authorized runtime smoke paths. During this verification, the restored database was found to be missing the approved design-asset import; the existing idempotent v9-1 import script added the missing 8 assets and the formal catalog now contains 8 assets, 6 Skills, 4 cases and 33 projects.
+- A safe external-test authentication adapter now issues short-lived, HMAC-signed bearer sessions only when `AUTH_MODE=test`; it first resolves the active database user and therefore preserves formal disabled-user and RBAC enforcement. In test mode, a forged development identity header is rejected. The adapter is explicitly excluded from the future production OIDC/SSO path.
+- Test-environment deployment configuration is prepared for Vercel (web), Railway (API and isolated PostgreSQL) and the existing private Cloudflare R2 test Bucket. A test-only idempotent bootstrap command creates the configured administrator, team and organization-scoped `admin` plus `member` assignments before the approved v9-1 catalog imports.
 
 ## Validated Product Modules
 
@@ -119,7 +121,7 @@ The next engineering objective is:
 
 ## In Progress
 
-- Phase 6 non-visual QA and delivery preparation is next. Phase 5.5 delivered one permission-aware navigation model across desktop and mobile, route-aware active states, dynamic breadcrumbs, real dashboard data, personal contribution/submission surfaces and explicit unavailable-state behavior for unfinished controls.
+- Phase 6 non-visual QA and external test-environment delivery preparation is in progress. Phase 5.5 delivered one permission-aware navigation model across desktop and mobile, route-aware active states, dynamic breadcrumbs, real dashboard data, personal contribution/submission surfaces and explicit unavailable-state behavior for unfinished controls.
 - The administration surface is now separated into content, taxonomy, team, user, role-permission, audit and platform-settings modules. Team updates, user status changes and role assignment/removal use the protected formal APIs and retain audit logging; the platform-settings module reports the current environment boundary without presenting unavailable production integrations as active controls.
 - Phase 4/5 implementation is in the working tree: the additive Prisma migration introduces persisted favorites, recent views, unified usage events, search logs and audit logs. The API provides permission-filtered PostgreSQL full-text search, search-click/no-result logging, favorites, recent views, real AI-project usage confirmation, content relations, analytics aggregates, taxonomy/content administration and audit-log endpoints. The workspace exposes global search, personal saved/recent pages, usage and relation flows, overview/insights and RBAC-gated administration pages. API strict typecheck, lint, Prisma validation/migration status and twelve PostgreSQL integration tests pass, including separate member/reviewer/manager/admin workflow coverage and input/CORS/file boundary assertions; Web typecheck, lint and production build also pass. The protected workspace correctly redirects to formal development login rather than substituting a static role.
 - Phase 3 is verified functionally. The public home, workspace shell, catalog lists, submit/draft flow, notifications, my submissions, review center, login and access-denied pages have been moved onto the v9-1 dark visual language using shadcn/ui primitives while retaining the formal API and RBAC behavior.
@@ -136,8 +138,8 @@ The next engineering objective is:
 Codex should:
 
 1. Begin Phase 6 non-visual QA: broaden security and authorization checks, record release evidence and resolve production-delivery prerequisites without resuming pixel parity.
-2. Return to the visual-parity inventory only when the user resumes it, then complete required deployed/local desktop and mobile comparisons.
-3. Provision the external test environment and add its exact HTTPS web origin to the existing private R2 Bucket CORS policy before validating browser-origin upload there.
+2. Deploy the prepared external test environment: create the Railway PostgreSQL/API and Vercel web services from `codex/v1-project-handoff`, set the documented test-only secrets, run the idempotent bootstrap/import commands, then add the exact Vercel HTTPS origin to Railway `WEB_ORIGIN` and the private R2 CORS policy before browser upload validation.
+3. Return to the visual-parity inventory only when the user resumes it, then complete required deployed/local desktop and mobile comparisons.
 
 ## Next Milestone
 
@@ -174,6 +176,7 @@ The following decisions may affect later implementation:
 
 - Enterprise SSO / OIDC provider is not yet confirmed.
 - Production hosting and database provider are not yet confirmed.
+- The external test deployment requires the repository branch to be pushed and an authenticated Vercel and Railway account to create the two hosting projects. No provider account or external service has been configured in this repository yet. The prepared configuration uses an isolated test PostgreSQL service, test-only signed sessions and the private `palmpay-design-hub-test` R2 Bucket; the exact Vercel origin is still unknown and must be added to R2 CORS only after Vercel creates it.
 - Cloudflare R2 is the approved production storage target. A private Bucket, Bucket-scoped Object Read & Write Token, live signed upload/download/checksum verification and localhost browser-origin CORS preflight were completed on 2026-07-18. The external test-web HTTPS origin must be added to the private Bucket CORS policy only after that deployment URL exists. Local signed filesystem storage remains the fallback development adapter.
 - Legacy examples contain team labels but no formal owner-user identity mapping required by the V1.0 ER model.
 - The ER defines `restricted` visibility but does not define a user/group ACL entity; current catalog access is limited to the owner or `content.edit_all` users.
