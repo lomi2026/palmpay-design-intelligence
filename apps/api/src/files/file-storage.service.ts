@@ -15,7 +15,7 @@ export class FileStorageService {
     return this.driver() === 'local';
   }
 
-  createUploadUrl(input: { fileId?: string; storageKey: string; mimeType: string; checksumSha256: string }) {
+  createUploadUrl(input: { fileId?: string; storageKey: string; mimeType: string }) {
     if (this.isLocal()) {
       if (!input.fileId) throw new ServiceUnavailableException('A file id is required for local storage.');
       return this.local.createUploadUrl({ fileId: input.fileId, storageKey: input.storageKey });

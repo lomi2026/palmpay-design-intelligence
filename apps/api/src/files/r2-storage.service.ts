@@ -1,5 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { createHash } from 'node:crypto';
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -22,7 +23,6 @@ export class R2StorageService {
   async createUploadUrl(input: {
     storageKey: string;
     mimeType: string;
-    checksumSha256: string;
   }) {
     const { client, bucket, expiresInSeconds } = this.connection();
     const url = await getSignedUrl(
@@ -31,7 +31,6 @@ export class R2StorageService {
         Bucket: bucket,
         Key: input.storageKey,
         ContentType: input.mimeType,
-        ChecksumSHA256: input.checksumSha256,
       }),
       { expiresIn: expiresInSeconds },
     );
@@ -40,10 +39,18 @@ export class R2StorageService {
 
   async readObjectMetadata(storageKey: string): Promise<R2ObjectMetadata> {
     const { client, bucket } = this.connection();
-    const object = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: storageKey, ChecksumMode: 'ENABLED' }));
+    const object = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: storageKey }));
+    const download = await client.send(new GetObjectCommand({ Bucket: bucket, Key: storageKey }));
+    if (!download.Body) throw new ServiceUnavailableException('Cloudflare R2 returned an empty object body.');
+
+    const checksum = createHash('sha256');
+    for await (const chunk of download.Body as AsyncIterable<Uint8Array>) {
+      checksum.update(chunk);
+    }
+
     return {
       sizeBytes: object.ContentLength ?? 0,
-      checksumSha256: object.ChecksumSHA256,
+      checksumSha256: checksum.digest('base64'),
       mimeType: object.ContentType,
     };
   }

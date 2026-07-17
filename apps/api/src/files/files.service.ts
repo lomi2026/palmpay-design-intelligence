@@ -40,7 +40,6 @@ export class FilesService {
       : await this.storage.createUploadUrl({
           storageKey,
           mimeType: input.mimeType,
-          checksumSha256: input.checksumSha256,
         });
     const file = await this.prisma.fileAttachment.create({
       data: {
@@ -62,7 +61,6 @@ export class FilesService {
         fileId: file.id,
         storageKey,
         mimeType: input.mimeType,
-        checksumSha256: input.checksumSha256,
       }));
 
     return {
@@ -72,10 +70,7 @@ export class FilesService {
         method: 'PUT' as const,
         headers: this.storage.isLocal()
           ? { 'Content-Type': input.mimeType }
-          : {
-              'Content-Type': input.mimeType,
-              'x-amz-checksum-sha256': input.checksumSha256,
-            },
+          : { 'Content-Type': input.mimeType },
         expiresAt: new Date(Date.now() + upload.expiresInSeconds * 1000).toISOString(),
       },
     };

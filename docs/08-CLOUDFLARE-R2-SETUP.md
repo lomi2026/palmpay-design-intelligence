@@ -48,7 +48,7 @@ In the bucket **Settings → CORS Policy → Add CORS policy → JSON**, use thi
   {
     "AllowedOrigins": ["http://localhost:3000"],
     "AllowedMethods": ["GET", "PUT", "HEAD", "DELETE"],
-    "AllowedHeaders": ["Content-Type", "x-amz-checksum-sha256"],
+    "AllowedHeaders": ["Content-Type"],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3600
   }
@@ -62,8 +62,8 @@ When the web app gets a production origin, add that exact HTTPS origin to `Allow
 After the API is restarted, a signed-in workspace user with `content.create` can use this sequence:
 
 1. `POST /api/files/upload-intents` with `originalName`, `mimeType`, `sizeBytes` and the file's Base64 SHA-256 checksum.
-2. `PUT` the bytes directly to the returned R2 URL, using exactly the returned `Content-Type` and `x-amz-checksum-sha256` headers.
-3. `POST /api/files/:id/complete` to verify the R2 object's size, MIME type and checksum before it becomes `READY`.
+2. `PUT` the bytes directly to the returned R2 URL, using exactly the returned `Content-Type` header.
+3. `POST /api/files/:id/complete` to verify the R2 object's size, MIME type and a server-calculated SHA-256 checksum before it becomes `READY`.
 4. `GET /api/files/:id/download` to receive a short-lived signed download URL.
 5. `DELETE /api/files/:id` to remove the R2 object and mark its PostgreSQL record deleted.
 
