@@ -5,51 +5,36 @@
 This is an internal acceptance environment, not the production environment.
 
 - Web: Vercel project with root directory `apps/web`
-- API: Railway service built from the repository root using `apps/api/Dockerfile`
-- Database: a Railway PostgreSQL service created only for this test environment
+- API: Render free Docker web service built from the repository root using `apps/api/Dockerfile`
+- Database: a Render free PostgreSQL service created only for this test environment
 - File storage: private Cloudflare R2 Bucket `palmpay-design-hub-test`
 - Authentication: `AUTH_MODE=test`, a deliberately isolated, server-signed test session adapter
 
 Do not use `AUTH_MODE=development` on any Internet-facing API. The development adapter trusts an HTTP header and is local-only by design. Do not use the test adapter in the future production environment; production requires OIDC/SSO.
 
-## 1. Railway API and PostgreSQL
+## 1. Render API and PostgreSQL
 
-1. Create a Railway project named `palmpay-design-hub-test`.
-2. Add a PostgreSQL service.
-3. Add a GitHub service from `lomi2026/palmpay-design-intelligence`, branch `codex/v1-project-handoff`.
-4. Railway reads `railway.toml` and builds `apps/api/Dockerfile` from the repository root.
-5. Set the API service variables below. Use Railway's PostgreSQL connection URL for `DATABASE_URL`.
-6. Generate a public Railway domain for the API service. Record it as `API_TEST_ORIGIN`.
-7. API startup runs `prisma migrate deploy`. Seed the system roles, taxonomy and approved bootstrap data once after the first successful deployment.
+1. In Render, choose **New +** then **Blueprint** and connect `lomi2026/palmpay-design-intelligence`, branch `codex/v1-project-handoff`.
+2. Render reads the committed root `render.yaml`, creates the API and isolated PostgreSQL database, links `DATABASE_URL`, applies Prisma migrations at API start, then runs the one-time seed/bootstrap/catalog import hook.
+3. During Blueprint creation, Render asks for the values marked `sync: false`: test access code, Vercel origin placeholder, and the existing private R2 endpoint and credentials. Do not enter secrets into GitHub.
+4. Choose the free instance options. This is suitable only for acceptance: the API sleeps after idle time and the free Render PostgreSQL database expires after 30 days.
+5. After deployment is healthy, generate the public Render API URL and record it as `API_TEST_ORIGIN`.
 
-Required Railway API variables:
+The Blueprint supplies all non-secret variables and generates `TEST_AUTH_SESSION_SECRET` automatically. Supply only these values in Render's secret-value prompts:
 
 ```dotenv
-NODE_ENV="production"
-DATABASE_URL="${{Postgres.DATABASE_URL}}"
-AUTH_MODE="test"
-AUTH_AUTO_PROVISION="false"
-DEFAULT_ORGANIZATION_CODE="palmpay-experience-design"
 TEST_AUTH_ACCESS_CODE="<at least 24 random characters; share only with approved testers>"
-TEST_AUTH_SESSION_SECRET="<at least 32 random characters; never share>"
-TEST_AUTH_SESSION_TTL_SECONDS="28800"
-TEST_BOOTSTRAP_ADMIN_EMAIL="lomi2026@126.com"
-TEST_BOOTSTRAP_ADMIN_NAME="PalmPay Test Administrator"
-WEB_ORIGIN="https://<Vercel-test-domain>"
-API_BASE_URL="https://<Railway-API-domain>"
-FILE_STORAGE_DRIVER="r2"
+WEB_ORIGIN="https://placeholder.invalid"
 R2_ENDPOINT="https://<Cloudflare-account-id>.r2.cloudflarestorage.com"
-R2_BUCKET="palmpay-design-hub-test"
 R2_ACCESS_KEY_ID="<Cloudflare R2 access key>"
 R2_SECRET_ACCESS_KEY="<Cloudflare R2 secret key>"
-R2_SIGNED_URL_TTL_SECONDS="300"
 ```
 
-Do not set `NEXT_PUBLIC_API_BASE_URL` on Railway. It belongs to Vercel.
+Do not set `NEXT_PUBLIC_API_BASE_URL` on Render. It belongs to Vercel.
 
 ### Initial database data (run once)
 
-After the Railway API reports healthy, open its Railway Shell and run the following from the image's repository root:
+The `render.yaml` initial deployment hook runs the following commands automatically after the API first becomes healthy. Run them only manually if the Render deployment log shows that the initial hook failed:
 
 ```bash
 cd /app
@@ -74,8 +59,8 @@ The three v9-1 import commands are also idempotent. Their expected first-run tot
 
 ```dotenv
 AUTH_MODE="test"
-API_BASE_URL="https://<Railway-API-domain>"
-NEXT_PUBLIC_API_BASE_URL="https://<Railway-API-domain>"
+API_BASE_URL="https://<Render-API-domain>"
+NEXT_PUBLIC_API_BASE_URL="https://<Render-API-domain>"
 ```
 
 The server-only `API_BASE_URL` lets Next.js server components call the API. `NEXT_PUBLIC_API_BASE_URL` is used by browser-side upload code.
@@ -84,7 +69,7 @@ The server-only `API_BASE_URL` lets Next.js server components call the API. `NEX
 
 After Vercel creates the test URL:
 
-1. Set Railway `WEB_ORIGIN` to the exact HTTPS Vercel origin, with no trailing slash.
+1. Set Render `WEB_ORIGIN` to the exact HTTPS Vercel origin, with no trailing slash, then redeploy the API.
 2. In R2 Bucket CORS, retain `http://localhost:3000` and add the exact Vercel test origin:
 
 ```json
@@ -111,4 +96,4 @@ After Vercel creates the test URL:
 
 ## 5. Production boundary
 
-Never promote this database, shared test code, R2 Bucket or credentials directly to production. Production uses its own PostgreSQL database, production R2 Bucket and enterprise OIDC/SSO integration.
+Never promote this database, shared test code, R2 Bucket or credentials directly to production. Production uses its own PostgreSQL database, production R2 Bucket and enterprise OIDC/SSO integration. The free Render PostgreSQL database expires after 30 days; export or discard this acceptance data before the expiry date.
