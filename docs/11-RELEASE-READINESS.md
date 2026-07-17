@@ -13,7 +13,7 @@ Last verified: 2026-07-17
 
 ## Source delivery status
 
-The current branch can be committed and pushed to GitHub as a source-delivery checkpoint.
+The current branch is published to GitHub as source-delivery checkpoint commit `987651f` on `codex/v1-project-handoff`.
 
 ## Production deployment status
 
@@ -25,6 +25,12 @@ The formal V1 application cannot be deployed solely through GitHub Pages:
 - No production host/database provider, environment secrets, domain, or CI/CD workflow is configured in this repository.
 
 Therefore, a GitHub push is not represented as a deployed formal application. It is a verified source checkpoint until a runtime host and database provider are explicitly chosen.
+
+## GitHub Pages verification
+
+GitHub Pages is enabled at `https://lomi2026.github.io/palmpay-design-intelligence/`, but its configured source is the repository `main` branch root. The Pages response was last modified on 2026-07-13 and no GitHub Actions workflow or deployment record exists for `codex/v1-project-handoff`.
+
+It remains the legacy static site and is not a deployment of the formal V1 application.
 
 ## Remaining release prerequisites
 
