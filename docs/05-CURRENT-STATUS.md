@@ -56,7 +56,7 @@ The next engineering objective is:
 - Formal AI Skill and AI case catalog list/detail pages backed by the permission-filtered API, using the deployed v9-1 information hierarchy
 - Cloudflare R2 S3-compatible attachment adapter, protected upload intents, checksum verification, short-lived download URLs and cleanup endpoints
 - Cloudflare R2 configuration guide that keeps the Bucket private and credentials out of source control
-- A private Cloudflare R2 Bucket and least-privilege API credentials have been configured and accepted through a live signed-upload smoke test: direct R2 upload, server-side SHA-256 verification, short-lived signed download, content comparison and cleanup all pass. The R2 adapter was corrected to use Cloudflare-compatible `Content-Type`-only presigned uploads while retaining server-side streamed checksum verification before a file becomes `READY`.
+- A private Cloudflare R2 Bucket and least-privilege API credentials have been configured and accepted through a live signed-upload smoke test: direct R2 upload, server-side SHA-256 verification, short-lived signed download, content comparison and cleanup all pass. The R2 adapter was corrected to use Cloudflare-compatible `Content-Type`-only presigned uploads while retaining server-side streamed checksum verification before a file becomes `READY`; the private Bucket CORS policy also passed a `http://localhost:3000` browser-origin `PUT` preflight.
 - Verified signed local-development attachment storage: upload intent, size and checksum validation, short-lived download and cleanup; files remain outside the repository on the current Mac
 - Phase 3 draft API foundation: explicit team selection, draft creation, autosave, draft recovery and per-content version history, with organization and owner-or-`content.edit_all` enforcement
 - v9-1-aligned workspace entry for 提交内容: content-type selector, four dedicated type-specific draft forms and shared draft editor shell backed by server actions and formal APIs
@@ -137,7 +137,7 @@ Codex should:
 
 1. Begin Phase 6 non-visual QA: broaden security and authorization checks, record release evidence and resolve production-delivery prerequisites without resuming pixel parity.
 2. Return to the visual-parity inventory only when the user resumes it, then complete required deployed/local desktop and mobile comparisons.
-3. Add the exact local and eventual test-web origins to the private R2 Bucket CORS policy, then validate a browser-origin upload after the test environment URL exists.
+3. Provision the external test environment and add its exact HTTPS web origin to the existing private R2 Bucket CORS policy before validating browser-origin upload there.
 
 ## Next Milestone
 
@@ -174,7 +174,7 @@ The following decisions may affect later implementation:
 
 - Enterprise SSO / OIDC provider is not yet confirmed.
 - Production hosting and database provider are not yet confirmed.
-- Cloudflare R2 is the approved production storage target. A private Bucket, Bucket-scoped Object Read & Write Token and live signed upload/download/checksum verification were completed on 2026-07-18. The Bucket CORS policy still needs the exact browser origins before end users can upload directly from the local or hosted web application. Local signed filesystem storage remains the fallback development adapter.
+- Cloudflare R2 is the approved production storage target. A private Bucket, Bucket-scoped Object Read & Write Token, live signed upload/download/checksum verification and localhost browser-origin CORS preflight were completed on 2026-07-18. The external test-web HTTPS origin must be added to the private Bucket CORS policy only after that deployment URL exists. Local signed filesystem storage remains the fallback development adapter.
 - Legacy examples contain team labels but no formal owner-user identity mapping required by the V1.0 ER model.
 - The ER defines `restricted` visibility but does not define a user/group ACL entity; current catalog access is limited to the owner or `content.edit_all` users.
 - PostgreSQL 17 is installed locally through Postgres.app. The `palmpay_design_hub` database was restored on 2026-07-17 from the supplied old-computer dump and brought up to date with the current Prisma migration set; the development API is available on port 3001.
