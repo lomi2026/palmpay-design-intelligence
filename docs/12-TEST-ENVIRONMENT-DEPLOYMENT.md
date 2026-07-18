@@ -45,7 +45,7 @@ pnpm --filter @palmpay/api prisma:import:v9-1-ai-catalog
 pnpm --filter @palmpay/api prisma:import:v9-1-design-assets
 ```
 
-`prisma:bootstrap:test` creates or reactivates the configured administrator, makes that user the owner of the `palmpay-experience-design` team, and assigns both the organization-scoped `admin` and `member` roles. It is idempotent and must be used only in the isolated test database.
+`prisma:bootstrap:test` creates or reactivates the configured administrator, makes that user the owner of the `palmpay-experience-design` team, and maintains the acceptance identities and organization-scoped roles below. It is idempotent and must be used only in the isolated test database.
 
 The three v9-1 import commands are also idempotent. Their expected first-run totals are 33 AI projects, 6 AI Skills, 4 AI cases and 8 design assets. Do not use a local database dump as a cloud-test restore: it could include unrelated local identities and historical data.
 
@@ -89,8 +89,10 @@ After Vercel creates the test URL:
 
 ## 4. Test identity and acceptance
 
-- The initial administrator is the value in `TEST_BOOTSTRAP_ADMIN_EMAIL` (`lomi2026@126.com` for this acceptance environment). Sign in with that email and the shared test access code after the Vercel deployment is live.
-- Each additional tester must first be created as an active user and assigned member, reviewer, manager or administrator roles through the formal administration surface.
+- `lomi2026@126.com` is the manager/administrator (`member`, `manager`, `admin`).
+- `lomi2025@126.com` is the contributor (`member`).
+- `lomi2024@126.com` is the reviewer (`reviewer`).
+- All three are active members of the `palmpay-experience-design` team and sign in with the shared test access code after the Vercel deployment is live.
 - Share the test access code only through an approved internal channel. It is not an account password and must be rotated after the acceptance period.
 - Verify member upload/submission, reviewer assignment/decision, administrator publication, signed attachment download and unauthorized-access rejection.
 
