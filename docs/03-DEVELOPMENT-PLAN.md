@@ -406,6 +406,22 @@ Acceptance:
 - The workspace dashboard does not present static demo metrics as formal data.
 - Primary actions are either functional or clearly unavailable; no inert primary controls remain.
 
+## 10.6 Functional closure remediation — active delivery order (2026-07-18)
+
+Before resuming desktop pixel parity, execute the P0 remediation backlog in
+`docs/13-FUNCTIONAL-COMPLETENESS-AUDIT.md`.
+
+Order:
+
+1. Complete missing P0 authoring, attachment-download, share, filtering and preview paths.
+2. Add and run deployed browser evidence for contributor, reviewer and administrator workflows.
+3. Resume desktop-only v9-1 visual parity after the functional acceptance gate passes.
+4. Perform mobile adaptation only after desktop functional and visual acceptance.
+
+The workspace navigation-performance defect is tracked separately and does not
+block functional-gap implementation, but it cannot be marked accepted without
+user-observed improvement.
+
 ## 11. Phase 6 — Migration, QA and launch
 
 ### Data migration

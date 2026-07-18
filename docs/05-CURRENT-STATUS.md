@@ -4,15 +4,15 @@ Last Updated: 2026-07-18
 
 ## Current Phase
 
-**Phase 5.5 functional-interface acceptance is complete; the external test environment core delivery is live; final v9-1 visual-parity remediation is in progress**
+**Phase 5.5 functional-closure audit and remediation is in progress; the external test environment core delivery is live; desktop visual parity and mobile adaptation are deferred until the P0 workflow gate passes**
 
 ## Current Objective
 
-Complete the remaining external-test browser acceptance while resuming the final v9-1 page-by-page visual-parity remediation.
+Close the audited P0 functional gaps and obtain external-test browser evidence before resuming desktop visual parity. Mobile-specific restoration is explicitly deferred.
 
 The next engineering objective is:
 
-> Phase 5.5 formal workflow coverage and the external test environment core delivery are complete enough to resume the required pixel-level parity work. Visual parity remains a required launch gate; live browser acceptance of uploads, review and publication continues in parallel.
+> A route or server action is not accepted merely because it exists. The next gate is a complete, deployed contributor → reviewer → administrator workflow, including real attachment download and P0 content validation. Desktop parity resumes after that gate; mobile adaptation is last.
 
 ## Approved Product Baseline
 
@@ -124,6 +124,8 @@ The next engineering objective is:
 
 ## In Progress
 
+- The user-approved functional-closure audit is complete and recorded in `docs/13-FUNCTIONAL-COMPLETENESS-AUDIT.md`. Active remediation priorities are the four-type editor completeness/validation gate, protected published-attachment download, canonical share link, consistent URL-backed catalog filters, contributor preview and external browser E2E evidence. Pixel-level visual work and mobile adaptation are paused until this functional gate passes. The workspace menu/tab performance issue remains deferred and is not counted as accepted.
+
 - The management-center tab performance defect has been corrected: each server render loads only its own authorized data (one or two endpoints rather than all eight administration datasets), then the compact finite tab set is full-prefetched into the client router cache for instant tab revisits. Current-user/auth-header reads are request-memoized across the workspace shell and page. A workspace-wide route review found no other query-tab surface that eagerly loads unrelated administration datasets.
 - The external-test workspace now keeps recently visited dynamic route segments in the browser for 120 seconds. After the workspace shell becomes interactive, its finite permission-filtered navigation set and the seven management tabs are explicitly warmed through the client router; pointer or keyboard intent also invokes direct route prefetching. This makes ordinary back-and-forth navigation and admin tab revisits use the client cache rather than repeat a Vercel-to-Render read. Large catalog/detail-link sets still do not automatically prefetch all visible records. Server-side RBAC remains enforced whenever a request is required; Render free-instance cold starts remain a hosting limitation.
 - The external test environment core is live: Render API/PostgreSQL, Vercel Web, test auth, exact-origin API/R2 CORS, test database initialization and the administrator session have remote evidence. Remaining delivery evidence is the browser acceptance of actual attachment upload, review and publication. Phase 5.5 delivered one permission-aware navigation model across desktop and mobile, route-aware active states, dynamic breadcrumbs, real dashboard data, personal contribution/submission surfaces and explicit unavailable-state behavior for unfinished controls.
@@ -144,13 +146,14 @@ The next engineering objective is:
 
 Codex should:
 
-1. Continue the v9-1 visual-parity inventory automatically, next covering catalog/detail responsive layouts and detail-state controls without weakening formal data, RBAC or lifecycle behavior.
-2. Restore the required deployed/local desktop and mobile comparison capture, then record external-test browser evidence for test-admin login, attachment upload/download, draft submission, reviewer decision and publication; correct any deployment-only defect found.
-3. Resolve remaining production-delivery prerequisites only when a durable hosting, database, SSO and domain decision is made.
+1. Implement the P0 functional remediation backlog F-01 through F-05 in `docs/13-FUNCTIONAL-COMPLETENESS-AUDIT.md`, preserving formal APIs, RBAC, versioning and audit records.
+2. Add and execute F-06 deployed test-environment browser evidence for contributor, reviewer and administrator flows, including upload and signed download.
+3. Resume desktop-only v9-1 visual parity only after the functional acceptance gate passes; perform mobile adaptation after desktop acceptance.
+4. Resolve production-delivery prerequisites only when a durable hosting, database, SSO and domain decision is made.
 
 ## Next Milestone
 
-**Phase 6 non-visual QA and delivery preparation; then v9-1 visual and interaction parity gate when resumed**
+**P0 functional closure and deployed workflow acceptance; then desktop v9-1 visual parity; then mobile adaptation**
 
 Milestone definition:
 

@@ -259,7 +259,16 @@ When a new explicit user decision changes this file:
 - By explicit user decision, pause the remaining pixel-level v9-1 remediation and complete the formal workspace functional interface first.
 - Add a Phase 5.5 functional-interface completion pass before Phase 6 acceptance.
 
-## 25. Continuous v9-1 parity remediation (2026-07-18)
+## 25. Functional closure, desktop parity, then mobile adaptation (2026-07-18)
+
+- The functional-interface pass must be judged by an explicit P0 workflow audit and deployed browser evidence, not merely by the existence of routes or server actions.
+- The current delivery order is: complete and verify desktop functional workflows first; restore desktop Web v9-1 parity second; perform mobile adaptation last.
+- Do not spend implementation capacity on pixel-level polish or mobile-specific parity while an identified P0 action, validation rule, attachment path or role workflow remains incomplete.
+- The existing workspace navigation-performance defect is tracked separately and is not represented as accepted merely because a code change was deployed.
+
+## 26. Superseded continuous v9-1 parity remediation (2026-07-18)
+
+This previous delivery order is superseded by Decision 25. It remains as historical context only; functional closure is now the active priority.
 
 - By explicit user decision, resume and complete the final v9-1 visual and interaction parity work for every page that has a deployed v9-1 counterpart.
 - Work through the approved priority order without waiting for further confirmation between individual page or flow batches: public entry, workspace shell and overview, knowledge catalogs and details, contribution/review flows, then formal-only pages inheriting the same system.
