@@ -14,6 +14,8 @@ The first P0 pass removes unused global client providers and eager background pr
 
 The follow-up P0 incident fix addresses the externally observed `/workspace` page hanging on its content skeleton: the workspace shell now treats notification and project-count badges as optional summaries, and the dashboard streams metrics, recent updates and personal todos behind separate Suspense boundaries with short timeout fallbacks. This prevents one slow Render/API/database summary request from blocking the entire dashboard content area. Moving from Render free hosting to a warm Alibaba Cloud service may reduce cold-start latency, but it is not a substitute for keeping non-critical dashboard data out of the blocking render path.
 
+The local production contribution workflow no longer refreshes an editor route after a successful review submission. Successful submissions replace the editor with `/workspace/submissions`, and direct access to a draft URL that has already entered review is redirected to the same status page instead of falling into the Workspace error boundary. A production-browser check confirmed create → submit → submission-list navigation with the persisted review shown as pending.
+
 The next engineering objective is:
 
 > A route or server action is not accepted merely because it exists. The next gate is a complete, deployed contributor → reviewer → administrator workflow, including real attachment download and P0 content validation. Desktop parity resumes after that gate; mobile adaptation is last.

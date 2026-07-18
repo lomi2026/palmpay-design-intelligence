@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { ApiError, serverApiFetch } from '@/lib/api';
 import { authenticatedApiHeaders } from '@/lib/auth';
@@ -12,6 +12,7 @@ async function getDraft(id: string) {
     return await serverApiFetch<Draft>(`/api/content-drafts/${encodeURIComponent(id)}`, { headers: await authenticatedApiHeaders() });
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) notFound();
+    if (error instanceof ApiError && error.status === 409) redirect('/workspace/submissions');
     throw error;
   }
 }

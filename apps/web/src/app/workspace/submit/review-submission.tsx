@@ -10,7 +10,7 @@ export function ReviewSubmission({ contentId, status }: { contentId: string; sta
   const router = useRouter();
   const [state, action, pending] = useActionState(submitReviewAction, initialState);
   useEffect(() => {
-    if (state.submitted) router.refresh();
+    if (state.submitted) router.replace('/workspace/submissions');
   }, [router, state.submitted]);
   if (!['DRAFT', 'CHANGES_REQUESTED'].includes(status)) return null;
 
