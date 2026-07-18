@@ -18,6 +18,11 @@ const organizationCode = process.env.DEFAULT_ORGANIZATION_CODE ?? 'palmpay-exper
 const adminName = process.env.TEST_BOOTSTRAP_ADMIN_NAME?.trim() || 'PalmPay Test Administrator';
 const teamCode = 'palmpay-experience-design';
 const teamName = 'PalmPay Experience Design';
+const acceptanceUsers = [
+  { email: adminEmail, name: adminName, roles: ['member', 'manager', 'admin'] },
+  { email: 'lomi2025@126.com', name: 'PalmPay Test Contributor', roles: ['member'] },
+  { email: 'lomi2024@126.com', name: 'PalmPay Test Reviewer', roles: ['reviewer'] },
+] as const;
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
@@ -27,15 +32,15 @@ async function main() {
     throw new Error(`Organization not found: ${organizationCode}. Run prisma:seed first.`);
   }
 
-  const [adminRole, memberRole] = await Promise.all([
-    prisma.role.findUnique({ where: { code: 'admin' } }),
-    prisma.role.findUnique({ where: { code: 'member' } }),
-  ]);
-  if (!adminRole || !memberRole) {
+  const roles = await prisma.role.findMany({
+    where: { code: { in: ['admin', 'manager', 'member', 'reviewer'] } },
+  });
+  const rolesByCode = new Map(roles.map((role) => [role.code, role]));
+  if (rolesByCode.size !== 4) {
     throw new Error('System roles are missing. Run prisma:seed first.');
   }
 
-  const user = await prisma.user.upsert({
+  const administrator = await prisma.user.upsert({
     where: { organizationId_email: { organizationId: organization.id, email: adminEmail } },
     create: {
       organizationId: organization.id,
@@ -55,44 +60,64 @@ async function main() {
       organizationId: organization.id,
       code: teamCode,
       name: teamName,
-      ownerId: user.id,
+      ownerId: administrator.id,
     },
-    update: { ownerId: user.id, status: 'ACTIVE' },
+    update: { ownerId: administrator.id, status: 'ACTIVE' },
   });
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { primaryTeamId: team.id },
-  });
+  for (const acceptanceUser of acceptanceUsers) {
+    const user = await prisma.user.upsert({
+      where: {
+        organizationId_email: {
+          organizationId: organization.id,
+          email: acceptanceUser.email,
+        },
+      },
+      create: {
+        organizationId: organization.id,
+        primaryTeamId: team.id,
+        email: acceptanceUser.email,
+        name: acceptanceUser.name,
+        status: UserStatus.ACTIVE,
+      },
+      update: {
+        primaryTeamId: team.id,
+        name: acceptanceUser.name,
+        status: UserStatus.ACTIVE,
+        deletedAt: null,
+      },
+    });
 
-  await Promise.all(
-    [adminRole, memberRole].map((role) =>
-      prisma.userRole.upsert({
-        where: {
-          userId_roleId_scopeType_scopeId: {
+    await Promise.all(
+      acceptanceUser.roles.map((roleCode) => {
+        const role = rolesByCode.get(roleCode);
+        if (!role) throw new Error(`Missing required role: ${roleCode}`);
+        return prisma.userRole.upsert({
+          where: {
+            userId_roleId_scopeType_scopeId: {
+              userId: user.id,
+              roleId: role.id,
+              scopeType: RoleScopeType.ORGANIZATION,
+              scopeId: organization.id,
+            },
+          },
+          create: {
             userId: user.id,
             roleId: role.id,
             scopeType: RoleScopeType.ORGANIZATION,
             scopeId: organization.id,
           },
-        },
-        create: {
-          userId: user.id,
-          roleId: role.id,
-          scopeType: RoleScopeType.ORGANIZATION,
-          scopeId: organization.id,
-        },
-        update: {},
+          update: {},
+        });
       }),
-    ),
-  );
+    );
+  }
 
   console.log(
     JSON.stringify({
       organization: organization.code,
       team: team.code,
-      administrator: adminEmail,
-      roles: ['admin', 'member'],
+      users: acceptanceUsers.map(({ email, roles }) => ({ email, roles })),
     }),
   );
 }
