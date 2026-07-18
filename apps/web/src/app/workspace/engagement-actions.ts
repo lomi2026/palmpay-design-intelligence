@@ -75,3 +75,12 @@ export async function removeRelationAction(formData: FormData) {
     await request(`/api/contents/${contentId}/relations/${relationId}`, { method: 'DELETE' });
   redirect(`/workspace/related?contentId=${encodeURIComponent(contentId)}`);
 }
+
+export async function recordContentShareAction(contentId: string, sourcePage: string) {
+  if (!contentId) return;
+  await request('/api/events', {
+    method: 'POST',
+    body: JSON.stringify({ eventType: 'content_share', contentId, sourcePage }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}

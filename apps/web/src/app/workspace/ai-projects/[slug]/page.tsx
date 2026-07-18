@@ -16,6 +16,7 @@ import {
   FavoriteControl,
 } from '@/components/workspace/engagement-controls';
 import { UsageSummary } from '@/components/workspace/usage-summary';
+import { PublishedAttachments } from '@/components/workspace/published-attachments';
 import { ProjectReadingNavigation } from '@/components/workspace/project-reading-navigation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -104,6 +105,7 @@ export default async function AIProjectDetailPage({
           { id: 'prioritization', label: '优先级依据' },
           { id: 'source-traceability', label: '来源与追溯' },
         ]} />
+        <div className="mt-4 max-w-[360px]"><PublishedAttachments attachments={project.attachments} /></div>
       </div>
     </main>
   );

@@ -1,10 +1,11 @@
 'use client';
 
-import { Heart, Link2, NotebookPen } from 'lucide-react';
-import { useActionState } from 'react';
+import { Check, Copy, Heart, Link2, NotebookPen } from 'lucide-react';
+import { useActionState, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { favoriteAction } from '@/app/workspace/engagement-actions';
+import { favoriteAction, recordContentShareAction } from '@/app/workspace/engagement-actions';
 
 export function FavoriteControl({
   contentId,
@@ -63,6 +64,38 @@ export function ContentEngagementLinks({ contentId }: { contentId: string }) {
           关联内容
         </Button>
       </Link>
+      <ContentShareButton contentId={contentId} />
     </div>
   );
+}
+
+function ContentShareButton({ contentId }: { contentId: string }) {
+  const pathname = usePathname();
+  const [copied, setCopied] = useState(false);
+
+  async function copyCanonicalLink() {
+    const link = `${window.location.origin}${pathname}`;
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch {
+      const input = document.createElement('textarea');
+      input.value = link;
+      input.style.position = 'fixed';
+      input.style.opacity = '0';
+      document.body.appendChild(input);
+      input.select();
+      const copiedWithFallback = document.execCommand('copy');
+      input.remove();
+      if (!copiedWithFallback) return;
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+    try {
+      await recordContentShareAction(contentId, pathname);
+    } catch {
+      // Sharing remains useful even if analytics is temporarily unavailable.
+    }
+  }
+
+  return <Button aria-label={copied ? '链接已复制' : '复制链接'} className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white" onClick={copyCanonicalLink} type="button" variant="outline">{copied ? <Check /> : <Copy />}{copied ? '已复制' : '复制链接'}</Button>;
 }

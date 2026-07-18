@@ -5,6 +5,11 @@ export interface ContentFile {
   sizeBytes: string;
 }
 
+export interface PublishedAttachment {
+  id: string;
+  file: ContentFile;
+}
+
 export interface ContentCard {
   id: string;
   contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT';
@@ -63,7 +68,7 @@ export interface DesignAssetDetail extends ContentCard {
     resourceLinks: unknown;
     maintenanceCycleDays: number | null;
   } | null;
-  attachments: Array<{ id: string; file: ContentFile }>;
+  attachments: PublishedAttachment[];
   sourceRelations: Array<{
     targetContent: { id: string; slug: string; title: string; contentType: string; status: string };
   }>;

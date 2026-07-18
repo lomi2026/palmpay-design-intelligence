@@ -2,11 +2,10 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { Check, CircleCheck, Grid2X2, LayoutList, Plus, Search, ShieldCheck } from 'lucide-react';
+import { Check, CircleCheck, Grid2X2, LayoutList, Plus, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -32,7 +31,6 @@ type DesignAssetCard = ContentCard & {
   currentVersion?: { versionLabel: string | null; body: unknown } | null;
 };
 
-const categories = ['全部', '组件与模式', '页面模板', '设计系统', '交付与验收', '研究与策略'] as const;
 const platforms = ['全部平台', 'Web', 'Mobile', '全平台'] as const;
 
 function getLegacyBody(value: unknown): LegacyAssetBody {
@@ -70,28 +68,19 @@ function AssetCover({ category, cover, platform }: { category: string; cover?: s
   return <div className="relative h-40 overflow-hidden border-b border-white/10 bg-white/[0.025] p-5"><div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:16px_16px]" /><div className="relative z-10 h-full">{preview}</div><Badge className="absolute bottom-4 left-4 z-20 h-5 rounded-full border-transparent bg-white/10 px-2.5 text-xs font-medium text-white" variant="secondary">{category}</Badge><span className="absolute top-4 right-4 z-20 rounded-full border border-white/15 bg-black/80 px-2 py-1 text-[10px] text-white/75 backdrop-blur">{platform}</span></div>;
 }
 
-export function DesignAssetsCatalog({ contents }: { contents: DesignAssetCard[] }) {
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<(typeof categories)[number]>('全部');
+export function DesignAssetsCatalog({ contents, search }: { contents: DesignAssetCard[]; search: string }) {
   const [platform, setPlatform] = useState<(typeof platforms)[number]>('全部平台');
   const [view, setView] = useState<'grid' | 'list'>('grid');
 
   const filtered = useMemo(() => {
-    const needle = search.trim().toLocaleLowerCase('zh-CN');
     return contents.filter((content) => {
-      const matchesText = !needle || [content.title, content.summary, content.category?.name, ...content.tags.map(({ tag }) => tag.name)]
-        .filter(Boolean)
-        .join(' ')
-        .toLocaleLowerCase('zh-CN')
-        .includes(needle);
-      const matchesCategory = category === '全部' || content.category?.name === category;
       const matchesPlatform = platform === '全部平台' || content.assetDetail?.platforms.includes(platform);
-      return matchesText && matchesCategory && matchesPlatform;
+      return matchesPlatform;
     });
-  }, [category, contents, platform, search]);
+  }, [contents, platform]);
 
   return (
-    <main className="mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8">
+    <section>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-[32px] font-semibold leading-10 tracking-[-0.045em] text-white">设计资产</h1>
@@ -103,17 +92,7 @@ export function DesignAssetsCatalog({ contents }: { contents: DesignAssetCard[] 
       </div>
 
       <section className="mt-7 rounded-xl border border-white/10 bg-white/[0.025] p-3.5">
-        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
-          <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/35" />
-            <Input
-              className="h-10 border-white/10 bg-black/20 pl-9 text-sm text-white placeholder:text-white/32 focus-visible:ring-white/20"
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="搜索资产名称、场景或描述"
-              type="search"
-              value={search}
-            />
-          </div>
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-end">
           <Select onValueChange={(value) => setPlatform(value as (typeof platforms)[number])} value={platform}>
             <SelectTrigger className="h-10 w-full border-white/10 bg-black/20 text-white/75 lg:w-32"><SelectValue placeholder={platform}>{platform}</SelectValue></SelectTrigger>
             <SelectContent>{platforms.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent>
@@ -123,11 +102,7 @@ export function DesignAssetsCatalog({ contents }: { contents: DesignAssetCard[] 
             <Button aria-label="列表视图" className={cn('size-7 rounded-md p-0', view === 'list' ? 'bg-white/12 text-white hover:bg-white/16' : 'text-white/45 hover:bg-white/8 hover:text-white')} onClick={() => setView('list')} size="icon-xs" type="button" variant="ghost"><LayoutList /></Button>
           </div>
         </div>
-        <div className="mt-6 flex flex-wrap gap-1.5">
-          {categories.map((item) => (
-            <Button className={cn('h-7 rounded-md px-2.5 text-xs', category === item ? 'bg-white text-black hover:bg-white/90' : 'border border-white/10 bg-transparent text-white/60 hover:bg-white/8 hover:text-white')} key={item} onClick={() => setCategory(item)} size="sm" type="button" variant={category === item ? 'default' : 'ghost'}>{item}</Button>
-          ))}
-        </div>
+        {search ? <p className="mt-3 text-xs text-white/45">搜索：{search}</p> : null}
       </section>
 
       <div className="mt-5 flex items-center justify-between text-xs text-white/42">
@@ -165,6 +140,6 @@ export function DesignAssetsCatalog({ contents }: { contents: DesignAssetCard[] 
       ) : (
         <section className="mt-3.5 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center text-sm text-white/45">没有符合当前筛选条件的资产。</section>
       )}
-    </main>
+    </section>
   );
 }

@@ -11,6 +11,7 @@ export function CatalogPageHeader({
   searchPlaceholder,
   count,
   source,
+  filterParams,
 }: {
   eyebrow: string;
   title: string;
@@ -20,6 +21,7 @@ export function CatalogPageHeader({
   searchPlaceholder: string;
   count: string;
   source?: string;
+  filterParams?: Record<string, string | undefined>;
 }) {
   return (
     <header className="relative overflow-hidden rounded-[22px] border border-white/[.11] bg-[#111112] px-6 py-7 sm:px-8">
@@ -31,6 +33,7 @@ export function CatalogPageHeader({
           <p className="mt-3 text-sm leading-6 text-white/55">{description}</p>
         </div>
         <form className="flex w-full max-w-xl gap-2" method="get">
+          {Object.entries(filterParams ?? {}).map(([key, value]) => value ? <input key={key} name={key} type="hidden" value={value} /> : null)}
           <label className="sr-only" htmlFor={searchId}>搜索{title}</label>
           <Input className="min-w-0 border-white/[.14] bg-black/[.25] text-white placeholder:text-white/35" defaultValue={search} id={searchId} name="search" placeholder={searchPlaceholder} type="search" />
           <Button className="border-white/[.16] bg-white/[.06] text-white hover:bg-white/[.12] hover:text-white" type="submit" variant="outline"><Search /> 搜索</Button>

@@ -2,6 +2,7 @@
 
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
+import { redirect } from 'next/navigation';
 
 export type ActionState = { error?: string; id?: string; savedAt?: string; submitted?: boolean };
 
@@ -17,10 +18,10 @@ function lines(formData: FormData, key: string) {
 
 function structuredBody(contentType: string, formData: FormData) {
   const text = (key: string) => optionalText(formData.get(key));
-  if (contentType === 'DESIGN_ASSET') return { assetType: text('assetType'), platforms: lines(formData, 'platforms'), scenarios: lines(formData, 'scenarios'), problemStatement: text('problemStatement'), usageGuide: text('usageGuide') };
-  if (contentType === 'AI_SKILL') return { applicableRoles: lines(formData, 'applicableRoles'), inputRequirements: text('inputRequirements'), outputSchema: text('outputSchema'), promptTemplate: text('promptTemplate'), executionSteps: text('executionSteps'), humanReviewRules: text('humanReviewRules') };
-  if (contentType === 'AI_CASE') return { background: text('background'), originalProcess: text('originalProcess'), aiResponsibilities: text('aiResponsibilities'), humanResponsibilities: text('humanResponsibilities'), resultSummary: text('resultSummary'), limitations: text('limitations') };
-  return { projectCode: text('projectCode'), domain: text('domain'), targetValue: text('targetValue'), problemStatement: text('problemStatement'), solutionHypothesis: text('solutionHypothesis'), expectedOutcome: text('expectedOutcome') };
+  if (contentType === 'DESIGN_ASSET') return { assetType: text('assetType'), platforms: lines(formData, 'platforms'), scenarios: lines(formData, 'scenarios'), unsuitableScenarios: lines(formData, 'unsuitableScenarios'), problemStatement: text('problemStatement'), usageGuide: text('usageGuide'), resourceLinks: lines(formData, 'resourceLinks'), relatedAssetIds: lines(formData, 'relatedAssetIds') };
+  if (contentType === 'AI_SKILL') return { goal: text('goal'), scenarios: lines(formData, 'scenarios'), unsuitableScenarios: lines(formData, 'unsuitableScenarios'), applicableRoles: lines(formData, 'applicableRoles'), inputRequirements: text('inputRequirements'), outputSchema: text('outputSchema'), promptTemplate: text('promptTemplate'), executionSteps: text('executionSteps'), exampleInput: text('exampleInput'), exampleOutput: text('exampleOutput'), humanReviewRules: text('humanReviewRules'), limitations: text('limitations'), recommendedModels: lines(formData, 'recommendedModels'), dataSecurityLevel: text('dataSecurityLevel'), promptVersion: text('promptVersion') };
+  if (contentType === 'AI_CASE') return { background: text('background'), originalProblem: text('originalProblem'), originalProcess: text('originalProcess'), aiIntervention: text('aiIntervention'), aiResponsibilities: text('aiResponsibilities'), humanResponsibilities: text('humanResponsibilities'), resultSummary: text('resultSummary'), beforeAfterComparison: text('beforeAfterComparison'), sampleSize: text('sampleSize'), validationMethod: text('validationMethod'), dataResult: text('dataResult'), limitations: text('limitations'), reusableConclusion: text('reusableConclusion'), relatedSkillContentId: text('relatedSkillContentId'), relatedProjectContentId: text('relatedProjectContentId') };
+  return { projectCode: text('projectCode'), domain: text('domain'), targetValue: text('targetValue'), projectStage: text('projectStage'), priority: text('priority'), problemStatement: text('problemStatement'), solutionHypothesis: text('solutionHypothesis'), expectedOutcome: text('expectedOutcome'), riskLevel: text('riskLevel'), evaluationResult: text('evaluationResult'), relatedSkillIds: lines(formData, 'relatedSkillIds'), relatedCaseIds: lines(formData, 'relatedCaseIds'), convertedProjectRef: text('convertedProjectRef') };
 }
 
 export async function createDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
@@ -86,6 +87,22 @@ export async function autosaveDraftAction(_: ActionState, formData: FormData): P
   } catch (error) {
     return { error: error instanceof Error ? error.message : '自动保存失败。' };
   }
+}
+
+export async function saveAndPreviewDraftAction(formData: FormData) {
+  const id = String(formData.get('id') ?? '');
+  if (!id) return;
+  await serverApiFetch(`/api/content-drafts/${id}`, {
+    method: 'PATCH',
+    headers: { ...(await authenticatedApiHeaders()), 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: formData.get('title'),
+      summary: optionalText(formData.get('summary')),
+      changeSummary: optionalText(formData.get('changeSummary')),
+      body: structuredBody(String(formData.get('contentType') ?? ''), formData),
+    }),
+  });
+  redirect(`/workspace/submit/${encodeURIComponent(id)}/preview`);
 }
 
 export async function contentLifecycleAction(_: ActionState, formData: FormData): Promise<ActionState> {

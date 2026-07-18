@@ -26,9 +26,25 @@ let publishedContent;
 let memberDraftContent;
 let memberRestrictedContent;
 let adminRestrictedContent;
+let organizationContent;
+let publishedAttachmentFileId;
+let restrictedAttachmentFileId;
+let filterCategoryId;
 const contentIds = [];
 const categoryIds = [];
+const tagIds = [];
 let serverOutput = '';
+
+const completeAssetBody = (blocks = []) => ({
+  assetType: 'COMPONENT_STANDARD',
+  platforms: ['Web'],
+  scenarios: ['Integration validation'],
+  unsuitableScenarios: ['Unreviewed production release'],
+  problemStatement: 'Integration fixture keeps the content contract complete.',
+  usageGuide: 'Review the asset before applying it to a handoff.',
+  resourceLinks: ['https://example.test/integration-asset'],
+  blocks,
+});
 
 async function waitForServer() {
   for (let attempt = 0; attempt < 50; attempt += 1) {
@@ -154,7 +170,7 @@ before(async () => {
         versionStatus: status,
         title: content.title,
         summary: content.summary,
-        body: { blocks: [] },
+        body: completeAssetBody(),
         createdById: ownerId,
         publishedAt: status === 'PUBLISHED' ? new Date() : null,
       },
@@ -175,7 +191,7 @@ before(async () => {
   }
 
   publishedContent = await createAsset(`integration-public-${runId}`, 'PUBLIC');
-  await createAsset(`integration-organization-${runId}`, 'ORGANIZATION');
+  organizationContent = await createAsset(`integration-organization-${runId}`, 'ORGANIZATION');
   await createAsset(`integration-team-${runId}`, 'TEAM');
   memberRestrictedContent = await createAsset(`integration-restricted-${runId}`, 'RESTRICTED');
   adminRestrictedContent = await createAsset(
@@ -185,6 +201,71 @@ before(async () => {
     adminUser.id,
   );
   memberDraftContent = await createAsset(`integration-draft-${runId}`, 'ORGANIZATION', 'DRAFT');
+  const filterCategory = await prisma.category.create({
+    data: {
+      organizationId: organization.id,
+      name: `Integration filter ${runId}`,
+      code: `filter-${runId}`,
+      contentTypes: ['DESIGN_ASSET'],
+    },
+  });
+  const filterTag = await prisma.tag.create({
+    data: {
+      organizationId: organization.id,
+      name: `Integration filter tag ${runId}`,
+      normalizedName: `integration-filter-${runId}`,
+    },
+  });
+  categoryIds.push(filterCategory.id);
+  filterCategoryId = filterCategory.id;
+  tagIds.push(filterTag.id);
+  await prisma.content.update({
+    where: { id: organizationContent.id },
+    data: { categoryId: filterCategory.id, verificationStatus: 'VERIFIED' },
+  });
+  await prisma.contentTag.create({
+    data: { contentId: organizationContent.id, tagId: filterTag.id, createdById: memberUser.id },
+  });
+  const [publishedVersion, restrictedVersion] = await Promise.all([
+    prisma.content.findUniqueOrThrow({ where: { id: publishedContent.id }, select: { currentVersionId: true } }),
+    prisma.content.findUniqueOrThrow({ where: { id: adminRestrictedContent.id }, select: { currentVersionId: true } }),
+  ]);
+  const [publishedFile, restrictedFile] = await Promise.all([
+    prisma.fileAttachment.create({
+      data: {
+        organizationId: organization.id,
+        originalName: 'integration-published.txt',
+        storageKey: `integration/${runId}/published.txt`,
+        mimeType: 'text/plain',
+        sizeBytes: 12,
+        checksum: 'sha256:integration',
+        accessLevel: 'RESTRICTED',
+        uploadStatus: 'READY',
+        uploadedById: adminUser.id,
+      },
+    }),
+    prisma.fileAttachment.create({
+      data: {
+        organizationId: organization.id,
+        originalName: 'integration-restricted.txt',
+        storageKey: `integration/${runId}/restricted.txt`,
+        mimeType: 'text/plain',
+        sizeBytes: 12,
+        checksum: 'sha256:integration',
+        accessLevel: 'RESTRICTED',
+        uploadStatus: 'READY',
+        uploadedById: adminUser.id,
+      },
+    }),
+  ]);
+  publishedAttachmentFileId = publishedFile.id;
+  restrictedAttachmentFileId = restrictedFile.id;
+  await prisma.attachmentRelation.createMany({
+    data: [
+      { fileId: publishedFile.id, entityType: 'VERSION', entityId: publishedVersion.currentVersionId, usageType: 'ATTACHMENT' },
+      { fileId: restrictedFile.id, entityType: 'VERSION', entityId: restrictedVersion.currentVersionId, usageType: 'ATTACHMENT' },
+    ],
+  });
 
   server = spawn(process.execPath, ['dist/main.js'], {
     cwd: new URL('../', import.meta.url),
@@ -234,7 +315,14 @@ after(async () => {
       ],
     },
   });
+  await prisma.attachmentRelation.deleteMany({
+    where: { fileId: { in: [publishedAttachmentFileId, restrictedAttachmentFileId].filter(Boolean) } },
+  });
+  await prisma.fileAttachment.deleteMany({
+    where: { id: { in: [publishedAttachmentFileId, restrictedAttachmentFileId].filter(Boolean) } },
+  });
   await prisma.content.deleteMany({ where: { id: { in: contentIds } } });
+  if (tagIds.length) await prisma.tag.deleteMany({ where: { id: { in: tagIds } } });
   if (categoryIds.length) await prisma.category.deleteMany({ where: { id: { in: categoryIds } } });
   if (team) await prisma.team.delete({ where: { id: team.id } });
   await prisma.notification.deleteMany({
@@ -283,6 +371,66 @@ test(
     const detail = await memberOrganizationDetail.json();
     assert.equal(detail.currentVersion.versionNumber, 1);
     assert.equal(detail.assetDetail.assetType, 'COMPONENT_STANDARD');
+
+    const filters = new URLSearchParams({
+      type: 'DESIGN_ASSET',
+      categoryId: filterCategoryId,
+      tag: `integration-filter-${runId}`,
+      verificationStatus: 'VERIFIED',
+    });
+    const filteredCatalog = await fetch(`${baseUrl}/contents?${filters}`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(filteredCatalog.status, 200);
+    const filteredFixtures = (await filteredCatalog.json()).items.filter((item) => contentIds.includes(item.id));
+    assert.deepEqual(filteredFixtures.map((item) => item.id), [organizationContent.id]);
+  },
+);
+
+test(
+  'published attachments are listed and downloadable only through authorized signed URLs',
+  { skip: !integrationEnabled },
+  async () => {
+    const detail = await fetch(`${baseUrl}/contents/${publishedContent.slug}`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(detail.status, 200);
+    assert.equal((await detail.json()).attachments.some((item) => item.file.id === publishedAttachmentFileId), true);
+
+    const allowedDownload = await fetch(`${baseUrl}/files/${publishedAttachmentFileId}/download`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(allowedDownload.status, 200);
+    assert.equal(typeof (await allowedDownload.json()).url, 'string');
+
+    const blockedDownload = await fetch(`${baseUrl}/files/${restrictedAttachmentFileId}/download`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(blockedDownload.status, 403);
+  },
+);
+
+test(
+  'draft preview source is visible only to its author or content editors',
+  { skip: !integrationEnabled },
+  async () => {
+    const authorView = await fetch(`${baseUrl}/content-drafts/${memberDraftContent.id}`, {
+      headers: { 'x-dev-user-email': memberEmail },
+    });
+    assert.equal(authorView.status, 200);
+    const authorDraft = await authorView.json();
+    assert.equal(authorDraft.draftVersion.versionStatus, 'DRAFT');
+    assert.equal(authorDraft.draftVersion.body.assetType, 'COMPONENT_STANDARD');
+
+    const reviewerView = await fetch(`${baseUrl}/content-drafts/${memberDraftContent.id}`, {
+      headers: { 'x-dev-user-email': reviewerEmail },
+    });
+    assert.equal(reviewerView.status, 403);
+
+    const editorView = await fetch(`${baseUrl}/content-drafts/${memberDraftContent.id}`, {
+      headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(editorView.status, 200);
   },
 );
 
@@ -405,19 +553,24 @@ test(
     const recordedEvent = await fetch(`${baseUrl}/events`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
-      body: JSON.stringify({ eventType: 'content_share', contentId: publishedContent.id }),
+      body: JSON.stringify({
+        eventType: 'content_share',
+        contentId: publishedContent.id,
+        sourcePage: `/workspace/design-assets/${publishedContent.slug}`,
+      }),
     });
     assert.equal(recordedEvent.status, 201);
-    assert.equal(
-      await prisma.usageEvent.count({
-        where: {
-          userId: memberUser.id,
-          contentId: publishedContent.id,
-          eventType: 'content_share',
-        },
-      }),
-      1,
-    );
+    const shareEvent = await prisma.usageEvent.findFirstOrThrow({
+      where: {
+        userId: memberUser.id,
+        contentId: publishedContent.id,
+        eventType: 'content_share',
+      },
+      orderBy: { occurredAt: 'desc' },
+    });
+    assert.deepEqual(shareEvent.metadata, {
+      sourcePage: `/workspace/design-assets/${publishedContent.slug}`,
+    });
 
     const memberOverview = await fetch(`${baseUrl}/analytics/overview`, {
       headers: { 'x-dev-user-email': memberEmail },
@@ -493,7 +646,7 @@ test(
       body: JSON.stringify({
         title: 'Revised integration draft',
         changeSummary: 'Added the requested usage guide.',
-        body: { usageGuide: 'Use this checked workflow before handoff.' },
+        body: completeAssetBody(),
       }),
     });
     assert.equal(revise.status, 200);
@@ -581,7 +734,7 @@ test(
     const autosave = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
-      body: JSON.stringify({ title: 'Edited draft title', body: { blocks: ['new draft only'] } }),
+      body: JSON.stringify({ title: 'Edited draft title', body: completeAssetBody(['new draft only']) }),
     });
     assert.equal(autosave.status, 200);
 
@@ -593,7 +746,7 @@ test(
     assert.equal(afterAutosave.title, original.title);
     assert.equal(afterAutosave.currentVersion.title, original.currentVersion.title);
     assert.equal(afterAutosave.draftVersion.title, 'Edited draft title');
-    assert.deepEqual(afterAutosave.draftVersion.body, { blocks: ['new draft only'] });
+    assert.deepEqual(afterAutosave.draftVersion.body, completeAssetBody(['new draft only']));
 
     const submit = await fetch(`${baseUrl}/reviews/content/${publishedContent.id}/submit`, {
       method: 'POST',

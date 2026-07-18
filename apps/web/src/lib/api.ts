@@ -10,6 +10,16 @@ export class ApiError extends Error {
   }
 }
 
+async function apiError(response: Response) {
+  let message = `API request failed with status ${response.status}`;
+  try {
+    const body = await response.json() as { message?: string | string[] };
+    if (Array.isArray(body.message)) message = body.message.join('；');
+    else if (body.message) message = body.message;
+  } catch {}
+  return new ApiError(response.status, message);
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...init,
@@ -17,7 +27,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `API request failed with status ${response.status}`);
+    throw await apiError(response);
   }
 
   return response.json() as Promise<T>;
@@ -32,7 +42,7 @@ export async function serverApiFetch<T>(path: string, init?: RequestInit): Promi
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `API request failed with status ${response.status}`);
+    throw await apiError(response);
   }
 
   return response.json() as Promise<T>;

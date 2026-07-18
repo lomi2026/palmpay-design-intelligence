@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
-import { autosaveDraftAction, type ActionState } from './actions';
+import { autosaveDraftAction, saveAndPreviewDraftAction, type ActionState } from './actions';
 import { ReviewSubmission } from './review-submission';
 import { ContentTypeFields } from './content-type-fields';
 import { DraftAttachments } from './draft-attachments';
@@ -31,7 +31,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
     <label className="grid gap-2 text-sm font-medium text-white/75">摘要<Textarea className="min-h-28 border-white/[.14] bg-black/25 text-white" defaultValue={draft.summary ?? ''} name="summary" /></label>
     <ContentTypeFields body={draft.draftVersion?.body as Record<string, unknown> | undefined} contentType={draft.contentType} />
     {state.error ? <p className="text-sm text-red-400">{state.error}</p> : null}
-    <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[.1] pt-5"><p aria-live="polite" className="text-xs text-white/40">草稿 v{draft.draftVersion?.versionNumber ?? 1} · {pending ? '自动保存中…' : state.savedAt ? `已保存 ${state.savedAt}` : '输入后将自动保存'}</p><Button className="h-11 bg-white px-5 font-semibold text-black hover:bg-white/85" disabled={pending} type="submit">{pending ? '保存中…' : '立即保存'}</Button></div>
+    <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[.1] pt-5"><p aria-live="polite" className="text-xs text-white/40">草稿 v{draft.draftVersion?.versionNumber ?? 1} · {pending ? '自动保存中…' : state.savedAt ? `已保存 ${state.savedAt}` : '输入后将自动保存'}</p><div className="flex flex-wrap gap-2"><Button className="h-11 border-white/[.16] bg-transparent px-4 text-white hover:bg-white/[.08] hover:text-white" formAction={saveAndPreviewDraftAction} type="submit" variant="outline">预览草稿</Button><Button className="h-11 bg-white px-5 font-semibold text-black hover:bg-white/85" disabled={pending} type="submit">{pending ? '保存中…' : '立即保存'}</Button></div></div>
   </form>
     <DraftAttachments attachments={draft.attachments} contentId={draft.id} />
     <ReviewSubmission contentId={draft.id} status={draftStatus} />

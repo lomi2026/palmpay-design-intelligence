@@ -58,6 +58,7 @@ export class ContentService {
       deletedAt: null,
       contentType: query.type,
       categoryId: query.categoryId,
+      verificationStatus: query.verificationStatus,
       tags: query.tag
         ? { some: { tag: { normalizedName: query.tag.trim().toLowerCase() } } }
         : undefined,
@@ -106,7 +107,14 @@ export class ContentService {
     if (user) await this.engagement.recordContentView(user, content.id);
 
     const attachments = await this.prisma.attachmentRelation.findMany({
-      where: { entityType: AttachmentEntityType.CONTENT, entityId: content.id },
+      where: {
+        OR: [
+          { entityType: AttachmentEntityType.VERSION, entityId: content.currentVersionId! },
+          // Compatibility for historical imports created before version-bound attachments.
+          { entityType: AttachmentEntityType.CONTENT, entityId: content.id },
+        ],
+        file: { uploadStatus: 'READY', deletedAt: null },
+      },
       include: { file: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });

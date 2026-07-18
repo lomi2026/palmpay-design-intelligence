@@ -18,6 +18,7 @@ import {
 import type { AutosaveDraftDto, CreateDraftDto } from './drafts.dto';
 import { AuditService } from '../governance/audit.service';
 import { EngagementService } from '../engagement/engagement.service';
+import { assertContentComplete } from './content-completeness';
 
 @Injectable()
 export class DraftsService {
@@ -209,6 +210,14 @@ export class DraftsService {
     ) {
       throw new ConflictException('This content cannot be published in its current state.');
     }
+    assertContentComplete({
+      contentType: content.contentType,
+      title: content.draftVersion.title,
+      summary: content.draftVersion.summary,
+      ownerId: content.ownerId,
+      versionNumber: content.draftVersion.versionNumber,
+      body: content.draftVersion.body,
+    });
 
     const now = new Date();
     const published = await this.prisma.$transaction(async (tx) => {

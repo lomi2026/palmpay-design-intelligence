@@ -16,6 +16,7 @@ import {
 import type { AssignReviewerDto, ReviewDecisionDto, SubmitReviewDto } from './reviews.dto';
 import { AuditService } from '../governance/audit.service';
 import { EngagementService } from '../engagement/engagement.service';
+import { assertContentComplete } from '../content/content-completeness';
 
 @Injectable()
 export class ReviewsService {
@@ -44,6 +45,14 @@ export class ReviewsService {
     ) {
       throw new ConflictException('Only a draft or change-requested version can be submitted.');
     }
+    assertContentComplete({
+      contentType: content.contentType,
+      title: draftVersion.title,
+      summary: draftVersion.summary,
+      ownerId: content.ownerId,
+      versionNumber: draftVersion.versionNumber,
+      body: draftVersion.body,
+    });
 
     const completed = await this.prisma.$transaction(async (tx) => {
       const active = await tx.reviewRequest.findFirst({

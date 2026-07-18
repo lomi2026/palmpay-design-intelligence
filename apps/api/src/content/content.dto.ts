@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
-import { ContentType } from '../generated/prisma/enums';
+import { ContentType, VerificationStatus } from '../generated/prisma/enums';
 
 export class ContentListQueryDto {
   @IsOptional()
@@ -20,6 +20,10 @@ export class ContentListQueryDto {
   @IsString()
   @MaxLength(200)
   search?: string;
+
+  @IsOptional()
+  @IsEnum(VerificationStatus)
+  verificationStatus?: VerificationStatus;
 
   @IsOptional()
   @Type(() => Number)

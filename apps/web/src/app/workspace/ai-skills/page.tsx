@@ -5,6 +5,7 @@ import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { verificationLabels } from '@/lib/ai-catalog';
 import type { ContentCard, ContentListResponse } from '@/lib/content-types';
 import { CatalogPageHeader } from '@/components/workspace/catalog-page-header';
+import { CatalogFilterControls } from '@/components/workspace/catalog-filter-controls';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,19 +13,23 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 type SkillCard = ContentCard & { skillDetail?: { applicableRoles: string[] } | null };
 type SkillListResponse = Omit<ContentListResponse, 'items'> & { items: SkillCard[] };
 
-export default async function AISkillsPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
-  const { search = '' } = await searchParams;
+export default async function AISkillsPage({ searchParams }: { searchParams: Promise<{ search?: string; categoryId?: string; tag?: string; verificationStatus?: string }> }) {
+  const { search = '', categoryId, tag, verificationStatus } = await searchParams;
+  const filters = { search: search.trim() || undefined, categoryId, tag, verificationStatus };
   const query = new URLSearchParams({ type: 'AI_SKILL', pageSize: '100' });
-  if (search.trim()) query.set('search', search.trim());
-  const [skills, currentUser] = await Promise.all([
+  for (const [key, value] of Object.entries(filters)) if (value) query.set(key, value);
+  const baseQuery = new URLSearchParams({ type: 'AI_SKILL', pageSize: '100' });
+  const [skills, filterSource, currentUser] = await Promise.all([
     serverApiFetch<SkillListResponse>(`/api/contents?${query}`, { headers: await authenticatedApiHeaders() }),
+    serverApiFetch<SkillListResponse>(`/api/contents?${baseQuery}`, { headers: await authenticatedApiHeaders() }),
     loadCurrentUser(),
   ]);
   const canCreate = currentUser?.permissions.includes('content.create');
 
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
-      <CatalogPageHeader eyebrow="AI CAPABILITIES" title="AI Skill" description="面向体验设计工作流的可复用 AI 方法。使用前需遵循输入边界并进行人工复核。" search={search} searchId="skill-search" searchPlaceholder="搜索名称或用途" count={`${skills.total} 个已发布 Skill`} />
+      <CatalogPageHeader eyebrow="AI CAPABILITIES" title="AI Skill" description="面向体验设计工作流的可复用 AI 方法。使用前需遵循输入边界并进行人工复核。" search={search} searchId="skill-search" searchPlaceholder="搜索名称或用途" count={`${skills.total} 个已发布 Skill`} filterParams={{ categoryId, tag, verificationStatus }} />
+      <CatalogFilterControls contents={filterSource.items} filters={filters} pathname="/workspace/ai-skills" />
       {canCreate ? <div className="mt-3 flex justify-end"><Button asChild className="h-9 rounded-lg bg-white px-3.5 text-sm text-black hover:bg-white/90"><Link href="/workspace/submit?type=AI_SKILL"><Plus className="size-4" />新增 Skill</Link></Button></div> : null}
       {skills.items.length ? (
         <section className="mt-5 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">

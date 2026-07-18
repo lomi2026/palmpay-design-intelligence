@@ -1,6 +1,7 @@
-import type { ContentCard } from './content-types';
+import type { ContentCard, PublishedAttachment } from './content-types';
 
 export interface AISkillDetail extends ContentCard {
+  attachments: PublishedAttachment[];
   skillDetail: {
     applicableRoles: string[];
     inputRequirements: { description?: string } | null;
@@ -24,6 +25,7 @@ export interface AISkillDetail extends ContentCard {
 }
 
 export interface AICaseDetail extends ContentCard {
+  attachments: PublishedAttachment[];
   caseDetail: {
     background: string | null;
     originalProcess: string | null;

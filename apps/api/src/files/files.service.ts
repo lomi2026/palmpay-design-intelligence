@@ -4,7 +4,7 @@ import type { IncomingMessage } from 'node:http';
 import { extname } from 'node:path';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../database/prisma.service';
-import { FileAccessLevel, UploadStatus } from '../generated/prisma/enums';
+import { AttachmentEntityType, ContentStatus, ContentVisibility, FileAccessLevel, UploadStatus } from '../generated/prisma/enums';
 import type { CreateUploadIntentDto } from './files.dto';
 import { FileStorageService } from './file-storage.service';
 
@@ -110,7 +110,7 @@ export class FilesService {
   }
 
   async createDownloadUrl(user: AuthenticatedUser, fileId: string) {
-    const file = await this.findManageableFile(user, fileId);
+    const file = await this.findDownloadableFile(user, fileId);
     if (file.uploadStatus !== UploadStatus.READY || file.deletedAt) {
       throw new ConflictException('This file is not ready to download.');
     }
@@ -171,6 +171,54 @@ export class FilesService {
     if (file.uploadedById !== user.id && !canManageAll) {
       throw new ForbiddenException('You cannot access this file.');
     }
+    return file;
+  }
+
+  private async findDownloadableFile(user: AuthenticatedUser, fileId: string) {
+    const file = await this.prisma.fileAttachment.findFirst({
+      where: { id: fileId, organizationId: user.organizationId },
+    });
+    if (!file) throw new NotFoundException('File not found.');
+    if (file.uploadedById === user.id || user.permissions.includes('content.edit_all')) return file;
+
+    const relations = await this.prisma.attachmentRelation.findMany({
+      where: {
+        fileId,
+        entityType: { in: [AttachmentEntityType.VERSION, AttachmentEntityType.CONTENT] },
+      },
+      select: { entityType: true, entityId: true },
+    });
+    const versionIds = relations
+      .filter((relation) => relation.entityType === AttachmentEntityType.VERSION)
+      .map((relation) => relation.entityId);
+    const contentIds = relations
+      .filter((relation) => relation.entityType === AttachmentEntityType.CONTENT)
+      .map((relation) => relation.entityId);
+    if (!versionIds.length && !contentIds.length)
+      throw new ForbiddenException('You cannot access this file.');
+    const readableContent = await this.prisma.content.findFirst({
+      where: {
+        organizationId: user.organizationId,
+        status: ContentStatus.PUBLISHED,
+        deletedAt: null,
+        OR: [
+          ...(versionIds.length ? [{ currentVersionId: { in: versionIds } }] : []),
+          ...(contentIds.length ? [{ id: { in: contentIds } }] : []),
+        ],
+        AND: [{
+          OR: [
+          { visibility: ContentVisibility.PUBLIC },
+          { visibility: ContentVisibility.ORGANIZATION },
+          ...(user.primaryTeamId
+            ? [{ visibility: ContentVisibility.TEAM, teamId: user.primaryTeamId }]
+            : []),
+          { visibility: ContentVisibility.RESTRICTED, ownerId: user.id },
+          ],
+        }],
+      },
+      select: { id: true },
+    });
+    if (!readableContent) throw new ForbiddenException('You cannot access this file.');
     return file;
   }
 

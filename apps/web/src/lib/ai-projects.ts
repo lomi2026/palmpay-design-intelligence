@@ -1,4 +1,4 @@
-import type { ContentCard } from './content-types';
+import type { ContentCard, PublishedAttachment } from './content-types';
 
 export type ProjectStage = 'EXPLORING' | 'READY' | 'PILOTING' | 'CONVERTED' | 'ARCHIVED';
 
@@ -33,7 +33,7 @@ export interface AIProjectDetail extends AIProjectCard {
     evaluationResult: unknown;
     suggestedOwnerTeam: { id: string; name: string; code: string } | null;
   } | null;
-  attachments: Array<{ id: string; file: { id: string; originalName: string; mimeType: string; sizeBytes: string } }>;
+  attachments: PublishedAttachment[];
 }
 
 export type ImportedProjectBody = {
