@@ -18,7 +18,10 @@ export async function developmentLogin(formData: FormData) {
 
   const email = result.data.email.trim().toLowerCase();
   try {
-    await serverApiFetch<CurrentUser>('/api/me', { headers: { 'x-dev-user-email': email } });
+    await serverApiFetch<CurrentUser>('/api/me', {
+      signal: AbortSignal.timeout(12000),
+      headers: { 'x-dev-user-email': email },
+    });
   } catch {
     redirect('/login?error=user-unavailable');
   }
@@ -44,6 +47,7 @@ export async function testLogin(formData: FormData) {
   try {
     const session = await serverApiFetch<{ accessToken: string; expiresAt: string }>('/api/auth/test-sessions', {
       method: 'POST',
+      signal: AbortSignal.timeout(12000),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: result.data.email.trim().toLowerCase(),

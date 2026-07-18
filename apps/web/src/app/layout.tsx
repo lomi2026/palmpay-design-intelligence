@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Providers } from '@/components/providers';
-import { TooltipProvider } from '@/components/ui/tooltip';
 
 export const metadata: Metadata = {
   title: 'PalmPay体验设计Hub',
@@ -12,9 +10,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="zh-CN" suppressHydrationWarning className="dark">
       <body suppressHydrationWarning>
-        <TooltipProvider>
-          <Providers>{children}</Providers>
-        </TooltipProvider>
+        {children}
       </body>
     </html>
   );

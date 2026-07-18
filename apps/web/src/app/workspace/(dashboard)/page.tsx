@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import {
   ArrowRight,
   BookOpenCheck,
@@ -19,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
-import { serverApiFetch } from '@/lib/api';
+import { optionalServerApiFetch } from '@/lib/api';
 import type { ContentCard as ContentCardData, ContentListResponse } from '@/lib/content-types';
 
 const journeySteps = [
@@ -60,6 +61,10 @@ const reviewLabels: Record<string, string> = {
   CANCELLED: '已取消',
 };
 
+function emptyContentList(pageSize: number): ContentListResponse {
+  return { items: [], page: 1, pageSize, total: 0 };
+}
+
 function contentHref(content: ContentCardData) {
   const routeSegment = content.contentType === 'DESIGN_ASSET'
     ? 'design-assets'
@@ -71,18 +76,71 @@ function contentHref(content: ContentCardData) {
   return `/workspace/${routeSegment}/${content.slug}`;
 }
 
-export default async function WorkspacePage() {
-  const user = await loadCurrentUser();
-  const canCreate = user?.permissions.includes('content.create') ?? false;
+function MetricCardsFallback() {
+  return (
+    <section className="mt-1.5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="正在加载工作台指标">
+      {Array.from({ length: 4 }, (_, index) => (
+        <Card key={index} className="min-h-48 rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none">
+          <CardContent className="p-5">
+            <div className="size-9 animate-pulse rounded-xl bg-white/[.06]" />
+            <div className="mt-7 h-10 w-20 animate-pulse rounded bg-white/[.07]" />
+            <div className="mt-2 h-4 w-24 animate-pulse rounded bg-white/[.06]" />
+            <div className="mt-2 h-3 w-32 animate-pulse rounded bg-white/[.045]" />
+          </CardContent>
+        </Card>
+      ))}
+    </section>
+  );
+}
+
+function RecentUpdatesFallback() {
+  return (
+    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none" aria-label="正在加载最近更新">
+      <CardContent className="p-5">
+        <div className="h-5 w-24 animate-pulse rounded bg-white/[.08]" />
+        <div className="mt-2 h-3 w-40 animate-pulse rounded bg-white/[.05]" />
+        <div className="mt-5 space-y-4">
+          {Array.from({ length: 5 }, (_, index) => (
+            <div className="flex items-center gap-4 py-1" key={index}>
+              <div className="size-9 shrink-0 animate-pulse rounded-lg bg-white/[.06]" />
+              <div className="min-w-0 flex-1">
+                <div className="h-4 w-3/5 animate-pulse rounded bg-white/[.07]" />
+                <div className="mt-2 h-3 w-2/5 animate-pulse rounded bg-white/[.045]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TodoFallback() {
+  return (
+    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none" aria-label="正在加载待办">
+      <CardContent className="p-5">
+        <div className="h-5 w-20 animate-pulse rounded bg-white/[.08]" />
+        <div className="mt-2 h-3 w-36 animate-pulse rounded bg-white/[.05]" />
+        <div className="mt-5 space-y-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div className="rounded-xl border border-white/[.1] bg-white/[.025] p-3.5" key={index}>
+              <div className="h-4 w-4/5 animate-pulse rounded bg-white/[.07]" />
+              <div className="mt-3 h-3 w-3/5 animate-pulse rounded bg-white/[.045]" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+async function MetricCards() {
   const headers = await authenticatedApiHeaders();
-  const [contents, projects, favorites, recent, submissions] = await Promise.all([
-    serverApiFetch<ContentListResponse>('/api/contents?pageSize=5', { headers }),
-    serverApiFetch<ContentListResponse>('/api/contents?type=AI_PROJECT&pageSize=1', { headers }),
-    serverApiFetch<PersonalItems>('/api/me/favorites', { headers }),
-    serverApiFetch<PersonalItems>('/api/me/recent-views', { headers }),
-    user?.permissions.includes('content.submit')
-      ? serverApiFetch<{ items: Submission[] }>('/api/reviews/mine', { headers })
-      : Promise.resolve({ items: [] }),
+  const [contents, projects, favorites, recent] = await Promise.all([
+    optionalServerApiFetch<ContentListResponse>('/api/contents?pageSize=5', { headers }, emptyContentList(5)),
+    optionalServerApiFetch<ContentListResponse>('/api/contents?type=AI_PROJECT&pageSize=1', { headers }, emptyContentList(1)),
+    optionalServerApiFetch<PersonalItems>('/api/me/favorites', { headers }, { items: [] }),
+    optionalServerApiFetch<PersonalItems>('/api/me/recent-views', { headers }, { items: [] }),
   ]);
   const metrics = [
     [BookOpenCheck, '正式目录', contents.total, '已发布内容', '按当前账号权限可见'],
@@ -90,7 +148,43 @@ export default async function WorkspacePage() {
     [Heart, '个人空间', favorites.items.length, '我的收藏', '跨设备同步'],
     [Clock3, '个人空间', recent.items.length, '最近浏览', '仍有权限访问'],
   ] as const;
+
+  return (
+    <section className="mt-1.5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {metrics.map(([Icon, scope, value, label, detail]) => (
+        <Card key={label} className="min-h-48 rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none">
+          <CardContent className="relative p-5"><span className="grid size-9 place-items-center rounded-xl bg-white/[.06] text-white/80"><Icon className="size-4" /></span><span className="absolute right-5 top-6 text-[11px] font-medium text-white/45">{scope}</span><strong className="mt-7 block text-[36px] tracking-[-.06em]">{value}</strong><p className="mt-1 text-[14px] font-semibold">{label}</p><p className="mt-1 text-[12px] text-white/45">{detail}</p></CardContent>
+        </Card>
+      ))}
+    </section>
+  );
+}
+
+async function RecentUpdates() {
+  const headers = await authenticatedApiHeaders();
+  const contents = await optionalServerApiFetch<ContentListResponse>('/api/contents?pageSize=5', { headers }, emptyContentList(5));
+
+  return (
+    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><div className="flex items-start justify-between"><div><h3 className="text-[18px] font-bold">最近更新</h3><p className="mt-1 text-[12px] text-white/45">经过审核并正式发布的内容</p></div><Button asChild variant="outline" size="sm" className="border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/search">查看全部</Link></Button></div><div className="mt-5 divide-y divide-white/[.08]">{contents.items.map((item) => <Link href={contentHref(item)} className="flex items-center gap-4 py-4 transition hover:bg-white/[.025]" key={item.id}><span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/[.06]"><Copy className="size-4 text-white/65" /></span><span className="min-w-0 flex-1"><strong className="block truncate text-[13px]">{item.title}</strong><span className="mt-1 block truncate text-[11px] text-white/45">{contentTypeLabels[item.contentType]} · {item.team.name}</span></span><Badge variant="outline" className="hidden border-white/[.12] bg-white/[.03] text-[10px] text-white/70 sm:inline-flex">{verificationLabels[item.verificationStatus] ?? item.verificationStatus}</Badge><time className="text-[11px] text-white/40">{new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit' }).format(new Date(item.updatedAt))}</time></Link>)}</div></CardContent></Card>
+  );
+}
+
+async function TodoCard({ canSubmit }: { canSubmit: boolean }) {
+  const headers = await authenticatedApiHeaders();
+  const submissions = canSubmit
+    ? await optionalServerApiFetch<{ items: Submission[] }>('/api/reviews/mine', { headers }, { items: [] })
+    : { items: [] };
   const todos = submissions.items.filter((item) => item.status !== 'APPROVED' && item.status !== 'CANCELLED').slice(0, 3);
+
+  return (
+    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><h3 className="text-[18px] font-bold">我的待办</h3><p className="mt-1 text-[12px] text-white/45">来自正式提交与审核状态</p><div className="mt-5 space-y-3">{todos.length ? todos.map((item) => <Link href="/workspace/submissions" className="block rounded-xl border border-white/[.1] bg-white/[.025] p-3.5 transition hover:bg-white/[.05]" key={item.id}><strong className="block text-[13px]">{item.version.title || item.content.title}</strong><span className="mt-2 block text-[11px] text-white/45">{contentTypeLabels[item.content.contentType] ?? item.content.contentType} · {new Intl.DateTimeFormat('zh-CN').format(new Date(item.submittedAt))}</span><Badge variant="outline" className="mt-3 border-white/[.12] text-[10px] text-white/75">{reviewLabels[item.status] ?? item.status}</Badge></Link>) : <p className="rounded-xl border border-dashed border-white/[.12] p-4 text-[12px] leading-5 text-white/45">当前没有需要处理的提交。</p>}</div>{canSubmit ? <Button asChild variant="outline" className="mt-4 w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/submissions"><ClipboardCheck className="size-4" /> 查看我的提交</Link></Button> : null}</CardContent></Card>
+  );
+}
+
+export default async function WorkspacePage() {
+  const user = await loadCurrentUser();
+  const canCreate = user?.permissions.includes('content.create') ?? false;
+  const canSubmit = user?.permissions.includes('content.submit') ?? false;
   return (
     <main id="root" className="v9-source-home mx-auto min-h-[calc(100vh-4rem)] w-full max-w-[1440px] bg-[#090909] px-4 pb-16 pt-6 text-[#f4f4f5] sm:px-6 lg:px-8">
       <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -131,17 +225,17 @@ export default async function WorkspacePage() {
       </section>
 
       <div className="mb-2 flex items-center justify-between"><span className="text-xs text-white/45">正式数据库实时数据 · 按账号权限过滤</span>{user?.permissions.includes('analytics.read') ? <Button asChild variant="ghost" size="sm" className="text-white/75 hover:bg-white/[.07] hover:text-white"><Link href="/workspace/insights">查看数据口径 <ArrowRight className="size-3" /></Link></Button> : null}</div>
-      <section className="mt-1.5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map(([Icon, scope, value, label, detail]) => (
-          <Card key={label} className="min-h-48 rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none">
-            <CardContent className="relative p-5"><span className="grid size-9 place-items-center rounded-xl bg-white/[.06] text-white/80"><Icon className="size-4" /></span><span className="absolute right-5 top-6 text-[11px] font-medium text-white/45">{scope}</span><strong className="mt-7 block text-[36px] tracking-[-.06em]">{value}</strong><p className="mt-1 text-[14px] font-semibold">{label}</p><p className="mt-1 text-[12px] text-white/45">{detail}</p></CardContent>
-          </Card>
-        ))}
-      </section>
+      <Suspense fallback={<MetricCardsFallback />}>
+        <MetricCards />
+      </Suspense>
 
       <section className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,.8fr)]">
-        <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><div className="flex items-start justify-between"><div><h3 className="text-[18px] font-bold">最近更新</h3><p className="mt-1 text-[12px] text-white/45">经过审核并正式发布的内容</p></div><Button asChild variant="outline" size="sm" className="border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/search">查看全部</Link></Button></div><div className="mt-5 divide-y divide-white/[.08]">{contents.items.map((item) => <Link href={contentHref(item)} className="flex items-center gap-4 py-4 transition hover:bg-white/[.025]" key={item.id}><span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/[.06]"><Copy className="size-4 text-white/65" /></span><span className="min-w-0 flex-1"><strong className="block truncate text-[13px]">{item.title}</strong><span className="mt-1 block truncate text-[11px] text-white/45">{contentTypeLabels[item.contentType]} · {item.team.name}</span></span><Badge variant="outline" className="hidden border-white/[.12] bg-white/[.03] text-[10px] text-white/70 sm:inline-flex">{verificationLabels[item.verificationStatus] ?? item.verificationStatus}</Badge><time className="text-[11px] text-white/40">{new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit' }).format(new Date(item.updatedAt))}</time></Link>)}</div></CardContent></Card>
-        <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><h3 className="text-[18px] font-bold">我的待办</h3><p className="mt-1 text-[12px] text-white/45">来自正式提交与审核状态</p><div className="mt-5 space-y-3">{todos.length ? todos.map((item) => <Link href="/workspace/submissions" className="block rounded-xl border border-white/[.1] bg-white/[.025] p-3.5 transition hover:bg-white/[.05]" key={item.id}><strong className="block text-[13px]">{item.version.title || item.content.title}</strong><span className="mt-2 block text-[11px] text-white/45">{contentTypeLabels[item.content.contentType] ?? item.content.contentType} · {new Intl.DateTimeFormat('zh-CN').format(new Date(item.submittedAt))}</span><Badge variant="outline" className="mt-3 border-white/[.12] text-[10px] text-white/75">{reviewLabels[item.status] ?? item.status}</Badge></Link>) : <p className="rounded-xl border border-dashed border-white/[.12] p-4 text-[12px] leading-5 text-white/45">当前没有需要处理的提交。</p>}</div>{user?.permissions.includes('content.submit') ? <Button asChild variant="outline" className="mt-4 w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/submissions"><ClipboardCheck className="size-4" /> 查看我的提交</Link></Button> : null}</CardContent></Card>
+        <Suspense fallback={<RecentUpdatesFallback />}>
+          <RecentUpdates />
+        </Suspense>
+        <Suspense fallback={<TodoFallback />}>
+          <TodoCard canSubmit={canSubmit} />
+        </Suspense>
       </section>
     </main>
   );

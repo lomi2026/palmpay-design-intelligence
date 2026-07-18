@@ -4,11 +4,15 @@ Last Updated: 2026-07-18
 
 ## Current Phase
 
-**Phase 5.5 functional-closure audit and remediation is in progress; the external test environment core delivery is live; desktop visual parity and mobile adaptation are deferred until the P0 workflow gate passes**
+**Frontend performance remediation is the active engineering priority; new feature work, desktop visual parity and mobile adaptation are paused**
 
 ## Current Objective
 
-Close the audited P0 functional gaps and obtain external-test browser evidence before resuming desktop visual parity. Mobile-specific restoration is explicitly deferred.
+Complete the production-build Workspace performance audit and P0 remediation without changing approved visuals, information architecture, wording or business behavior. The formal Vercel deployment branch is the only implementation baseline.
+
+The first P0 pass removes unused global client providers and eager background prefetching of every permission-visible dynamic Workspace route, restores native App Router Link prefetch behavior, and adds a Workspace content loading boundary so the persistent Sidebar and Header remain visible while only the route content changes. Local production-build, typecheck, lint and unit-test verification passes; post-deployment browser profiling and Vercel Speed Insights comparison remain open.
+
+The follow-up P0 incident fix addresses the externally observed `/workspace` page hanging on its content skeleton: the workspace shell now treats notification and project-count badges as optional summaries, and the dashboard streams metrics, recent updates and personal todos behind separate Suspense boundaries with short timeout fallbacks. This prevents one slow Render/API/database summary request from blocking the entire dashboard content area. Moving from Render free hosting to a warm Alibaba Cloud service may reduce cold-start latency, but it is not a substitute for keeping non-critical dashboard data out of the blocking render path.
 
 The next engineering objective is:
 

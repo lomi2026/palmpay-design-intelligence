@@ -47,3 +47,19 @@ export async function serverApiFetch<T>(path: string, init?: RequestInit): Promi
 
   return response.json() as Promise<T>;
 }
+
+export async function optionalServerApiFetch<T>(
+  path: string,
+  init: RequestInit | undefined,
+  fallback: T,
+  timeoutMs = 3500,
+): Promise<T> {
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
+  const signal = init?.signal ? AbortSignal.any([init.signal, timeoutSignal]) : timeoutSignal;
+
+  try {
+    return await serverApiFetch<T>(path, { ...init, signal });
+  } catch {
+    return fallback;
+  }
+}

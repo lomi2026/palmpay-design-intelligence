@@ -19,6 +19,10 @@ export interface CurrentUser {
   permissions: string[];
 }
 
+function isRequestTimeout(error: unknown) {
+  return error instanceof DOMException && ['AbortError', 'TimeoutError'].includes(error.name);
+}
+
 export const loadCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const cookieStore = await cookies();
   const developmentEmail = cookieStore.get(DEVELOPMENT_USER_COOKIE)?.value;
@@ -28,10 +32,12 @@ export const loadCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   try {
     return await serverApiFetch<CurrentUser>('/api/me', {
+      signal: AbortSignal.timeout(8000),
       headers: testSession ? { Authorization: `Bearer ${testSession}` } : { 'x-dev-user-email': developmentEmail! },
     });
   } catch (error: unknown) {
     if (error instanceof ApiError && [401, 403, 404].includes(error.status)) return null;
+    if (isRequestTimeout(error)) return null;
     throw error;
   }
 });

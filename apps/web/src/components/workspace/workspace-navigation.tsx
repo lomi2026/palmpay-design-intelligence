@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type MouseEventHandler } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   BarChart3,
   Bell,
@@ -120,19 +119,10 @@ function WorkspaceNavigationLink({
   item: NavigationItem;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }) {
-  const router = useRouter();
-  const prefetchDestination = () => router.prefetch(item.href);
-
   return (
     <Link
       href={item.href}
       aria-current={active ? 'page' : undefined}
-      // Manual prefetch is intentionally used instead of toggling <Link>'s
-      // prefetch prop through React state. It starts immediately on intent and
-      // warms the complete route payload for dynamic authenticated pages.
-      prefetch={false}
-      onFocus={prefetchDestination}
-      onMouseEnter={prefetchDestination}
       onClick={onClick}
       className={cn(
         'flex h-10 items-center gap-3 rounded-[10px] px-3 text-[13px] transition',
