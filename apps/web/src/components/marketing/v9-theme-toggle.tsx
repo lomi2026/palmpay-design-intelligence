@@ -31,6 +31,8 @@ export function V9ThemeToggle() {
   const theme = useSyncExternalStore(subscribeToThemePreference, savedTheme, () => 'dark');
 
   useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
     document.querySelectorAll('.v9-source-home').forEach((element) => element.setAttribute('data-theme', theme));
   }, [theme]);
 

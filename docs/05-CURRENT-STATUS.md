@@ -16,6 +16,8 @@ The follow-up P0 incident fix addresses the externally observed `/workspace` pag
 
 The local production contribution workflow no longer refreshes an editor route after a successful review submission. Successful submissions replace the editor with `/workspace/submissions`, and direct access to a draft URL that has already entered review is redirected to the same status page instead of falling into the Workspace error boundary. A production-browser check confirmed create → submit → submission-list navigation with the persisted review shown as pending.
 
+The shared light/dark control state is synchronized with the root shadcn theme class. Token-driven primary buttons now render black-on-white in dark mode and white-on-black in light mode, while active administration tabs, review filters and catalog view toggles expose their selected state correctly. Link-backed buttons use the shadcn `asChild` contract, so their foreground tokens are no longer overridden by global anchor inheritance.
+
 The next engineering objective is:
 
 > A route or server action is not accepted merely because it exists. The next gate is a complete, deployed contributor → reviewer → administrator workflow, including real attachment download and P0 content validation. Desktop parity resumes after that gate; mobile adaptation is last.

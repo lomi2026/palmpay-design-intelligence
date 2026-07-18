@@ -174,19 +174,21 @@ export default async function AdminPage({
           the client router cache instead of blocking on a cross-region read. */}
       <nav className="mt-5 flex flex-wrap gap-2">
         {adminTabs.map(([key, label]) => (
-          <Link key={key} href={`/workspace/admin?tab=${key}`} prefetch>
-            <Button
-              variant={tab === key ? 'default' : 'outline'}
-              size="sm"
-              className={
-                tab === key
-                  ? ''
-                  : 'border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white'
-              }
-            >
+          <Button
+            asChild
+            key={key}
+            variant={tab === key ? 'default' : 'outline'}
+            size="sm"
+            className={
+              tab === key
+                ? ''
+                : 'border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white'
+            }
+          >
+            <Link aria-current={tab === key ? 'page' : undefined} href={`/workspace/admin?tab=${key}`} prefetch>
               {label}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         ))}
       </nav>
       {tab === 'content' ? (

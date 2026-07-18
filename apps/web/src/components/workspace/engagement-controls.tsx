@@ -44,26 +44,28 @@ export function FavoriteControl({
 export function ContentEngagementLinks({ contentId }: { contentId: string }) {
   return (
     <div className="flex flex-wrap gap-2" aria-label="内容协作操作">
-      <Link href={`/workspace/usage?contentId=${contentId}`}>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
-        >
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
+      >
+        <Link href={`/workspace/usage?contentId=${contentId}`}>
           <NotebookPen />
           确认使用
-        </Button>
-      </Link>
-      <Link href={`/workspace/related?contentId=${contentId}`}>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
-        >
+        </Link>
+      </Button>
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
+      >
+        <Link href={`/workspace/related?contentId=${contentId}`}>
           <Link2 />
           关联内容
-        </Button>
-      </Link>
+        </Link>
+      </Button>
       <ContentShareButton contentId={contentId} />
     </div>
   );

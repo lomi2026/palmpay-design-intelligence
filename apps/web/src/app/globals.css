@@ -64,10 +64,6 @@ body {
     sans-serif;
 }
 
-a {
-  color: inherit;
-}
-
 .v9-source-home {
   --v9-bg: #090909;
   --v9-panel: #111112;
@@ -218,6 +214,9 @@ a {
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  a {
+    color: inherit;
   }
   body {
     @apply bg-background text-foreground;

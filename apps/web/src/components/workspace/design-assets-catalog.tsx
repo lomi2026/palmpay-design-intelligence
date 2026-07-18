@@ -98,8 +98,8 @@ export function DesignAssetsCatalog({ contents, search }: { contents: DesignAsse
             <SelectContent>{platforms.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent>
           </Select>
           <div className="flex rounded-lg border border-white/10 bg-black/20 p-0.5">
-            <Button aria-label="卡片视图" className={cn('size-7 rounded-md p-0', view === 'grid' ? 'bg-white/12 text-white hover:bg-white/16' : 'text-white/45 hover:bg-white/8 hover:text-white')} onClick={() => setView('grid')} size="icon-xs" type="button" variant="ghost"><Grid2X2 /></Button>
-            <Button aria-label="列表视图" className={cn('size-7 rounded-md p-0', view === 'list' ? 'bg-white/12 text-white hover:bg-white/16' : 'text-white/45 hover:bg-white/8 hover:text-white')} onClick={() => setView('list')} size="icon-xs" type="button" variant="ghost"><LayoutList /></Button>
+            <Button aria-label="卡片视图" aria-pressed={view === 'grid'} className={cn('size-7 rounded-md p-0', view === 'grid' ? 'bg-white/12 text-white hover:bg-white/16' : 'text-white/45 hover:bg-white/8 hover:text-white')} onClick={() => setView('grid')} size="icon-xs" type="button" variant="ghost"><Grid2X2 /></Button>
+            <Button aria-label="列表视图" aria-pressed={view === 'list'} className={cn('size-7 rounded-md p-0', view === 'list' ? 'bg-white/12 text-white hover:bg-white/16' : 'text-white/45 hover:bg-white/8 hover:text-white')} onClick={() => setView('list')} size="icon-xs" type="button" variant="ghost"><LayoutList /></Button>
           </div>
         </div>
         {search ? <p className="mt-3 text-xs text-white/45">搜索：{search}</p> : null}
