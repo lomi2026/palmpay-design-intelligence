@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { serverApiFetch } from '@/lib/api';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { WorkspaceSearchShortcut } from '@/components/workspace/workspace-search-shortcut';
+import { WorkspaceRouteWarmer } from '@/components/workspace/workspace-route-warmer';
 import { V9ThemeToggle } from '@/components/marketing/v9-theme-toggle';
 import {
   WorkspaceBreadcrumb,
@@ -63,6 +64,7 @@ export default async function WorkspaceLayout({ children }: Readonly<{ children:
       </aside>
       <div className="md:pl-[224px]">
         <header className="sticky top-0 z-20 flex h-16 items-center border-b border-white/[.11] bg-[#090909]/95 px-4 backdrop-blur-xl md:px-8"><WorkspaceMobileNavigation {...navigationProps} /><WorkspaceBreadcrumb /><WorkspaceSearchShortcut /><div className="ml-auto flex items-center gap-2"><V9ThemeToggle /><Link href="/workspace/notifications" aria-label="通知中心" className="relative grid size-9 place-items-center rounded-[10px] border border-white/[.12] text-white/75 hover:bg-white/[.06]"><Bell className="size-4" />{notifications.unreadCount ? <span className="absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full bg-white px-1 py-0.5 text-[9px] font-bold leading-none text-black">{notifications.unreadCount > 99 ? '99+' : notifications.unreadCount}</span> : null}</Link><details className="group relative"><summary className="flex list-none cursor-pointer items-center gap-2 rounded-[10px] p-1.5 hover:bg-white/[.06]"><span className="grid size-8 place-items-center rounded-full bg-white/[.12] text-[11px] font-bold">{user.name.slice(0, 2).toUpperCase()}</span><span className="hidden text-left leading-4 lg:block"><strong className="block text-[12px]">{user.name}</strong><em className="block text-[11px] not-italic text-white/50">{roleLabel}</em></span><ChevronDown className="size-3 text-white/55" /></summary><form action={logout} className="absolute right-0 top-11 w-28 rounded-lg border border-white/[.12] bg-[#161616] p-1"><Button type="submit" variant="ghost" className="w-full justify-start text-white hover:bg-white/[.08] hover:text-white"><LogOut className="size-4" />退出</Button></form></details></div></header>
+        <WorkspaceRouteWarmer {...navigationProps} />
         {children}
       </div>
     </div>

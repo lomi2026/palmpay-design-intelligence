@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type MouseEventHandler, useState } from 'react';
+import { type MouseEventHandler } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   BarChart3,
   Bell,
@@ -119,18 +120,19 @@ function WorkspaceNavigationLink({
   item: NavigationItem;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }) {
-  const [hasNavigationIntent, setHasNavigationIntent] = useState(false);
+  const router = useRouter();
+  const prefetchDestination = () => router.prefetch(item.href);
 
   return (
     <Link
       href={item.href}
       aria-current={active ? 'page' : undefined}
-      // `true` is intentional: Next treats default/dynamic prefetches as a
-      // short-lived cache. A full prefetch keeps the destination available for
-      // the configured static stale time after a user has shown intent.
-      prefetch={hasNavigationIntent ? true : false}
-      onFocus={() => setHasNavigationIntent(true)}
-      onMouseEnter={() => setHasNavigationIntent(true)}
+      // Manual prefetch is intentionally used instead of toggling <Link>'s
+      // prefetch prop through React state. It starts immediately on intent and
+      // warms the complete route payload for dynamic authenticated pages.
+      prefetch={false}
+      onFocus={prefetchDestination}
+      onMouseEnter={prefetchDestination}
       onClick={onClick}
       className={cn(
         'flex h-10 items-center gap-3 rounded-[10px] px-3 text-[13px] transition',
