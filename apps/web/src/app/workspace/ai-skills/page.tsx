@@ -32,11 +32,11 @@ export default async function AISkillsPage({ searchParams }: { searchParams: Pro
             <Card key={skill.id} className="group min-h-60 border border-white/[.1] bg-[#111112] py-5 shadow-none transition hover:-translate-y-0.5 hover:border-white/[.22] hover:bg-white/[.035]">
               <CardHeader>
                 <div className="flex items-center justify-between gap-3 text-[11px] text-white/45"><Badge variant="outline" className="border-white/[.12] bg-white/[.035] text-white/60">{skill.category?.name ?? '未分类'}</Badge><span>{verificationLabels[skill.verificationStatus] ?? skill.verificationStatus}</span></div>
-                <CardTitle className="mt-4 text-[19px] leading-7 text-white"><Link className="transition group-hover:text-white/70" href={`/workspace/ai-skills/${skill.slug}`}>{skill.title}</Link></CardTitle>
+                <CardTitle className="mt-4 text-[19px] leading-7 text-white"><Link className="transition group-hover:text-white/70" href={`/workspace/ai-skills/${skill.slug}`} prefetch={false}>{skill.title}</Link></CardTitle>
                 <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/55">{skill.summary ?? '暂无说明'}</p>
               </CardHeader>
               <CardContent><div className="flex min-h-5 flex-wrap gap-1.5">{(skill.skillDetail?.applicableRoles ?? []).map((role) => <Badge variant="outline" className="border-white/[.1] bg-black/[.18] text-white/45" key={role}>{role}</Badge>)}</div></CardContent>
-              <CardFooter className="mt-auto justify-between border-white/[.1] bg-transparent px-5 pt-5 text-xs text-white/40"><span>负责人 · {skill.owner.name}</span><Link className="inline-flex items-center gap-1 transition hover:text-white" href={`/workspace/ai-skills/${skill.slug}`}>打开方法 <ArrowRight className="size-3" /></Link></CardFooter>
+              <CardFooter className="mt-auto justify-between border-white/[.1] bg-transparent px-5 pt-5 text-xs text-white/40"><span>负责人 · {skill.owner.name}</span><Link className="inline-flex items-center gap-1 transition hover:text-white" href={`/workspace/ai-skills/${skill.slug}`} prefetch={false}>打开方法 <ArrowRight className="size-3" /></Link></CardFooter>
             </Card>
           ))}
         </section>

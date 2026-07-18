@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { type MouseEventHandler, useState } from 'react';
 import {
   BarChart3,
   Bell,
@@ -109,6 +110,43 @@ function isActive(pathname: string, href: string) {
   return href === '/workspace' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function WorkspaceNavigationLink({
+  active,
+  item,
+  onClick,
+}: {
+  active: boolean;
+  item: NavigationItem;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+}) {
+  const [hasNavigationIntent, setHasNavigationIntent] = useState(false);
+
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? 'page' : undefined}
+      prefetch={hasNavigationIntent ? null : false}
+      onFocus={() => setHasNavigationIntent(true)}
+      onMouseEnter={() => setHasNavigationIntent(true)}
+      onClick={onClick}
+      className={cn(
+        'flex h-10 items-center gap-3 rounded-[10px] px-3 text-[13px] transition',
+        active
+          ? 'bg-white/[.1] font-semibold text-white'
+          : 'text-white/70 hover:bg-white/[.06] hover:text-white',
+      )}
+    >
+      <item.icon className="size-4" />
+      {item.label}
+      {item.badge !== undefined ? (
+        <Badge variant="outline" className="ml-auto border-white/[.12] px-1.5 text-[10px] text-white/60">
+          {item.badge}
+        </Badge>
+      ) : null}
+    </Link>
+  );
+}
+
 function NavigationLinks({ closeOnNavigate = false, ...props }: NavigationProps & { closeOnNavigate?: boolean }) {
   const pathname = usePathname();
   return (
@@ -119,26 +157,7 @@ function NavigationLinks({ closeOnNavigate = false, ...props }: NavigationProps 
           <nav className="space-y-1" aria-label={group.label}>
             {group.items.map((item) => {
               const active = isActive(pathname, item.href);
-              const link = (
-                <Link
-                  href={item.href}
-                  aria-current={active ? 'page' : undefined}
-                  className={cn(
-                    'flex h-10 items-center gap-3 rounded-[10px] px-3 text-[13px] transition',
-                    active
-                      ? 'bg-white/[.1] font-semibold text-white'
-                      : 'text-white/70 hover:bg-white/[.06] hover:text-white',
-                  )}
-                >
-                  <item.icon className="size-4" />
-                  {item.label}
-                  {item.badge !== undefined ? (
-                    <Badge variant="outline" className="ml-auto border-white/[.12] px-1.5 text-[10px] text-white/60">
-                      {item.badge}
-                    </Badge>
-                  ) : null}
-                </Link>
-              );
+              const link = <WorkspaceNavigationLink active={active} item={item} />;
               return closeOnNavigate ? <SheetClose asChild key={item.href}>{link}</SheetClose> : <div key={item.href}>{link}</div>;
             })}
           </nav>

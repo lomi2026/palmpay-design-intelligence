@@ -35,6 +35,7 @@ export function ContentCard({ content }: { content: ContentCardData }) {
           <Link
             className="transition group-hover:text-white/70"
             href={`/workspace/${contentRoute}/${content.slug}`}
+            prefetch={false}
           >
             {content.title}
           </Link>

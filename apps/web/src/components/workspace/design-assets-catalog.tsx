@@ -142,13 +142,13 @@ export function DesignAssetsCatalog({ contents }: { contents: DesignAssetCard[] 
             const status = legacy?.statusLabel ?? '已发布';
             return (
               <Card className={cn('gap-0 overflow-hidden border border-white/10 bg-white/[0.025] py-0 shadow-none transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.045]', view === 'list' && 'md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center')} key={content.id}>
-                {view === 'grid' ? <Link aria-label={`打开 ${content.title}`} href={`/workspace/design-assets/${content.slug}`}><AssetCover category={content.category?.name ?? '未分类'} cover={legacy?.cover} platform={content.assetDetail?.platforms[0] ?? '全平台'} /></Link> : null}
+                {view === 'grid' ? <Link aria-label={`打开 ${content.title}`} href={`/workspace/design-assets/${content.slug}`} prefetch={false}><AssetCover category={content.category?.name ?? '未分类'} cover={legacy?.cover} platform={content.assetDetail?.platforms[0] ?? '全平台'} /></Link> : null}
                 <CardHeader className="p-4 pb-4">
                   <div className="flex items-center justify-between gap-3 text-xs">
                     {view === 'list' ? <div className="flex min-w-0 items-center gap-1.5 text-white/42"><span className="truncate">{content.category?.name ?? '未分类'}</span><span className="text-white/20">·</span><span>{content.assetDetail?.platforms[0] ?? '全平台'}</span></div> : <Badge className={cn('h-5 rounded-full border px-2 text-xs font-medium', statusClass(status))} variant="outline">{status === '已验证' ? <ShieldCheck className="size-3" /> : <CircleCheck className="size-3" />}{status}</Badge>}
                     <FavoriteControl contentId={content.id} returnTo="/workspace/design-assets" />
                   </div>
-                  <CardTitle className="mt-3 text-base font-semibold leading-6 tracking-tight text-white"><Link className="transition hover:text-white/70" href={`/workspace/design-assets/${content.slug}`}>{content.title}</Link></CardTitle>
+                  <CardTitle className="mt-3 text-base font-semibold leading-6 tracking-tight text-white"><Link className="transition hover:text-white/70" href={`/workspace/design-assets/${content.slug}`} prefetch={false}>{content.title}</Link></CardTitle>
                   <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-white/47">{content.summary}</p>
                 </CardHeader>
                 <CardContent className="px-4 pb-0">
