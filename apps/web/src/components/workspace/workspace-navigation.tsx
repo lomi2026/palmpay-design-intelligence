@@ -125,7 +125,10 @@ function WorkspaceNavigationLink({
     <Link
       href={item.href}
       aria-current={active ? 'page' : undefined}
-      prefetch={hasNavigationIntent ? null : false}
+      // `true` is intentional: Next treats default/dynamic prefetches as a
+      // short-lived cache. A full prefetch keeps the destination available for
+      // the configured static stale time after a user has shown intent.
+      prefetch={hasNavigationIntent ? true : false}
       onFocus={() => setHasNavigationIntent(true)}
       onMouseEnter={() => setHasNavigationIntent(true)}
       onClick={onClick}

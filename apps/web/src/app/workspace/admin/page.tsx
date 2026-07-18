@@ -169,9 +169,12 @@ export default async function AdminPage({
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
       <WorkspacePageHero description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" eyebrow="PLATFORM ADMINISTRATION" metric={heroMetric} title="用可追溯的规则，维护团队能力库。" />
+      {/* All seven management views are intentionally full-prefetched after this
+          page is visible. They are a compact, finite set, so tab changes use
+          the client router cache instead of blocking on a cross-region read. */}
       <nav className="mt-5 flex flex-wrap gap-2">
         {adminTabs.map(([key, label]) => (
-          <Link key={key} href={`/workspace/admin?tab=${key}`} prefetch={false}>
+          <Link key={key} href={`/workspace/admin?tab=${key}`} prefetch>
             <Button
               variant={tab === key ? 'default' : 'outline'}
               size="sm"
