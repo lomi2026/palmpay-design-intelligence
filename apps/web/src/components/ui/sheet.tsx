@@ -50,17 +50,17 @@ function SheetContent({
         data-slot="sheet-content"
         data-side={side}
         className={cn(
-          "fixed z-50 flex flex-col gap-4 bg-[#0a0a0a] text-white shadow-2xl outline-none duration-200 data-open:animate-in data-closed:animate-out",
-          side === "left" && "inset-y-0 left-0 h-full w-[min(320px,88vw)] border-r border-white/10 data-open:slide-in-from-left data-closed:slide-out-to-left",
-          side === "right" && "inset-y-0 right-0 h-full w-[min(320px,88vw)] border-l border-white/10 data-open:slide-in-from-right data-closed:slide-out-to-right",
-          side === "top" && "inset-x-0 top-0 border-b border-white/10 data-open:slide-in-from-top data-closed:slide-out-to-top",
-          side === "bottom" && "inset-x-0 bottom-0 border-t border-white/10 data-open:slide-in-from-bottom data-closed:slide-out-to-bottom",
+          "fixed z-50 flex flex-col gap-4 bg-background text-foreground shadow-2xl outline-none duration-200 data-open:animate-in data-closed:animate-out",
+          side === "left" && "inset-y-0 left-0 h-full w-[min(320px,88vw)] border-r border-border data-open:slide-in-from-left data-closed:slide-out-to-left",
+          side === "right" && "inset-y-0 right-0 h-full w-[min(320px,88vw)] border-l border-border data-open:slide-in-from-right data-closed:slide-out-to-right",
+          side === "top" && "inset-x-0 top-0 border-b border-border data-open:slide-in-from-top data-closed:slide-out-to-top",
+          side === "bottom" && "inset-x-0 bottom-0 border-t border-border data-open:slide-in-from-bottom data-closed:slide-out-to-bottom",
           className,
         )}
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute right-4 top-4 grid size-9 place-items-center rounded-[10px] border border-white/10 text-white/65 transition hover:bg-white/[.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+        <SheetPrimitive.Close className="absolute right-4 top-4 grid size-9 place-items-center rounded-[10px] border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30">
           <XIcon className="size-4" />
           <span className="sr-only">关闭菜单</span>
         </SheetPrimitive.Close>
@@ -78,7 +78,7 @@ function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPr
 }
 
 function SheetDescription({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Description>) {
-  return <SheetPrimitive.Description data-slot="sheet-description" className={cn("text-xs text-white/45", className)} {...props} />
+  return <SheetPrimitive.Description data-slot="sheet-description" className={cn("text-xs text-muted-foreground", className)} {...props} />
 }
 
 export {

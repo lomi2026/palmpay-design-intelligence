@@ -18,9 +18,9 @@ export default async function LoginPage({
   const isTestMode = process.env.AUTH_MODE === 'test';
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[#090909] px-6 py-12">
-      <section className="relative w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/[.11] bg-[#111112] p-7 shadow-2xl shadow-black/30 sm:p-10">
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-35" />
+    <main className="v9-source-home grid min-h-screen place-items-center bg-[var(--v9-bg)] px-6 py-12 text-[var(--v9-text)]">
+      <section className="relative w-full max-w-[560px] overflow-hidden rounded-[28px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-7 shadow-2xl shadow-black/30 sm:p-10">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--v9-grid-line)_1px,transparent_1px),linear-gradient(var(--v9-grid-line)_1px,transparent_1px)] bg-[size:48px_48px] opacity-35" />
         <div className="relative"><p className="text-[11px] font-semibold tracking-[.24em] text-white/45">PALMPAY DESIGN HUB</p>
         <h1 className="mt-4 text-[34px] font-semibold tracking-[-.055em] text-white">登录体验设计 Hub</h1>
         <p className="mt-2 text-sm leading-6 text-white/55">
@@ -35,7 +35,7 @@ export default async function LoginPage({
           </label>
           <Input
             autoComplete="email"
-            className="h-11 w-full border-white/15 bg-black/25 text-white placeholder:text-white/35"
+            className="h-11 w-full border-[var(--v9-line-strong)] bg-[var(--v9-field)] text-[var(--v9-text)] placeholder:text-[var(--v9-subtle)]"
             id="email"
             name="email"
             placeholder="name@palmpay.com"
@@ -49,7 +49,7 @@ export default async function LoginPage({
               </label>
               <Input
                 autoComplete="current-password"
-                className="h-11 w-full border-white/15 bg-black/25 text-white placeholder:text-white/35"
+                className="h-11 w-full border-[var(--v9-line-strong)] bg-[var(--v9-field)] text-[var(--v9-text)] placeholder:text-[var(--v9-subtle)]"
                 id="accessCode"
                 name="accessCode"
                 required

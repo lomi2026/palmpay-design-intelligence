@@ -194,7 +194,7 @@ export default async function WorkspacePage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {user?.permissions.includes('analytics.read') ? <Button asChild variant="outline" className="h-9 border-white/[.14] bg-transparent px-4 text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/overview"><Gauge className="size-4" /> 价值总览</Link></Button> : null}
-          {canCreate ? <Button asChild className="h-9 bg-[#f4f4f4] px-4 font-bold !text-[#090909] hover:bg-white">
+          {canCreate ? <Button asChild className="h-9 bg-[var(--v9-strong)] px-4 font-bold text-[var(--v9-strong-foreground)] hover:bg-[var(--v9-strong)]">
             <Link href="/workspace/submit"><Send className="size-4" /> 提交内容</Link>
           </Button> : null}
         </div>
@@ -211,7 +211,7 @@ export default async function WorkspacePage() {
             <h2 className="max-w-3xl text-3xl font-semibold leading-[1.12] tracking-[-.045em] sm:text-5xl">把团队经验，转化为可复用、可验证的设计能力。</h2>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/60 sm:text-base">设计资产、AI Skill 与实践案例不再分散在个人文件中，而是通过发现、使用、贡献与衡量形成持续增长的团队能力。</p>
             <div className="mt-7 flex flex-wrap gap-2">
-              <Button asChild size="lg" className="h-10 bg-[#f4f4f4] px-5 font-bold !text-[#090909] hover:bg-white"><Link href="/workspace/design-assets">进入资产库 <ArrowRight className="size-4" /></Link></Button>
+              <Button asChild size="lg" className="h-10 bg-[var(--v9-strong)] px-5 font-bold text-[var(--v9-strong-foreground)] hover:bg-[var(--v9-strong)]"><Link href="/workspace/design-assets">进入资产库 <ArrowRight className="size-4" /></Link></Button>
               <Button asChild size="lg" variant="outline" className="h-10 border-white/[.14] bg-transparent px-4 text-white hover:bg-white/[.07] hover:text-white"><Link href={user?.permissions.includes('analytics.read') ? '/workspace/overview' : '/workspace/ai-cases'}>查看价值证据</Link></Button>
             </div>
           </div>

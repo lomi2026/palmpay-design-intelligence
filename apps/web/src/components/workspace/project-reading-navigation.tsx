@@ -64,12 +64,12 @@ export function ProjectReadingNavigation({ items }: { items: ReadingItem[] }) {
   return (
     <>
       <div aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-0.5 pointer-events-none">
-        <span className="block h-full bg-white transition-[width] duration-100" style={{ width: `${progress}%` }} />
+        <span className="block h-full bg-primary transition-[width] duration-100" style={{ width: `${progress}%` }} />
       </div>
       <Sheet>
         <SheetTrigger asChild>
           <Button
-            className="fixed bottom-3 right-3 z-30 h-10 rounded-full border-white/[.16] bg-[#111]/95 px-3.5 text-[12px] font-semibold text-white shadow-[0_14px_38px_rgba(0,0,0,.32)] backdrop-blur hover:bg-white/[.1] hover:text-white md:bottom-[22px] md:right-[22px]"
+            className="fixed bottom-3 right-3 z-30 h-10 rounded-full border-border bg-background/95 px-3.5 text-[12px] font-semibold text-foreground shadow-[0_14px_38px_rgba(0,0,0,.32)] backdrop-blur hover:bg-muted hover:text-foreground md:bottom-[22px] md:right-[22px]"
             size="sm"
             type="button"
             variant="outline"
@@ -78,9 +78,9 @@ export function ProjectReadingNavigation({ items }: { items: ReadingItem[] }) {
             目录
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-[min(340px,calc(100vw-32px))] border-white/[.12] bg-[#111] p-0 sm:right-4 sm:top-4 sm:bottom-4 sm:h-auto sm:rounded-[20px]" side="right">
-          <SheetHeader className="border-b border-white/[.1] pr-14">
-            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-white/45">Page outline</p>
+        <SheetContent className="w-[min(340px,calc(100vw-32px))] border-border bg-background p-0 sm:right-4 sm:top-4 sm:bottom-4 sm:h-auto sm:rounded-[20px]" side="right">
+          <SheetHeader className="border-b border-border pr-14">
+            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-muted-foreground">Page outline</p>
             <SheetTitle className="text-[18px]">内容目录</SheetTitle>
             <SheetDescription>点击章节快速定位，内容仍以当前正式版本为准。</SheetDescription>
           </SheetHeader>
@@ -88,7 +88,7 @@ export function ProjectReadingNavigation({ items }: { items: ReadingItem[] }) {
             {items.map((item, index) => (
               <SheetClose asChild key={item.id}>
                 <button
-                  className={`grid w-full grid-cols-[28px_minmax(0,1fr)] gap-2 rounded-[10px] px-3 py-2.5 text-left text-[12px] font-semibold leading-5 transition ${activeId === item.id ? 'bg-white text-black' : 'text-white/60 hover:bg-white/[.07] hover:text-white'}`}
+                  className={`grid w-full grid-cols-[28px_minmax(0,1fr)] gap-2 rounded-[10px] px-3 py-2.5 text-left text-[12px] font-semibold leading-5 transition ${activeId === item.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                   onClick={() => scrollTo(item)}
                   type="button"
                 >

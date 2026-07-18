@@ -33,7 +33,6 @@ export function V9ThemeToggle() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     document.documentElement.style.colorScheme = theme;
-    document.querySelectorAll('.v9-source-home').forEach((element) => element.setAttribute('data-theme', theme));
   }, [theme]);
 
   function toggleTheme() {
@@ -50,7 +49,7 @@ export function V9ThemeToggle() {
   return (
     <Button
       aria-label={theme === 'dark' ? '切换至浅色主题' : '切换至深色主题'}
-      className="size-10 rounded-[10px] border-white/[.1] bg-white/[.035] text-white hover:bg-white/[.08] hover:text-white"
+      className="size-10 rounded-[10px] border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
       onClick={toggleTheme}
       size="icon-sm"
       type="button"

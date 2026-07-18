@@ -156,6 +156,7 @@ The next engineering objective is:
 - The workspace Design Assets module uses 8 formally imported, source-traceable v9-1 assets instead of an empty catalog. Its header, filters, card-cover hierarchy and metadata use the deployed workspace component language with shadcn/ui composition. The historical `design-assets.html` URL is 404 on the current deployment, so it is not a separate parity blocker.
 - By the latest explicit user direction, v9-1 parity remediation now continues automatically through small page/flow batches. The first resumed batch adds the required domain, value and stage filters to the real AI Project portfolio and aligns its portfolio density with the approved project-library model; the value overview, data-insights and review-center entry surfaces also now use the same high-density workspace hierarchy while retaining their live PostgreSQL metrics and actions. Web typecheck, lint and production build pass after this batch. Browser capture is now available for deployed source/formal comparisons, although the remaining desktop/mobile states and the new code’s post-deployment capture are still open.
 - The continuous parity pass now also covers the formal contribution, submission and review flows; AI Skill and AI Case catalog hierarchy; personal saved/recent space; notifications; global search; relationship management; usage confirmation; login/access-denied states; shared content cards; and all administration tabs. The draft editor, attachment binding/removal, review handoff, published-detail actions and recoverable-error states now share the dense workspace hierarchy; the admin panels retain every protected server action while adding consistent operational headers, counts, empty states and responsive panels. Web typecheck, lint and the 23-route production build pass after this batch. Required desktop/mobile source-versus-rendered comparison remains open before visual acceptance.
+- The local light/dark theme remediation is complete and recorded in `docs/14-THEME-AUDIT.md`. Theme selection is applied before first paint, the Workspace shell/sidebar/header now use shared semantic tokens, restored v9-1 dark utility tokens receive exact light-mode compatibility mappings, and Dialog/Sheet portals use global shadcn theme tokens. Twenty-five accessible product routes were checked in both themes on a production build, with additional light-mode search-dialog and mobile-sheet evidence. Web/API typecheck, lint and builds pass; API tests report 13 passed, 0 failed and 11 existing integration-environment skips. External Vercel deployment and post-deploy theme sampling remain open.
 
 ## Next Task
 
@@ -193,7 +194,7 @@ Milestone definition:
 - Yuque integration
 - Jira integration
 - GitHub integration
-- Full light-theme token migration beyond the restored v9-1 public-home and workspace-shell preference behavior
+- External deployment and post-deploy verification of the completed local light/dark theme remediation
 
 ## Current Blockers / Decisions Needed
 

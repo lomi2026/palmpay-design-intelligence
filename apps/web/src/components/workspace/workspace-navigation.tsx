@@ -127,14 +127,14 @@ function WorkspaceNavigationLink({
       className={cn(
         'flex h-10 items-center gap-3 rounded-[10px] px-3 text-[13px] transition',
         active
-          ? 'bg-white/[.1] font-semibold text-white'
-          : 'text-white/70 hover:bg-white/[.06] hover:text-white',
+          ? 'bg-[var(--v9-soft-hover)] font-semibold text-[var(--v9-text)]'
+          : 'text-[var(--v9-muted)] hover:bg-[var(--v9-soft)] hover:text-[var(--v9-text)]',
       )}
     >
       <item.icon className="size-4" />
       {item.label}
       {item.badge !== undefined ? (
-        <Badge variant="outline" className="ml-auto border-white/[.12] px-1.5 text-[10px] text-white/60">
+        <Badge variant="outline" className="ml-auto border-[var(--v9-line)] px-1.5 text-[10px] text-[var(--v9-muted)]">
           {item.badge}
         </Badge>
       ) : null}
@@ -148,7 +148,7 @@ function NavigationLinks({ closeOnNavigate = false, ...props }: NavigationProps 
     <div className="space-y-6">
       {navigationGroups(props).map((group) => (
         <section key={group.label}>
-          <p className="mb-2 px-2 text-[11px] text-white/45">{group.label}</p>
+          <p className="mb-2 px-2 text-[11px] text-[var(--v9-subtle)]">{group.label}</p>
           <nav className="space-y-1" aria-label={group.label}>
             {group.items.map((item) => {
               const active = isActive(pathname, item.href);
@@ -170,12 +170,12 @@ export function WorkspaceMobileNavigation(props: NavigationProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon-sm" className="mr-2 size-9 border-white/[.12] bg-transparent text-white hover:bg-white/[.06] hover:text-white md:hidden" aria-label="打开工作台菜单">
+        <Button variant="outline" size="icon-sm" className="mr-2 size-9 border-[var(--v9-line)] bg-transparent text-[var(--v9-text)] hover:bg-[var(--v9-soft)] hover:text-[var(--v9-text)] md:hidden" aria-label="打开工作台菜单">
           <Menu className="size-4" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="gap-0 p-0">
-        <SheetHeader className="border-b border-white/[.1] pr-14">
+        <SheetHeader className="border-b border-border pr-14">
           <SheetTitle>PalmPay Design Hub</SheetTitle>
           <SheetDescription>工作台导航</SheetDescription>
         </SheetHeader>
@@ -211,10 +211,10 @@ export function WorkspaceBreadcrumb() {
     ? '工作台'
     : routeLabels.find(([href]) => pathname === href || pathname.startsWith(`${href}/`))?.[1] ?? '工作台';
   return (
-    <div className="hidden items-center gap-2 text-[13px] text-white/55 md:flex">
+    <div className="hidden items-center gap-2 text-[13px] text-[var(--v9-muted)] md:flex">
       <span>PalmPay UX</span>
       <span>›</span>
-      <strong className="font-semibold text-white">{label}</strong>
+      <strong className="font-semibold text-[var(--v9-text)]">{label}</strong>
     </div>
   );
 }

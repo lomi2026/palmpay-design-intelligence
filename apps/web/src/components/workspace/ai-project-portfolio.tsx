@@ -18,17 +18,26 @@ type FilterChipProps = {
 };
 
 function FilterChip({ active, children, onClick }: FilterChipProps) {
+  const activeStyle = active
+    ? {
+        backgroundColor: 'var(--v9-strong)',
+        borderColor: 'var(--v9-strong)',
+        color: 'var(--v9-strong-foreground)',
+      }
+    : undefined;
+
   return (
     <Button
       aria-pressed={active}
       className={cn(
         'h-8 rounded-full border px-3 text-[11px] font-medium transition',
         active
-          ? 'border-white bg-white text-black hover:bg-white/90 hover:text-black'
+          ? 'hover:opacity-90'
           : 'border-white/[.12] bg-transparent text-white/55 hover:bg-white/[.07] hover:text-white',
       )}
       onClick={onClick}
       size="sm"
+      style={activeStyle}
       type="button"
       variant="outline"
     >
