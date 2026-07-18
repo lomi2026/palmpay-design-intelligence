@@ -64,6 +64,23 @@ type Audit = {
     actor: { name: string; email: string } | null;
   }>;
 };
+
+const adminTabs = [
+  ['content', '内容管理'],
+  ['taxonomy', '分类与标签'],
+  ['teams', '团队管理'],
+  ['users', '用户管理'],
+  ['roles', '角色权限'],
+  ['audit', '审计日志'],
+  ['settings', '平台设置'],
+] as const;
+
+type AdminTab = (typeof adminTabs)[number][0];
+
+function isAdminTab(value: string): value is AdminTab {
+  return adminTabs.some(([key]) => key === value);
+}
+
 const modules: Record<string, string> = {
   DESIGN_ASSET: 'design-assets',
   AI_SKILL: 'ai-skills',
@@ -76,7 +93,8 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const { tab = 'content' } = await searchParams;
+  const { tab: requestedTab = 'content' } = await searchParams;
+  const tab: AdminTab = isAdminTab(requestedTab) ? requestedTab : 'content';
   const user = await loadCurrentUser();
   if (
     !user ||
@@ -90,47 +108,70 @@ export default async function AdminPage({
     redirect('/unauthorized');
   const headers = await authenticatedApiHeaders();
   const organizationPath = `/api/organizations/${user.organizationId}`;
-  const [organization, contents, categories, tags, users, teams, roles, audit] = await Promise.all([
-    serverApiFetch<Organization>(organizationPath, { headers }),
-    user.permissions.includes('content.edit_all')
-      ? serverApiFetch<AdminContent>('/api/admin/contents?pageSize=100', { headers })
-      : Promise.resolve({ items: [], total: 0 }),
-    user.permissions.includes('taxonomy.manage')
-      ? serverApiFetch<Category[]>('/api/admin/categories', { headers })
-      : Promise.resolve([]),
-    user.permissions.includes('taxonomy.manage')
-      ? serverApiFetch<Tag[]>('/api/admin/tags', { headers })
-      : Promise.resolve([]),
-    user.permissions.includes('user.manage')
-      ? serverApiFetch<{ items: User[] }>(`${organizationPath}/users?pageSize=100`, { headers })
-      : Promise.resolve({ items: [] }),
-    user.permissions.includes('user.manage')
-      ? serverApiFetch<Team[]>(`${organizationPath}/teams`, { headers })
-      : Promise.resolve([]),
-    user.permissions.includes('user.manage')
-      ? serverApiFetch<Role[]>(`${organizationPath}/roles`, { headers })
-      : Promise.resolve([]),
-    user.permissions.includes('audit.read')
-      ? serverApiFetch<Audit>('/api/admin/audit-logs?pageSize=100', { headers })
-      : Promise.resolve({ items: [] }),
-  ]);
-  const nav = [
-    ['content', '内容管理'],
-    ['taxonomy', '分类与标签'],
-    ['teams', '团队管理'],
-    ['users', '用户管理'],
-    ['roles', '角色权限'],
-    ['audit', '审计日志'],
-    ['settings', '平台设置'],
-  ];
+
+  // Keep each administration section isolated: switching tabs should not wait for
+  // unrelated, permission-gated API reads from the other six sections.
+  let organization: Organization | null = null;
+  let contents: AdminContent = { items: [], total: 0 };
+  let categories: Category[] = [];
+  let tags: Tag[] = [];
+  let users: { items: User[] } = { items: [] };
+  let teams: Team[] = [];
+  let roles: Role[] = [];
+  let audit: Audit = { items: [] };
+
+  if (tab === 'content' && user.permissions.includes('content.edit_all')) {
+    contents = await serverApiFetch<AdminContent>('/api/admin/contents?pageSize=100', { headers });
+  }
+  if (tab === 'taxonomy' && user.permissions.includes('taxonomy.manage')) {
+    [categories, tags] = await Promise.all([
+      serverApiFetch<Category[]>('/api/admin/categories', { headers }),
+      serverApiFetch<Tag[]>('/api/admin/tags', { headers }),
+    ]);
+  }
+  if (tab === 'teams' && user.permissions.includes('user.manage')) {
+    [teams, users] = await Promise.all([
+      serverApiFetch<Team[]>(`${organizationPath}/teams`, { headers }),
+      serverApiFetch<{ items: User[] }>(`${organizationPath}/users?pageSize=100`, { headers }),
+    ]);
+  }
+  if (tab === 'users' && user.permissions.includes('user.manage')) {
+    users = await serverApiFetch<{ items: User[] }>(`${organizationPath}/users?pageSize=100`, { headers });
+  }
+  if (tab === 'roles' && user.permissions.includes('user.manage')) {
+    [roles, users] = await Promise.all([
+      serverApiFetch<Role[]>(`${organizationPath}/roles`, { headers }),
+      serverApiFetch<{ items: User[] }>(`${organizationPath}/users?pageSize=100`, { headers }),
+    ]);
+  }
+  if (tab === 'audit' && user.permissions.includes('audit.read')) {
+    audit = await serverApiFetch<Audit>('/api/admin/audit-logs?pageSize=100', { headers });
+  }
+  if (tab === 'settings') {
+    organization = await serverApiFetch<Organization>(organizationPath, { headers });
+  }
+
+  const heroMetric = tab === 'content'
+    ? { value: contents.total, label: '可管理内容' }
+    : tab === 'taxonomy'
+      ? { value: categories.length + tags.length, label: '分类与标签' }
+      : tab === 'teams'
+        ? { value: teams.length, label: '组织团队' }
+        : tab === 'users'
+          ? { value: users.items.length, label: '组织用户' }
+          : tab === 'roles'
+            ? { value: roles.length, label: '系统角色' }
+            : tab === 'audit'
+              ? { value: audit.items.length, label: '最近审计记录' }
+              : { value: organization ? 1 : 0, label: '组织配置' };
   const panelClass = 'rounded-2xl border border-white/[.1] bg-[#111112] p-5 shadow-[0_16px_48px_rgba(0,0,0,.16)] sm:p-6';
   const controlClass = 'border-white/15 bg-white/[.04] text-white placeholder:text-white/30 focus-visible:ring-white/35';
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
-      <WorkspacePageHero description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" eyebrow="PLATFORM ADMINISTRATION" metric={{ value: contents.total, label: '可管理内容' }} title="用可追溯的规则，维护团队能力库。" />
+      <WorkspacePageHero description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" eyebrow="PLATFORM ADMINISTRATION" metric={heroMetric} title="用可追溯的规则，维护团队能力库。" />
       <nav className="mt-5 flex flex-wrap gap-2">
-        {nav.map(([key, label]) => (
-          <Link key={key} href={`/workspace/admin?tab=${key}`}>
+        {adminTabs.map(([key, label]) => (
+          <Link key={key} href={`/workspace/admin?tab=${key}`} prefetch={false}>
             <Button
               variant={tab === key ? 'default' : 'outline'}
               size="sm"
@@ -360,7 +401,7 @@ export default async function AdminPage({
       ) : null}
       {tab === 'settings' ? (
         <section className="mt-7 grid gap-5 lg:grid-cols-2">
-          <article className={panelClass}><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">ORGANIZATION</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">组织配置</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织名称</dt><dd>{organization.name}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织代码</dt><dd>{organization.code}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">运行状态</dt><dd>{organization.status}</dd></div></dl></article>
+          <article className={panelClass}><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">ORGANIZATION</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">组织配置</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织名称</dt><dd>{organization?.name ?? '—'}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织代码</dt><dd>{organization?.code ?? '—'}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">运行状态</dt><dd>{organization?.status ?? '—'}</dd></div></dl></article>
           <article className={panelClass}><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">RUNTIME BOUNDARY</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">当前环境边界</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">认证</dt><dd>隔离开发认证</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">数据库</dt><dd>PostgreSQL 17</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">附件存储</dt><dd>Cloudflare R2</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">AI Gateway</dt><dd className="text-white/45">尚未配置</dd></div></dl><p className="mt-4 text-xs leading-5 text-white/40">生产 SSO、Cloudflare R2 和 AI 数据边界确认后，才会开放对应的可写配置。</p></article>
         </section>
       ) : null}

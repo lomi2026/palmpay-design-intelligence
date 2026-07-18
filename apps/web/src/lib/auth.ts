@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 import { ApiError, serverApiFetch } from './api';
 
 export const DEVELOPMENT_USER_COOKIE = 'palmpay_dev_user_email';
@@ -18,7 +19,7 @@ export interface CurrentUser {
   permissions: string[];
 }
 
-export async function loadCurrentUser() {
+export const loadCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const cookieStore = await cookies();
   const developmentEmail = cookieStore.get(DEVELOPMENT_USER_COOKIE)?.value;
   const testSession = cookieStore.get(TEST_SESSION_COOKIE)?.value;
@@ -33,12 +34,12 @@ export async function loadCurrentUser() {
     if (error instanceof ApiError && [401, 403, 404].includes(error.status)) return null;
     throw error;
   }
-}
+});
 
-export async function authenticatedApiHeaders(): Promise<Record<string, string>> {
+export const authenticatedApiHeaders = cache(async (): Promise<Record<string, string>> => {
   const cookieStore = await cookies();
   const developmentEmail = cookieStore.get(DEVELOPMENT_USER_COOKIE)?.value;
   const testSession = cookieStore.get(TEST_SESSION_COOKIE)?.value;
   if (testSession) return { Authorization: `Bearer ${testSession}` };
   return developmentEmail ? { 'x-dev-user-email': developmentEmail } : {};
-}
+});
