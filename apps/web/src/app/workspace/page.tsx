@@ -73,6 +73,7 @@ function contentHref(content: ContentCardData) {
 
 export default async function WorkspacePage() {
   const user = await loadCurrentUser();
+  const canCreate = user?.permissions.includes('content.create') ?? false;
   const headers = await authenticatedApiHeaders();
   const [contents, projects, favorites, recent, submissions] = await Promise.all([
     serverApiFetch<ContentListResponse>('/api/contents?pageSize=5', { headers }),
@@ -99,9 +100,9 @@ export default async function WorkspacePage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {user?.permissions.includes('analytics.read') ? <Button asChild variant="outline" className="h-9 border-white/[.14] bg-transparent px-4 text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/overview"><Gauge className="size-4" /> 价值总览</Link></Button> : null}
-          <Button asChild className="h-9 bg-[#f4f4f4] px-4 font-bold !text-[#090909] hover:bg-white">
+          {canCreate ? <Button asChild className="h-9 bg-[#f4f4f4] px-4 font-bold !text-[#090909] hover:bg-white">
             <Link href="/workspace/submit"><Send className="size-4" /> 提交内容</Link>
-          </Button>
+          </Button> : null}
         </div>
       </section>
 

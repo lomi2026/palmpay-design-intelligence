@@ -24,13 +24,14 @@ export function DraftEditor({ draft }: { draft: Draft }) {
   };
   useEffect(() => () => { if (saveTimer.current) clearTimeout(saveTimer.current); }, []);
   return <>
-    <form action={action} className="mt-6 grid gap-5 rounded-2xl border border-white/10 bg-white/[0.035] p-5 md:p-6" onInput={scheduleAutosave} ref={formRef}><input name="id" type="hidden" value={draft.id} /><input name="contentType" type="hidden" value={draft.contentType} />
-    <label className="grid gap-1.5 text-sm text-white/75">标题<Input className="border-white/15 bg-black/25 text-white" defaultValue={draft.title} name="title" required /></label>
-    <label className="grid gap-1.5 text-sm text-white/75">摘要<Textarea className="min-h-20 border-white/15 bg-black/25 text-white" defaultValue={draft.summary ?? ''} name="summary" /></label>
-    <label className="grid gap-1.5 text-sm text-white/75">本次修改说明<Input className="border-white/15 bg-black/25 text-white placeholder:text-white/35" defaultValue={draft.draftVersion?.changeSummary ?? ''} name="changeSummary" placeholder="例如：补充使用步骤" /></label>
+    <form action={action} className="mt-6 grid gap-6 rounded-[24px] border border-white/[.1] bg-[#111] p-5 md:p-8" onInput={scheduleAutosave} ref={formRef}><input name="id" type="hidden" value={draft.id} /><input name="contentType" type="hidden" value={draft.contentType} />
+    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-white/[.1] pb-5"><div><p className="text-[11px] font-bold tracking-[.15em] text-white/45">CONTENT VERSION</p><h2 className="mt-1 text-[28px] font-semibold tracking-[-.045em] text-white">完善内容说明</h2></div><p className="max-w-md text-sm leading-6 text-white/50">字段随内容类型变化；系统会在停止输入后自动保存，提交审核前仍可继续编辑。</p></div>
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]"><label className="grid gap-2 text-sm font-medium text-white/75">标题<Input className="h-12 border-white/[.14] bg-black/25 text-base text-white" defaultValue={draft.title} name="title" required /></label>
+    <label className="grid gap-2 text-sm font-medium text-white/75">本次修改说明<Input className="h-12 border-white/[.14] bg-black/25 text-white placeholder:text-white/35" defaultValue={draft.draftVersion?.changeSummary ?? ''} name="changeSummary" placeholder="例如：补充使用步骤" /></label></div>
+    <label className="grid gap-2 text-sm font-medium text-white/75">摘要<Textarea className="min-h-28 border-white/[.14] bg-black/25 text-white" defaultValue={draft.summary ?? ''} name="summary" /></label>
     <ContentTypeFields body={draft.draftVersion?.body as Record<string, unknown> | undefined} contentType={draft.contentType} />
     {state.error ? <p className="text-sm text-red-400">{state.error}</p> : null}
-    <div className="flex items-center justify-between border-t border-white/10 pt-4"><p aria-live="polite" className="text-xs text-white/40">草稿 v{draft.draftVersion?.versionNumber ?? 1} · {pending ? '自动保存中…' : state.savedAt ? `已保存 ${state.savedAt}` : '输入后将自动保存'}</p><Button className="bg-white text-black hover:bg-white/85" disabled={pending} type="submit">{pending ? '保存中…' : '立即保存'}</Button></div>
+    <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[.1] pt-5"><p aria-live="polite" className="text-xs text-white/40">草稿 v{draft.draftVersion?.versionNumber ?? 1} · {pending ? '自动保存中…' : state.savedAt ? `已保存 ${state.savedAt}` : '输入后将自动保存'}</p><Button className="h-11 bg-white px-5 font-semibold text-black hover:bg-white/85" disabled={pending} type="submit">{pending ? '保存中…' : '立即保存'}</Button></div>
   </form>
     <DraftAttachments attachments={draft.attachments} contentId={draft.id} />
     <ReviewSubmission contentId={draft.id} status={draftStatus} />

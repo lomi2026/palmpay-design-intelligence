@@ -5,6 +5,7 @@ import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
 import { usageConfirmationAction } from '../engagement-actions';
+import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 
 export default async function UsagePage({
   searchParams,
@@ -17,15 +18,11 @@ export default async function UsagePage({
     { headers: await authenticatedApiHeaders() },
   );
   return (
-    <main className="mx-auto max-w-2xl px-6 py-8 md:px-10">
-      <Link href="/workspace" className="text-sm text-white/50 hover:text-white">
+    <main className="mx-auto max-w-[960px] px-5 py-8 md:px-8 md:py-10">
+      <Link href="/workspace" className="text-sm text-white/50 transition hover:text-white">
         ← 返回工作台
       </Link>
-      <p className="mt-8 text-xs tracking-[.18em] text-white/45">REAL PROJECT REUSE</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-[-.045em]">确认内容使用</h1>
-      <p className="mt-3 text-sm leading-6 text-white/55">
-        确认后会将这次复用与正式 AI 项目库中的真实项目关联；浏览和收藏不会被视为有效使用。
-      </p>
+      <div className="mt-5"><WorkspacePageHero description="确认后会将这次复用与正式 AI 项目库中的真实项目关联；浏览和收藏不会被视为有效使用。" eyebrow="REAL PROJECT REUSE" metric={{ value: projects.total, label: '可关联项目' }} title="把‘看过’和‘真正用过’区分开。" /></div>
       {success ? (
         <p className="mt-5 rounded-lg border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">
           已记录真实项目引用。
@@ -38,7 +35,7 @@ export default async function UsagePage({
       ) : null}
       <form
         action={usageConfirmationAction}
-        className="mt-7 space-y-5 rounded-xl border border-white/12 bg-white/[.035] p-5"
+        className="mt-5 space-y-5 rounded-2xl border border-white/[.11] bg-[#111112] p-5 md:p-6"
       >
         <input type="hidden" name="contentId" value={contentId} />
         <div>
@@ -71,7 +68,7 @@ export default async function UsagePage({
             className="mt-2 border-white/15 bg-white/[.04] text-white"
           />
         </div>
-        <Button type="submit">确认使用并关联项目</Button>
+        <Button className="bg-white text-black hover:bg-white/85" type="submit">确认使用并关联项目</Button>
       </form>
     </main>
   );

@@ -79,22 +79,19 @@ export default async function ContributionsPage() {
   const contributions = await serverApiFetch<{ items: Contribution[]; total: number }>('/api/content-drafts', {
     headers: await authenticatedApiHeaders(),
   });
+  const drafts = contributions.items.filter((item) => ['DRAFT', 'CHANGES_REQUESTED'].includes(item.draftVersion?.versionStatus ?? item.status)).length;
+  const inReview = contributions.items.filter((item) => ['IN_REVIEW', 'APPROVED'].includes(item.draftVersion?.versionStatus ?? item.status)).length;
+  const published = contributions.items.filter((item) => item.status === 'PUBLISHED').length;
 
   return (
-    <main className="px-5 py-8 md:px-8 md:py-10">
-      <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-7 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs tracking-[0.18em] text-violet-200/75">MY CONTRIBUTIONS</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-white">我的贡献</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">集中管理由你负责的草稿、审核版本与已发布内容。管理员权限不会改变此处的个人范围。</p>
-        </div>
-        <Button asChild className="bg-white font-semibold text-black hover:bg-white/90">
-          <Link href="/workspace/submit"><Plus className="size-4" /> 新建内容</Link>
-        </Button>
+    <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
+      <header className="relative overflow-hidden rounded-[22px] border border-white/[.11] bg-[#111112] px-6 py-7 sm:px-8">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40" />
+        <div className="relative grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"><div><p className="text-[11px] font-semibold tracking-[.2em] text-white/45">MY CONTRIBUTIONS</p><h1 className="mt-3 text-[34px] font-semibold tracking-[-.055em] text-white">让每一次个人沉淀，都进入团队可维护的能力库。</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">集中管理由你负责的草稿、审核版本与已发布内容。管理员权限不会扩大此处的个人范围。</p></div><div className="flex flex-wrap items-center gap-3"><div className="grid grid-cols-3 gap-2">{[[drafts, '待完善'], [inReview, '审核中'], [published, '已发布']].map(([value, label]) => <div className="min-w-[78px] rounded-[13px] border border-white/[.1] bg-black/[.22] p-3" key={label as string}><strong className="block text-[22px] leading-none tracking-[-.05em] text-white">{value as number}</strong><span className="mt-2 block text-[10px] text-white/45">{label as string}</span></div>)}</div><Button asChild className="bg-white font-semibold text-black hover:bg-white/90"><Link href="/workspace/submit"><Plus className="size-4" /> 新建内容</Link></Button></div></div>
       </header>
 
       <div className="mt-5 flex items-center justify-between text-sm text-white/45">
-        <span>共 {contributions.total} 项</span>
+        <span>共 {contributions.total} 项个人内容</span>
         <Link href="/workspace/submissions" className="text-white/70 transition hover:text-white">查看我的提交 →</Link>
       </div>
 
@@ -105,7 +102,7 @@ export default async function ContributionsPage() {
             const effectiveStatus = item.draftVersion?.versionStatus ?? item.status;
             const versionNumber = item.draftVersion?.versionNumber ?? item.currentVersion?.versionNumber;
             return (
-              <Card key={item.id} className="border-white/10 bg-white/[0.035] py-0 shadow-none">
+              <Card key={item.id} className="border-white/[.1] bg-[#111112] py-0 shadow-none transition hover:border-white/[.2] hover:bg-white/[.035]">
                 <CardContent className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] tracking-[0.1em] text-white/40">

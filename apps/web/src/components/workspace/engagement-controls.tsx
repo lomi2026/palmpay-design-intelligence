@@ -22,7 +22,7 @@ export function FavoriteControl({
     undefined,
   );
   return (
-    <form action={action}>
+    <form action={action} className="shrink-0">
       <input type="hidden" name="contentId" value={contentId} />
       <input type="hidden" name="returnTo" value={returnTo} />
       <input type="hidden" name="active" value={String(active)} />
@@ -31,7 +31,7 @@ export function FavoriteControl({
         variant="outline"
         size="sm"
         disabled={pending}
-        className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+        className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
       >
         <Heart className={active ? 'fill-current' : ''} />
         {active ? '取消收藏' : '收藏'}
@@ -42,12 +42,12 @@ export function FavoriteControl({
 
 export function ContentEngagementLinks({ contentId }: { contentId: string }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2" aria-label="内容协作操作">
       <Link href={`/workspace/usage?contentId=${contentId}`}>
         <Button
           variant="outline"
           size="sm"
-          className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+          className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
         >
           <NotebookPen />
           确认使用
@@ -57,7 +57,7 @@ export function ContentEngagementLinks({ contentId }: { contentId: string }) {
         <Button
           variant="outline"
           size="sm"
-          className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+          className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
         >
           <Link2 />
           关联内容

@@ -6,6 +6,7 @@ import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
 import { searchResultAction } from '../engagement-actions';
+import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 
 export default async function SearchPage({
   searchParams,
@@ -21,10 +22,9 @@ export default async function SearchPage({
       )
     : null;
   return (
-    <main className="mx-auto max-w-6xl px-6 py-8 md:px-10">
-      <p className="text-xs tracking-[.18em] text-white/45">GLOBAL SEARCH</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-[-.045em]">全局搜索</h1>
-      <form className="mt-6 flex max-w-2xl gap-2">
+    <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
+      <WorkspacePageHero description="在全部正式内容中搜索；结果会先按你的组织与权限范围过滤。" eyebrow="GLOBAL SEARCH" metric={result ? { value: result.total, label: '可访问结果' } : undefined} title="用一个关键词，找到可复用的团队经验。" />
+      <form className="mt-5 flex max-w-3xl gap-2">
         <Input
           name="q"
           defaultValue={query}
@@ -37,12 +37,12 @@ export default async function SearchPage({
         </Button>
       </form>
       {result ? (
-        <section className="mt-8">
+        <section className="mt-6">
           <p className="mb-5 text-sm text-white/50">
             “{query}”共找到 {result.total} 项可访问内容
           </p>
           {result.items.length ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {result.items.map((content) => (
                 <div className="relative" key={content.id}>
                   <ContentCard content={content} />
@@ -64,13 +64,13 @@ export default async function SearchPage({
               ))}
             </div>
           ) : (
-            <p className="rounded-xl border border-dashed border-white/15 p-8 text-sm text-white/50">
+            <p className="rounded-2xl border border-dashed border-white/15 bg-white/[.02] p-8 text-sm text-white/50">
               没有匹配内容。可以更换关键词、缩短描述，或创建新的内容需求。
             </p>
           )}
         </section>
       ) : (
-        <p className="mt-8 text-sm text-white/50">
+        <p className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[.02] p-8 text-sm text-white/50">
           输入关键词，在全部正式内容中搜索。结果会先按你的权限过滤。
         </p>
       )}

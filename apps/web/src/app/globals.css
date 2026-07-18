@@ -69,7 +69,73 @@ a {
 }
 
 .v9-source-home {
+  --v9-bg: #090909;
+  --v9-panel: #111112;
+  --v9-panel-2: #171717;
+  --v9-text: #f4f4f5;
+  --v9-muted: #9c9c9c;
+  --v9-line: rgba(255, 255, 255, 0.1);
+  --v9-soft: rgba(255, 255, 255, 0.045);
+  --v9-strong: #f4f4f4;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.v9-source-home[data-theme='light'] {
+  --v9-bg: #f5f5f4;
+  --v9-panel: #fff;
+  --v9-panel-2: #f0f0ef;
+  --v9-text: #151515;
+  --v9-muted: #696970;
+  --v9-line: rgba(0, 0, 0, 0.09);
+  --v9-soft: rgba(0, 0, 0, 0.04);
+  --v9-strong: #151515;
+  background: radial-gradient(circle at 8% 0%, rgba(0, 0, 0, 0.045), transparent 30%) var(--v9-bg) !important;
+  color-scheme: light;
+  color: var(--v9-text) !important;
+}
+
+.v9-source-home[data-theme='light'] img[src*='nav-logo'] {
+  filter: invert(1);
+}
+
+.v9-source-home[data-theme='light'] header,
+.v9-source-home[data-theme='light'] [class*='bg-[#090909]'],
+.v9-source-home[data-theme='light'] [class*='bg-black'] {
+  background-color: var(--v9-bg) !important;
+}
+
+.v9-source-home[data-theme='light'] [class*='bg-[#0c0c0d]'],
+.v9-source-home[data-theme='light'] [class*='bg-[#111'],
+.v9-source-home[data-theme='light'] [class*='bg-[#171717'] {
+  background-color: var(--v9-panel) !important;
+}
+
+.v9-source-home[data-theme='light'] [class*='bg-white/'] {
+  background-color: var(--v9-soft) !important;
+}
+
+.v9-source-home[data-theme='light'] [class*='border-white'] {
+  border-color: var(--v9-line) !important;
+}
+
+.v9-source-home[data-theme='light'] [class*='text-white'],
+.v9-source-home[data-theme='light'] [class*='text-[#f4f4f5]'] {
+  color: var(--v9-text) !important;
+}
+
+.v9-source-home[data-theme='light'] [class*='text-[#d0d0d4]'],
+.v9-source-home[data-theme='light'] [class*='text-white/'] {
+  color: var(--v9-muted) !important;
+}
+
+.v9-source-home[data-theme='light'] [class*='bg-[#f4f4f4]'],
+.v9-source-home[data-theme='light'] [class*='bg-white text-black'] {
+  background-color: var(--v9-strong) !important;
+}
+
+.v9-source-home[data-theme='light'] [class*='text-[#090909]'],
+.v9-source-home[data-theme='light'] [class*='text-black'] {
+  color: var(--v9-bg) !important;
 }
 
 @theme inline {

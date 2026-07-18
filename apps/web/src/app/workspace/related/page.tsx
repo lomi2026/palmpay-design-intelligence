@@ -4,6 +4,7 @@ import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
 import { createRelationAction, removeRelationAction } from '../engagement-actions';
+import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 
 type Relations = {
   outgoing: Array<{
@@ -40,20 +41,18 @@ export default async function RelatedContentPage({
       ])
     : [null, { items: [], page: 1, pageSize: 100, total: 0 } satisfies ContentListResponse];
   return (
-    <main className="mx-auto max-w-3xl px-6 py-8 md:px-10">
-      <Link href="/workspace" className="text-sm text-white/50 hover:text-white">
+    <main className="mx-auto max-w-[1100px] px-5 py-8 md:px-8 md:py-10">
+      <Link href="/workspace" className="text-sm text-white/50 transition hover:text-white">
         ← 返回工作台
       </Link>
-      <p className="mt-8 text-xs tracking-[.18em] text-white/45">CONTENT GRAPH</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-[-.045em]">关联内容</h1>
-      <p className="mt-3 text-sm text-white/55">建立资产、Skill、案例与项目之间的可追溯关联。</p>
-      {success ? <p className="mt-5 text-sm text-emerald-200">内容关联已保存。</p> : null}
-      {error ? <p className="mt-5 text-sm text-red-200">请选择关联目标。</p> : null}
+      <div className="mt-5"><WorkspacePageHero description="建立资产、Skill、案例与项目之间可追溯的关联；关联只会作用于当前正式内容。" eyebrow="CONTENT GRAPH" metric={contentId ? { value: (relations?.outgoing.length ?? 0) + (relations?.incoming.length ?? 0), label: '已有连接' } : undefined} title="让经验之间形成可以解释的网络。" /></div>
+      {success ? <p className="mt-4 rounded-xl border border-emerald-200/20 bg-emerald-200/[.07] p-3 text-sm text-emerald-100">内容关联已保存。</p> : null}
+      {error ? <p className="mt-4 rounded-xl border border-red-200/20 bg-red-200/[.07] p-3 text-sm text-red-100">请选择关联目标。</p> : null}
       {contentId ? (
         <>
           <form
             action={createRelationAction}
-            className="mt-6 grid gap-3 rounded-xl border border-white/12 bg-white/[.035] p-5 md:grid-cols-[1fr_180px_auto]"
+            className="mt-5 grid gap-3 rounded-2xl border border-white/[.11] bg-[#111112] p-5 md:grid-cols-[1fr_180px_auto]"
           >
             <input type="hidden" name="contentId" value={contentId} />
             <select
@@ -85,13 +84,13 @@ export default async function RelatedContentPage({
             </select>
             <Button type="submit">添加关联</Button>
           </form>
-          <div className="mt-7 grid gap-6 md:grid-cols-2">
-            <section>
-              <h2 className="text-sm font-medium">此内容关联到</h2>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            <section className="rounded-2xl border border-white/[.1] bg-[#111112] p-5">
+              <h2 className="text-sm font-medium text-white">此内容关联到</h2>
               <ul className="mt-3 space-y-2">
                 {relations?.outgoing.map((relation) => (
                   <li
-                    className="flex items-center justify-between gap-3 rounded-lg border border-white/10 p-3 text-sm"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-white/[.1] bg-black/[.15] p-3 text-sm"
                     key={relation.id}
                   >
                     <Link
@@ -112,11 +111,11 @@ export default async function RelatedContentPage({
                 ))}
               </ul>
             </section>
-            <section>
-              <h2 className="text-sm font-medium">被以下内容关联</h2>
+            <section className="rounded-2xl border border-white/[.1] bg-[#111112] p-5">
+              <h2 className="text-sm font-medium text-white">被以下内容关联</h2>
               <ul className="mt-3 space-y-2">
                 {relations?.incoming.map((relation) => (
-                  <li className="rounded-lg border border-white/10 p-3 text-sm" key={relation.id}>
+                  <li className="rounded-xl border border-white/[.1] bg-black/[.15] p-3 text-sm" key={relation.id}>
                     <Link
                       className="hover:underline"
                       href={`/workspace/${moduleFor(relation.sourceContent.contentType)}/${relation.sourceContent.slug}`}
@@ -131,7 +130,7 @@ export default async function RelatedContentPage({
           </div>
         </>
       ) : (
-        <p className="mt-8 rounded-lg border border-dashed border-white/15 p-5 text-sm text-white/50">
+        <p className="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/[.02] p-8 text-sm text-white/50">
           请从内容详情页进入关联管理。
         </p>
       )}

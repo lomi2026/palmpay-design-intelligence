@@ -258,6 +258,13 @@ When a new explicit user decision changes this file:
 
 - By explicit user decision, pause the remaining pixel-level v9-1 remediation and complete the formal workspace functional interface first.
 - Add a Phase 5.5 functional-interface completion pass before Phase 6 acceptance.
+
+## 25. Continuous v9-1 parity remediation (2026-07-18)
+
+- By explicit user decision, resume and complete the final v9-1 visual and interaction parity work for every page that has a deployed v9-1 counterpart.
+- Work through the approved priority order without waiting for further confirmation between individual page or flow batches: public entry, workspace shell and overview, knowledge catalogs and details, contribution/review flows, then formal-only pages inheriting the same system.
+- Every parity change must preserve the formal V1 API, PostgreSQL, RBAC, versioning, review and audit behavior already implemented. Static prototype behavior and localStorage must not be reintroduced as a substitute.
+- Completion still requires applicable automated checks and source-versus-rendered visual evidence at desktop and mobile breakpoints. A page without that evidence remains open in the parity inventory.
 - Phase 5.5 must expose the implemented modules through a complete permission-aware desktop and mobile navigation system, remove inert controls, bind the workspace dashboard to formal APIs, and complete the missing personal, governance, analytics and administration surfaces.
 - RBAC remains authoritative: a menu item may be absent for a user who does not have its permission, and no visual completion work may bypass API or page authorization.
 - Final v9-1 parity remains a launch gate after functional-interface and critical-flow completion.

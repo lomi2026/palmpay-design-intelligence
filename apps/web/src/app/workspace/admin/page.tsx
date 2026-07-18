@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
+import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import {
   assignRoleAction,
   createCategoryAction,
@@ -122,11 +123,12 @@ export default async function AdminPage({
     ['audit', '审计日志'],
     ['settings', '平台设置'],
   ];
+  const panelClass = 'rounded-2xl border border-white/[.1] bg-[#111112] p-5 shadow-[0_16px_48px_rgba(0,0,0,.16)] sm:p-6';
+  const controlClass = 'border-white/15 bg-white/[.04] text-white placeholder:text-white/30 focus-visible:ring-white/35';
   return (
-    <main className="mx-auto max-w-6xl px-6 py-8 md:px-10">
-      <p className="text-xs tracking-[.18em] text-white/45">PLATFORM ADMINISTRATION</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-[-.045em]">管理中心</h1>
-      <nav className="mt-6 flex flex-wrap gap-2">
+    <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
+      <WorkspacePageHero description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" eyebrow="PLATFORM ADMINISTRATION" metric={{ value: contents.total, label: '可管理内容' }} title="用可追溯的规则，维护团队能力库。" />
+      <nav className="mt-5 flex flex-wrap gap-2">
         {nav.map(([key, label]) => (
           <Link key={key} href={`/workspace/admin?tab=${key}`}>
             <Button
@@ -144,15 +146,18 @@ export default async function AdminPage({
         ))}
       </nav>
       {tab === 'content' ? (
-        <section className="mt-7 rounded-xl border border-white/10 bg-white/[.035] p-5">
-          <div className="flex justify-between">
-            <h2 className="text-base font-medium">正式内容</h2>
-            <span className="text-sm text-white/45">{contents.total} 项</span>
+        <section className={`mt-5 ${panelClass}`}>
+          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/[.1] pb-4">
+            <div>
+              <p className="text-[10px] font-semibold tracking-[.18em] text-white/40">GOVERNED CONTENT</p>
+              <h2 className="mt-1 text-lg font-medium tracking-[-.025em]">正式内容</h2>
+            </div>
+            <span className="rounded-full border border-white/[.12] bg-black/20 px-3 py-1 text-xs text-white/55">{contents.total} 项</span>
           </div>
           <div className="mt-4 divide-y divide-white/10">
             {contents.items.map((item) => (
               <div
-                className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"
+                className="flex flex-wrap items-center justify-between gap-3 py-3.5 text-sm"
                 key={item.id}
               >
                 <div>
@@ -166,30 +171,32 @@ export default async function AdminPage({
                     {item.contentType} · {item.owner.name}
                   </p>
                 </div>
-                <span className="rounded border border-white/12 px-2 py-1 text-xs text-white/60">
+                <span className="rounded-full border border-white/12 bg-black/20 px-2.5 py-1 text-[11px] text-white/60">
                   {item.status}
                 </span>
               </div>
             ))}
+            {!contents.items.length ? <p className="py-10 text-center text-sm text-white/45">当前组织范围内没有可管理的正式内容。</p> : null}
           </div>
         </section>
       ) : null}
       {tab === 'taxonomy' ? (
         <section className="mt-7 grid gap-5 lg:grid-cols-2">
-          <div className="rounded-xl border border-white/10 bg-white/[.035] p-5">
-            <h2 className="text-base font-medium">分类</h2>
+          <div className={panelClass}>
+            <p className="text-[10px] font-semibold tracking-[.18em] text-white/40">TAXONOMY</p>
+            <h2 className="mt-1 text-lg font-medium tracking-[-.025em]">分类</h2>
             <form action={createCategoryAction} className="mt-4 grid gap-2">
               <Input
                 name="name"
                 placeholder="分类名称"
                 required
-                className="border-white/15 bg-white/[.04] text-white"
+                className={controlClass}
               />
               <Input
                 name="code"
                 placeholder="唯一代码，例如 research-method"
                 required
-                className="border-white/15 bg-white/[.04] text-white"
+                className={controlClass}
               />
               <select
                 name="contentType"
@@ -231,14 +238,15 @@ export default async function AdminPage({
               ))}
             </ul>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[.035] p-5">
-            <h2 className="text-base font-medium">标签</h2>
+          <div className={panelClass}>
+            <p className="text-[10px] font-semibold tracking-[.18em] text-white/40">TAG LIBRARY</p>
+            <h2 className="mt-1 text-lg font-medium tracking-[-.025em]">标签</h2>
             <form action={createTagAction} className="mt-4 flex gap-2">
               <Input
                 name="name"
                 placeholder="新增标签"
                 required
-                className="border-white/15 bg-white/[.04] text-white"
+                className={controlClass}
               />
               <Button type="submit">新增</Button>
             </form>
@@ -272,10 +280,10 @@ export default async function AdminPage({
         </section>
       ) : null}
       {tab === 'teams' ? (
-        <section className="mt-7 rounded-xl border border-white/10 bg-white/[.035] p-5">
+        <section className={`mt-5 ${panelClass}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><h2 className="text-base font-medium">团队管理</h2><p className="mt-1 text-xs text-white/45">维护团队名称、负责人和启用状态。</p></div>
-            <span className="text-sm text-white/45">{teams.length} 个团队</span>
+            <div><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">TEAM DIRECTORY</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">团队管理</h2><p className="mt-1 text-xs text-white/45">维护团队名称、负责人和启用状态。</p></div>
+            <span className="rounded-full border border-white/[.12] bg-black/20 px-3 py-1 text-xs text-white/55">{teams.length} 个团队</span>
           </div>
           <div className="mt-4 divide-y divide-white/10">
             {teams.map((team) => (
@@ -290,8 +298,8 @@ export default async function AdminPage({
         </section>
       ) : null}
       {tab === 'users' ? (
-        <section className="mt-7 rounded-xl border border-white/10 bg-white/[.035] p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-base font-medium">用户管理</h2><p className="mt-1 text-xs text-white/45">管理账号状态；角色授权在“角色权限”中完成。</p></div><span className="text-sm text-white/45">{users.items.length} 个用户</span></div>
+        <section className={`mt-5 ${panelClass}`}>
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">IDENTITY DIRECTORY</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">用户管理</h2><p className="mt-1 text-xs text-white/45">管理账号状态；角色授权在“角色权限”中完成。</p></div><span className="rounded-full border border-white/[.12] bg-black/20 px-3 py-1 text-xs text-white/55">{users.items.length} 个用户</span></div>
           <div className="mt-4 divide-y divide-white/10">
             {users.items.map((member) => (
               <div
@@ -326,16 +334,17 @@ export default async function AdminPage({
       ) : null}
       {tab === 'roles' ? (
         <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)]">
-          <section className="rounded-xl border border-white/10 bg-white/[.035] p-5"><h2 className="text-base font-medium">系统角色权限</h2><p className="mt-1 text-xs text-white/45">权限矩阵由系统角色定义，授权后立即应用于页面和 API。</p><div className="mt-4 space-y-3">{roles.map((role) => <article className="rounded-xl border border-white/10 p-4" key={role.id}><div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-medium">{role.name}</h3><p className="mt-1 text-xs text-white/40">{role.code}</p></div><Badge variant="outline" className="border-white/15 text-white/60">{role.rolePermissions.length} 项权限</Badge></div><div className="mt-3 flex flex-wrap gap-1.5">{role.rolePermissions.map(({ permission }) => <Badge variant="outline" className="border-white/10 text-[10px] text-white/45" key={permission.id}>{permission.code}</Badge>)}</div></article>)}</div></section>
-          <section className="rounded-xl border border-white/10 bg-white/[.035] p-5"><h2 className="text-base font-medium">用户角色授权</h2><p className="mt-1 text-xs text-white/45">一个用户可以拥有多个组织级角色。</p><div className="mt-4 divide-y divide-white/10">{users.items.map((member) => <div className="py-4" key={member.id}><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm">{member.name}</p><p className="text-xs text-white/40">{member.email}</p></div><form action={assignRoleAction} className="flex gap-2"><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><select name="roleId" defaultValue="" required className="h-8 min-w-0 rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white"><option value="" disabled>添加角色</option>{roles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}</select><Button type="submit" size="sm" variant="outline" className="border-white/15 bg-transparent text-white">授予</Button></form></div><div className="mt-3 flex flex-wrap gap-1.5">{member.userRoles.length ? member.userRoles.map((entry) => <form action={removeUserRoleAction} key={entry.id}><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><input type="hidden" name="userRoleId" value={entry.id} /><Button type="submit" size="sm" variant="outline" className="h-7 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white">{entry.role.name} ×</Button></form>) : <span className="text-xs text-white/45">无角色</span>}</div></div>)}</div></section>
+          <section className={panelClass}><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">PERMISSION MODEL</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">系统角色权限</h2><p className="mt-1 text-xs text-white/45">权限矩阵由系统角色定义，授权后立即应用于页面和 API。</p><div className="mt-4 space-y-3">{roles.map((role) => <article className="rounded-xl border border-white/[.1] bg-black/[.16] p-4" key={role.id}><div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-medium">{role.name}</h3><p className="mt-1 text-xs text-white/40">{role.code}</p></div><Badge variant="outline" className="border-white/15 text-white/60">{role.rolePermissions.length} 项权限</Badge></div><div className="mt-3 flex flex-wrap gap-1.5">{role.rolePermissions.map(({ permission }) => <Badge variant="outline" className="border-white/10 text-[10px] text-white/45" key={permission.id}>{permission.code}</Badge>)}</div></article>)}</div></section>
+          <section className={panelClass}><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">ACCESS ASSIGNMENT</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">用户角色授权</h2><p className="mt-1 text-xs text-white/45">一个用户可以拥有多个组织级角色。</p><div className="mt-4 divide-y divide-white/10">{users.items.map((member) => <div className="py-4" key={member.id}><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm">{member.name}</p><p className="text-xs text-white/40">{member.email}</p></div><form action={assignRoleAction} className="flex gap-2"><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><select name="roleId" defaultValue="" required className="h-8 min-w-0 rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white"><option value="" disabled>添加角色</option>{roles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}</select><Button type="submit" size="sm" variant="outline" className="border-white/15 bg-transparent text-white">授予</Button></form></div><div className="mt-3 flex flex-wrap gap-1.5">{member.userRoles.length ? member.userRoles.map((entry) => <form action={removeUserRoleAction} key={entry.id}><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><input type="hidden" name="userRoleId" value={entry.id} /><Button type="submit" size="sm" variant="outline" className="h-7 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white">{entry.role.name} ×</Button></form>) : <span className="text-xs text-white/45">无角色</span>}</div></div>)}</div></section>
         </div>
       ) : null}
       {tab === 'audit' ? (
-        <section className="mt-7 rounded-xl border border-white/10 bg-white/[.035] p-5">
-          <h2 className="text-base font-medium">审计日志</h2>
+        <section className={`mt-5 ${panelClass}`}>
+          <p className="text-[10px] font-semibold tracking-[.18em] text-white/40">ACTIVITY LEDGER</p>
+          <h2 className="mt-1 text-lg font-medium tracking-[-.025em]">审计日志</h2>
           <div className="mt-4 divide-y divide-white/10">
             {audit.items.map((item) => (
-              <div className="flex flex-wrap justify-between gap-3 py-3 text-sm" key={item.id}>
+              <div className="flex flex-wrap justify-between gap-3 py-3.5 text-sm" key={item.id}>
                 <span>
                   {item.action}
                   <em className="ml-2 not-italic text-xs text-white/40">{item.entityType}</em>
@@ -351,8 +360,8 @@ export default async function AdminPage({
       ) : null}
       {tab === 'settings' ? (
         <section className="mt-7 grid gap-5 lg:grid-cols-2">
-          <article className="rounded-xl border border-white/10 bg-white/[.035] p-5"><p className="text-xs tracking-[.15em] text-white/40">ORGANIZATION</p><h2 className="mt-2 text-base font-medium">组织配置</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织名称</dt><dd>{organization.name}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织代码</dt><dd>{organization.code}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">运行状态</dt><dd>{organization.status}</dd></div></dl></article>
-          <article className="rounded-xl border border-white/10 bg-white/[.035] p-5"><p className="text-xs tracking-[.15em] text-white/40">RUNTIME BOUNDARY</p><h2 className="mt-2 text-base font-medium">当前环境边界</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">认证</dt><dd>隔离开发认证</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">数据库</dt><dd>PostgreSQL 17</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">附件存储</dt><dd>本地签名存储</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">AI Gateway</dt><dd className="text-white/45">尚未配置</dd></div></dl><p className="mt-4 text-xs leading-5 text-white/40">生产 SSO、Cloudflare R2 和 AI 数据边界确认后，才会开放对应的可写配置。</p></article>
+          <article className={panelClass}><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">ORGANIZATION</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">组织配置</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织名称</dt><dd>{organization.name}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">组织代码</dt><dd>{organization.code}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">运行状态</dt><dd>{organization.status}</dd></div></dl></article>
+          <article className={panelClass}><p className="text-[10px] font-semibold tracking-[.18em] text-white/40">RUNTIME BOUNDARY</p><h2 className="mt-1 text-lg font-medium tracking-[-.025em]">当前环境边界</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">认证</dt><dd>隔离开发认证</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">数据库</dt><dd>PostgreSQL 17</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">附件存储</dt><dd>Cloudflare R2</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">AI Gateway</dt><dd className="text-white/45">尚未配置</dd></div></dl><p className="mt-4 text-xs leading-5 text-white/40">生产 SSO、Cloudflare R2 和 AI 数据边界确认后，才会开放对应的可写配置。</p></article>
         </section>
       ) : null}
     </main>

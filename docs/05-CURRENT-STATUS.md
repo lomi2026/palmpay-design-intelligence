@@ -4,15 +4,15 @@ Last Updated: 2026-07-18
 
 ## Current Phase
 
-**Phase 5.5 functional-interface acceptance is complete; Phase 6 test-environment delivery preparation is in progress; final v9-1 pixel-parity remediation remains paused**
+**Phase 5.5 functional-interface acceptance is complete; the external test environment core delivery is live; final v9-1 visual-parity remediation is in progress**
 
 ## Current Objective
 
-Complete non-visual Phase 6 QA and delivery preparation while keeping the final v9-1 page-by-page visual-parity remediation paused by explicit user decision.
+Complete the remaining external-test browser acceptance while resuming the final v9-1 page-by-page visual-parity remediation.
 
 The next engineering objective is:
 
-> By explicit user decision on 2026-07-17, pause pixel-level parity work and complete Phase 5.5 functional-interface coverage first. Visual parity remains a required launch gate after the formal flows are complete.
+> Phase 5.5 formal workflow coverage and the external test environment core delivery are complete enough to resume the required pixel-level parity work. Visual parity remains a required launch gate; live browser acceptance of uploads, review and publication continues in parallel.
 
 ## Approved Product Baseline
 
@@ -85,6 +85,8 @@ The next engineering objective is:
 - Phase 6 local QA has verified Prisma schema/migration status, production builds, 12 PostgreSQL integration checks, security-boundary assertions and authorized runtime smoke paths. During this verification, the restored database was found to be missing the approved design-asset import; the existing idempotent v9-1 import script added the missing 8 assets and the formal catalog now contains 8 assets, 6 Skills, 4 cases and 33 projects.
 - A safe external-test authentication adapter now issues short-lived, HMAC-signed bearer sessions only when `AUTH_MODE=test`; it first resolves the active database user and therefore preserves formal disabled-user and RBAC enforcement. In test mode, a forged development identity header is rejected. The adapter is explicitly excluded from the future production OIDC/SSO path.
 - Test-environment deployment configuration is prepared for Vercel (web), Render free Docker API and isolated free PostgreSQL, and the existing private Cloudflare R2 test Bucket. A test-only idempotent bootstrap command creates the configured administrator, team and organization-scoped `admin` plus `member` assignments before the approved v9-1 catalog imports. The original Railway route was blocked by the account's exhausted free resource-creation quota and is retained only as a future paid-hosting fallback.
+- The Render Blueprint has created the isolated PostgreSQL 17 test database and deployed the `palmpay-design-hub-api-test` API. Its public health check at `/api/health` returns `{"status":"ok"}` after the production-startup safeguard was corrected for the explicitly supported `AUTH_MODE=test` deployment path.
+- The public Vercel test web at `https://palmpay-design-intelligence-web.vercel.app` is deployed from `apps/web` on `codex/v1-project-handoff`. Render `WEB_ORIGIN` and the private R2 test Bucket CORS policy both allow that exact HTTPS origin. The free Render plan does not offer a Shell, so the Docker test-only startup path now runs the idempotent database migration, seed, test-admin bootstrap and approved v9-1 imports automatically. A remote test-session request for `lomi2026@126.com` now returns `201`.
 
 ## Validated Product Modules
 
@@ -121,25 +123,27 @@ The next engineering objective is:
 
 ## In Progress
 
-- Phase 6 non-visual QA and external test-environment delivery preparation is in progress. Phase 5.5 delivered one permission-aware navigation model across desktop and mobile, route-aware active states, dynamic breadcrumbs, real dashboard data, personal contribution/submission surfaces and explicit unavailable-state behavior for unfinished controls.
+- The external test environment core is live: Render API/PostgreSQL, Vercel Web, test auth, exact-origin API/R2 CORS, test database initialization and the administrator session have remote evidence. Remaining delivery evidence is the browser acceptance of actual attachment upload, review and publication. Phase 5.5 delivered one permission-aware navigation model across desktop and mobile, route-aware active states, dynamic breadcrumbs, real dashboard data, personal contribution/submission surfaces and explicit unavailable-state behavior for unfinished controls.
 - The administration surface is now separated into content, taxonomy, team, user, role-permission, audit and platform-settings modules. Team updates, user status changes and role assignment/removal use the protected formal APIs and retain audit logging; the platform-settings module reports the current environment boundary without presenting unavailable production integrations as active controls.
 - Phase 4/5 implementation is in the working tree: the additive Prisma migration introduces persisted favorites, recent views, unified usage events, search logs and audit logs. The API provides permission-filtered PostgreSQL full-text search, search-click/no-result logging, favorites, recent views, real AI-project usage confirmation, content relations, analytics aggregates, taxonomy/content administration and audit-log endpoints. The workspace exposes global search, personal saved/recent pages, usage and relation flows, overview/insights and RBAC-gated administration pages. API strict typecheck, lint, Prisma validation/migration status and twelve PostgreSQL integration tests pass, including separate member/reviewer/manager/admin workflow coverage and input/CORS/file boundary assertions; Web typecheck, lint and production build also pass. The protected workspace correctly redirects to formal development login rather than substituting a static role.
 - Phase 3 is verified functionally. The public home, workspace shell, catalog lists, submit/draft flow, notifications, my submissions, review center, login and access-denied pages have been moved onto the v9-1 dark visual language using shadcn/ui primitives while retaining the formal API and RBAC behavior.
-- The mandatory v9-1 parity gate is still open: the public home has now received a complete desktop structure restoration against deployed source commit `bf39748` (hero, metric panel, task paths, AI project portfolio, asset toolbar/grid, verified case, governance and CTA), while the deployed workspace and project counterparts still need complete responsive and permission-state acceptance. Direct deployment checks established that several archived deep links (Design Assets, submit, demo workspace and AI Skill pages) are 404 and therefore are formal-only V1 routes rather than current deployed parity targets. Cloudflare R2 activation remains deferred until a payment method is available.
+- The mandatory v9-1 parity gate is still open: deployed/authenticated desktop first-viewport pairs for the public home, workspace and AI project library were captured on 2026-07-18. Source-informed corrections restored the public header’s constrained desktop container and the AI project portfolio’s overview/suggested-priority layer using real published records. Responsive, project-detail, interaction-state and post-deployment captures still need to be completed before acceptance. Direct deployment checks established that several archived deep links (Design Assets, submit, demo workspace and AI Skill pages) are 404 and therefore are formal-only V1 routes rather than current deployed parity targets. The test R2 Bucket is configured and live-signed-upload validated.
 - The formal AI Project detail now uses the deployed project-template information hierarchy while binding every displayed signal to the persisted AIProjectDetail, ContentVersion, owner/team, priority and engagement models. It retains RBAC-gated lifecycle actions instead of copying the legacy static reset/action behavior.
 - The formal AI Case detail now uses the deployed verified-practice information hierarchy while binding the before/after comparison, AI and human responsibilities, result and validation evidence to CaseDetail and ContentVersion data. Missing limits are explicitly marked as incomplete rather than presented as verified production evidence.
 - The formal Design Asset detail now puts applicability and constraints ahead of implementation detail, while preserving persisted usage guidance, version, maintenance metadata, attachments, related content and engagement actions.
 - The formal AI Skill detail now exposes the approved reusable-method model from `SkillDetail`: scope, input/output, Prompt, execution conditions, examples, human review, limitations, version and owner. It does not invent missing examples or limitations. Direct deployment checks confirm that the archived Skill catalog/detail filenames return 404, so these formal pages inherit the deployed workspace system instead of claiming a missing v9-1 counterpart.
 - The deployed workspace desktop baseline has been checksum-verified against the matching historical source and compared side by side with an authenticated formal local workspace at `1280 x 720`. The sidebar, top bar, dashboard hero, metric, update and todo layout has received a source-informed correction pass; matching reviewer/admin test identity and the remaining page/state captures are still required for acceptance.
 - The workspace Design Assets module uses 8 formally imported, source-traceable v9-1 assets instead of an empty catalog. Its header, filters, card-cover hierarchy and metadata use the deployed workspace component language with shadcn/ui composition. The historical `design-assets.html` URL is 404 on the current deployment, so it is not a separate parity blocker.
+- By the latest explicit user direction, v9-1 parity remediation now continues automatically through small page/flow batches. The first resumed batch adds the required domain, value and stage filters to the real AI Project portfolio and aligns its portfolio density with the approved project-library model; the value overview, data-insights and review-center entry surfaces also now use the same high-density workspace hierarchy while retaining their live PostgreSQL metrics and actions. Web typecheck, lint and production build pass after this batch. Browser capture is now available for deployed source/formal comparisons, although the remaining desktop/mobile states and the new code’s post-deployment capture are still open.
+- The continuous parity pass now also covers the formal contribution, submission and review flows; AI Skill and AI Case catalog hierarchy; personal saved/recent space; notifications; global search; relationship management; usage confirmation; login/access-denied states; shared content cards; and all administration tabs. The draft editor, attachment binding/removal, review handoff, published-detail actions, loading and recoverable-error states now share the dense workspace hierarchy; the admin panels retain every protected server action while adding consistent operational headers, counts, empty states and responsive panels. Web typecheck, lint and the 23-route production build pass after this batch. Required desktop/mobile source-versus-rendered comparison remains open before visual acceptance.
 
 ## Next Task
 
 Codex should:
 
-1. Begin Phase 6 non-visual QA: broaden security and authorization checks, record release evidence and resolve production-delivery prerequisites without resuming pixel parity.
-2. Deploy the prepared external test environment: create the Render API/PostgreSQL Blueprint and Vercel web service from `codex/v1-project-handoff`, set the documented test-only secrets, verify the automatic bootstrap/import hook, then add the exact Vercel HTTPS origin to Render `WEB_ORIGIN` and the private R2 CORS policy before browser upload validation.
-3. Return to the visual-parity inventory only when the user resumes it, then complete required deployed/local desktop and mobile comparisons.
+1. Continue the v9-1 visual-parity inventory automatically, next covering catalog/detail responsive layouts and detail-state controls without weakening formal data, RBAC or lifecycle behavior.
+2. Restore the required deployed/local desktop and mobile comparison capture, then record external-test browser evidence for test-admin login, attachment upload/download, draft submission, reviewer decision and publication; correct any deployment-only defect found.
+3. Resolve remaining production-delivery prerequisites only when a durable hosting, database, SSO and domain decision is made.
 
 ## Next Milestone
 
@@ -168,7 +172,7 @@ Milestone definition:
 - Yuque integration
 - Jira integration
 - GitHub integration
-- Full light-theme token migration
+- Full light-theme token migration beyond the restored v9-1 public-home and workspace-shell preference behavior
 
 ## Current Blockers / Decisions Needed
 
@@ -176,8 +180,8 @@ The following decisions may affect later implementation:
 
 - Enterprise SSO / OIDC provider is not yet confirmed.
 - Production hosting and database provider are not yet confirmed.
-- Railway cannot create the required API service for the current account because its free resource-creation quota is exhausted. The external test deployment now uses the committed Render Blueprint for an isolated free Docker API and free PostgreSQL plus Vercel web. Render's free PostgreSQL database expires after 30 days and the free API sleeps after inactivity, so this is an acceptance environment rather than a production route. The prepared configuration uses test-only signed sessions and the private `palmpay-design-hub-test` R2 Bucket; the exact Vercel origin is still unknown and must be added to Render `WEB_ORIGIN` and R2 CORS only after Vercel creates it.
-- Cloudflare R2 is the approved production storage target. A private Bucket, Bucket-scoped Object Read & Write Token, live signed upload/download/checksum verification and localhost browser-origin CORS preflight were completed on 2026-07-18. The external test-web HTTPS origin must be added to the private Bucket CORS policy only after that deployment URL exists. Local signed filesystem storage remains the fallback development adapter.
+- Railway cannot create the required API service for the current account because its free resource-creation quota is exhausted. The external test deployment uses the committed Render Blueprint for an isolated free Docker API and free PostgreSQL plus the Vercel web at `https://palmpay-design-intelligence-web.vercel.app`. Render's free PostgreSQL database expires after 30 days and the free API sleeps after inactivity, so this is an acceptance environment rather than a production route. The prepared configuration uses test-only signed sessions and the private `palmpay-design-hub-test` R2 Bucket; the exact Vercel origin has been added to both Render `WEB_ORIGIN` and R2 CORS.
+- Cloudflare R2 is the approved production storage target. A private test Bucket, Bucket-scoped Object Read & Write Token, live signed upload/download/checksum verification, localhost browser-origin preflight and the exact external-test HTTPS origin CORS policy were completed on 2026-07-18. Local signed filesystem storage remains the fallback development adapter.
 - Legacy examples contain team labels but no formal owner-user identity mapping required by the V1.0 ER model.
 - The ER defines `restricted` visibility but does not define a user/group ACL entity; current catalog access is limited to the owner or `content.edit_all` users.
 - PostgreSQL 17 is installed locally through Postgres.app. The `palmpay_design_hub` database was restored on 2026-07-17 from the supplied old-computer dump and brought up to date with the current Prisma migration set; the development API is available on port 3001.

@@ -21,19 +21,19 @@ export function ContentCard({ content }: { content: ContentCardData }) {
           ? 'ai-cases'
           : 'ai-projects';
   return (
-    <Card className="min-h-56 border border-white/10 bg-white/[0.035] py-5 shadow-none transition hover:border-white/25 hover:bg-white/[0.055]">
+    <Card className="group min-h-56 border border-white/[.1] bg-[#111112] py-5 shadow-none transition hover:-translate-y-0.5 hover:border-white/[.22] hover:bg-white/[.035]">
       <CardHeader>
-        <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
-          <Badge variant="outline" className="border-white/10 text-white/55">
+        <div className="flex items-center justify-between gap-3 text-[11px] text-neutral-500">
+          <Badge variant="outline" className="border-white/[.12] bg-white/[.035] text-white/55">
             {content.category?.name ?? '未分类'}
           </Badge>
           <span>
             {verificationLabels[content.verificationStatus] ?? content.verificationStatus}
           </span>
         </div>
-        <CardTitle className="mt-3 text-lg font-medium leading-7 text-white">
+        <CardTitle className="mt-4 text-[19px] font-medium leading-7 text-white">
           <Link
-            className="hover:text-violet-200 hover:underline hover:underline-offset-4"
+            className="transition group-hover:text-white/70"
             href={`/workspace/${contentRoute}/${content.slug}`}
           >
             {content.title}
@@ -46,14 +46,14 @@ export function ContentCard({ content }: { content: ContentCardData }) {
       <CardContent>
         <div className="mt-4 flex flex-wrap gap-1.5">
           {content.tags.map(({ tag }) => (
-            <Badge variant="outline" className="border-white/10 text-white/45" key={tag.id}>
+            <Badge variant="outline" className="border-white/[.1] bg-black/[.18] text-white/45" key={tag.id}>
               {tag.name}
             </Badge>
           ))}
         </div>
       </CardContent>
-      <CardFooter className="mt-auto flex items-center justify-between border-white/10 bg-transparent px-5 pt-5 text-xs text-white/40">
-        <span>{content.owner.name}</span>
+      <CardFooter className="mt-auto flex items-center justify-between border-white/[.1] bg-transparent px-5 pt-5 text-xs text-white/40">
+        <span>负责人 · {content.owner.name}</span>
         <span>{content.team.name}</span>
       </CardFooter>
     </Card>

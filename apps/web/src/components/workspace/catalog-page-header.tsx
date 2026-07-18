@@ -22,23 +22,24 @@ export function CatalogPageHeader({
   source?: string;
 }) {
   return (
-    <header className="border-b border-white/10 pb-7">
-      <div className="flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
-        <div>
-          <p className="text-xs tracking-[0.18em] text-violet-200/75">{eyebrow}</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-white">{title}</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">{description}</p>
+    <header className="relative overflow-hidden rounded-[22px] border border-white/[.11] bg-[#111112] px-6 py-7 sm:px-8">
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40" />
+      <div className="relative flex flex-col justify-between gap-7 xl:flex-row xl:items-end">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold tracking-[.2em] text-white/45">{eyebrow}</p>
+          <h1 className="mt-3 text-[34px] font-semibold tracking-[-.055em] text-white">{title}</h1>
+          <p className="mt-3 text-sm leading-6 text-white/55">{description}</p>
         </div>
-        <form className="flex w-full max-w-md gap-2" method="get">
+        <form className="flex w-full max-w-xl gap-2" method="get">
           <label className="sr-only" htmlFor={searchId}>搜索{title}</label>
-          <Input className="min-w-0 border-white/15 bg-white/[0.045] text-white placeholder:text-white/35" defaultValue={search} id={searchId} name="search" placeholder={searchPlaceholder} type="search" />
-          <Button variant="outline" className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white" type="submit"><Search /> 搜索</Button>
+          <Input className="min-w-0 border-white/[.14] bg-black/[.25] text-white placeholder:text-white/35" defaultValue={search} id={searchId} name="search" placeholder={searchPlaceholder} type="search" />
+          <Button className="border-white/[.16] bg-white/[.06] text-white hover:bg-white/[.12] hover:text-white" type="submit" variant="outline"><Search /> 搜索</Button>
         </form>
       </div>
-      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/45">
-        <span>{count}</span>
-        {source ? <span>{source}</span> : null}
-        {search ? <span>搜索：{search}</span> : null}
+      <div className="relative mt-6 flex flex-wrap items-center gap-2 text-[11px] text-white/50">
+        <span className="rounded-full border border-white/[.11] bg-black/[.2] px-3 py-1.5">{count}</span>
+        {source ? <span className="rounded-full border border-white/[.11] bg-black/[.2] px-3 py-1.5">{source}</span> : null}
+        {search ? <span className="rounded-full border border-white/[.11] bg-black/[.2] px-3 py-1.5">搜索：{search}</span> : null}
       </div>
     </header>
   );

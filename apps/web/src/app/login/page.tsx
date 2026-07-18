@@ -18,17 +18,18 @@ export default async function LoginPage({
   const isTestMode = process.env.AUTH_MODE === 'test';
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_right,rgba(167,139,250,.16),transparent_30%),#0b0b0b] px-6 py-12">
-      <section className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.045] p-7 shadow-2xl shadow-black/30 backdrop-blur-sm">
-        <p className="text-xs tracking-[0.2em] text-violet-200/75">PALMPAY DESIGN HUB</p>
-        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.045em] text-white">登录体验设计 Hub</h1>
+    <main className="grid min-h-screen place-items-center bg-[#090909] px-6 py-12">
+      <section className="relative w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/[.11] bg-[#111112] p-7 shadow-2xl shadow-black/30 sm:p-10">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-35" />
+        <div className="relative"><p className="text-[11px] font-semibold tracking-[.24em] text-white/45">PALMPAY DESIGN HUB</p>
+        <h1 className="mt-4 text-[34px] font-semibold tracking-[-.055em] text-white">登录体验设计 Hub</h1>
         <p className="mt-2 text-sm leading-6 text-white/55">
           {isTestMode
             ? '测试环境仅允许已启用成员使用测试访问码登录。正式环境接入企业 SSO 后将替换此表单。'
             : '当前为隔离的开发认证入口。正式环境接入企业 SSO 后将替换此表单。'}
         </p>
 
-        <form action={isTestMode ? testLogin : developmentLogin} className="mt-7 space-y-4">
+        <form action={isTestMode ? testLogin : developmentLogin} className="mt-8 space-y-4">
           <label className="block text-sm text-white/75" htmlFor="email">
             企业邮箱
           </label>
@@ -67,9 +68,10 @@ export default async function LoginPage({
           </Button>
         </form>
 
-        <Link className="mt-6 inline-flex text-sm text-white/45 hover:text-white/75" href="/">
+        <Link className="mt-7 inline-flex text-sm text-white/45 transition hover:text-white/75" href="/">
           返回公开首页
         </Link>
+        </div>
       </section>
     </main>
   );

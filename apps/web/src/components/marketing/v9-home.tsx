@@ -2,7 +2,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ArrowRight,
-  Moon,
   Search,
   Sparkles,
   BarChart3,
@@ -12,6 +11,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MarketingMobileMenu } from '@/components/marketing/marketing-mobile-menu';
+import { V9MobileSection } from '@/components/marketing/v9-mobile-section';
+import { V9ThemeToggle } from '@/components/marketing/v9-theme-toggle';
 
 const featuredAssets = [
   ['Component system', '组件规范', '更新于 2 天前', 'Web 数据表格组件规范', '统一复杂业务表格的布局、筛选、批量操作、状态与空数据表达。', '设计系统小组', '已验证 · 72% 复用', 'window'],
@@ -24,7 +25,7 @@ export function V9Home() {
   return (
     <main className="v9-source-home overflow-hidden bg-[#090909] text-[#f4f4f5]">
       <header className="sticky top-0 z-30 h-[72px] border-b border-white/[0.08] bg-[#090909]/[.82] backdrop-blur-xl">
-        <div className="flex h-full items-center gap-8 px-4 md:px-6">
+        <div className="mx-auto flex h-full w-full max-w-[1248px] items-center gap-8 px-4 md:px-0">
           <Link href="/" className="flex shrink-0 items-center gap-2.5 md:gap-3" aria-label="返回首页">
             <Image src="/v9-1/assets/nav-logo-20260710.png" alt="PalmPay Design Intelligence Hub" className="size-7 object-contain" height={28} width={28} priority />
             <span className="leading-[1.05] text-[13px] font-semibold tracking-[-.02em]">PalmPay Design<br className="hidden min-[561px]:block" /><span className="hidden text-[9px] font-medium tracking-[.18em] text-white/60 min-[561px]:inline">INTELLIGENCE HUB</span></span>
@@ -39,7 +40,7 @@ export function V9Home() {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <Button asChild variant="outline" size="sm" className="hidden h-10 w-[150px] justify-start rounded-[10px] border-white/[.1] bg-white/[.035] px-3 text-[12px] font-normal text-white/45 hover:bg-white/[.08] hover:text-white md:inline-flex"><Link href="/workspace/search"><Search className="size-3.5" /> 搜索资产、Skill 或… <kbd className="ml-auto rounded border border-white/[.1] px-1.5 text-[10px]">⌘K</kbd></Link></Button>
-            <Button variant="outline" size="icon-sm" aria-label="切换明暗主题" className="size-10 rounded-[10px] border-white/[.1] bg-white/[.035] text-white hover:bg-white/[.08] hover:text-white"><Moon className="size-4" /></Button>
+            <V9ThemeToggle />
             <MarketingMobileMenu />
             <Button asChild size="sm" className="hidden h-10 rounded-[10px] bg-[#f4f4f4] px-5 text-[13px] font-bold !text-[#090909] hover:bg-white min-[561px]:inline-flex">
               <Link href="/workspace">进入工作台 <ArrowRight className="size-4" /></Link>
@@ -134,22 +135,22 @@ export function V9Home() {
           </div>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ['S05 · STRATEGY', '90 天执行计划', '通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。', '组织执行', '/workspace/ai-projects'],
-              ['P01 · PRODUCTION', 'AI 需求分析与体验策略中心', '统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。', '设计生产', '/workspace/ai-projects'],
-              ['P08 · GROWTH', 'AI 新用户激活助手', '基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。', '业务增长', '/workspace/ai-projects'],
-              ['P23 · RISK', 'AI 高风险操作体验审计', '审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。', '金融风险', '/workspace/ai-projects'],
+              ['S05 · STRATEGY', '90 天执行计划', '通过试点完成基础建设、结果验证、标准化与复制，明确团队如何真正启动。', '组织执行', '/workspace/ai-projects/ai-project-s05?from=home'],
+              ['P01 · PRODUCTION', 'AI 需求分析与体验策略中心', '统一吸收项目上下文，自动生成设计分析、风险识别与体验策略。', '设计生产', '/workspace/ai-projects/ai-project-p01?from=home'],
+              ['P08 · GROWTH', 'AI 新用户激活助手', '基于用户状态、未完成任务与目标能力，推荐下一步最有价值的行动。', '业务增长', '/workspace/ai-projects/ai-project-p08?from=home'],
+              ['P23 · RISK', 'AI 高风险操作体验审计', '审计资金、权限、安全和敏感操作的保护机制、可理解性与可追溯性。', '金融风险', '/workspace/ai-projects/ai-project-p23?from=home'],
             ].map(([code, title, body, category, href]) => <Link key={code} href={href!} className="group flex min-h-[260px] flex-col rounded-[18px] border border-white/[.1] bg-white/[.035] p-[22px] transition hover:-translate-y-1 hover:border-white/[.2] hover:bg-white/[.06]"><div className="flex items-center justify-between text-[9px] tracking-[.1em] text-white/45"><span>{code}</span><ArrowUpRight className="size-3.5" /></div><h3 className="mt-11 text-[18px] font-semibold leading-[1.34] tracking-[-.025em] text-white">{title}</h3><p className="mt-2.5 text-[11px] leading-[1.65] text-white/50">{body}</p><div className="mt-auto flex items-center justify-between border-t border-white/[.1] pt-[18px] text-[9px] text-white/45"><span>{category}</span><span>可立项</span></div></Link>)}
           </div>
-          <div className="mt-[18px] flex flex-wrap gap-3"><Button asChild className="h-10 rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white"><Link href="/workspace/ai-projects">进入 AI 项目库 <ArrowRight className="size-4" /></Link></Button><Button asChild variant="outline" className="h-10 rounded-[10px] border-white/[.12] bg-white/[.035] px-[18px] text-[13px] font-bold text-white hover:bg-white/[.08] hover:text-white"><Link href="/workspace/ai-projects">查看 90 天执行路线</Link></Button></div>
+          <div className="mt-[18px] flex flex-wrap gap-3"><Button asChild className="h-10 rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white"><Link href="/workspace/ai-projects">进入 AI 项目库 <ArrowRight className="size-4" /></Link></Button><Button asChild variant="outline" className="h-10 rounded-[10px] border-white/[.12] bg-white/[.035] px-[18px] text-[13px] font-bold text-white hover:bg-white/[.08] hover:text-white"><Link href="/workspace/ai-projects/ai-project-s05?from=home">查看 90 天执行路线</Link></Button></div>
         </div>
       </section>
 
-      <section id="assets" className="px-5 py-20 md:px-6 md:py-24">
-        <div className="mx-auto max-w-[1232px]">
-          <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-            <div className="max-w-[560px]"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Latest assets</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">最新设计资产</h2><p className="mt-3 text-[14px] leading-6 text-white/50">将组件、设计规范、品牌、AI 工作流，持续沉淀为固有设计资产。</p></div>
-            <Link className="inline-flex items-center gap-2 text-[12px] font-semibold text-white/70 transition hover:text-white" href="/workspace/design-assets">进入完整资产库 <ArrowRight className="size-4" /></Link>
-          </div>
+      <V9MobileSection
+        className="px-5 py-20 md:px-6 md:py-24"
+        header={<><div className="max-w-[560px]"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Latest assets</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">最新设计资产</h2><p className="mt-3 text-[14px] leading-6 text-white/50">将组件、设计规范、品牌、AI 工作流，持续沉淀为固有设计资产。</p></div><Link className="inline-flex items-center gap-2 text-[12px] font-semibold text-white/70 transition hover:text-white" href="/workspace/design-assets">进入完整资产库 <ArrowRight className="size-4" /></Link></>}
+        headerClassName="mb-10 flex flex-wrap items-end justify-between gap-6 max-[720px]:flex-col max-[720px]:items-start"
+        id="assets"
+      >
           <div className="mb-[18px] flex flex-wrap items-center gap-[10px] rounded-[15px] border border-white/[.1] bg-white/[.035] p-3">
             <form action="/workspace/search" className="flex h-10 min-w-[260px] flex-1 items-center gap-2 rounded-[10px] border border-white/[.1] bg-black/20 px-3 text-white/45"><Search className="size-4" /><input aria-label="搜索设计资产" className="min-w-0 flex-1 bg-transparent text-[12px] text-white outline-none placeholder:text-white/35" name="q" placeholder="搜索标题、场景或维护团队…" type="search" /></form>
             <div className="flex flex-wrap gap-1.5" role="group" aria-label="资产筛选">{['全部', '组件规范', '页面模板', 'AI 工作流', '交付规范'].map((filter, index) => <Link className={`h-[34px] rounded-[9px] border px-[11px] text-[10px] font-semibold leading-[32px] transition ${index === 0 ? 'border-white/[.1] bg-white/[.1] text-white' : 'border-transparent text-white/45 hover:border-white/[.1] hover:bg-white/[.08] hover:text-white'}`} href="/workspace/design-assets" key={filter}>{filter}</Link>)}</div>
@@ -165,16 +166,25 @@ export function V9Home() {
               <div className="p-[19px]"><div className="flex items-center justify-between gap-2 text-[9px] text-white/45"><span>{category}</span><span>{updated}</span></div><h3 className="mt-3 text-[16px] font-semibold leading-[1.35] tracking-[-.025em] text-white">{title}</h3><p className="mt-2 min-h-[52px] text-[11px] leading-[1.62] text-white/50">{description}</p><div className="mt-[18px] flex items-center justify-between border-t border-white/[.1] pt-[14px] text-[9px] text-white/45"><span>{team}</span><b className="font-semibold text-white/70">{status}</b></div></div>
             </Link>)}
           </div>
-        </div>
-      </section>
+      </V9MobileSection>
 
-      <section id="cases" className="px-5 py-[58px] md:px-6 md:py-[72px]">
-        <div className="mx-auto max-w-[1232px]"><div className="mb-10 max-w-[560px]"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Verified AI practice</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">AI案例-沉淀方法与结果</h2><p className="mt-3 text-[14px] leading-6 text-white/50">用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p></div>
+      <V9MobileSection
+        className="px-5 py-[58px] md:px-6 md:py-[72px]"
+        header={<div className="max-w-[560px]"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Verified AI practice</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">AI案例-沉淀方法与结果</h2><p className="mt-3 text-[14px] leading-6 text-white/50">用完整案例展示 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p></div>}
+        headerClassName="mb-10 flex flex-wrap items-end justify-between gap-6 max-[720px]:flex-col max-[720px]:items-start"
+        id="cases"
+      >
           <article className="grid overflow-hidden rounded-[24px] border border-white/[.1] bg-white/[.035] lg:grid-cols-[1.08fr_.92fr]"><div className="border-b border-white/[.1] bg-black/20 p-6 lg:border-b-0 lg:border-r lg:p-9"><div className="mb-7 flex items-center justify-between text-[9px] uppercase tracking-[.13em] text-white/45"><span>Before / After</span><Badge variant="outline" className="border-white/[.14] bg-white/[.04] text-[9px] text-white/60">Verified case</Badge></div><div className="grid items-center gap-4 md:grid-cols-[1fr_36px_1fr]"><div className="rounded-2xl border border-white/[.1] bg-white/[.035] p-4"><div className="flex justify-between text-[8px] text-white/45"><span>传统流程</span><span>3 days</span></div><div className="mt-3 h-[205px] rounded-[10px] border border-white/[.1] bg-black/20 p-3"><i className="mb-3 block h-[18px] border-b border-white/[.1]" /><div className="grid grid-cols-2 gap-2"><i className="h-[67px] rounded-[7px] border border-white/[.1] bg-white/[.035]" /><i className="h-[67px] rounded-[7px] border border-white/[.1] bg-white/[.035]" /><i className="col-span-2 h-12 rounded-[7px] border border-white/[.1] bg-white/[.035]" /></div></div></div><ArrowRight className="mx-auto size-5 text-white/45" /><div className="rounded-2xl border border-white/[.1] bg-white/[.035] p-4"><div className="flex justify-between text-[8px] text-white/45"><span>AI 协同流程</span><span>4 hours</span></div><div className="mt-3 grid h-[205px] grid-cols-[40px_1fr] overflow-hidden rounded-[10px] border border-white/[.1] bg-black/20"><div className="border-r border-white/[.1] p-2">{[1,2,3,4].map((item) => <i className="my-2 block h-1.5 rounded bg-white/[.13]" key={item} />)}</div><div className="p-3"><i className="mb-3 block h-2 w-[45%] rounded bg-white/[.18]" /><div className="grid grid-cols-2 gap-2">{[1,2,3,4].map((item) => <i className="h-14 rounded-[7px] border border-white/[.1] bg-white/[.035]" key={item} />)}</div></div></div></div></div></div><div className="p-7 md:p-[42px]"><Badge variant="outline" className="border-white/[.14] bg-white/[.04] text-[10px] text-white/65">效率提升 · AI 精选</Badge><h3 className="mt-[18px] text-[34px] font-semibold leading-[1.12] tracking-[-.045em] text-white">营销活动视觉探索</h3><p className="mt-3 text-[13px] leading-[1.75] text-white/50">AI 不直接替代设计判断，而是加速参考图整理、方向扩散和方案初筛；设计师负责定义边界、选择方向并形成可复用方法。</p><div className="my-7 grid gap-3">{[['01','定义输入边界','设计师确定品牌资产、参考风格和不可突破的约束。'],['02','AI 扩散与聚类','快速生成方向并按视觉语言、场景和风险进行归类。'],['03','人工筛选与沉淀','设计师完成最终选择，并把有效路径保存为下一次可调用的 Skill。']].map(([number,title,body]) => <div className="grid grid-cols-[28px_1fr] gap-3" key={number}><span className="grid size-7 place-items-center rounded-lg border border-white/[.1] bg-white/[.04] text-[9px] text-white/45">{number}</span><div><b className="block text-[11px] text-white">{title}</b><p className="mt-0.5 text-[10px] text-white/50">{body}</p></div></div>)}</div><div className="grid grid-cols-3 gap-4 border-t border-white/[.1] pt-[23px]">{[['3d → 4h','首轮视觉探索'],['12','验证方向数量'],['1 Skill','已沉淀为工作流']].map(([value,label]) => <div key={label}><strong className="block text-[22px] tracking-[-.04em] text-white">{value}</strong><span className="mt-1 block text-[8px] text-white/45">{label}</span></div>)}</div></div></article>
-        </div>
-      </section>
+      </V9MobileSection>
 
-      <section id="governance" className="px-5 py-[58px] md:px-6 md:py-[72px]"><div className="mx-auto max-w-[1232px]"><div className="mb-10"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Platform governance</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">从设计系统到平台机制</h2><p className="mt-3 text-[14px] leading-6 text-white/50">用三个角色形成从标准、创新到质量闭环，避免资产只上传、不维护、不复用。</p></div><div className="grid gap-4 lg:grid-cols-[1fr_76px_1fr_76px_1fr] lg:gap-0">{[['01 / STANDARDIZE','设计系统','负责组件、模式、Token 与跨业务体验标准。','标准建立 · 资产维护 · 版本治理'],['02 / EXPLORE','AI 设计','将实验性的 AI 产出转化为可调用、可验证的方法。','Skill 设计 · 方法验证 · 案例沉淀'],['03 / OPERATE','设计运营','维护审核、发布、复用反馈和影响力数据。','质量审核 · 内容运营 · 价值度量']].flatMap(([index,title,body,footer], position) => [<article className="relative min-h-[210px] rounded-[18px] border border-white/[.1] bg-white/[.035] p-[27px]" key={title}><span className="text-[10px] tracking-[.14em] text-white/45">{index}</span><h3 className="mt-[50px] text-[21px] font-semibold tracking-[-.03em] text-white">{title}</h3><p className="mt-2 text-[11px] text-white/50">{body}</p><footer className="absolute bottom-[22px] left-[27px] right-[27px] border-t border-white/[.1] pt-3 text-[9px] text-white/45">{footer}</footer></article>, position < 2 ? <div aria-hidden="true" className="hidden place-items-center lg:grid" key={`${title}-connector`}><span className="relative h-px w-full bg-white/[.16] after:absolute after:-right-px after:-top-[3px] after:size-[6px] after:rotate-45 after:border-r after:border-t after:border-white/45" /></div> : null])}</div></div></section>
+      <V9MobileSection
+        className="px-5 py-[58px] md:px-6 md:py-[72px]"
+        header={<div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">Platform governance</p><h2 className="mt-4 text-[34px] font-semibold tracking-[-.05em] text-white md:text-[42px]">从设计系统到平台机制</h2><p className="mt-3 text-[14px] leading-6 text-white/50">用三个角色形成从标准、创新到质量闭环，避免资产只上传、不维护、不复用。</p></div>}
+        headerClassName="mb-10 flex flex-wrap items-end justify-between gap-6 max-[720px]:flex-col max-[720px]:items-start"
+        id="governance"
+      >
+        <div className="grid gap-4 lg:grid-cols-[1fr_76px_1fr_76px_1fr] lg:gap-0">{[['01 / STANDARDIZE','设计系统','负责组件、模式、Token 与跨业务体验标准。','标准建立 · 资产维护 · 版本治理'],['02 / EXPLORE','AI 设计','将实验性的 AI 产出转化为可调用、可验证的方法。','Skill 设计 · 方法验证 · 案例沉淀'],['03 / OPERATE','设计运营','维护审核、发布、复用反馈和影响力数据。','质量审核 · 内容运营 · 价值度量']].flatMap(([index,title,body,footer], position) => [<article className="relative min-h-[210px] rounded-[18px] border border-white/[.1] bg-white/[.035] p-[27px]" key={title}><span className="text-[10px] tracking-[.14em] text-white/45">{index}</span><h3 className="mt-[50px] text-[21px] font-semibold tracking-[-.03em] text-white">{title}</h3><p className="mt-2 text-[11px] text-white/50">{body}</p><footer className="absolute bottom-[22px] left-[27px] right-[27px] border-t border-white/[.1] pt-3 text-[9px] text-white/45">{footer}</footer></article>, position < 2 ? <div aria-hidden="true" className="hidden place-items-center lg:grid" key={`${title}-connector`}><span className="relative h-px w-full bg-white/[.16] after:absolute after:-right-px after:-top-[3px] after:size-[6px] after:rotate-45 after:border-r after:border-t after:border-white/45" /></div> : null])}</div>
+      </V9MobileSection>
 
       <section className="px-5 py-20 md:px-6"><div className="relative mx-auto flex max-w-[1232px] flex-col justify-between gap-9 overflow-hidden rounded-[28px] border border-white/[.16] bg-white/[.035] p-8 md:flex-row md:items-center md:p-[54px]"><span className="absolute -right-20 -top-[120px] size-[320px] rounded-full border border-white/[.1] shadow-[0_0_0_40px_rgba(255,255,255,.035)]" /><div className="relative z-10 max-w-[720px]"><h2 className="text-[32px] font-semibold leading-[1.08] tracking-[-.05em] text-white md:text-[54px]">把一次优秀产出，变成团队下一次工作的起点</h2><p className="mt-4 text-[13px] text-white/50">本版本用于验证首页信息架构、品牌表达与核心入口，不包含真实权限和后台数据。</p></div><Button asChild className="relative z-10 h-10 min-w-[154px] rounded-[10px] bg-[#f4f4f4] px-[18px] text-[13px] font-bold !text-[#090909] hover:bg-white"><Link href="/workspace">进入工作台 <ArrowRight className="size-4" /></Link></Button></div></section>
 
