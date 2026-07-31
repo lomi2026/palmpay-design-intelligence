@@ -1,6 +1,6 @@
 # PalmPay体验设计Hub — Current Project Status
 
-Last Updated: 2026-07-18
+Last Updated: 2026-07-31
 
 ## Current Phase
 
@@ -15,6 +15,8 @@ The first P0 pass removes unused global client providers and eager background pr
 The follow-up P0 incident fix addresses the externally observed `/workspace` page hanging on its content skeleton: the workspace shell now treats notification and project-count badges as optional summaries, and the dashboard streams metrics, recent updates and personal todos behind separate Suspense boundaries with short timeout fallbacks. This prevents one slow Render/API/database summary request from blocking the entire dashboard content area. Moving from Render free hosting to a warm Alibaba Cloud service may reduce cold-start latency, but it is not a substitute for keeping non-critical dashboard data out of the blocking render path.
 
 The local production contribution workflow no longer refreshes an editor route after a successful review submission. Successful submissions replace the editor with `/workspace/submissions`, and direct access to a draft URL that has already entered review is redirected to the same status page instead of falling into the Workspace error boundary. A production-browser check confirmed create → submit → submission-list navigation with the persisted review shown as pending.
+
+The 2026-07-31 external test-login incident was traced to the cold-start path: the Render container repeated database migration, seed, identity bootstrap and all three catalog imports before starting the API, while the Vercel login action aborted after 12 seconds and reported every transport or service failure as invalid credentials. The local fix restores a migration-only API startup, keeps the test login request alive for the free-instance cold-start window, and distinguishes unavailable authentication infrastructure from rejected credentials. Local Web/API typecheck and lint, the Web production build, and the API test suite pass; deployment and external login confirmation remain open.
 
 The shared light/dark control state is synchronized with the root shadcn theme class. Token-driven primary buttons now render black-on-white in dark mode and white-on-black in light mode, while active administration tabs, review filters and catalog view toggles expose their selected state correctly. Link-backed buttons use the shadcn `asChild` contract, so their foreground tokens are no longer overridden by global anchor inheritance.
 

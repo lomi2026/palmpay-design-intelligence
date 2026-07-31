@@ -3,8 +3,10 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { serverApiFetch } from '@/lib/api';
+import { ApiError, serverApiFetch } from '@/lib/api';
 import { DEVELOPMENT_USER_COOKIE, TEST_SESSION_COOKIE, type CurrentUser } from '@/lib/auth';
+
+const LOGIN_REQUEST_TIMEOUT_MS = 70_000;
 
 const loginSchema = z.object({ email: z.email().max(320) });
 const testLoginSchema = z.object({
@@ -47,7 +49,10 @@ export async function testLogin(formData: FormData) {
   try {
     const session = await serverApiFetch<{ accessToken: string; expiresAt: string }>('/api/auth/test-sessions', {
       method: 'POST',
-      signal: AbortSignal.timeout(12000),
+      // Render's acceptance service sleeps when idle. Keep the request alive
+      // long enough for a cold start instead of reporting a timeout as invalid
+      // credentials.
+      signal: AbortSignal.timeout(LOGIN_REQUEST_TIMEOUT_MS),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: result.data.email.trim().toLowerCase(),
@@ -63,8 +68,11 @@ export async function testLogin(formData: FormData) {
       path: '/',
       expires: Number.isNaN(expiresAt.valueOf()) ? undefined : expiresAt,
     });
-  } catch {
-    redirect('/login?error=invalid-credentials');
+  } catch (error: unknown) {
+    if (error instanceof ApiError && [401, 403, 404].includes(error.status)) {
+      redirect('/login?error=invalid-credentials');
+    }
+    redirect('/login?error=service-unavailable');
   }
   redirect('/workspace');
 }

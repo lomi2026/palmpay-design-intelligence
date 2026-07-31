@@ -7,6 +7,7 @@ const errorMessages: Record<string, string> = {
   'invalid-email': '请输入有效的企业邮箱。',
   'user-unavailable': '用户不存在、未启用或已被禁用。',
   'invalid-credentials': '邮箱、测试访问码无效，或该用户尚未启用。',
+  'service-unavailable': '认证服务正在启动或暂时不可用，请稍候重试。',
 };
 
 export default async function LoginPage({

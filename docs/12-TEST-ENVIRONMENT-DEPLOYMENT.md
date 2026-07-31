@@ -20,6 +20,8 @@ Do not use `AUTH_MODE=development` on any Internet-facing API. The development a
 4. Choose the free instance options. This is suitable only for acceptance: the API sleeps after idle time and the free Render PostgreSQL database expires after 30 days.
 5. After deployment is healthy, generate the public Render API URL and record it as `API_TEST_ORIGIN`.
 
+The container startup path applies pending Prisma migrations and starts the API only. Seed, test-identity bootstrap and catalog imports belong to the Blueprint's idempotent initial deployment hook; do not add them to the container `CMD`. Render restarts a sleeping free instance through that command, so repeating all imports there materially delays every cold-start login.
+
 The Blueprint supplies all non-secret variables and generates `TEST_AUTH_SESSION_SECRET` automatically. Supply only these values in Render's secret-value prompts:
 
 ```dotenv

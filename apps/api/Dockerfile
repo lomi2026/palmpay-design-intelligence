@@ -15,4 +15,4 @@ WORKDIR /app/apps/api
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "if [ \"$AUTH_MODE\" = \"test\" ]; then pnpm exec prisma migrate deploy && pnpm run prisma:seed && pnpm run prisma:bootstrap:test && pnpm run prisma:import:v9-1-projects && pnpm run prisma:import:v9-1-ai-catalog && pnpm run prisma:import:v9-1-design-assets; fi; pnpm run start:deploy"]
+CMD ["pnpm", "run", "start:deploy"]
