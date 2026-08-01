@@ -6,7 +6,7 @@ Last updated: 2026-07-31
 
 A new local prelaunch audit found that earlier completeness checks protected the version snapshot but did not project newly published snapshots into the four relational detail tables. It also found organization-wide leakage from TEAM-scoped review permissions, owner-only editing without `content.edit_own`, user disable without required content-owner transfer, missing restricted-download events/audit and cold-start authentication failures being misclassified as logout.
 
-The local correction pass now covers those paths with service and PostgreSQL integration tests. On 2026-08-01 the restored local database reported all five migrations current and the complete API suite passed 44/44, including all 14 database E2E checks (0 failed, 0 skipped). Web tests, typecheck, lint and production build pass. These fixes are not yet committed, deployed or externally accepted, so the browser functional gate below remains open.
+The correction pass now covers those paths with service and PostgreSQL integration tests. On 2026-08-01 the restored local database reported all six migrations current and the complete API suite passed 46/46, including all 14 database E2E checks (0 failed, 0 skipped). Web tests pass 20/20; typecheck, lint and production build pass. Commit `46b988d` is deployed to the Vercel/Render external-test environment with the migration-gated API healthy; three-role browser workflow acceptance remains open.
 
 ## Purpose and delivery order
 
