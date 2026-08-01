@@ -44,8 +44,8 @@ export default async function OverviewPage() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-45" />
         <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1fr)_410px] xl:items-end">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[.2em] text-white/48">Value overview · Formal evidence</p>
-            <h1 className="mt-4 max-w-3xl text-[34px] font-semibold leading-[1.08] tracking-[-.055em] text-white sm:text-[46px]">把内容沉淀、真实复用与项目引用放在同一套价值口径里。</h1>
+            <p className="text-[11px] font-semibold tracking-[.2em] text-white/45">VALUE OVERVIEW</p>
+            <h1 className="mt-3 max-w-3xl text-[34px] font-semibold leading-[1.08] tracking-[-.055em] text-white sm:text-[46px]">把内容沉淀、真实复用与项目引用放在同一套价值口径里。</h1>
             <p className="mt-4 max-w-2xl text-[14px] leading-7 text-white/55">以下数据来自正式内容目录、行为事件和项目引用记录；统计周期为最近 {overview.periodDays} 天，不混入静态演示数据。</p>
           </div>
           <div className="rounded-[18px] border border-white/[.12] bg-black/[.24] p-5">
@@ -70,13 +70,13 @@ export default async function OverviewPage() {
 
       <section className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,.8fr)]">
         <div className="rounded-[20px] border border-white/[.1] bg-[#111112] p-5 sm:p-6">
-          <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[11px] font-semibold uppercase tracking-[.16em] text-white/45">Reuse and engagement</p><h2 className="mt-2 text-[25px] font-semibold tracking-[-.04em] text-white">从目录到真实使用</h2></div><Button asChild className="border-white/[.14] bg-transparent text-white hover:bg-white/[.07] hover:text-white" size="sm" variant="outline"><Link href="/workspace/insights">查看数据洞察 <ArrowRight className="size-3.5" /></Link></Button></div>
+          <div className="flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-[25px] font-semibold tracking-[-.04em] text-white">从目录到真实使用</h2></div><Button asChild className="border-white/[.14] bg-transparent text-white hover:bg-white/[.07] hover:text-white" size="sm" variant="outline"><Link href="/workspace/insights">查看数据洞察 <ArrowRight className="size-3.5" /></Link></Button></div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {evidenceMetrics.map(([Icon, label, value, detail]) => <article className="rounded-[16px] border border-white/[.1] bg-white/[.025] p-4" key={label}><Icon className="size-4 text-white/70" /><strong className="mt-6 block text-[30px] font-semibold leading-none tracking-[-.05em] text-white">{value}</strong><p className="mt-2 text-[13px] font-medium text-white">{label}</p><p className="mt-1 text-[11px] leading-5 text-white/45">{detail}</p></article>)}
           </div>
         </div>
         <aside className="flex flex-col justify-between rounded-[20px] border border-white/[.1] bg-white p-6 text-black sm:p-7">
-          <div><BookOpenCheck className="size-5" /><p className="mt-8 text-[11px] font-semibold uppercase tracking-[.15em] text-black/55">Content health</p><h2 className="mt-3 text-[30px] font-semibold leading-[1.08] tracking-[-.05em]">{overview.verifiedCases} 个案例已经有验证证据</h2><p className="mt-4 text-[13px] leading-6 text-black/60">有效的案例需要说明 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p></div>
+          <div><BookOpenCheck className="size-5" /><h2 className="mt-8 text-[30px] font-semibold leading-[1.08] tracking-[-.05em]">{overview.verifiedCases} 个案例已经有验证证据</h2><p className="mt-4 text-[13px] leading-6 text-black/60">有效的案例需要说明 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p></div>
           <div className="mt-8 border-t border-black/15 pt-5"><div className="flex items-center justify-between text-[12px]"><span className="text-black/55">内容贡献者</span><strong>{overview.contributors}</strong></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full bg-black" style={{ width: `${Math.min(100, overview.contributors ? (overview.verifiedCases / overview.contributors) * 100 : 0)}%` }} /></div></div>
         </aside>
       </section>

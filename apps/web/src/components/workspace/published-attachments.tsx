@@ -29,5 +29,5 @@ function AttachmentDownload({ attachment }: { attachment: PublishedAttachment })
 
 export function PublishedAttachments({ attachments }: { attachments: PublishedAttachment[] }) {
   if (!attachments.length) return null;
-  return <section className="rounded-[18px] border border-white/[.1] bg-[#111] p-5"><div className="flex items-center gap-2"><Paperclip className="size-4 text-white/55" /><div><p className="text-[11px] font-bold uppercase tracking-[.13em] text-white/45">Attachments</p><h2 className="mt-0.5 text-[20px] font-semibold tracking-[-.035em] text-white">下载附件</h2></div></div><p className="mt-2 text-xs leading-5 text-white/45">下载链接仅在本次授权后短暂有效，不会公开文件存储地址。</p><ul className="mt-4 grid gap-2">{attachments.map((attachment) => <AttachmentDownload attachment={attachment} key={attachment.id} />)}</ul></section>;
+  return <section className="rounded-[18px] border border-white/[.1] bg-[#111] p-5"><div className="flex items-center gap-2"><Paperclip className="size-4 text-white/55" /><h2 className="text-[20px] font-semibold tracking-[-.035em] text-white">下载附件</h2></div><p className="mt-2 text-xs leading-5 text-white/45">下载链接仅在本次授权后短暂有效，不会公开文件存储地址。</p><ul className="mt-4 grid gap-2">{attachments.map((attachment) => <AttachmentDownload attachment={attachment} key={attachment.id} />)}</ul></section>;
 }

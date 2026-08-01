@@ -14,10 +14,7 @@ export function AuthServiceUnavailable() {
   return (
     <main className="v9-source-home grid min-h-screen place-items-center bg-[var(--v9-bg)] px-6 py-12 text-[var(--v9-text)]">
       <section className="w-full max-w-[560px] rounded-[28px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-7 shadow-2xl shadow-black/30 sm:p-10">
-        <p className="text-[11px] font-semibold tracking-[.24em] text-[var(--v9-muted)]">
-          PALMPAY DESIGN HUB
-        </p>
-        <h1 className="mt-4 text-[30px] font-semibold tracking-[-.045em]">认证服务暂时不可用</h1>
+        <h1 className="text-[30px] font-semibold tracking-[-.045em]">认证服务暂时不可用</h1>
         <p className="mt-3 text-sm leading-6 text-[var(--v9-muted)]">
           你的登录会话没有被判定为失效。测试服务可能正在唤醒，请稍候后重试。
         </p>

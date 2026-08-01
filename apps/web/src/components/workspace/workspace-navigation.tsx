@@ -178,7 +178,7 @@ export function WorkspaceMobileNavigation(props: NavigationProps) {
       </SheetTrigger>
       <SheetContent side="left" className="gap-0 p-0">
         <SheetHeader className="border-b border-border pr-14">
-          <SheetTitle>PalmPay Design Hub</SheetTitle>
+          <SheetTitle>PalmPay 体验设计中心</SheetTitle>
           <SheetDescription>工作台导航</SheetDescription>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto p-3">

@@ -1,6 +1,7 @@
 import { ContentCard } from '@/components/content-card';
 import { FavoriteControl } from '@/components/workspace/engagement-controls';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
+import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentCard as ContentCardData } from '@/lib/content-types';
@@ -24,9 +25,9 @@ export default async function FavoritesPage() {
           ))}
         </div>
       ) : (
-        <p className="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/[.02] p-8 text-sm text-white/50">
+        <WorkspaceEmptyState className="mt-5">
           还没有收藏内容。浏览资产、Skill、案例或项目时可以加入收藏。
-        </p>
+        </WorkspaceEmptyState>
       )}
     </main>
   );

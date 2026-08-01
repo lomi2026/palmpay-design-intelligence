@@ -4,9 +4,12 @@ import { FilePenLine } from 'lucide-react';
 
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
+import { WorkspaceHeroMetric, WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
+import { WorkspaceStatusBadge } from '@/components/workspace/workspace-status-badge';
+import { contentTypeLabel } from '@/lib/content-types';
 import { submissionRevisionHref } from './submission-actions';
 
 type Submission = {
@@ -31,11 +34,12 @@ type Submission = {
   }>;
 };
 
-const labels: Record<string, string> = {
-  PENDING: '审核中',
-  APPROVED: '已通过',
-  CHANGES_REQUESTED: '退回修改',
-  CANCELLED: '已取消',
+const actionLabels: Record<string, string> = {
+  ASSIGN: '分配审核人',
+  APPROVE: '通过',
+  REQUEST_CHANGES: '要求修改',
+  COMMENT: '内部备注',
+  CANCEL: '取消',
 };
 
 export default async function SubmissionsPage() {
@@ -44,8 +48,7 @@ export default async function SubmissionsPage() {
   if (!user.permissions.includes('content.submit')) {
     return (
       <main className="px-5 py-8 md:px-8 md:py-10">
-        <p className="text-xs tracking-[0.18em] text-violet-200/75">MY SUBMISSIONS</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-white">我的投稿</h1>
+        <h1 className="text-3xl font-semibold tracking-[-0.045em] text-white">我的投稿</h1>
         <p className="mt-3 text-sm text-white/55">此页面仅对拥有投稿权限的成员开放。</p>
       </main>
     );
@@ -61,24 +64,11 @@ export default async function SubmissionsPage() {
 
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
-      <header className="relative overflow-hidden rounded-[22px] border border-white/[.11] bg-[#111112] px-6 py-7 sm:px-8">
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40" />
-        <div className="relative grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div>
-            <p className="text-[11px] font-semibold tracking-[.2em] text-white/45">MY SUBMISSIONS</p>
-            <h1 className="mt-3 text-[34px] font-semibold tracking-[-.055em] text-white">让每一个提交都有清晰的下一步。</h1>
-            <p className="mt-3 text-sm leading-6 text-white/55">追踪已提交版本、审核人及历史意见。审核通过后仍需由具备发布权限的成员完成正式发布。</p>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {[[pending, '审核中'], [changesRequested, '待修改'], [approved, '已通过']].map(([value, label]) => (
-              <div className="min-w-[78px] rounded-[13px] border border-white/[.1] bg-black/[.22] p-3" key={label as string}>
-                <strong className="block text-[22px] leading-none tracking-[-.05em] text-white">{value as number}</strong>
-                <span className="mt-2 block text-[10px] text-white/45">{label as string}</span>
-              </div>
-            ))}
-          </div>
+      <WorkspacePageHero description="追踪已提交版本、审核人及历史意见。审核通过后仍需由具备发布权限的成员完成正式发布。" eyebrow="MY SUBMISSIONS" title="让每一个提交都有清晰的下一步。">
+        <div className="grid grid-cols-3 gap-2">
+          {[[pending, '审核中'], [changesRequested, '待修改'], [approved, '已通过']].map(([value, label]) => <WorkspaceHeroMetric key={label as string} label={label as string} value={value as number} />)}
         </div>
-      </header>
+      </WorkspacePageHero>
 
       {submissions.items.length ? (
         <div className="mt-5 grid gap-3">
@@ -89,11 +79,11 @@ export default async function SubmissionsPage() {
                 <CardHeader>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-[11px] tracking-[0.14em] text-white/40">{submission.content.contentType} · v{submission.version.versionNumber}</p>
+                      <p className="text-[11px] tracking-[0.14em] text-white/40">{contentTypeLabel(submission.content.contentType)} · v{submission.version.versionNumber}</p>
                       <CardTitle className="mt-2 text-[18px] text-white">{submission.version.title}</CardTitle>
                       <p className="mt-2 text-sm text-white/50">提交于 {new Date(submission.submittedAt).toLocaleString('zh-CN')} · 审核人：{submission.assignedReviewer?.name ?? '待分配'}</p>
                     </div>
-                    <Badge variant="outline" className="border-white/15 bg-white/[.035] text-white/70">{labels[submission.status] ?? submission.status}</Badge>
+                    <WorkspaceStatusBadge label={submission.status === 'PENDING' ? '审核中' : undefined} status={submission.status} />
                   </div>
                 </CardHeader>
                 {submission.submitMessage || submission.version.changeSummary ? (
@@ -103,7 +93,7 @@ export default async function SubmissionsPage() {
                   <ol className="space-y-2">
                     {submission.actions.map((action) => (
                       <li className="text-sm" key={action.id}>
-                        <span className="text-white/75">{action.actor.name} · {labels[action.action] ?? action.action}</span>
+                        <span className="text-white/75">{action.actor.name} · {actionLabels[action.action] ?? action.action}</span>
                         {action.comment ? <span className="text-white/50">：{action.comment}</span> : null}
                       </li>
                     ))}
@@ -119,7 +109,7 @@ export default async function SubmissionsPage() {
           })}
         </div>
       ) : (
-        <div className="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-8 text-sm text-white/45">你还没有提交审核的内容。</div>
+        <WorkspaceEmptyState className="mt-5">你还没有提交审核的内容。</WorkspaceEmptyState>
       )}
     </main>
   );

@@ -7,6 +7,7 @@ import { serverApiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
+import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
 import {
   markAllNotificationsReadAction,
   markNotificationReadAction,
@@ -62,11 +63,11 @@ export default async function NotificationsPage() {
             const target = notificationTarget(notification);
             return (
               <Card
-                className={`relative py-4 shadow-none transition ${target ? 'hover:border-white/[.28] hover:bg-white/[.07]' : ''} ${notification.readAt ? 'border border-white/[.1] bg-[#111112]' : 'border border-white/[.22] bg-white/[.055]'}`}
+                className={`relative py-4 shadow-none transition ${target ? 'hover:border-[var(--v9-line-strong)] hover:bg-[var(--v9-panel-2)]' : ''} ${notification.readAt ? 'border border-[var(--v9-line)] bg-[var(--v9-panel)]' : 'border border-[var(--v9-status-info-line)] bg-[var(--v9-status-info-bg)]'}`}
                 key={notification.id}
               >
-                <CardHeader className="flex-row items-center gap-3">
-                  <span className={`grid size-8 place-items-center rounded-full ${notification.readAt ? 'bg-white/8 text-white/55' : 'bg-white text-black'}`}>
+                <CardHeader className="flex flex-row items-center gap-3">
+                  <span className={`grid size-8 place-items-center rounded-full ${notification.readAt ? 'bg-[var(--v9-soft)] text-[var(--v9-muted)]' : 'bg-[var(--v9-status-info-bg)] text-[var(--v9-status-info-text)] ring-1 ring-[var(--v9-status-info-line)]'}`}>
                     <Bell className="size-4" />
                   </span>
                   <div>
@@ -89,7 +90,7 @@ export default async function NotificationsPage() {
                     </form>
                   ) : null}
                 </CardHeader>
-                <CardContent className="pl-[4.5rem] text-sm leading-6 text-white/60">
+                <CardContent className="pl-[3.75rem] text-sm leading-6 text-white/60">
                   {notification.message}
                 </CardContent>
                 {target ? notification.readAt ? (
@@ -118,9 +119,7 @@ export default async function NotificationsPage() {
           })}
         </div>
       ) : (
-        <div className="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-8 text-sm text-white/45">
-          暂时没有通知。
-        </div>
+        <WorkspaceEmptyState className="mt-5">暂时没有通知。</WorkspaceEmptyState>
       )}
     </main>
   );

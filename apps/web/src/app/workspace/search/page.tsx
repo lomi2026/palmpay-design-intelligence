@@ -7,6 +7,7 @@ import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
 import { searchResultAction } from '../engagement-actions';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
+import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
 
 export default async function SearchPage({
   searchParams,
@@ -64,15 +65,15 @@ export default async function SearchPage({
               ))}
             </div>
           ) : (
-            <p className="rounded-2xl border border-dashed border-white/15 bg-white/[.02] p-8 text-sm text-white/50">
+            <WorkspaceEmptyState>
               没有匹配内容。可以更换关键词、缩短描述，或创建新的内容需求。
-            </p>
+            </WorkspaceEmptyState>
           )}
         </section>
       ) : (
-        <p className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[.02] p-8 text-sm text-white/50">
+        <WorkspaceEmptyState className="mt-6">
           输入关键词，在全部正式内容中搜索。结果会先按你的权限过滤。
-        </p>
+        </WorkspaceEmptyState>
       )}
     </main>
   );

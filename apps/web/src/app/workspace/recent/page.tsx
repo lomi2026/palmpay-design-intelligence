@@ -1,6 +1,7 @@
 import { ContentCard } from '@/components/content-card';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
+import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentCard as ContentCardData } from '@/lib/content-types';
 import { RefreshRecentOnEntry } from './refresh-on-entry';
@@ -26,9 +27,9 @@ export default async function RecentPage() {
           ))}
         </div>
       ) : (
-        <p className="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/[.02] p-8 text-sm text-white/50">
+        <WorkspaceEmptyState className="mt-5">
           最近没有浏览记录。打开一项正式内容后，它会出现在这里。
-        </p>
+        </WorkspaceEmptyState>
       )}
     </main>
   );

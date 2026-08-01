@@ -80,7 +80,6 @@ export function ProjectReadingNavigation({ items }: { items: ReadingItem[] }) {
         </SheetTrigger>
         <SheetContent className="w-[min(340px,calc(100vw-32px))] border-border bg-background p-0 sm:right-4 sm:top-4 sm:bottom-4 sm:h-auto sm:rounded-[20px]" side="right">
           <SheetHeader className="border-b border-border pr-14">
-            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-muted-foreground">Page outline</p>
             <SheetTitle className="text-[18px]">内容目录</SheetTitle>
             <SheetDescription>点击章节快速定位，内容仍以当前正式版本为准。</SheetDescription>
           </SheetHeader>

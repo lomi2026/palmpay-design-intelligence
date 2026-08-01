@@ -19,9 +19,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { WorkspaceStatusBadge } from '@/components/workspace/workspace-status-badge';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { optionalServerApiFetch } from '@/lib/api';
-import type { ContentCard as ContentCardData, ContentListResponse } from '@/lib/content-types';
+import { contentTypeLabel, type ContentCard as ContentCardData, type ContentListResponse } from '@/lib/content-types';
 import {
   buildDashboardTodos,
   type DashboardReview,
@@ -36,21 +37,6 @@ const journeySteps = [
 ] as const;
 
 type PersonalItems = { items: unknown[] };
-
-const contentTypeLabels: Record<string, string> = {
-  DESIGN_ASSET: '设计资产',
-  AI_SKILL: 'AI Skill',
-  AI_CASE: 'AI 案例',
-  AI_PROJECT: 'AI 项目',
-};
-
-const verificationLabels: Record<string, string> = {
-  UNVERIFIED: '未验证',
-  INTERNAL_TRIAL: '内部试用',
-  PILOT: '试点中',
-  VERIFIED: '已验证',
-  INVALIDATED: '已失效',
-};
 
 function emptyContentList(pageSize: number): ContentListResponse {
   return { items: [], page: 1, pageSize, total: 0 };
@@ -156,7 +142,7 @@ async function RecentUpdates() {
   const contents = await optionalServerApiFetch<ContentListResponse>('/api/contents?pageSize=5', { headers }, emptyContentList(5));
 
   return (
-    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><div className="flex items-start justify-between"><div><h3 className="text-[18px] font-bold">最近更新</h3><p className="mt-1 text-[12px] text-white/45">经过审核并正式发布的内容</p></div><Button asChild variant="outline" size="sm" className="border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/search">查看全部</Link></Button></div><div className="mt-5 divide-y divide-white/[.08]">{contents.items.map((item) => <Link href={contentHref(item)} className="flex items-center gap-4 py-4 transition hover:bg-white/[.025]" key={item.id}><span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/[.06]"><Copy className="size-4 text-white/65" /></span><span className="min-w-0 flex-1"><strong className="block truncate text-[13px]">{item.title}</strong><span className="mt-1 block truncate text-[11px] text-white/45">{contentTypeLabels[item.contentType]} · {item.team.name}</span></span><Badge variant="outline" className="hidden border-white/[.12] bg-white/[.03] text-[10px] text-white/70 sm:inline-flex">{verificationLabels[item.verificationStatus] ?? item.verificationStatus}</Badge><time className="text-[11px] text-white/40">{new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit' }).format(new Date(item.updatedAt))}</time></Link>)}</div></CardContent></Card>
+    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><div className="flex items-start justify-between"><div><h3 className="text-[18px] font-bold">最近更新</h3><p className="mt-1 text-[12px] text-white/45">经过审核并正式发布的内容</p></div><Button asChild variant="outline" size="sm" className="border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/search">查看全部</Link></Button></div><div className="mt-5 divide-y divide-white/[.08]">{contents.items.map((item) => <Link href={contentHref(item)} className="flex items-center gap-4 py-4 transition hover:bg-white/[.025]" key={item.id}><span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/[.06]"><Copy className="size-4 text-white/65" /></span><span className="min-w-0 flex-1"><strong className="block truncate text-[13px]">{item.title}</strong><span className="mt-1 block truncate text-[11px] text-white/45">{contentTypeLabel(item.contentType)} · {item.team.name}</span></span><WorkspaceStatusBadge className="hidden sm:inline-flex" status={item.verificationStatus} /><time className="text-[11px] text-white/40">{new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit' }).format(new Date(item.updatedAt))}</time></Link>)}</div></CardContent></Card>
   );
 }
 
@@ -190,7 +176,7 @@ async function TodoCard({
   });
 
   return (
-    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><h3 className="text-[18px] font-bold">我的待办</h3><p className="mt-1 text-[12px] text-white/45">只显示需要当前角色采取行动的事项</p><div className="mt-5 space-y-3">{todos.length ? todos.map((item) => <Link href={item.href} className="block rounded-xl border border-white/[.1] bg-white/[.025] p-3.5 transition hover:bg-white/[.05]" key={item.id}><strong className="block text-[13px]">{item.title}</strong><span className="mt-2 block text-[11px] text-white/45">{contentTypeLabels[item.contentType] ?? item.contentType} · {new Intl.DateTimeFormat('zh-CN').format(new Date(item.submittedAt))}</span><Badge variant="outline" className="mt-3 border-white/[.12] text-[10px] text-white/75">{item.label}</Badge></Link>) : <p className="rounded-xl border border-dashed border-white/[.12] p-4 text-[12px] leading-5 text-white/45">当前没有需要你处理的事项。</p>}</div><div className="mt-4 grid gap-2">{canSubmit ? <Button asChild variant="outline" className="w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/submissions"><ClipboardCheck className="size-4" /> 查看我的提交</Link></Button> : null}{canReview || canAssign ? <Button asChild variant="outline" className="w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/reviews"><ClipboardCheck className="size-4" /> 进入审核中心</Link></Button> : null}</div></CardContent></Card>
+    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><h3 className="text-[18px] font-bold">我的待办</h3><p className="mt-1 text-[12px] text-white/45">只显示需要当前角色采取行动的事项</p><div className="mt-5 space-y-3">{todos.length ? todos.map((item) => <Link href={item.href} className="block rounded-xl border border-white/[.1] bg-white/[.025] p-3.5 transition hover:bg-white/[.05]" key={item.id}><strong className="block text-[13px]">{item.title}</strong><span className="mt-2 block text-[11px] text-white/45">{contentTypeLabel(item.contentType)} · {new Intl.DateTimeFormat('zh-CN').format(new Date(item.submittedAt))}</span><Badge variant="outline" className="mt-3 border-white/[.12] text-[10px] text-white/75">{item.label}</Badge></Link>) : <p className="rounded-xl border border-dashed border-white/[.12] p-4 text-[12px] leading-5 text-white/45">当前没有需要你处理的事项。</p>}</div><div className="mt-4 grid gap-2">{canSubmit ? <Button asChild variant="outline" className="w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/submissions"><ClipboardCheck className="size-4" /> 查看我的提交</Link></Button> : null}{canReview || canAssign ? <Button asChild variant="outline" className="w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/reviews"><ClipboardCheck className="size-4" /> 进入审核中心</Link></Button> : null}</div></CardContent></Card>
   );
 }
 
@@ -220,7 +206,7 @@ export default async function WorkspacePage() {
           <div className="relative z-10 flex flex-col justify-center">
             <div className="mb-5 flex items-center gap-3">
               <Image src="/v9-1/assets/nav-logo-20260710.png" alt="PalmPay Design" width={36} height={36} className="size-9 object-contain" />
-              <p className="text-[13px] font-semibold leading-4">PalmPay Design<br /><span className="text-[10px] font-medium uppercase tracking-[.18em] text-white/55">Intelligence Hub</span></p>
+              <p className="text-[13px] font-semibold leading-4">PalmPay Design</p>
               <Badge variant="outline" className="border-white/[.12] bg-white/[.04] text-white/75">Beta 1.0</Badge>
             </div>
             <h2 className="max-w-3xl text-3xl font-semibold leading-[1.12] tracking-[-.045em] sm:text-5xl">把团队经验，转化为可复用、可验证的设计能力。</h2>

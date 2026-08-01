@@ -43,6 +43,19 @@ export interface ContentCard {
   tags: Array<{ tag: { id: string; name: string; normalizedName: string } }>;
 }
 
+export type ContentType = ContentCard['contentType'];
+
+export const contentTypeLabels: Record<ContentType, string> = {
+  DESIGN_ASSET: '设计资产',
+  AI_SKILL: 'AI Skill',
+  AI_CASE: 'AI 案例',
+  AI_PROJECT: 'AI 项目',
+};
+
+export function contentTypeLabel(contentType: string) {
+  return contentTypeLabels[contentType as ContentType] ?? contentType.replaceAll('_', ' ').toLocaleLowerCase('zh-CN');
+}
+
 export interface ContentListResponse {
   items: ContentCard[];
   page: number;

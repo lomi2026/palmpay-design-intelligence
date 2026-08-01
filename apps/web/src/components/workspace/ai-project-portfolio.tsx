@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowUpRight, CheckCircle2, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { ArrowUpRight, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { getImportedProjectBody, stageLabels, verificationLabels, type AIProjectCard, type ProjectStage } from '@/lib/ai-projects';
+import { getImportedProjectBody, stageLabels, type AIProjectCard, type ProjectStage } from '@/lib/ai-projects';
+import { WorkspaceStatusBadge } from './workspace-status-badge';
 
 type FilterKey = 'domain' | 'value' | 'stage';
 
@@ -63,6 +64,10 @@ function projectRank(project: AIProjectCard) {
   return typeof rank === 'number' && Number.isFinite(rank) ? rank : null;
 }
 
+function priorityLabel(priority: string) {
+  return ({ HIGH: '高', MEDIUM: '中', LOW: '低' } as Record<string, string>)[priority] ?? priority;
+}
+
 export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) {
   const [filters, setFilters] = useState<Record<FilterKey, string>>({
     domain: '全部领域',
@@ -102,11 +107,10 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
 
   return (
     <section className="mt-6">
-      <section className="border-y border-white/[.1] py-7 md:py-8" aria-labelledby="portfolio-overview-title">
+      <section className="py-7 md:py-8" aria-labelledby="portfolio-overview-title">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[.18em] text-white/45">Portfolio overview</p>
-            <h2 className="mt-2 text-[24px] font-semibold tracking-[-.045em] text-white md:text-[30px]" id="portfolio-overview-title">项目探索组合</h2>
+            <h2 className="text-[24px] font-semibold tracking-[-.045em] text-white md:text-[30px]" id="portfolio-overview-title">项目探索组合</h2>
           </div>
           <p className="max-w-md text-[12px] leading-5 text-white/45">项目状态与优先级均来自已发布内容；建议优先验证不替代正式立项和审批。</p>
         </div>
@@ -133,11 +137,11 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
             <div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><SlidersHorizontal className="size-3.5" />按探索维度筛选</div>
             <div className="text-[12px] text-white/45">显示 <strong className="font-semibold text-white">{filteredProjects.length}</strong> / {projects.length} 个项目</div>
           </div>
-          <div className="grid gap-4 xl:grid-cols-3">
+          <div className="grid gap-4 2xl:grid-cols-[1.15fr_1fr_.9fr]">
             {(['domain', 'value', 'stage'] as const).map((type) => (
-              <div className="flex flex-wrap items-center gap-2" key={type}>
-                <span className="mr-1 text-[10px] font-semibold uppercase tracking-[.12em] text-white/40">{type === 'domain' ? '领域' : type === 'value' ? '目标价值' : '项目阶段'}</span>
-                {options[type].map((option) => <FilterChip active={filters[type] === option} key={option} onClick={() => setFilter(type, option)}>{option}</FilterChip>)}
+              <div className="grid grid-cols-[56px_minmax(0,1fr)] items-start gap-3" key={type}>
+                <span className="pt-2 text-[10px] font-semibold tracking-[.12em] text-white/40">{type === 'domain' ? '领域' : type === 'value' ? '目标价值' : '项目阶段'}</span>
+                <div className="flex flex-wrap gap-2">{options[type].map((option) => <FilterChip active={filters[type] === option} key={option} onClick={() => setFilter(type, option)}>{option}</FilterChip>)}</div>
               </div>
             ))}
           </div>
@@ -153,7 +157,7 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
                 <article className="group grid gap-4 px-5 py-5 transition hover:bg-white/[.035] md:grid-cols-[84px_minmax(0,1fr)_minmax(168px,.42fr)_auto] md:items-center md:gap-6 md:px-6" key={project.id}>
                   <div className="flex items-center justify-between gap-3 md:block">
                     <span className="font-mono text-[13px] font-semibold tracking-[.08em] text-white">{detail?.projectCode ?? 'AI'}</span>
-                    <span className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-white/45"><span className="size-1.5 rounded-full bg-white/60" />{stage}</span>
+                    <WorkspaceStatusBadge className="mt-2" label={stage} status={projectStage(project)} />
                   </div>
                   <div className="min-w-0">
                     <Link className="inline-flex items-start gap-2 text-[17px] font-semibold leading-6 tracking-[-.025em] text-white transition group-hover:text-white/80" href={`/workspace/ai-projects/${project.slug}`}>
@@ -165,7 +169,7 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
                     <Badge className="rounded-full border-white/[.12] bg-white/[.035] px-2.5 text-[10px] font-medium text-white/65" variant="outline">{projectDomain(project)}</Badge>
                     <Badge className="rounded-full border-white/[.12] bg-white/[.035] px-2.5 text-[10px] font-medium text-white/65" variant="outline">{projectValue(project)}</Badge>
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] text-white/48 md:justify-end"><CheckCircle2 className="size-3.5" />{verificationLabels[project.verificationStatus] ?? project.verificationStatus}<span className="rounded-full border border-white/[.12] px-2 py-0.5 font-mono text-[10px] text-white/60">{priority}</span></div>
+                  <div className="flex items-center gap-2 md:justify-end"><WorkspaceStatusBadge status={project.verificationStatus} /><span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-2 py-0.5 text-[10px] text-[var(--v9-muted)]">优先级：{priorityLabel(priority)}</span></div>
                 </article>
               );
             })}

@@ -23,8 +23,8 @@ export default async function LoginPage({
     <main className="v9-source-home grid min-h-screen place-items-center bg-[var(--v9-bg)] px-6 py-12 text-[var(--v9-text)]">
       <section className="relative w-full max-w-[560px] overflow-hidden rounded-[28px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-7 shadow-2xl shadow-black/30 sm:p-10">
         <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--v9-grid-line)_1px,transparent_1px),linear-gradient(var(--v9-grid-line)_1px,transparent_1px)] bg-[size:48px_48px] opacity-35" />
-        <div className="relative"><p className="text-[11px] font-semibold tracking-[.24em] text-white/45">PALMPAY DESIGN HUB</p>
-        <h1 className="mt-4 text-[34px] font-semibold tracking-[-.055em] text-white">登录体验设计 Hub</h1>
+        <div className="relative">
+        <h1 className="text-[34px] font-semibold tracking-[-.055em] text-white">登录体验设计中心</h1>
         <p className="mt-2 text-sm leading-6 text-white/55">
           {isTestMode
             ? '测试环境仅允许已启用成员使用测试访问码登录。正式环境接入企业 SSO 后将替换此表单。'

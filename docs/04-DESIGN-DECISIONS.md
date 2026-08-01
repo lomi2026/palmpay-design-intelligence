@@ -283,3 +283,10 @@ This previous delivery order is superseded by Decision 25. It remains as histori
 - By explicit user decision, the first entry to a Workspace menu page uses the earliest approved full skeleton pattern: heading lines, four summary-card placeholders and one main-content placeholder.
 - Do not replace this pattern with the top progress strip and loading text.
 - This decision changes loading presentation only. Route boundaries, caching, prefetch, permissions and data-fetching behavior remain unchanged.
+
+## 28. Chinese-first interface wording (2026-08-02)
+
+- By explicit user decision, user-facing field labels, actions, status explanations and operational copy use Chinese across the public home and formal workspace.
+- Main Workspace menu pages retain a short uppercase English eyebrow as visual decoration above the primary Chinese heading. This exception does not apply to operational fields, buttons, filters, permissions, statuses or explanations, which remain Chinese-first.
+- Approved brand names, project codes, version notation and established product terms such as PalmPay Design, AI Skill, Prompt, Beta 1.0 and v9-1 remain unchanged unless a later explicit decision replaces them.
+- Machine identifiers and third-party technology names may remain in their canonical form when translation would reduce traceability or accuracy. Permission codes remain internal identifiers, while the management interface displays their Chinese permission names.

@@ -8,6 +8,7 @@ import { createDraftAction, type ActionState } from './actions';
 import { ContentTypeFields } from './content-type-fields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 
 type Team = { id: string; name: string; code: string };
@@ -37,14 +38,14 @@ export function CreateDraftForm({
   }, [router, state.id]);
 
   return (
-    <form action={action} className="mt-6 overflow-hidden rounded-[20px] border border-white/[.1] bg-[#111112]">
-      <section className="border-b border-white/[.1] p-5 md:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-[.16em] text-white/45">01 / Content type</p><h2 className="mt-2 text-[22px] font-semibold tracking-[-.04em] text-white">选择要沉淀的团队能力</h2></div><p className="max-w-sm text-[12px] leading-5 text-white/45">不同类型会使用对应字段结构；创建后均以私有草稿开始。</p></div>
+    <form action={action} className="mt-6 overflow-hidden rounded-[20px] border border-[var(--v9-line)] bg-[var(--v9-panel)]">
+      <section className="border-b border-[var(--v9-line)] p-5 md:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-[11px] font-semibold tracking-[.16em] text-white/45">01 / 内容类型</p><h2 className="mt-2 text-[22px] font-semibold tracking-[-.04em] text-white">选择要沉淀的团队能力</h2></div><p className="max-w-sm text-[12px] leading-5 text-white/45">不同类型会使用对应字段结构；创建后均以私有草稿开始。</p></div>
         <input name="contentType" type="hidden" value={contentType} />
-        <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">{contentTypes.map(({ value, label, description, icon: Icon }) => <button aria-pressed={contentType === value} className={`rounded-[14px] border p-4 text-left transition ${contentType === value ? 'border-white bg-white text-black' : 'border-white/[.12] bg-white/[.025] text-white hover:bg-white/[.07]'}`} key={value} onClick={() => setContentType(value)} type="button"><Icon className="size-4" /><strong className="mt-6 block text-[14px]">{label}</strong><span className={`mt-1.5 block text-[11px] leading-5 ${contentType === value ? 'text-black/60' : 'text-white/48'}`}>{description}</span></button>)}</div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">{contentTypes.map(({ value, label, description, icon: Icon }) => <button aria-pressed={contentType === value} className={`rounded-[14px] border p-4 text-left text-[var(--v9-text)] transition focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[var(--v9-soft-hover)] ${contentType === value ? 'border-[var(--v9-status-accent-line)] bg-[var(--v9-status-accent-bg)]' : 'border-[var(--v9-line)] bg-[var(--v9-soft)] hover:border-[var(--v9-line-strong)] hover:bg-[var(--v9-soft-hover)]'}`} key={value} onClick={() => setContentType(value)} type="button"><Icon className={contentType === value ? 'size-4 text-[var(--v9-status-accent-text)]' : 'size-4 text-[var(--v9-muted)]'} /><strong className="mt-6 block text-[14px]">{label}</strong><span className="mt-1.5 block text-[11px] leading-5 text-[var(--v9-copy)]">{description}</span></button>)}</div>
       </section>
       <section className="grid gap-5 p-5 md:grid-cols-2 md:p-6">
-        <label className="grid gap-1.5 text-sm text-white/75">归属团队<select className="h-9 rounded-lg border border-white/15 bg-black/25 px-3 text-sm text-white" name="teamId" required><option value="">请选择团队</option>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>
+        <label className="grid gap-1.5 text-sm text-white/75">归属团队<NativeSelect className="h-9 w-full rounded-lg border border-white/15 bg-black/25 px-3 text-sm text-white" containerClassName="w-full" name="teamId" required><option value="">请选择团队</option>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</NativeSelect></label>
         <div className="hidden md:block" />
         <label className="grid gap-1.5 text-sm text-white/75 md:col-span-2">标题<Input className="border-white/15 bg-black/25 text-white placeholder:text-white/35" name="title" placeholder="用清晰、可检索的标题说明内容" required /></label>
         <label className="grid gap-1.5 text-sm text-white/75 md:col-span-2">摘要<Textarea className="min-h-20 border-white/15 bg-black/25 text-white placeholder:text-white/35" name="summary" placeholder="说明它解决什么问题、适用于哪些场景" /></label>

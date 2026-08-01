@@ -1,6 +1,6 @@
 # PalmPay体验设计Hub — Current Project Status
 
-Last Updated: 2026-08-01
+Last Updated: 2026-08-02
 
 ## Current Phase
 
@@ -27,6 +27,8 @@ The local production contribution workflow no longer refreshes an editor route a
 The 2026-07-31 external test-login incident was traced to the cold-start path: the Render container repeated database migration, seed, identity bootstrap and all three catalog imports before starting the API, while the Vercel login action aborted after 12 seconds and reported every transport or service failure as invalid credentials. Release commit `4b5f6da` restores a migration-only API startup, keeps the test login request alive for the free-instance cold-start window, and distinguishes unavailable authentication infrastructure from rejected credentials. Local Web/API typecheck and lint, the Web production build, and the API test suite pass; Vercel reports a successful deployment, the Render health endpoint returns 200, and the test-session endpoint returns the expected 401 for a deliberately invalid code. Valid-code browser confirmation remains open because the shared access code is intentionally absent from the repository.
 
 The shared light/dark control state is synchronized with the root shadcn theme class. Token-driven primary buttons now render black-on-white in dark mode and white-on-black in light mode, while active administration tabs, review filters and catalog view toggles expose their selected state correctly. Link-backed buttons use the shadcn `asChild` contract, so their foreground tokens are no longer overridden by global anchor inheritance.
+
+The 2026-08-02 Workspace consistency pass centralizes repeated content-type labels, status labels/tones, page hero metrics and empty states, and moves catalog cards, filters, form controls, dashboards, review/submission flows and administration lists onto the same semantic surface, border and text hierarchy. Five representative dark-mode routes (`/workspace`, `/workspace/insights`, `/workspace/admin`, `/workspace/submit`, `/workspace/ai-skills`) were verified at 1280 px with no horizontal overflow or browser console errors. Web typecheck, lint, 24 tests and the 23-page production build pass. This changes presentation only; API, RBAC and workflow state logic are unchanged.
 
 The next engineering objective is:
 

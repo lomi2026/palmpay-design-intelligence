@@ -2,14 +2,7 @@ import Link from 'next/link';
 import type { ContentCard as ContentCardData } from '@/lib/content-types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
-const verificationLabels: Record<string, string> = {
-  UNVERIFIED: '未验证',
-  INTERNAL_TRIAL: '内部试用',
-  PILOT: '试点中',
-  VERIFIED: '已验证',
-  INVALIDATED: '已失效',
-};
+import { WorkspaceStatusBadge } from '@/components/workspace/workspace-status-badge';
 
 export function ContentCard({ content }: { content: ContentCardData }) {
   const contentRoute =
@@ -21,39 +14,37 @@ export function ContentCard({ content }: { content: ContentCardData }) {
           ? 'ai-cases'
           : 'ai-projects';
   return (
-    <Card className="group min-h-56 border border-white/[.1] bg-[#111112] py-5 shadow-none transition hover:-translate-y-0.5 hover:border-white/[.22] hover:bg-white/[.035]">
+    <Card className="group min-h-56 border border-[var(--v9-line)] bg-[var(--v9-panel)] py-5 shadow-none transition hover:-translate-y-0.5 hover:border-[var(--v9-line-strong)] hover:bg-[var(--v9-panel-2)]">
       <CardHeader>
-        <div className="flex items-center justify-between gap-3 text-[11px] text-neutral-500">
-          <Badge variant="outline" className="border-white/[.12] bg-white/[.035] text-white/55">
+        <div className="flex items-center justify-between gap-3 text-[11px] text-[var(--v9-subtle)]">
+          <Badge variant="outline" className="border-[var(--v9-line)] bg-[var(--v9-soft)] text-[var(--v9-copy)]">
             {content.category?.name ?? '未分类'}
           </Badge>
-          <span>
-            {verificationLabels[content.verificationStatus] ?? content.verificationStatus}
-          </span>
+          <WorkspaceStatusBadge status={content.verificationStatus} />
         </div>
-        <CardTitle className="mt-4 text-[19px] font-medium leading-7 text-white">
+        <CardTitle className="mt-4 text-[19px] font-medium leading-7 text-[var(--v9-text)]">
           <Link
-            className="transition group-hover:text-white/70"
+            className="transition group-hover:text-[var(--v9-muted)]"
             href={`/workspace/${contentRoute}/${content.slug}`}
             prefetch={false}
           >
             {content.title}
           </Link>
         </CardTitle>
-        <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/55">
+        <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--v9-copy)]">
           {content.summary ?? '暂无摘要'}
         </p>
       </CardHeader>
       <CardContent>
         <div className="mt-4 flex flex-wrap gap-1.5">
           {content.tags.map(({ tag }) => (
-            <Badge variant="outline" className="border-white/[.1] bg-black/[.18] text-white/45" key={tag.id}>
+            <Badge variant="outline" className="border-[var(--v9-line)] bg-[var(--v9-soft)] text-[var(--v9-subtle)]" key={tag.id}>
               {tag.name}
             </Badge>
           ))}
         </div>
       </CardContent>
-      <CardFooter className="mt-auto flex items-center justify-between border-white/[.1] bg-transparent px-5 pt-5 text-xs text-white/40">
+      <CardFooter className="mt-auto flex items-center justify-between border-[var(--v9-line)] bg-transparent px-5 pt-5 text-xs text-[var(--v9-subtle)]">
         <span>负责人 · {content.owner.name}</span>
         <span>{content.team.name}</span>
       </CardFooter>
