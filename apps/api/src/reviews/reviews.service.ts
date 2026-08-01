@@ -9,10 +9,12 @@ import { PrismaService } from '../database/prisma.service';
 import {
   AttachmentEntityType,
   ContentStatus,
+  RoleScopeType,
   ReviewActionType,
   ReviewRequestStatus,
   UserStatus,
 } from '../generated/prisma/enums';
+import type { Prisma } from '../generated/prisma/client';
 import type { AssignReviewerDto, ReviewDecisionDto, SubmitReviewDto } from './reviews.dto';
 import { AuditService } from '../governance/audit.service';
 import { EngagementService } from '../engagement/engagement.service';
@@ -32,7 +34,9 @@ export class ReviewsService {
       include: { draftVersion: true },
     });
     if (!content) throw new NotFoundException('Content was not found.');
-    if (content.ownerId !== user.id && !user.permissions.includes('content.edit_all')) {
+    const canSubmitOwn =
+      content.ownerId === user.id && user.permissions.includes('content.edit_own');
+    if (!canSubmitOwn && !user.permissions.includes('content.edit_all')) {
       throw new ForbiddenException('You cannot submit this content for review.');
     }
     if (!content.draftVersion)
@@ -69,14 +73,8 @@ export class ReviewsService {
       });
       const reviewers = await tx.user.findMany({
         where: {
-          organizationId: user.organizationId,
-          status: UserStatus.ACTIVE,
+          ...this.reviewerEligibilityWhere(user.organizationId, [content.teamId]),
           id: { not: user.id },
-          userRoles: {
-            some: {
-              role: { rolePermissions: { some: { permission: { code: 'review.process' } } } },
-            },
-          },
         },
         select: { id: true },
       });
@@ -115,11 +113,7 @@ export class ReviewsService {
     const reviewer = await this.prisma.user.findFirst({
       where: {
         id: input.reviewerId,
-        organizationId: user.organizationId,
-        status: UserStatus.ACTIVE,
-        userRoles: {
-          some: { role: { rolePermissions: { some: { permission: { code: 'review.process' } } } } },
-        },
+        ...this.reviewerEligibilityWhere(user.organizationId, [review.content.teamId]),
       },
       select: { id: true },
     });
@@ -193,8 +187,9 @@ export class ReviewsService {
   }
 
   async queue(user: AuthenticatedUser) {
+    const reviewScope = this.reviewContentWhere(user);
     const items = await this.prisma.reviewRequest.findMany({
-      where: { content: { organizationId: user.organizationId, deletedAt: null } },
+      where: { content: reviewScope },
       include: {
         content: { select: { id: true, title: true, contentType: true, status: true } },
         version: {
@@ -259,14 +254,9 @@ export class ReviewsService {
   }
 
   async reviewers(user: AuthenticatedUser) {
+    const teamIds = this.reviewTeamIds(user);
     const items = await this.prisma.user.findMany({
-      where: {
-        organizationId: user.organizationId,
-        status: UserStatus.ACTIVE,
-        userRoles: {
-          some: { role: { rolePermissions: { some: { permission: { code: 'review.process' } } } } },
-        },
-      },
+      where: this.reviewerEligibilityWhere(user.organizationId, teamIds),
       select: { id: true, name: true, email: true },
       orderBy: { name: 'asc' },
     });
@@ -277,6 +267,7 @@ export class ReviewsService {
     const review = await this.prisma.reviewRequest.findFirst({
       where: { id: reviewId, content: { organizationId: user.organizationId, deletedAt: null } },
       include: {
+        content: { select: { teamId: true } },
         version: {
           include: {
             baseVersion: true,
@@ -285,6 +276,7 @@ export class ReviewsService {
       },
     });
     if (!review) throw new NotFoundException('Review request was not found.');
+    this.assertCanProcessTeam(user, review.content.teamId);
     const baseVersion = review.version.baseVersion;
     const [baseAttachments, versionAttachments] = await Promise.all([
       baseVersion ? this.versionAttachments(baseVersion.id) : Promise.resolve([]),
@@ -373,11 +365,101 @@ export class ReviewsService {
   private async findProcessableReview(user: AuthenticatedUser, reviewId: string) {
     const review = await this.prisma.reviewRequest.findFirst({
       where: { id: reviewId, content: { organizationId: user.organizationId, deletedAt: null } },
+      include: { content: { select: { teamId: true } } },
     });
     if (!review) throw new NotFoundException('Review request was not found.');
+    this.assertCanProcessTeam(user, review.content.teamId);
     if (review.status !== ReviewRequestStatus.PENDING)
       throw new ConflictException('This review request is already complete.');
     return review;
+  }
+
+  private reviewPermissionScopes(user: AuthenticatedUser) {
+    return user.permissionScopes.filter(({ code }) => code === 'review.process');
+  }
+
+  private reviewTeamIds(user: AuthenticatedUser): string[] | undefined {
+    const scopes = this.reviewPermissionScopes(user);
+    if (
+      scopes.some(
+        ({ scopeType, scopeId }) =>
+          scopeType === RoleScopeType.ORGANIZATION && scopeId === user.organizationId,
+      )
+    ) {
+      return undefined;
+    }
+    const teamIds = [
+      ...new Set(
+        scopes
+          .filter(({ scopeType }) => scopeType === RoleScopeType.TEAM)
+          .map(({ scopeId }) => scopeId),
+      ),
+    ];
+    if (!teamIds.length) throw new ForbiddenException('No review scope is assigned to you.');
+    return teamIds;
+  }
+
+  private reviewContentWhere(user: AuthenticatedUser): Prisma.ContentWhereInput {
+    const teamIds = this.reviewTeamIds(user);
+    return {
+      organizationId: user.organizationId,
+      deletedAt: null,
+      ...(teamIds ? { teamId: { in: teamIds } } : {}),
+    };
+  }
+
+  private assertCanProcessTeam(user: AuthenticatedUser, teamId: string) {
+    const teamIds = this.reviewTeamIds(user);
+    if (teamIds && !teamIds.includes(teamId)) {
+      throw new ForbiddenException('This review is outside your assigned team scope.');
+    }
+  }
+
+  private reviewerEligibilityWhere(
+    organizationId: string,
+    teamIds?: string[],
+  ): Prisma.UserWhereInput {
+    const permission = {
+      role: { rolePermissions: { some: { permission: { code: 'review.process' } } } },
+    };
+    return {
+      organizationId,
+      status: UserStatus.ACTIVE,
+      OR: [
+        {
+          userRoles: {
+            some: {
+              scopeType: RoleScopeType.ORGANIZATION,
+              scopeId: organizationId,
+              ...permission,
+            },
+          },
+        },
+        ...(teamIds?.length
+          ? [
+              {
+                primaryTeamId: { in: teamIds },
+                userRoles: {
+                  some: {
+                    scopeType: RoleScopeType.TEAM,
+                    scopeId: { in: teamIds },
+                    ...permission,
+                  },
+                },
+              },
+            ]
+          : [
+              {
+                userRoles: {
+                  some: {
+                    scopeType: RoleScopeType.TEAM,
+                    ...permission,
+                  },
+                },
+              },
+            ]),
+      ],
+    };
   }
 
   private async findAssignedReview(user: AuthenticatedUser, reviewId: string) {

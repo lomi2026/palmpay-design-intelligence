@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { authenticatedApiHeaders } from '@/lib/auth';
+import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
 import { createRelationAction, removeRelationAction } from '../engagement-actions';
@@ -34,12 +34,19 @@ export default async function RelatedContentPage({
 }) {
   const { contentId = '', success, error } = await searchParams;
   const headers = await authenticatedApiHeaders();
+  const user = await loadCurrentUser();
   const [relations, catalog] = contentId
     ? await Promise.all([
         serverApiFetch<Relations>(`/api/contents/${contentId}/relations`, { headers }),
         serverApiFetch<ContentListResponse>('/api/contents?pageSize=100', { headers }),
       ])
     : [null, { items: [], page: 1, pageSize: 100, total: 0 } satisfies ContentListResponse];
+  const source = catalog.items.find((item) => item.id === contentId);
+  const canEdit = Boolean(
+    user &&
+      (user.permissions.includes('content.edit_all') ||
+        (user.permissions.includes('content.edit_own') && source?.owner.id === user.id)),
+  );
   return (
     <main className="mx-auto max-w-[1100px] px-5 py-8 md:px-8 md:py-10">
       <Link href="/workspace" className="text-sm text-white/50 transition hover:text-white">
@@ -50,7 +57,7 @@ export default async function RelatedContentPage({
       {error ? <p className="mt-4 rounded-xl border border-red-200/20 bg-red-200/[.07] p-3 text-sm text-red-100">请选择关联目标。</p> : null}
       {contentId ? (
         <>
-          <form
+          {canEdit ? <form
             action={createRelationAction}
             className="mt-5 grid gap-3 rounded-2xl border border-white/[.11] bg-[#111112] p-5 md:grid-cols-[1fr_180px_auto]"
           >
@@ -83,7 +90,7 @@ export default async function RelatedContentPage({
               <option value="DERIVED_FROM">衍生自</option>
             </select>
             <Button type="submit">添加关联</Button>
-          </form>
+          </form> : null}
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <section className="rounded-2xl border border-white/[.1] bg-[#111112] p-5">
               <h2 className="text-sm font-medium text-white">此内容关联到</h2>
@@ -100,13 +107,13 @@ export default async function RelatedContentPage({
                       {relation.targetContent.title}
                       <span className="ml-2 text-xs text-white/40">{relation.relationType}</span>
                     </Link>
-                    <form action={removeRelationAction}>
+                    {canEdit ? <form action={removeRelationAction}>
                       <input type="hidden" name="contentId" value={contentId} />
                       <input type="hidden" name="relationId" value={relation.id} />
                       <Button type="submit" variant="ghost" size="sm">
                         移除
                       </Button>
-                    </form>
+                    </form> : null}
                   </li>
                 ))}
               </ul>

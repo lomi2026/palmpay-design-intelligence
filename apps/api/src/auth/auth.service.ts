@@ -67,6 +67,13 @@ export class AuthService {
         (scopeType === RoleScopeType.ORGANIZATION && scopeId === user.organizationId) ||
         (scopeType === RoleScopeType.TEAM && scopeId === user.primaryTeamId),
     );
+    const permissionScopes = applicableRoles.flatMap(({ role, scopeType, scopeId }) =>
+      role.rolePermissions.map(({ permission }) => ({
+        code: permission.code,
+        scopeType,
+        scopeId,
+      })),
+    );
 
     return {
       id: user.id,
@@ -83,13 +90,8 @@ export class AuthService {
         scopeType,
         scopeId,
       })),
-      permissions: [
-        ...new Set(
-          applicableRoles.flatMap(({ role }) =>
-            role.rolePermissions.map(({ permission }) => permission.code),
-          ),
-        ),
-      ].sort(),
+      permissions: [...new Set(permissionScopes.map(({ code }) => code))].sort(),
+      permissionScopes,
     };
   }
 

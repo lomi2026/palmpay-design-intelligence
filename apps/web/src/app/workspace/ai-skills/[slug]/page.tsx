@@ -44,7 +44,9 @@ export default async function AISkillDetailPage({ params }: { params: Promise<{ 
   }
   const currentUser = await loadCurrentUser();
   const canEdit =
-    currentUser?.id === skill.owner.id || currentUser?.permissions.includes('content.edit_all');
+    (currentUser?.id === skill.owner.id &&
+      currentUser.permissions.includes('content.edit_own')) ||
+    currentUser?.permissions.includes('content.edit_all');
   const canUnpublish = currentUser?.permissions.includes('content.unpublish') ?? false;
   const canArchive = currentUser?.permissions.includes('content.archive') ?? false;
   const usage = await serverApiFetch<{

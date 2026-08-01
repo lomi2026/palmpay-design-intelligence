@@ -41,6 +41,10 @@ export class UserListQueryDto extends PaginationQueryDto {
 export class UpdateUserStatusDto {
   @IsEnum(UserStatus)
   status!: UserStatus;
+
+  @IsOptional()
+  @IsUUID()
+  replacementOwnerId?: string;
 }
 
 export class UpdateTeamDto {

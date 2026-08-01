@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { cache } from 'react';
-import { ApiError, serverApiFetch } from './api';
+import { serverApiFetch } from './api';
+import { classifyCurrentUserFailure, currentUserRequestTimeoutMs } from './auth-failure';
 
 export const DEVELOPMENT_USER_COOKIE = 'palmpay_dev_user_email';
 export const TEST_SESSION_COOKIE = 'palmpay_test_session';
@@ -19,33 +20,46 @@ export interface CurrentUser {
   permissions: string[];
 }
 
-function isRequestTimeout(error: unknown) {
-  return error instanceof DOMException && ['AbortError', 'TimeoutError'].includes(error.name);
+export class AuthenticationServiceUnavailableError extends Error {
+  constructor(cause: unknown) {
+    super('The authentication service is temporarily unavailable.', { cause });
+    this.name = 'AuthenticationServiceUnavailableError';
+  }
 }
 
-export const loadCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+const loadAuthenticationCookies = cache(async () => {
   const cookieStore = await cookies();
-  const developmentEmail = cookieStore.get(DEVELOPMENT_USER_COOKIE)?.value;
-  const testSession = cookieStore.get(TEST_SESSION_COOKIE)?.value;
+  return {
+    developmentEmail: cookieStore.get(DEVELOPMENT_USER_COOKIE)?.value,
+    testSession: cookieStore.get(TEST_SESSION_COOKIE)?.value,
+  };
+});
+
+export const hasAuthenticationSession = cache(async () => {
+  const { developmentEmail, testSession } = await loadAuthenticationCookies();
+  return Boolean(developmentEmail || testSession);
+});
+
+export const loadCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  const { developmentEmail, testSession } = await loadAuthenticationCookies();
 
   if (!developmentEmail && !testSession) return null;
 
   try {
     return await serverApiFetch<CurrentUser>('/api/me', {
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(currentUserRequestTimeoutMs(process.env.AUTH_MODE)),
       headers: testSession ? { Authorization: `Bearer ${testSession}` } : { 'x-dev-user-email': developmentEmail! },
     });
   } catch (error: unknown) {
-    if (error instanceof ApiError && [401, 403, 404].includes(error.status)) return null;
-    if (isRequestTimeout(error)) return null;
+    const failureKind = classifyCurrentUserFailure(error);
+    if (failureKind === 'unauthenticated') return null;
+    if (failureKind === 'unavailable') throw new AuthenticationServiceUnavailableError(error);
     throw error;
   }
 });
 
 export const authenticatedApiHeaders = cache(async (): Promise<Record<string, string>> => {
-  const cookieStore = await cookies();
-  const developmentEmail = cookieStore.get(DEVELOPMENT_USER_COOKIE)?.value;
-  const testSession = cookieStore.get(TEST_SESSION_COOKIE)?.value;
+  const { developmentEmail, testSession } = await loadAuthenticationCookies();
   if (testSession) return { Authorization: `Bearer ${testSession}` };
   return developmentEmail ? { 'x-dev-user-email': developmentEmail } : {};
 });

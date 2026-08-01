@@ -390,6 +390,9 @@ Workspace shell:
 Functional surfaces:
 
 - real workspace metrics, recent content and personal tasks
+- role-aware actionable todos for contributors, reviewers and administrators
+- recoverable notification-count synchronization and notification target navigation
+- fresh-on-entry recent views without disabling the global workspace route cache
 - complete personal-space entry points
 - complete contribution, submission and review entry points
 - complete analytics entry points for authorized users
@@ -400,8 +403,8 @@ Acceptance:
 
 - Every implemented formal module is reachable from an authorized navigation path.
 - A member can complete discovery, favorite, usage and contribution flows.
-- A reviewer can complete assignment, decision and history flows.
-- An administrator can manage content, taxonomy, users, roles and audit records.
+- A reviewer can view the authorized queue and complete decision and history flows only for reviews assigned to them.
+- An administrator can assign or reassign reviewers and manage content, taxonomy, users, roles and audit records.
 - Desktop and mobile navigation expose the same authorized capabilities.
 - The workspace dashboard does not present static demo metrics as formal data.
 - Primary actions are either functional or clearly unavailable; no inert primary controls remain.

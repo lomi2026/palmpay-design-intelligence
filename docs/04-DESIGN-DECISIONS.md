@@ -277,3 +277,9 @@ This previous delivery order is superseded by Decision 25. It remains as histori
 - Phase 5.5 must expose the implemented modules through a complete permission-aware desktop and mobile navigation system, remove inert controls, bind the workspace dashboard to formal APIs, and complete the missing personal, governance, analytics and administration surfaces.
 - RBAC remains authoritative: a menu item may be absent for a user who does not have its permission, and no visual completion work may bypass API or page authorization.
 - Final v9-1 parity remains a launch gate after functional-interface and critical-flow completion.
+
+## 27. Workspace first-entry loading state (2026-08-01)
+
+- By explicit user decision, the first entry to a Workspace menu page uses the earliest approved full skeleton pattern: heading lines, four summary-card placeholders and one main-content placeholder.
+- Do not replace this pattern with the top progress strip and loading text.
+- This decision changes loading presentation only. Route boundaries, caching, prefetch, permissions and data-fetching behavior remain unchanged.

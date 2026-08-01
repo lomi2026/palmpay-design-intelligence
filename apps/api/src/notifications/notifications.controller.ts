@@ -15,6 +15,9 @@ export class NotificationsController {
   @Get()
   list(@CurrentUser() user: AuthenticatedUser) { return this.notifications.list(user); }
 
+  @Get('unread-count')
+  unreadCount(@CurrentUser() user: AuthenticatedUser) { return this.notifications.unreadCount(user); }
+
   @Patch('read-all')
   readAll(@CurrentUser() user: AuthenticatedUser) { return this.notifications.markAllRead(user); }
 

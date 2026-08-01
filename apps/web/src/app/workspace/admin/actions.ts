@@ -57,10 +57,14 @@ export async function updateTagStatusAction(formData: FormData) {
 export async function updateUserStatusAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
   const userId = String(formData.get('userId'));
+  const replacementOwnerId = String(formData.get('replacementOwnerId') ?? '');
   await api(`/api/organizations/${organizationId}/users/${userId}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: String(formData.get('status')) }),
+    body: JSON.stringify({
+      status: String(formData.get('status')),
+      ...(replacementOwnerId ? { replacementOwnerId } : {}),
+    }),
   });
   redirect('/workspace/admin?tab=users');
 }

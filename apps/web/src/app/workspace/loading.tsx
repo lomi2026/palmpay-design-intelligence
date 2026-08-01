@@ -1,10 +1,15 @@
 export default function WorkspaceLoading() {
   return (
-    <main aria-busy="true" aria-label="页面加载中" className="mx-auto max-w-[1232px] px-5 py-7 md:px-8">
-      <div className="h-1 w-full overflow-hidden rounded-full bg-white/[.06]">
-        <div className="h-full w-1/3 animate-pulse rounded-full bg-white/45" />
+    <main className="px-5 py-8 md:px-8 md:py-10" aria-busy="true" aria-label="正在加载工作台内容">
+      <div className="h-3 w-32 animate-pulse rounded bg-white/10" />
+      <div className="mt-4 h-9 w-52 animate-pulse rounded-lg bg-white/10" />
+      <div className="mt-3 h-4 w-full max-w-xl animate-pulse rounded bg-white/[0.07]" />
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index} className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/[0.035]" />
+        ))}
       </div>
-      <p className="mt-3 text-[11px] text-white/40">正在加载内容…</p>
+      <div className="mt-6 h-72 animate-pulse rounded-2xl border border-white/10 bg-white/[0.035]" />
     </main>
   );
 }

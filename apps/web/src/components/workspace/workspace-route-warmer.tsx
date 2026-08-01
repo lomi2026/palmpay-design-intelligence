@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { filterWorkspaceWarmRoutes } from './workspace-route-policy';
 
 type WorkspaceRouteWarmerProps = {
   canAnalyze: boolean;
@@ -18,8 +19,9 @@ type WorkspaceRouteWarmerProps = {
  * normal menu switch reads from Next's client router cache instead of waiting
  * for a Vercel -> Render request.
  *
- * This deliberately excludes catalog detail records and search results: their
- * cardinality is unbounded and they should only be prefetched on user intent.
+ * This deliberately excludes catalog detail records and search results because
+ * their cardinality is unbounded, plus personal routes such as recent views
+ * whose value depends on an immediately preceding action.
  */
 export function WorkspaceRouteWarmer({
   canAnalyze,
@@ -57,7 +59,7 @@ export function WorkspaceRouteWarmer({
       );
     }
 
-    return nextRoutes;
+    return filterWorkspaceWarmRoutes(nextRoutes);
   }, [canAnalyze, canCreate, canManage, canReview, canSubmit]);
 
   useEffect(() => {

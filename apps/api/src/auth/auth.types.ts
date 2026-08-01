@@ -13,6 +13,12 @@ export interface AuthenticatedRole {
   scopeId: string;
 }
 
+export interface AuthenticatedPermissionScope {
+  code: string;
+  scopeType: RoleScopeType;
+  scopeId: string;
+}
+
 export interface AuthenticatedUser {
   id: string;
   organizationId: string;
@@ -25,6 +31,7 @@ export interface AuthenticatedUser {
   locale: string;
   roles: AuthenticatedRole[];
   permissions: string[];
+  permissionScopes: AuthenticatedPermissionScope[];
 }
 
 export interface AuthenticatedRequest {

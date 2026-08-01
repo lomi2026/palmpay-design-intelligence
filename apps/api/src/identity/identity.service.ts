@@ -5,7 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { RoleScopeType } from '../generated/prisma/enums';
+import { Prisma } from '../generated/prisma/client';
+import { RoleScopeType, UserStatus } from '../generated/prisma/enums';
 import type {
   AssignUserRoleDto,
   UpdateTeamDto,
@@ -126,20 +127,119 @@ export class IdentityService {
     actorId: string,
   ) {
     const existing = await this.getUser(organizationId, userId);
-    const updated = await this.prisma.user.update({
-      where: { id: userId },
-      data: { status: input.status },
-    });
-    await this.audit.write({
-      organizationId,
-      actorId,
-      action: 'user.status.update',
-      entityType: 'user',
-      entityId: userId,
-      beforeData: existing,
-      afterData: updated,
-    });
-    return updated;
+    const disabling =
+      input.status === UserStatus.DISABLED && existing.status !== UserStatus.DISABLED;
+    const result = await this.prisma.$transaction(async (tx) => {
+      const ownedContent = disabling
+        ? await tx.content.findMany({
+            where: { organizationId, ownerId: userId, deletedAt: null },
+            select: { id: true, title: true, slug: true, status: true },
+            orderBy: { updatedAt: 'desc' },
+          })
+        : [];
+      if (ownedContent.length > 0 && !input.replacementOwnerId) {
+        throw new ConflictException({
+          code: 'CONTENT_OWNERSHIP_TRANSFER_REQUIRED',
+          message: 'Select an active replacement owner before disabling this user.',
+          ownedContentCount: ownedContent.length,
+          ownedContent: ownedContent.slice(0, 20),
+        });
+      }
+
+      if (ownedContent.length > 0) {
+        if (input.replacementOwnerId === userId) {
+          throw new BadRequestException('The replacement owner must be a different user.');
+        }
+        const replacementOwner = await tx.user.findFirst({
+          where: {
+            id: input.replacementOwnerId,
+            organizationId,
+            status: UserStatus.ACTIVE,
+            deletedAt: null,
+          },
+          select: {
+            id: true,
+            primaryTeamId: true,
+            userRoles: {
+              select: {
+                scopeType: true,
+                scopeId: true,
+                role: {
+                  select: {
+                    rolePermissions: {
+                      select: { permission: { select: { code: true } } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+        if (!replacementOwner) {
+          throw new BadRequestException(
+            'The replacement owner must be an active user in the same organization.',
+          );
+        }
+        const canOwnContent = replacementOwner.userRoles.some(
+          ({ scopeType, scopeId, role }) =>
+            ((scopeType === RoleScopeType.ORGANIZATION && scopeId === organizationId) ||
+              (scopeType === RoleScopeType.TEAM && scopeId === replacementOwner.primaryTeamId)) &&
+            role.rolePermissions.some(({ permission }) =>
+              ['content.edit_own', 'content.edit_all'].includes(permission.code),
+            ),
+        );
+        if (!canOwnContent) {
+          throw new BadRequestException(
+            'The replacement owner must have an applicable content editing permission.',
+          );
+        }
+        const transferred = await tx.content.updateMany({
+          where: { organizationId, ownerId: userId, deletedAt: null },
+          data: { ownerId: replacementOwner.id },
+        });
+        if (transferred.count !== ownedContent.length) {
+          throw new ConflictException('Content ownership changed during the disable operation.');
+        }
+        await tx.auditLog.create({
+          data: {
+            organizationId,
+            actorId,
+            action: 'content.owner.transfer',
+            entityType: 'content_ownership',
+            entityId: userId,
+            beforeData: {
+              ownerId: userId,
+              contentIds: ownedContent.map((content) => content.id),
+            },
+            afterData: {
+              ownerId: replacementOwner.id,
+              contentIds: ownedContent.map((content) => content.id),
+            },
+          },
+        });
+      }
+
+      const updated = await tx.user.update({
+        where: { id: userId },
+        data: { status: input.status },
+      });
+      await tx.auditLog.create({
+        data: {
+          organizationId,
+          actorId,
+          action: input.status === UserStatus.DISABLED ? 'user.disable' : 'user.status.update',
+          entityType: 'user',
+          entityId: userId,
+          beforeData: JSON.parse(JSON.stringify(existing)) as Prisma.InputJsonValue,
+          afterData: JSON.parse(JSON.stringify(updated)) as Prisma.InputJsonValue,
+        },
+      });
+      return {
+        updated,
+        transferredContentIds: ownedContent.map((content) => content.id),
+      };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    return result.updated;
   }
 
   listPermissions() {

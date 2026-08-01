@@ -8,6 +8,7 @@ const errorMessages: Record<string, string> = {
   'user-unavailable': '用户不存在、未启用或已被禁用。',
   'invalid-credentials': '邮箱、测试访问码无效，或该用户尚未启用。',
   'service-unavailable': '认证服务正在启动或暂时不可用，请稍候重试。',
+  'session-expired': '登录已失效，或该用户已不可用，请重新登录。',
 };
 
 export default async function LoginPage({

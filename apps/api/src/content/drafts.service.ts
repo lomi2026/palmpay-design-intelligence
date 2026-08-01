@@ -19,6 +19,7 @@ import type { AutosaveDraftDto, CreateDraftDto } from './drafts.dto';
 import { AuditService } from '../governance/audit.service';
 import { EngagementService } from '../engagement/engagement.service';
 import { assertContentComplete } from './content-completeness';
+import { upsertPublishedContentDetail } from './content-detail-projection';
 
 @Injectable()
 export class DraftsService {
@@ -126,7 +127,7 @@ export class DraftsService {
       include: { currentVersion: true, draftVersion: true },
     });
     if (!content) throw new NotFoundException('Content was not found.');
-    if (content.ownerId !== user.id && !user.permissions.includes('content.edit_all')) {
+    if (!this.canEditContent(user, content.ownerId)) {
       throw new ForbiddenException('You cannot edit this content.');
     }
     if (content.status !== ContentStatus.PUBLISHED || !content.currentVersion) {
@@ -231,6 +232,14 @@ export class DraftsService {
       });
       if (promoted.count !== 1)
         throw new ConflictException('This draft version is no longer awaiting publication.');
+
+      await upsertPublishedContentDetail(
+        tx,
+        content.contentType,
+        content.id,
+        content.organizationId,
+        content.draftVersion!.body,
+      );
 
       const published = await tx.content.updateMany({
         where: { id: content.id, draftVersionId: content.draftVersion!.id },
@@ -345,40 +354,43 @@ export class DraftsService {
     ]);
     if (input.attachmentFileIds !== undefined) {
       const fileIds = [...new Set(input.attachmentFileIds)];
-      const files = await this.prisma.fileAttachment.findMany({
-        where: {
-          id: { in: fileIds },
-          organizationId: user.organizationId,
-          uploadStatus: UploadStatus.READY,
-          deletedAt: null,
+      await this.prisma.$transaction(
+        async (tx) => {
+          const files = await tx.fileAttachment.findMany({
+            where: {
+              id: { in: fileIds },
+              organizationId: user.organizationId,
+              uploadStatus: UploadStatus.READY,
+              deletedAt: null,
+            },
+            select: { id: true, uploadedById: true },
+          });
+          const canManageAll = user.permissions.includes('content.edit_all');
+          if (
+            files.length !== fileIds.length ||
+            files.some((file) => file.uploadedById !== user.id && !canManageAll)
+          ) {
+            throw new BadRequestException(
+              'Each attachment must be a ready file that you can manage.',
+            );
+          }
+          await tx.attachmentRelation.deleteMany({
+            where: { entityType: AttachmentEntityType.VERSION, entityId: draft.id },
+          });
+          if (fileIds.length) {
+            await tx.attachmentRelation.createMany({
+              data: fileIds.map((fileId, sortOrder) => ({
+                fileId,
+                entityType: AttachmentEntityType.VERSION,
+                entityId: draft.id,
+                usageType: AttachmentUsageType.ATTACHMENT,
+                sortOrder,
+              })),
+            });
+          }
         },
-        select: { id: true, uploadedById: true },
-      });
-      const canManageAll = user.permissions.includes('content.edit_all');
-      if (
-        files.length !== fileIds.length ||
-        files.some((file) => file.uploadedById !== user.id && !canManageAll)
-      ) {
-        throw new BadRequestException('Each attachment must be a ready file that you can manage.');
-      }
-      await this.prisma.$transaction([
-        this.prisma.attachmentRelation.deleteMany({
-          where: { entityType: AttachmentEntityType.VERSION, entityId: draft.id },
-        }),
-        ...(fileIds.length
-          ? [
-              this.prisma.attachmentRelation.createMany({
-                data: fileIds.map((fileId, sortOrder) => ({
-                  fileId,
-                  entityType: AttachmentEntityType.VERSION,
-                  entityId: draft.id,
-                  usageType: AttachmentUsageType.ATTACHMENT,
-                  sortOrder,
-                })),
-              }),
-            ]
-          : []),
-      ]);
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
     }
 
     return { content: this.serialize(updatedContent), version: this.serialize(updatedVersion) };
@@ -426,7 +438,7 @@ export class DraftsService {
       include: { draftVersion: true },
     });
     if (!content) throw new NotFoundException('Content was not found.');
-    if (content.ownerId !== user.id && !user.permissions.includes('content.edit_all')) {
+    if (!this.canEditContent(user, content.ownerId)) {
       throw new ForbiddenException('You cannot edit this content.');
     }
     if (
@@ -461,6 +473,13 @@ export class DraftsService {
       );
     }
     return content;
+  }
+
+  private canEditContent(user: AuthenticatedUser, ownerId: string) {
+    return (
+      user.permissions.includes('content.edit_all') ||
+      (ownerId === user.id && user.permissions.includes('content.edit_own'))
+    );
   }
 
   private serialize<T>(value: T) {

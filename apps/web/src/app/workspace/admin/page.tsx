@@ -349,7 +349,7 @@ export default async function AdminPage({
           <div className="mt-4 divide-y divide-white/10">
             {users.items.map((member) => (
               <div
-                className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center"
+                className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_430px] lg:items-center"
                 key={member.id}
               >
                 <div>
@@ -357,7 +357,7 @@ export default async function AdminPage({
                   <p className="text-xs text-white/45">{member.email}</p>
                   <p className="mt-2 text-xs text-white/40">{member.primaryTeam?.name ?? '尚未加入主团队'} · {member.userRoles.map((entry) => entry.role.name).join('、') || '无角色'}</p>
                 </div>
-                <form action={updateUserStatusAction} className="flex gap-2">
+                <form action={updateUserStatusAction} className="grid gap-2 sm:grid-cols-[110px_minmax(0,1fr)_auto]">
                   <input type="hidden" name="organizationId" value={user.organizationId} />
                   <input type="hidden" name="userId" value={member.id} />
                   <select
@@ -368,6 +368,17 @@ export default async function AdminPage({
                     <option value="ACTIVE">启用</option>
                     <option value="INVITED">邀请中</option>
                     <option value="DISABLED">停用</option>
+                  </select>
+                  <select
+                    name="replacementOwnerId"
+                    defaultValue=""
+                    aria-label="停用时的新内容负责人"
+                    className="h-8 min-w-0 rounded-lg border border-white/15 bg-white/[.04] px-2 text-sm text-white"
+                  >
+                    <option value="">停用时转移内容至…</option>
+                    {users.items
+                      .filter((candidate) => candidate.id !== member.id && candidate.status === 'ACTIVE')
+                      .map((candidate) => <option value={candidate.id} key={candidate.id}>{candidate.name}</option>)}
                   </select>
                   <Button type="submit" size="sm">
                     更新

@@ -135,6 +135,7 @@ Suggested permission codes:
 - content.archive
 - review.read
 - review.process
+- review.assign
 - analytics.read
 - user.manage
 - taxonomy.manage
@@ -509,6 +510,9 @@ Rules:
 
 - One active review per content version.
 - submitted_by cannot equal assigned_reviewer_id.
+- `review.assign` is granted only to the platform administrator role.
+- Only `review.assign` users can assign or reassign `assigned_reviewer_id`.
+- `review.process` users can decide only review requests assigned to themselves.
 
 ### review_actions
 

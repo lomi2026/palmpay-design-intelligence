@@ -58,7 +58,9 @@ export default async function DesignAssetDetailPage({
   }
   const currentUser = await loadCurrentUser();
   const canEdit =
-    currentUser?.id === content.owner.id || currentUser?.permissions.includes('content.edit_all');
+    (currentUser?.id === content.owner.id &&
+      currentUser.permissions.includes('content.edit_own')) ||
+    currentUser?.permissions.includes('content.edit_all');
   const canUnpublish = currentUser?.permissions.includes('content.unpublish') ?? false;
   const canArchive = currentUser?.permissions.includes('content.archive') ?? false;
   const usage = await serverApiFetch<{

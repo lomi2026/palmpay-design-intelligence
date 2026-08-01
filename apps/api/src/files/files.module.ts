@@ -7,9 +7,10 @@ import { FileStorageService } from './file-storage.service';
 import { LocalFilesController } from './local-files.controller';
 import { LocalStorageService } from './local-storage.service';
 import { R2StorageService } from './r2-storage.service';
+import { GovernanceModule } from '../governance/governance.module';
 
 @Module({
-  imports: [AuthModule, DatabaseModule],
+  imports: [AuthModule, DatabaseModule, GovernanceModule],
   controllers: [FilesController, LocalFilesController],
   providers: [FilesService, FileStorageService, LocalStorageService, R2StorageService],
 })

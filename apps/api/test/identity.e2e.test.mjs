@@ -14,6 +14,7 @@ const adminEmail = `codex-admin-${runId}@example.test`;
 const memberEmail = `codex-member-${runId}@example.test`;
 const reviewerEmail = `codex-reviewer-${runId}@example.test`;
 const managerEmail = `codex-manager-${runId}@example.test`;
+const teamReviewerEmail = `codex-team-reviewer-${runId}@example.test`;
 let prisma;
 let server;
 let organization;
@@ -21,9 +22,15 @@ let adminUser;
 let memberUser;
 let reviewerUser;
 let managerUser;
+let teamReviewerUser;
 let team;
+let otherTeam;
+let submitOnlyRole;
 let publishedContent;
 let memberDraftContent;
+let submitOnlyDraftContent;
+let teamScopeReview;
+let otherTeamReview;
 let memberRestrictedContent;
 let adminRestrictedContent;
 let organizationContent;
@@ -45,6 +52,84 @@ const completeAssetBody = (blocks = []) => ({
   resourceLinks: ['https://example.test/integration-asset'],
   blocks,
 });
+
+const publicationFixtures = () => {
+  const fixtures = [
+    {
+      contentType: 'DESIGN_ASSET',
+      detailKey: 'assetDetail',
+      detailField: 'assetType',
+      bodyV1: { ...completeAssetBody(), assetType: 'E2E_ASSET_V1' },
+      valueV2: 'E2E_ASSET_V2',
+    },
+    {
+      contentType: 'AI_SKILL',
+      detailKey: 'skillDetail',
+      detailField: 'promptTemplate',
+      bodyV1: {
+        goal: 'Validate a reusable research workflow.',
+        scenarios: ['Research synthesis'],
+        unsuitableScenarios: ['Unreviewed final decisions'],
+        applicableRoles: ['Designer'],
+        inputRequirements: 'Approved research notes.',
+        outputSchema: 'A structured findings list.',
+        promptTemplate: 'E2E_SKILL_PROMPT_V1',
+        executionSteps: 'Prepare, execute, and review.',
+        exampleInput: 'Interview notes.',
+        exampleOutput: 'Prioritized findings.',
+        humanReviewRules: 'Verify each finding against its source.',
+        limitations: 'Cannot replace accountable human judgment.',
+        recommendedModels: ['approved-model'],
+        dataSecurityLevel: 'internal',
+        promptVersion: '1.0',
+      },
+      valueV2: 'E2E_SKILL_PROMPT_V2',
+    },
+    {
+      contentType: 'AI_CASE',
+      detailKey: 'caseDetail',
+      detailField: 'resultSummary',
+      bodyV1: {
+        background: 'A controlled integration research case.',
+        originalProblem: 'Synthesis was slow.',
+        originalProcess: 'Manual synthesis.',
+        aiIntervention: 'Candidate clustering.',
+        aiResponsibilities: 'Generate candidate clusters.',
+        humanResponsibilities: 'Verify evidence and conclusions.',
+        resultSummary: 'E2E_CASE_RESULT_V1',
+        beforeAfterComparison: 'Five days to two days.',
+        sampleSize: '20 interviews',
+        validationMethod: 'Owner and reviewer verification.',
+        dataResult: 'Cycle time reduced in the fixture.',
+        limitations: 'Validated only on the integration fixture.',
+        reusableConclusion: 'Use AI for initial clustering with human review.',
+      },
+      valueV2: 'E2E_CASE_RESULT_V2',
+    },
+    {
+      contentType: 'AI_PROJECT',
+      detailKey: 'projectDetail',
+      detailField: 'expectedOutcome',
+      bodyV1: {
+        projectCode: `E2E-PROJECT-${runId}`,
+        domain: 'Research',
+        targetValue: 'Efficiency',
+        projectStage: 'EXPLORING',
+        priority: 'high',
+        problemStatement: 'The workflow repeats manual synthesis.',
+        solutionHypothesis: 'AI can assist the first synthesis pass.',
+        expectedOutcome: 'E2E_PROJECT_OUTCOME_V1',
+        riskLevel: 'Internal data must remain controlled.',
+        evaluationResult: 'Proceed through the controlled review flow.',
+      },
+      valueV2: 'E2E_PROJECT_OUTCOME_V2',
+    },
+  ];
+  return fixtures.map((fixture) => ({
+    ...fixture,
+    bodyV2: { ...fixture.bodyV1, [fixture.detailField]: fixture.valueV2 },
+  }));
+};
 
 async function waitForServer() {
   for (let attempt = 0; attempt < 50; attempt += 1) {
@@ -144,8 +229,57 @@ before(async () => {
     where: { id: { in: [adminUser.id, memberUser.id, reviewerUser.id, managerUser.id] } },
     data: { primaryTeamId: team.id },
   });
+  otherTeam = await prisma.team.create({
+    data: {
+      organizationId: organization.id,
+      name: 'Other Integration Team',
+      code: `integration-other-${runId}`,
+      ownerId: adminUser.id,
+    },
+  });
+  teamReviewerUser = await prisma.user.create({
+    data: {
+      organizationId: organization.id,
+      primaryTeamId: team.id,
+      name: 'Team-scoped Integration Reviewer',
+      email: teamReviewerEmail,
+      status: 'ACTIVE',
+      userRoles: {
+        create: {
+          roleId: reviewerRole.id,
+          scopeType: 'TEAM',
+          scopeId: team.id,
+        },
+      },
+    },
+  });
 
-  async function createAsset(slug, visibility, status = 'PUBLISHED', ownerId = memberUser.id) {
+  const submitPermission = await prisma.permission.findUniqueOrThrow({
+    where: { code: 'content.submit' },
+  });
+  submitOnlyRole = await prisma.role.create({
+    data: {
+      organizationId: organization.id,
+      code: `submit-only-${runId}`,
+      name: 'Integration submit-only role',
+      rolePermissions: { create: { permissionId: submitPermission.id } },
+      userRoles: {
+        create: {
+          userId: managerUser.id,
+          scopeType: 'ORGANIZATION',
+          scopeId: organization.id,
+        },
+      },
+    },
+  });
+
+  async function createAsset(
+    slug,
+    visibility,
+    status = 'PUBLISHED',
+    ownerId = memberUser.id,
+    contentTeamId = team.id,
+  ) {
     const content = await prisma.content.create({
       data: {
         organizationId: organization.id,
@@ -154,7 +288,7 @@ before(async () => {
         slug,
         summary: 'Integration catalog fixture',
         ownerId,
-        teamId: team.id,
+        teamId: contentTeamId,
         createdById: ownerId,
         status,
         visibility,
@@ -201,6 +335,50 @@ before(async () => {
     adminUser.id,
   );
   memberDraftContent = await createAsset(`integration-draft-${runId}`, 'ORGANIZATION', 'DRAFT');
+  submitOnlyDraftContent = await createAsset(
+    `integration-submit-only-${runId}`,
+    'ORGANIZATION',
+    'DRAFT',
+    managerUser.id,
+  );
+  const teamScopeContent = await createAsset(
+    `integration-team-scope-${runId}`,
+    'ORGANIZATION',
+    'IN_REVIEW',
+  );
+  const otherTeamContent = await createAsset(
+    `integration-other-team-scope-${runId}`,
+    'ORGANIZATION',
+    'IN_REVIEW',
+    memberUser.id,
+    otherTeam.id,
+  );
+  const [teamScopeVersion, otherTeamVersion] = await Promise.all([
+    prisma.content.findUniqueOrThrow({
+      where: { id: teamScopeContent.id },
+      select: { draftVersionId: true },
+    }),
+    prisma.content.findUniqueOrThrow({
+      where: { id: otherTeamContent.id },
+      select: { draftVersionId: true },
+    }),
+  ]);
+  [teamScopeReview, otherTeamReview] = await Promise.all([
+    prisma.reviewRequest.create({
+      data: {
+        contentId: teamScopeContent.id,
+        versionId: teamScopeVersion.draftVersionId,
+        submittedById: memberUser.id,
+      },
+    }),
+    prisma.reviewRequest.create({
+      data: {
+        contentId: otherTeamContent.id,
+        versionId: otherTeamVersion.draftVersionId,
+        submittedById: memberUser.id,
+      },
+    }),
+  ]);
   const filterCategory = await prisma.category.create({
     data: {
       organizationId: organization.id,
@@ -321,16 +499,33 @@ after(async () => {
   await prisma.fileAttachment.deleteMany({
     where: { id: { in: [publishedAttachmentFileId, restrictedAttachmentFileId].filter(Boolean) } },
   });
+  await prisma.auditLog.deleteMany({
+    where: {
+      actorId: {
+        in: [adminUser.id, memberUser.id, reviewerUser.id, managerUser.id, teamReviewerUser.id],
+      },
+    },
+  });
   await prisma.content.deleteMany({ where: { id: { in: contentIds } } });
   if (tagIds.length) await prisma.tag.deleteMany({ where: { id: { in: tagIds } } });
   if (categoryIds.length) await prisma.category.deleteMany({ where: { id: { in: categoryIds } } });
+  if (otherTeam) await prisma.team.delete({ where: { id: otherTeam.id } });
   if (team) await prisma.team.delete({ where: { id: team.id } });
   await prisma.notification.deleteMany({
-    where: { receiverId: { in: [adminUser.id, memberUser.id, reviewerUser.id, managerUser.id] } },
+    where: {
+      receiverId: {
+        in: [adminUser.id, memberUser.id, reviewerUser.id, managerUser.id, teamReviewerUser.id],
+      },
+    },
   });
   await prisma.user.deleteMany({
-    where: { email: { in: [adminEmail, memberEmail, reviewerEmail, managerEmail] } },
+    where: {
+      email: {
+        in: [adminEmail, memberEmail, reviewerEmail, managerEmail, teamReviewerEmail],
+      },
+    },
   });
+  if (submitOnlyRole) await prisma.role.delete({ where: { id: submitOnlyRole.id } });
   await prisma.$disconnect();
 });
 
@@ -602,6 +797,245 @@ test(
         headers: { 'x-dev-user-email': adminEmail },
       });
       assert.equal(response.status, 200, `Expected admin access to ${path}`);
+    }
+  },
+);
+
+test(
+  'review processing respects team scopes while preserving organization-scoped access',
+  { skip: !integrationEnabled },
+  async () => {
+    const teamQueue = await fetch(`${baseUrl}/reviews/queue`, {
+      headers: { 'x-dev-user-email': teamReviewerEmail },
+    });
+    assert.equal(teamQueue.status, 200);
+    const teamReviewIds = (await teamQueue.json()).items.map((item) => item.id);
+    assert.equal(teamReviewIds.includes(teamScopeReview.id), true);
+    assert.equal(teamReviewIds.includes(otherTeamReview.id), false);
+
+    const organizationQueue = await fetch(`${baseUrl}/reviews/queue`, {
+      headers: { 'x-dev-user-email': reviewerEmail },
+    });
+    assert.equal(organizationQueue.status, 200);
+    const organizationReviewIds = (await organizationQueue.json()).items.map((item) => item.id);
+    assert.equal(organizationReviewIds.includes(teamScopeReview.id), true);
+    assert.equal(organizationReviewIds.includes(otherTeamReview.id), true);
+
+    const blockedReviewerDirectory = await fetch(`${baseUrl}/reviews/reviewers`, {
+      headers: { 'x-dev-user-email': teamReviewerEmail },
+    });
+    assert.equal(blockedReviewerDirectory.status, 403);
+
+    const adminReviewers = await fetch(`${baseUrl}/reviews/reviewers`, {
+      headers: { 'x-dev-user-email': adminEmail },
+    });
+    assert.equal(adminReviewers.status, 200);
+    assert.equal(
+      (await adminReviewers.json()).items.some((item) => item.id === teamReviewerUser.id),
+      true,
+    );
+
+    const allowedDiff = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/diff`, {
+      headers: { 'x-dev-user-email': teamReviewerEmail },
+    });
+    assert.equal(allowedDiff.status, 200);
+    const blockedDiff = await fetch(`${baseUrl}/reviews/${otherTeamReview.id}/diff`, {
+      headers: { 'x-dev-user-email': teamReviewerEmail },
+    });
+    assert.equal(blockedDiff.status, 403);
+
+    const blockedAssignment = await fetch(`${baseUrl}/reviews/${otherTeamReview.id}/assign`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
+      body: JSON.stringify({ reviewerId: teamReviewerUser.id }),
+    });
+    assert.equal(blockedAssignment.status, 403);
+
+    await prisma.reviewRequest.update({
+      where: { id: otherTeamReview.id },
+      data: { assignedReviewerId: teamReviewerUser.id },
+    });
+    for (const operation of ['comment', 'approve']) {
+      const blockedDecision = await fetch(
+        `${baseUrl}/reviews/${otherTeamReview.id}/${operation}`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
+          body: JSON.stringify({ comment: 'This other-team review must remain inaccessible.' }),
+        },
+      );
+      assert.equal(blockedDecision.status, 403, `Expected team-scope denial for ${operation}`);
+    }
+    await prisma.reviewRequest.update({
+      where: { id: otherTeamReview.id },
+      data: { assignedReviewerId: null },
+    });
+
+    const blockedTeamAssignment = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/assign`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
+      body: JSON.stringify({ reviewerId: teamReviewerUser.id }),
+    });
+    assert.equal(blockedTeamAssignment.status, 403);
+
+    const teamAssignment = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/assign`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ reviewerId: teamReviewerUser.id }),
+    });
+    assert.equal(teamAssignment.status, 200);
+    const teamComment = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/comment`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
+      body: JSON.stringify({ comment: 'Team-scoped review note.' }),
+    });
+    assert.equal(teamComment.status, 201);
+    const teamApproval = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
+      body: JSON.stringify({ comment: 'Team-scoped approval.' }),
+    });
+    assert.equal(teamApproval.status, 201);
+
+    const organizationAssignment = await fetch(
+      `${baseUrl}/reviews/${otherTeamReview.id}/assign`,
+      {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+        body: JSON.stringify({ reviewerId: reviewerUser.id }),
+      },
+    );
+    assert.equal(organizationAssignment.status, 200);
+    const organizationComment = await fetch(
+      `${baseUrl}/reviews/${otherTeamReview.id}/comment`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
+        body: JSON.stringify({ comment: 'Organization-scoped review note.' }),
+      },
+    );
+    assert.equal(organizationComment.status, 201);
+    const organizationApproval = await fetch(
+      `${baseUrl}/reviews/${otherTeamReview.id}/approve`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
+        body: JSON.stringify({ comment: 'Organization-scoped approval.' }),
+      },
+    );
+    assert.equal(organizationApproval.status, 201);
+  },
+);
+
+test(
+  'content submission requires edit-own or edit-all authority in addition to ownership',
+  { skip: !integrationEnabled },
+  async () => {
+    const response = await fetch(`${baseUrl}/reviews/content/${submitOnlyDraftContent.id}/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': managerEmail },
+      body: JSON.stringify({ message: 'Ownership alone must not allow submission.' }),
+    });
+    assert.equal(response.status, 403);
+    assert.equal(
+      await prisma.reviewRequest.count({ where: { contentId: submitOnlyDraftContent.id } }),
+      0,
+    );
+  },
+);
+
+test(
+  'all content types persist approved detail projections and preserve prior version bodies',
+  { skip: !integrationEnabled },
+  async () => {
+    async function request(path, method, email, body) {
+      const response = await fetch(`${baseUrl}${path}`, {
+        method,
+        headers: {
+          'x-dev-user-email': email,
+          ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+        },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+      const text = await response.text();
+      assert.ok(
+        response.ok,
+        `${method} ${path} returned ${response.status}: ${text}`,
+      );
+      return text ? JSON.parse(text) : null;
+    }
+
+    async function approveAndPublish(contentId, message) {
+      const review = await request(
+        `/reviews/content/${contentId}/submit`,
+        'POST',
+        memberEmail,
+        { message },
+      );
+      await request(`/reviews/${review.id}/assign`, 'PATCH', adminEmail, {
+        reviewerId: reviewerUser.id,
+      });
+      await request(`/reviews/${review.id}/approve`, 'POST', reviewerEmail, {
+        comment: 'Approved by the content projection integration test.',
+      });
+      await request(`/content-drafts/${contentId}/publish`, 'POST', adminEmail);
+    }
+
+    for (const fixture of publicationFixtures()) {
+      const created = await request('/content-drafts', 'POST', memberEmail, {
+        contentType: fixture.contentType,
+        title: `${fixture.contentType} projection ${runId}`,
+        summary: 'A temporary full publication-flow fixture.',
+        teamId: team.id,
+        visibility: 'ORGANIZATION',
+        versionLabel: 'v1.0',
+        body: fixture.bodyV1,
+      });
+      contentIds.push(created.id);
+      const versionOneId = created.draftVersion.id;
+
+      await approveAndPublish(created.id, `Review ${fixture.contentType} v1.`);
+      const firstDetail = await request(`/contents/${created.slug}`, 'GET', memberEmail);
+      assert.equal(firstDetail.currentVersion.id, versionOneId);
+      assert.deepEqual(firstDetail.currentVersion.body, fixture.bodyV1);
+      assert.equal(
+        firstDetail[fixture.detailKey][fixture.detailField],
+        fixture.bodyV1[fixture.detailField],
+      );
+
+      const editDraft = await request(
+        `/content-drafts/${created.id}/from-published`,
+        'POST',
+        memberEmail,
+      );
+      assert.equal(editDraft.draftVersion.versionNumber, 2);
+      await request(`/content-drafts/${created.id}`, 'PATCH', memberEmail, {
+        title: `${fixture.contentType} projection v2 ${runId}`,
+        versionLabel: 'v2.0',
+        changeSummary: 'Update the projected detail field.',
+        body: fixture.bodyV2,
+      });
+      await approveAndPublish(created.id, `Review ${fixture.contentType} v2.`);
+
+      const secondDetail = await request(`/contents/${created.slug}`, 'GET', memberEmail);
+      assert.equal(secondDetail.currentVersion.versionNumber, 2);
+      assert.deepEqual(secondDetail.currentVersion.body, fixture.bodyV2);
+      assert.equal(
+        secondDetail[fixture.detailKey][fixture.detailField],
+        fixture.valueV2,
+      );
+
+      const storedVersions = await prisma.contentVersion.findMany({
+        where: { contentId: created.id },
+        orderBy: { versionNumber: 'asc' },
+        select: { id: true, versionNumber: true, versionStatus: true, body: true },
+      });
+      assert.equal(storedVersions.length, 2);
+      assert.equal(storedVersions[0].id, versionOneId);
+      assert.equal(storedVersions[0].versionStatus, 'PUBLISHED');
+      assert.deepEqual(storedVersions[0].body, fixture.bodyV1);
+      assert.equal(storedVersions[1].versionStatus, 'PUBLISHED');
+      assert.deepEqual(storedVersions[1].body, fixture.bodyV2);
     }
   },
 );

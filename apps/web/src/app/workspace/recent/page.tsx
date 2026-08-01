@@ -3,6 +3,7 @@ import { authenticatedApiHeaders } from '@/lib/auth';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentCard as ContentCardData } from '@/lib/content-types';
+import { RefreshRecentOnEntry } from './refresh-on-entry';
 
 export default async function RecentPage() {
   const result = await serverApiFetch<{
@@ -10,6 +11,7 @@ export default async function RecentPage() {
   }>('/api/me/recent-views', { headers: await authenticatedApiHeaders() });
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
+      <RefreshRecentOnEntry />
       <WorkspacePageHero description="仅显示你仍有权限访问的正式内容。每次进入内容详情都会更新这里的浏览记录。" eyebrow="PERSONAL SPACE" metric={{ value: result.items.length, label: '近期内容' }} title="延续刚刚开始的工作。" />
       {result.items.length ? (
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">

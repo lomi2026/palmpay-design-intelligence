@@ -246,7 +246,7 @@ export class EngagementService {
     input: CreateContentRelationDto,
   ) {
     const source = await this.findAccessibleContent(user, contentId);
-    if (source.ownerId !== user.id && !user.permissions.includes('content.edit_all')) {
+    if (!this.canEditContent(user, source.ownerId)) {
       throw new ForbiddenException('Only the content owner can manage its relations.');
     }
     if (contentId === input.targetContentId)
@@ -275,7 +275,7 @@ export class EngagementService {
     });
     if (!relation) throw new NotFoundException('Content relation not found.');
     const source = await this.findAccessibleContent(user, contentId);
-    if (source.ownerId !== user.id && !user.permissions.includes('content.edit_all')) {
+    if (!this.canEditContent(user, source.ownerId)) {
       throw new ForbiddenException('Only the content owner can manage its relations.');
     }
     await this.prisma.contentRelation.delete({ where: { id: relation.id } });
@@ -308,6 +308,13 @@ export class EngagementService {
     });
     if (!content) throw new NotFoundException('Content not found.');
     return content;
+  }
+
+  private canEditContent(user: AuthenticatedUser, ownerId: string) {
+    return (
+      user.permissions.includes('content.edit_all') ||
+      (ownerId === user.id && user.permissions.includes('content.edit_own'))
+    );
   }
 
   private publishedAccessWhere(user: AuthenticatedUser): Prisma.ContentWhereInput {

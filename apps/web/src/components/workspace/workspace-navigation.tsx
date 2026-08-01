@@ -34,6 +34,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { shouldPrefetchWorkspaceRoute } from './workspace-route-policy';
 
 type NavigationCapabilities = {
   canAnalyze: boolean;
@@ -122,6 +123,7 @@ function WorkspaceNavigationLink({
   return (
     <Link
       href={item.href}
+      prefetch={shouldPrefetchWorkspaceRoute(item.href)}
       aria-current={active ? 'page' : undefined}
       onClick={onClick}
       className={cn(

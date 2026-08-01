@@ -1,20 +1,17 @@
 # PalmPay体验设计Hub V1.0
 
-这是 PalmPay体验设计Hub V1.0 产品化重构项目骨架。
+这是 PalmPay体验设计Hub V1.0 的正式前后端产品化仓库。
 
 ## 当前状态
 
-- 项目上下文、PRD、ER 模型、研发计划、设计决策与 AI 协作规则已建立。
-- `AGENTS.md` 用于 Codex 项目规则。
-- `CLAUDE.md` 用于 Claude Code 项目规则。
-- 正式前后端工程尚未由 Codex Phase 1 创建。
-- `legacy/v9-1/` 当前为占位目录：必须放入最终 v9-1 完整代码基线。
+- 正式 Next.js Web、NestJS API、Prisma/PostgreSQL 数据模型和测试环境部署配置均已建立。
+- 当前工作重点是 P0 功能闭环、数据库 E2E 与部署后三角色验收；详见 `docs/05-CURRENT-STATUS.md`。
+- `AGENTS.md` 与 `CLAUDE.md` 分别约束 Codex 和 Claude Code 的协作方式。
+- `legacy/v9-1/` 是本地归档参考；若归档与已部署最终 v9-1 不一致，以已部署基线及匹配历史源码为准。
 
 ## Codex 首次接管
 
-打开整个项目根目录后，让 Codex 阅读 `CODEX-START-HERE.md` 并执行其中的项目接管检查。
-
-本轮先不要修改代码。
+打开整个项目根目录后，先阅读 `AGENTS.md` 与其中要求的项目文档，再按 `docs/05-CURRENT-STATUS.md` 的 Next Task 继续。
 
 ## Important
 

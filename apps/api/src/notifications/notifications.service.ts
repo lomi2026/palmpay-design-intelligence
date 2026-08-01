@@ -7,8 +7,58 @@ export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async list(user: AuthenticatedUser) {
-    const items = await this.prisma.notification.findMany({ where: { receiverId: user.id }, orderBy: { createdAt: 'desc' }, take: 100 });
-    return { items, unreadCount: items.filter((item) => !item.readAt).length };
+    const [items, unreadCount] = await Promise.all([
+      this.prisma.notification.findMany({
+        where: { receiverId: user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      }),
+      this.prisma.notification.count({ where: { receiverId: user.id, readAt: null } }),
+    ]);
+    const reviewIds = items.flatMap((item) =>
+      item.type === 'review_changes_requested' &&
+      item.relatedEntityType === 'review_request' &&
+      item.relatedEntityId
+        ? [item.relatedEntityId]
+        : [],
+    );
+    const reviews = reviewIds.length
+      ? await this.prisma.reviewRequest.findMany({
+          where: {
+            id: { in: reviewIds },
+            content: { organizationId: user.organizationId, deletedAt: null },
+          },
+          select: {
+            id: true,
+            status: true,
+            content: {
+              select: { id: true, slug: true, contentType: true, status: true },
+            },
+          },
+        })
+      : [];
+    const reviewsById = new Map(reviews.map((review) => [review.id, review]));
+
+    return {
+      items: items.map((item) => ({
+        ...item,
+        relatedReview:
+          item.type === 'review_changes_requested' &&
+          item.relatedEntityType === 'review_request' &&
+          item.relatedEntityId
+            ? reviewsById.get(item.relatedEntityId) ?? null
+            : null,
+      })),
+      unreadCount,
+    };
+  }
+
+  async unreadCount(user: AuthenticatedUser) {
+    return {
+      unreadCount: await this.prisma.notification.count({
+        where: { receiverId: user.id, readAt: null },
+      }),
+    };
   }
 
   async markRead(user: AuthenticatedUser, id: string) {

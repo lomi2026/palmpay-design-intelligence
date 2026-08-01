@@ -22,7 +22,7 @@ export class ReviewsController {
   }
 
   @Get('reviewers')
-  @RequirePermissions('review.process')
+  @RequirePermissions('review.assign')
   reviewers(@CurrentUser() user: AuthenticatedUser) {
     return this.reviews.reviewers(user);
   }
@@ -46,7 +46,7 @@ export class ReviewsController {
   }
 
   @Patch(':id/assign')
-  @RequirePermissions('review.process')
+  @RequirePermissions('review.assign')
   assign(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: AssignReviewerDto) {
     return this.reviews.assign(user, id, body);
   }

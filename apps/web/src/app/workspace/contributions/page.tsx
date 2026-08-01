@@ -99,6 +99,12 @@ export default async function ContributionsPage() {
         <div className="mt-4 grid gap-4">
           {contributions.items.map((item) => {
             const action = contributionAction(item);
+            const permittedAction =
+              action?.href.startsWith('/workspace/submit/') &&
+              !user.permissions.includes('content.edit_own') &&
+              !user.permissions.includes('content.edit_all')
+                ? null
+                : action;
             const effectiveStatus = item.draftVersion?.versionStatus ?? item.status;
             const versionNumber = item.draftVersion?.versionNumber ?? item.currentVersion?.versionNumber;
             return (
@@ -117,9 +123,9 @@ export default async function ContributionsPage() {
                   </div>
                   <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
                     <Badge variant="outline" className="border-white/15 text-white/70">{statusLabels[effectiveStatus] ?? effectiveStatus}</Badge>
-                    {action ? (
+                    {permittedAction ? (
                       <Button asChild variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.07] hover:text-white">
-                        <Link href={action.href}><action.icon className="size-4" /> {action.label}</Link>
+                        <Link href={permittedAction.href}><permittedAction.icon className="size-4" /> {permittedAction.label}</Link>
                       </Button>
                     ) : null}
                   </div>

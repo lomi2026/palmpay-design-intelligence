@@ -4,9 +4,11 @@ import type { IncomingMessage } from 'node:http';
 import { extname } from 'node:path';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../database/prisma.service';
+import { Prisma } from '../generated/prisma/client';
 import { AttachmentEntityType, ContentStatus, ContentVisibility, FileAccessLevel, UploadStatus } from '../generated/prisma/enums';
 import type { CreateUploadIntentDto } from './files.dto';
 import { FileStorageService } from './file-storage.service';
+import { AuditService } from '../governance/audit.service';
 
 const allowedMimeTypes = new Set([
   'application/pdf',
@@ -26,6 +28,7 @@ export class FilesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: FileStorageService,
+    private readonly audit: AuditService,
   ) {}
 
   async createUploadIntent(user: AuthenticatedUser, input: CreateUploadIntentDto) {
@@ -115,6 +118,28 @@ export class FilesService {
       throw new ConflictException('This file is not ready to download.');
     }
     const download = await this.storage.createDownloadUrl({ fileId: file.id, storageKey: file.storageKey });
+    await this.prisma.usageEvent.create({
+      data: {
+        organizationId: user.organizationId,
+        userId: user.id,
+        eventType: 'file_download',
+        metadata: {
+          fileId: file.id,
+          originalName: file.originalName,
+          accessLevel: file.accessLevel,
+        },
+      },
+    });
+    if (file.accessLevel === FileAccessLevel.RESTRICTED) {
+      await this.audit.write({
+        organizationId: user.organizationId,
+        actorId: user.id,
+        action: 'file.download',
+        entityType: 'file_attachment',
+        entityId: file.id,
+        afterData: { accessLevel: file.accessLevel, expiresInSeconds: download.expiresInSeconds },
+      });
+    }
     return {
       url: download.url,
       expiresAt: new Date(Date.now() + download.expiresInSeconds * 1000).toISOString(),
@@ -124,11 +149,47 @@ export class FilesService {
   async deleteFile(user: AuthenticatedUser, fileId: string) {
     const file = await this.findManageableFile(user, fileId);
     if (file.deletedAt) return { deleted: true };
-    await this.storage.deleteObject(file.storageKey);
-    await this.prisma.fileAttachment.update({
-      where: { id: file.id },
-      data: { uploadStatus: UploadStatus.DELETED, deletedAt: new Date() },
-    });
+    const deletedAt = new Date();
+    await this.prisma.$transaction(
+      async (tx) => {
+        const [relation, coverContent, caseEvidence] = await Promise.all([
+          tx.attachmentRelation.findFirst({
+            where: { fileId: file.id },
+            select: { id: true },
+          }),
+          tx.content.findFirst({
+            where: { coverFileId: file.id, deletedAt: null },
+            select: { id: true },
+          }),
+          tx.caseEvidence.findFirst({
+            where: { attachmentId: file.id },
+            select: { id: true },
+          }),
+        ]);
+        if (relation || coverContent || caseEvidence) {
+          throw new ConflictException(
+            'Detach this file from every content version, cover or evidence record before deleting it.',
+          );
+        }
+        const deleted = await tx.fileAttachment.updateMany({
+          where: { id: file.id, organizationId: user.organizationId, deletedAt: null },
+          data: { uploadStatus: UploadStatus.DELETED, deletedAt },
+        });
+        if (deleted.count !== 1) {
+          throw new ConflictException('This file changed before it could be deleted.');
+        }
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+    try {
+      await this.storage.deleteObject(file.storageKey);
+    } catch (error: unknown) {
+      await this.prisma.fileAttachment.updateMany({
+        where: { id: file.id, uploadStatus: UploadStatus.DELETED, deletedAt },
+        data: { uploadStatus: file.uploadStatus, deletedAt: null },
+      });
+      throw error;
+    }
     return { deleted: true };
   }
 

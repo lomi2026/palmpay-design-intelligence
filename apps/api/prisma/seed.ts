@@ -21,6 +21,7 @@ const permissions = [
   ['content.archive', 'content', '归档内容'],
   ['review.read', 'review', '查看审核'],
   ['review.process', 'review', '处理审核'],
+  ['review.assign', 'review', '分配审核人'],
   ['analytics.read', 'analytics', '查看数据洞察'],
   ['user.manage', 'user', '管理用户'],
   ['taxonomy.manage', 'taxonomy', '管理分类和标签'],

@@ -22,6 +22,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { optionalServerApiFetch } from '@/lib/api';
 import type { ContentCard as ContentCardData, ContentListResponse } from '@/lib/content-types';
+import {
+  buildDashboardTodos,
+  type DashboardReview,
+  type DashboardSubmission,
+} from './dashboard-todos';
 
 const journeySteps = [
   [Search, '发现', '搜索与推荐'],
@@ -31,13 +36,6 @@ const journeySteps = [
 ] as const;
 
 type PersonalItems = { items: unknown[] };
-type Submission = {
-  id: string;
-  status: string;
-  submittedAt: string;
-  content: { title: string; contentType: string };
-  version: { title: string };
-};
 
 const contentTypeLabels: Record<string, string> = {
   DESIGN_ASSET: '设计资产',
@@ -52,13 +50,6 @@ const verificationLabels: Record<string, string> = {
   PILOT: '试点中',
   VERIFIED: '已验证',
   INVALIDATED: '已失效',
-};
-
-const reviewLabels: Record<string, string> = {
-  PENDING: '审核中',
-  APPROVED: '已通过',
-  CHANGES_REQUESTED: '待修改',
-  CANCELLED: '已取消',
 };
 
 function emptyContentList(pageSize: number): ContentListResponse {
@@ -169,15 +160,37 @@ async function RecentUpdates() {
   );
 }
 
-async function TodoCard({ canSubmit }: { canSubmit: boolean }) {
+async function TodoCard({
+  userId,
+  canSubmit,
+  canReview,
+  canAssign,
+}: {
+  userId: string;
+  canSubmit: boolean;
+  canReview: boolean;
+  canAssign: boolean;
+}) {
   const headers = await authenticatedApiHeaders();
-  const submissions = canSubmit
-    ? await optionalServerApiFetch<{ items: Submission[] }>('/api/reviews/mine', { headers }, { items: [] })
-    : { items: [] };
-  const todos = submissions.items.filter((item) => item.status !== 'APPROVED' && item.status !== 'CANCELLED').slice(0, 3);
+  const [submissions, reviewQueue] = await Promise.all([
+    canSubmit
+      ? optionalServerApiFetch<{ items: DashboardSubmission[] }>('/api/reviews/mine', { headers }, { items: [] })
+      : Promise.resolve({ items: [] }),
+    canReview || canAssign
+      ? optionalServerApiFetch<{ items: DashboardReview[] }>('/api/reviews/queue', { headers }, { items: [] })
+      : Promise.resolve({ items: [] }),
+  ]);
+  const todos = buildDashboardTodos({
+    userId,
+    submissions: submissions.items,
+    reviewQueue: reviewQueue.items,
+    canSubmit,
+    canReview,
+    canAssign,
+  });
 
   return (
-    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><h3 className="text-[18px] font-bold">我的待办</h3><p className="mt-1 text-[12px] text-white/45">来自正式提交与审核状态</p><div className="mt-5 space-y-3">{todos.length ? todos.map((item) => <Link href="/workspace/submissions" className="block rounded-xl border border-white/[.1] bg-white/[.025] p-3.5 transition hover:bg-white/[.05]" key={item.id}><strong className="block text-[13px]">{item.version.title || item.content.title}</strong><span className="mt-2 block text-[11px] text-white/45">{contentTypeLabels[item.content.contentType] ?? item.content.contentType} · {new Intl.DateTimeFormat('zh-CN').format(new Date(item.submittedAt))}</span><Badge variant="outline" className="mt-3 border-white/[.12] text-[10px] text-white/75">{reviewLabels[item.status] ?? item.status}</Badge></Link>) : <p className="rounded-xl border border-dashed border-white/[.12] p-4 text-[12px] leading-5 text-white/45">当前没有需要处理的提交。</p>}</div>{canSubmit ? <Button asChild variant="outline" className="mt-4 w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/submissions"><ClipboardCheck className="size-4" /> 查看我的提交</Link></Button> : null}</CardContent></Card>
+    <Card className="rounded-2xl border-white/[.12] bg-[#111112] py-0 shadow-none"><CardContent className="p-5"><h3 className="text-[18px] font-bold">我的待办</h3><p className="mt-1 text-[12px] text-white/45">只显示需要当前角色采取行动的事项</p><div className="mt-5 space-y-3">{todos.length ? todos.map((item) => <Link href={item.href} className="block rounded-xl border border-white/[.1] bg-white/[.025] p-3.5 transition hover:bg-white/[.05]" key={item.id}><strong className="block text-[13px]">{item.title}</strong><span className="mt-2 block text-[11px] text-white/45">{contentTypeLabels[item.contentType] ?? item.contentType} · {new Intl.DateTimeFormat('zh-CN').format(new Date(item.submittedAt))}</span><Badge variant="outline" className="mt-3 border-white/[.12] text-[10px] text-white/75">{item.label}</Badge></Link>) : <p className="rounded-xl border border-dashed border-white/[.12] p-4 text-[12px] leading-5 text-white/45">当前没有需要你处理的事项。</p>}</div><div className="mt-4 grid gap-2">{canSubmit ? <Button asChild variant="outline" className="w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/submissions"><ClipboardCheck className="size-4" /> 查看我的提交</Link></Button> : null}{canReview || canAssign ? <Button asChild variant="outline" className="w-full border-white/[.12] bg-transparent text-white hover:bg-white/[.07] hover:text-white"><Link href="/workspace/reviews"><ClipboardCheck className="size-4" /> 进入审核中心</Link></Button> : null}</div></CardContent></Card>
   );
 }
 
@@ -185,6 +198,8 @@ export default async function WorkspacePage() {
   const user = await loadCurrentUser();
   const canCreate = user?.permissions.includes('content.create') ?? false;
   const canSubmit = user?.permissions.includes('content.submit') ?? false;
+  const canReview = user?.permissions.includes('review.process') ?? false;
+  const canAssign = user?.permissions.includes('review.assign') ?? false;
   return (
     <main id="root" className="v9-source-home mx-auto min-h-[calc(100vh-4rem)] w-full max-w-[1440px] bg-[#090909] px-4 pb-16 pt-6 text-[#f4f4f5] sm:px-6 lg:px-8">
       <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -234,7 +249,7 @@ export default async function WorkspacePage() {
           <RecentUpdates />
         </Suspense>
         <Suspense fallback={<TodoFallback />}>
-          <TodoCard canSubmit={canSubmit} />
+          {user ? <TodoCard userId={user.id} canSubmit={canSubmit} canReview={canReview} canAssign={canAssign} /> : <TodoFallback />}
         </Suspense>
       </section>
     </main>
