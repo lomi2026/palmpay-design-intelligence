@@ -7,7 +7,6 @@ services:
     branch: codex/v1-project-handoff
     dockerContext: .
     dockerfilePath: ./apps/api/Dockerfile
-    dockerCommand: pnpm run start:deploy:bootstrap
     healthCheckPath: /api/health
     initialDeployHook: >-
       cd /app && pnpm --filter @palmpay/api prisma:seed &&
