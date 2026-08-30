@@ -6,6 +6,7 @@
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "start:deploy": "prisma migrate deploy && node dist/main.js",
+    "start:deploy:bootstrap": "prisma migrate deploy && pnpm run prisma:seed && pnpm run prisma:bootstrap:test && pnpm run prisma:import:v9-1-projects && pnpm run prisma:import:v9-1-ai-catalog && pnpm run prisma:import:v9-1-design-assets && node dist/main.js",
     "start:dev": "node scripts/dev.mjs",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "typecheck": "prisma generate && tsc --noEmit",
