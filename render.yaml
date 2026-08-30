@@ -52,9 +52,7 @@ services:
 
 databases:
   - name: palmpay-design-hub-test-db
-    plan: 0.1c-256mb
-    diskSizeGB: 1
-    storageAutoscalingEnabled: false
+    plan: free
     region: singapore
     databaseName: palmpay_design_hub_test
     user: palmpay
