@@ -22,9 +22,8 @@ export class TestAuthAdapter implements AuthenticationAdapter {
     return this.config.get<string>('AUTH_MODE') === 'test';
   }
 
-  issueSession(input: { email: string; accessCode: string }) {
+  issueSession(input: { email: string }) {
     if (!this.isEnabled()) throw new ServiceUnavailableException('Test authentication is not enabled.');
-    this.assertAccessCode(input.accessCode);
 
     const issuedAt = Date.now();
     const expiresAt = issuedAt + this.sessionTtlSeconds() * 1000;
@@ -71,19 +70,6 @@ export class TestAuthAdapter implements AuthenticationAdapter {
     }
 
     return { email: payload.email.trim().toLowerCase() };
-  }
-
-  private assertAccessCode(receivedCode: string) {
-    const configuredCode = this.config.get<string>('TEST_AUTH_ACCESS_CODE');
-    if (!configuredCode || configuredCode.length < 24) {
-      throw new ServiceUnavailableException('TEST_AUTH_ACCESS_CODE must contain at least 24 characters.');
-    }
-
-    const received = Buffer.from(receivedCode);
-    const expected = Buffer.from(configuredCode);
-    if (received.length !== expected.length || !timingSafeEqual(received, expected)) {
-      throw new UnauthorizedException('The test access code is invalid.');
-    }
   }
 
   private signaturesMatch(encodedPayload: string, receivedSignature: string) {

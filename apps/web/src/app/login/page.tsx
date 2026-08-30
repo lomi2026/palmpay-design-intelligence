@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { developmentLogin, testLogin } from './actions';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { LoginServiceStatus, LoginSubmitButton } from './login-status';
 
 const errorMessages: Record<string, string> = {
   'invalid-email': '请输入有效的企业邮箱。',
   'user-unavailable': '用户不存在、未启用或已被禁用。',
-  'invalid-credentials': '邮箱、测试访问码无效，或该用户尚未启用。',
+  'invalid-credentials': '邮箱无效，或该测试账号尚未启用。',
   'service-unavailable': '认证服务正在启动或暂时不可用，请稍候重试。',
   'session-expired': '登录已失效，或该用户已不可用，请重新登录。',
 };
@@ -27,9 +27,11 @@ export default async function LoginPage({
         <h1 className="text-[34px] font-semibold tracking-[-.055em] text-white">登录体验设计中心</h1>
         <p className="mt-2 text-sm leading-6 text-white/55">
           {isTestMode
-            ? '测试环境仅允许已启用成员使用测试访问码登录。正式环境接入企业 SSO 后将替换此表单。'
+            ? '测试环境仅允许已启用成员使用企业邮箱登录。正式环境接入企业 SSO 后将替换此表单。'
             : '当前为隔离的开发认证入口。正式环境接入企业 SSO 后将替换此表单。'}
         </p>
+
+        {isTestMode ? <LoginServiceStatus /> : null}
 
         <form action={isTestMode ? testLogin : developmentLogin} className="mt-8 space-y-4">
           <label className="block text-sm text-white/75" htmlFor="email">
@@ -44,30 +46,10 @@ export default async function LoginPage({
             required
             type="email"
           />
-          {isTestMode ? (
-            <>
-              <label className="block text-sm text-white/75" htmlFor="accessCode">
-                测试访问码
-              </label>
-              <Input
-                autoComplete="current-password"
-                className="h-11 w-full border-[var(--v9-line-strong)] bg-[var(--v9-field)] text-[var(--v9-text)] placeholder:text-[var(--v9-subtle)]"
-                id="accessCode"
-                name="accessCode"
-                required
-                type="password"
-              />
-            </>
-          ) : null}
           {error ? (
             <p className="text-sm text-red-400">{errorMessages[error] ?? '登录失败，请重试。'}</p>
           ) : null}
-          <Button
-            className="h-11 w-full bg-white text-black hover:bg-white/85"
-            type="submit"
-          >
-            继续
-          </Button>
+          <LoginSubmitButton />
         </form>
 
         <Link className="mt-7 inline-flex text-sm text-white/45 transition hover:text-white/75" href="/">

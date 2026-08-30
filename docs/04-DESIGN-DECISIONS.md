@@ -290,3 +290,10 @@ This previous delivery order is superseded by Decision 25. It remains as histori
 - Main Workspace menu pages retain a short uppercase English eyebrow as visual decoration above the primary Chinese heading. This exception does not apply to operational fields, buttons, filters, permissions, statuses or explanations, which remain Chinese-first.
 - Approved brand names, project codes, version notation and established product terms such as PalmPay Design, AI Skill, Prompt, Beta 1.0 and v9-1 remain unchanged unless a later explicit decision replaces them.
 - Machine identifiers and third-party technology names may remain in their canonical form when translation would reduce traceability or accuracy. Permission codes remain internal identifiers, while the management interface displays their Chinese permission names.
+
+## 29. Test-environment passwordless login (2026-08-30)
+
+- By explicit user decision, the external acceptance environment no longer asks users for the shared test access code.
+- Test users sign in with the email address of a pre-provisioned active account. The backend must still resolve that account before issuing a short-lived signed session and must retain all RBAC and disabled-user checks.
+- The login page should start warming the sleeping test API when opened, explain that the first connection may take about one minute, and expose a clear pending state while login is running.
+- This decision applies only to the isolated acceptance environment. Formal production authentication still requires enterprise OIDC/SSO and must not reuse the passwordless test adapter.

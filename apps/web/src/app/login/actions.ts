@@ -9,10 +9,6 @@ import { DEVELOPMENT_USER_COOKIE, TEST_SESSION_COOKIE, type CurrentUser } from '
 const LOGIN_REQUEST_TIMEOUT_MS = 70_000;
 
 const loginSchema = z.object({ email: z.email().max(320) });
-const testLoginSchema = z.object({
-  email: z.email().max(320),
-  accessCode: z.string().min(1).max(256),
-});
 
 export async function developmentLogin(formData: FormData) {
   const result = loginSchema.safeParse({ email: formData.get('email') });
@@ -40,10 +36,7 @@ export async function developmentLogin(formData: FormData) {
 }
 
 export async function testLogin(formData: FormData) {
-  const result = testLoginSchema.safeParse({
-    email: formData.get('email'),
-    accessCode: formData.get('accessCode'),
-  });
+  const result = loginSchema.safeParse({ email: formData.get('email') });
   if (!result.success) redirect('/login?error=invalid-credentials');
 
   try {
@@ -56,7 +49,6 @@ export async function testLogin(formData: FormData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: result.data.email.trim().toLowerCase(),
-        accessCode: result.data.accessCode,
       }),
     });
     const expiresAt = new Date(session.expiresAt);

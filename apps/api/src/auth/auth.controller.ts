@@ -1,6 +1,6 @@
 import { Body, Controller, Get, NotFoundException, Post, UseGuards } from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, MaxLength } from 'class-validator';
 import { AuthGuard } from './auth.guard';
 import { CurrentUser } from './current-user.decorator';
 import { AuthService } from './auth.service';
@@ -11,11 +11,6 @@ class CreateTestSessionDto {
   @IsEmail()
   @MaxLength(320)
   email!: string;
-
-  @IsString()
-  @MinLength(1)
-  @MaxLength(256)
-  accessCode!: string;
 }
 
 @ApiTags('authentication')
@@ -32,7 +27,7 @@ export class AuthController {
     if (!this.testAuth.isEnabled()) throw new NotFoundException();
     const email = body.email.trim().toLowerCase();
     await this.auth.resolveUser({ email });
-    return this.testAuth.issueSession({ email, accessCode: body.accessCode });
+    return this.testAuth.issueSession({ email });
   }
 
   @Get('me')

@@ -16,7 +16,7 @@ Do not use `AUTH_MODE=development` on any Internet-facing API. The development a
 
 1. In Render, choose **New +** then **Blueprint** and connect `lomi2026/palmpay-design-intelligence`, branch `codex/v1-project-handoff`.
 2. Render reads the committed root `render.yaml`, creates the API and isolated PostgreSQL database, links `DATABASE_URL`, applies Prisma migrations at API start, then runs the one-time seed/bootstrap/catalog import hook.
-3. During Blueprint creation, Render asks for the values marked `sync: false`: test access code, Vercel origin placeholder, and the existing private R2 endpoint and credentials. Do not enter secrets into GitHub.
+3. During Blueprint creation, Render asks for the values marked `sync: false`: Vercel origin placeholder and the existing private R2 endpoint and credentials. Do not enter secrets into GitHub.
 4. Choose the free instance options. This is suitable only for acceptance: the API sleeps after idle time and the free Render PostgreSQL database expires after 30 days.
 5. After deployment is healthy, generate the public Render API URL and record it as `API_TEST_ORIGIN`.
 
@@ -25,7 +25,6 @@ The container startup path applies pending Prisma migrations and starts the API 
 The Blueprint supplies all non-secret variables and generates `TEST_AUTH_SESSION_SECRET` automatically. Supply only these values in Render's secret-value prompts:
 
 ```dotenv
-TEST_AUTH_ACCESS_CODE="<at least 24 random characters; share only with approved testers>"
 WEB_ORIGIN="https://placeholder.invalid"
 R2_ENDPOINT="https://<Cloudflare-account-id>.r2.cloudflarestorage.com"
 R2_ACCESS_KEY_ID="<Cloudflare R2 access key>"
@@ -94,10 +93,10 @@ After Vercel creates the test URL:
 - `lomi2026@126.com` is the manager/administrator (`member`, `manager`, `admin`).
 - `lomi2025@126.com` is the contributor (`member`).
 - `lomi2024@126.com` is the reviewer (`reviewer`).
-- All three are active members of the `palmpay-experience-design` team and sign in with the shared test access code after the Vercel deployment is live.
-- Share the test access code only through an approved internal channel. It is not an account password and must be rotated after the acceptance period.
+- All three are active members of the `palmpay-experience-design` team and sign in with their email address after the Vercel deployment is live.
+- Passwordless email login is limited to this isolated acceptance environment. The API still resolves a pre-provisioned active user before issuing a short-lived signed session, and production must use enterprise OIDC/SSO.
 - Verify member upload/submission, reviewer assignment/decision, administrator publication, signed attachment download and unauthorized-access rejection.
 
 ## 5. Production boundary
 
-Never promote this database, shared test code, R2 Bucket or credentials directly to production. Production uses its own PostgreSQL database, production R2 Bucket and enterprise OIDC/SSO integration. The free Render PostgreSQL database expires after 30 days; export or discard this acceptance data before the expiry date.
+Never promote this database, passwordless test adapter, R2 Bucket or credentials directly to production. Production uses its own PostgreSQL database, production R2 Bucket and enterprise OIDC/SSO integration. The free Render PostgreSQL database expires after 30 days; export or discard this acceptance data before the expiry date.
