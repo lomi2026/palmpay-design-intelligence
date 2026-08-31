@@ -75,9 +75,9 @@ export default async function OverviewPage() {
             {evidenceMetrics.map(([Icon, label, value, detail]) => <article className="rounded-[16px] border border-white/[.1] bg-white/[.025] p-4" key={label}><Icon className="size-4 text-white/70" /><strong className="mt-6 block text-[30px] font-semibold leading-none tracking-[-.05em] text-white">{value}</strong><p className="mt-2 text-[13px] font-medium text-white">{label}</p><p className="mt-1 text-[11px] leading-5 text-white/45">{detail}</p></article>)}
           </div>
         </div>
-        <aside className="flex flex-col justify-between rounded-[20px] border border-white/[.1] bg-white p-6 text-black sm:p-7">
-          <div><BookOpenCheck className="size-5" /><h2 className="mt-8 text-[30px] font-semibold leading-[1.08] tracking-[-.05em]">{overview.verifiedCases} 个案例已经有验证证据</h2><p className="mt-4 text-[13px] leading-6 text-black/60">有效的案例需要说明 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p></div>
-          <div className="mt-8 border-t border-black/15 pt-5"><div className="flex items-center justify-between text-[12px]"><span className="text-black/55">内容贡献者</span><strong>{overview.contributors}</strong></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full bg-black" style={{ width: `${Math.min(100, overview.contributors ? (overview.verifiedCases / overview.contributors) * 100 : 0)}%` }} /></div></div>
+        <aside className="flex flex-col justify-between rounded-[20px] border border-[var(--v9-line-strong)] bg-[var(--v9-panel-2)] p-6 text-[var(--v9-text)] sm:p-7">
+          <div><BookOpenCheck className="size-5 text-[var(--v9-muted)]" /><h2 className="mt-8 text-[30px] font-semibold leading-[1.08] tracking-[-.05em]">{overview.verifiedCases} 个案例已经有验证证据</h2><p className="mt-4 text-[13px] leading-6 text-[var(--v9-copy)]">有效的案例需要说明 AI 如何介入、设计师在哪里判断，以及结果如何被验证。</p></div>
+          <div className="mt-8 border-t border-[var(--v9-line)] pt-5"><div className="flex items-center justify-between text-[12px]"><span className="text-[var(--v9-copy)]">内容贡献者</span><strong>{overview.contributors}</strong></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--v9-soft-hover)]"><div className="h-full rounded-full bg-[var(--v9-muted)]" style={{ width: `${Math.min(100, overview.contributors ? (overview.verifiedCases / overview.contributors) * 100 : 0)}%` }} /></div></div>
         </aside>
       </section>
 
