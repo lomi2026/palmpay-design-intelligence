@@ -21,23 +21,28 @@ function refreshAdmin(refreshShell = false) {
   refresh();
 }
 
-async function saveEdit(path: string, body: Record<string, unknown>): Promise<AdminSaveResult> {
+async function saveEdit(
+  path: string,
+  body: Record<string, unknown> | undefined,
+  method: 'PATCH' | 'POST' | 'DELETE' = 'PATCH',
+  operation = '保存',
+): Promise<AdminSaveResult> {
   try {
     await api(path, {
-      method: 'PATCH',
+      method,
       signal: AbortSignal.timeout(15_000),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     // Return the write acknowledgement immediately. AdminEditForm refreshes the
     // view separately, outside the save action's pending lifecycle.
-    return { status: 'success', message: '保存成功' };
+    return { status: 'success', message: `${operation}成功` };
   } catch (error) {
     return {
       status: 'error',
       message: error instanceof ApiError
-        ? `保存失败：${error.message}`
-        : '保存结果暂未确认，可能是网络较慢。请刷新核对状态后再重试。',
+        ? `${operation}失败：${error.message}`
+        : `${operation}结果暂未确认，可能是网络较慢。请刷新核对状态后再重试。`,
     };
   }
 }
@@ -96,25 +101,18 @@ export async function updateTeamAction(formData: FormData) {
 export async function assignRoleAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
   const userId = String(formData.get('userId'));
-  await api(`/api/organizations/${organizationId}/users/${userId}/roles`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      roleId: String(formData.get('roleId')),
-      scopeType: 'ORGANIZATION',
-      scopeId: organizationId,
-    }),
-  });
-  refreshAdmin(true);
+  const roleId = String(formData.get('roleId') ?? '');
+  if (!roleId) return { status: 'error' as const, message: '请先选择要授予的角色' };
+  return saveEdit(`/api/organizations/${organizationId}/users/${userId}/roles`, {
+    roleId,
+    scopeType: 'ORGANIZATION',
+    scopeId: organizationId,
+  }, 'POST', '角色授予');
 }
 
 export async function removeUserRoleAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
   const userId = String(formData.get('userId'));
   const userRoleId = String(formData.get('userRoleId'));
-  if (!organizationId || !userId || !userRoleId) return;
-  await api(`/api/organizations/${organizationId}/users/${userId}/roles/${userRoleId}`, {
-    method: 'DELETE',
-  });
-  refreshAdmin(true);
+  return saveEdit(`/api/organizations/${organizationId}/users/${userId}/roles/${userRoleId}`, undefined, 'DELETE', '角色移除');
 }

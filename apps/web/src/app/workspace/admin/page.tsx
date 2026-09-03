@@ -405,7 +405,7 @@ export default async function AdminPage({
                   <div className="py-4" key={member.id}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div><p className="text-sm">{member.name}</p><p className="text-xs text-white/40">{member.email}</p></div>
-                      <form action={assignRoleAction} className="flex gap-2">
+                      <AdminEditForm action={assignRoleAction} resetOnSuccess className="flex gap-2">
                         <input type="hidden" name="organizationId" value={user.organizationId} />
                         <input type="hidden" name="userId" value={member.id} />
                         <NativeSelect
@@ -419,16 +419,16 @@ export default async function AdminPage({
                           {assignableRoles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}
                         </NativeSelect>
                         <AdminSubmitButton size="sm" variant="outline" disabled={!assignableRoles.length} pendingLabel="授予中…" className="border-white/15 bg-transparent text-white">授予</AdminSubmitButton>
-                      </form>
+                      </AdminEditForm>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {member.userRoles.length ? member.userRoles.map((entry) => (
-                        <form action={removeUserRoleAction} key={entry.id}>
+                        <AdminEditForm action={removeUserRoleAction} key={entry.id}>
                           <input type="hidden" name="organizationId" value={user.organizationId} />
                           <input type="hidden" name="userId" value={member.id} />
                           <input type="hidden" name="userRoleId" value={entry.id} />
-                          <Button type="submit" size="sm" variant="outline" className="h-7 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white">{entry.role.name} ×</Button>
-                        </form>
+                          <AdminSubmitButton pendingLabel="移除中…" size="sm" variant="outline" className="h-7 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white">{entry.role.name} ×</AdminSubmitButton>
+                        </AdminEditForm>
                       )) : <span className="text-xs text-white/45">无角色</span>}
                     </div>
                   </div>

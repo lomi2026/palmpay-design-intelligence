@@ -16,8 +16,6 @@ test('administration mutations refresh the current management view without a sta
   const expectedRefresh = {
     createCategoryAction: 'refreshAdmin()',
     createTagAction: 'refreshAdmin()',
-    assignRoleAction: 'refreshAdmin(true)',
-    removeUserRoleAction: 'refreshAdmin(true)',
   };
 
   for (const [actionName, refreshCall] of Object.entries(expectedRefresh)) {
@@ -33,13 +31,13 @@ test('edit saves return acknowledgements without waiting for page reads and have
   const actions = read('../src/app/workspace/admin/actions.ts');
   const form = read('../src/app/workspace/admin/admin-edit-form.tsx');
   const feedback = read('../src/app/workspace/admin/admin-feedback.tsx');
-  for (const name of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction']) {
+  for (const name of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction', 'assignRoleAction', 'removeUserRoleAction']) {
     const action = actions.match(new RegExp(`export async function ${name}\\b[\\s\\S]*?(?=export async function|$)`))?.[0];
     assert.match(action, /return saveEdit\(/);
     assert.doesNotMatch(action, /refreshAdmin\(/);
   }
   assert.match(actions, /AbortSignal\.timeout\(15_000\)/);
-  assert.match(actions, /保存结果暂未确认/);
+  assert.match(actions, /结果暂未确认/);
   assert.match(form, /useActionState/);
   assert.match(form, /showAdminFeedback\(result\)/);
   assert.match(form, /startTransition\(\(\) => router\.refresh\(\)\)/);
@@ -67,10 +65,12 @@ test('editing forms block automatic reset before Radix can restore mount-time va
   for (const action of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction']) {
     assert.match(page, new RegExp(`<AdminEditForm action=\\{${action}\\}`));
   }
-  // Creation and role grants intentionally clear their fields after success.
+  // Creation clears normally; role grants clear only after confirmed success.
   assert.match(page, /<form action=\{createCategoryAction\}/);
   assert.match(page, /<form action=\{createTagAction\}/);
-  assert.match(page, /<form action=\{assignRoleAction\}/);
+  assert.match(page, /<AdminEditForm action=\{assignRoleAction\} resetOnSuccess/);
+  assert.match(form, /if \(resetOnSuccess\)/);
+  assert.match(form, /form\.current\?\.reset\(\)/);
 });
 
 test('tags are disabled until an administrator explicitly enables them', () => {
