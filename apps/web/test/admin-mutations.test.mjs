@@ -45,6 +45,21 @@ test('management selects submit the visible value and accept refreshed server de
   assert.match(submitButton, /disabled=\{pending \|\| disabled\}/);
 });
 
+test('editing forms block automatic reset before Radix can restore mount-time values', () => {
+  const form = read('../src/app/workspace/admin/admin-edit-form.tsx');
+  const page = read('../src/app/workspace/admin/page.tsx');
+  assert.match(form, /onResetCapture/);
+  assert.match(form, /event\.preventDefault\(\)/);
+  assert.match(form, /event\.stopPropagation\(\)/);
+  for (const action of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction']) {
+    assert.match(page, new RegExp(`<AdminEditForm action=\\{${action}\\}`));
+  }
+  // Creation and role grants intentionally clear their fields after success.
+  assert.match(page, /<form action=\{createCategoryAction\}/);
+  assert.match(page, /<form action=\{createTagAction\}/);
+  assert.match(page, /<form action=\{assignRoleAction\}/);
+});
+
 test('tags are disabled until an administrator explicitly enables them', () => {
   const schema = read('../../api/prisma/schema.prisma');
   const migration = read(

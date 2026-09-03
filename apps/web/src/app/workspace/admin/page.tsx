@@ -10,6 +10,7 @@ import { contentTypeLabel } from '@/lib/content-types';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import { WorkspaceStatusBadge } from '@/components/workspace/workspace-status-badge';
 import { AdminSubmitButton } from './admin-submit-button';
+import { AdminEditForm } from './admin-edit-form';
 import {
   assignRoleAction,
   createCategoryAction,
@@ -266,7 +267,7 @@ export default async function AdminPage({
                     {item.name}
                     <em className="ml-2 not-italic text-xs text-white/40">{item.code}</em>
                   </span>
-                  <form action={updateCategoryStatusAction} className="flex items-center gap-2">
+                  <AdminEditForm action={updateCategoryStatusAction} className="flex items-center gap-2">
                     <input type="hidden" name="categoryId" value={item.id} />
                     <NativeSelect
                       name="status"
@@ -279,7 +280,7 @@ export default async function AdminPage({
                     <AdminSubmitButton size="sm" variant="ghost" className="h-7 px-2 text-xs">
                       保存
                     </AdminSubmitButton>
-                  </form>
+                  </AdminEditForm>
                 </li>
               ))}
             </ul>
@@ -302,7 +303,7 @@ export default async function AdminPage({
                   key={item.id}
                 >
                   <span>{item.name}</span>
-                  <form action={updateTagStatusAction} className="flex items-center gap-2">
+                  <AdminEditForm action={updateTagStatusAction} className="flex items-center gap-2">
                     <input type="hidden" name="tagId" value={item.id} />
                     <span className="text-xs text-white/50">使用 {item.usageCount}</span>
                     <NativeSelect
@@ -317,7 +318,7 @@ export default async function AdminPage({
                     <AdminSubmitButton size="sm" variant="ghost" className="h-7 px-2 text-xs">
                       保存
                     </AdminSubmitButton>
-                  </form>
+                  </AdminEditForm>
                 </li>
               ))}
             </ul>
@@ -332,12 +333,12 @@ export default async function AdminPage({
           </div>
           <div className="mt-4 divide-y divide-white/10">
             {teams.map((team) => (
-              <form action={updateTeamAction} className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_180px_160px_auto] lg:items-end" key={team.id}>
+              <AdminEditForm action={updateTeamAction} className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_180px_160px_auto] lg:items-end" key={team.id}>
                 <div><label className="text-xs text-white/45" htmlFor={`team-name-${team.id}`}>团队名称</label><Input id={`team-name-${team.id}`} name="name" defaultValue={team.name} required className="mt-1 border-white/15 bg-white/[.04] text-white" /><p className="mt-1 text-xs text-white/35">{team.code} · {team._count.members} 名成员</p></div>
                 <div><label className="text-xs text-white/45" htmlFor={`team-owner-${team.id}`}>负责人</label><NativeSelect id={`team-owner-${team.id}`} name="ownerId" defaultValue={team.owner?.id ?? ''} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-1 w-full">{team.owner ? null : <option value="">暂未指定</option>}{users.items.filter((member) => member.status === 'ACTIVE').map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}</NativeSelect></div>
                 <div><label className="text-xs text-white/45" htmlFor={`team-status-${team.id}`}>状态</label><NativeSelect id={`team-status-${team.id}`} name="status" defaultValue={team.status} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-1 w-full"><option value="ACTIVE">启用</option><option value="DISABLED">停用</option></NativeSelect></div>
                 <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><AdminSubmitButton size="sm">保存</AdminSubmitButton>
-              </form>
+              </AdminEditForm>
             ))}
           </div>
         </section>
@@ -356,7 +357,7 @@ export default async function AdminPage({
                   <p className="text-xs text-white/45">{member.email}</p>
                   <p className="mt-2 text-xs text-white/40">{member.primaryTeam?.name ?? '尚未加入主团队'} · {member.userRoles.map((entry) => entry.role.name).join('、') || '无角色'}</p>
                 </div>
-                <form action={updateUserStatusAction} className="grid gap-2 sm:grid-cols-[110px_minmax(0,1fr)_auto]">
+                <AdminEditForm action={updateUserStatusAction} className="grid gap-2 sm:grid-cols-[110px_minmax(0,1fr)_auto]">
                   <input type="hidden" name="organizationId" value={user.organizationId} />
                   <input type="hidden" name="userId" value={member.id} />
                   <NativeSelect
@@ -382,7 +383,7 @@ export default async function AdminPage({
                   <AdminSubmitButton size="sm" pendingLabel="更新中…">
                     更新
                   </AdminSubmitButton>
-                </form>
+                </AdminEditForm>
               </div>
             ))}
           </div>
