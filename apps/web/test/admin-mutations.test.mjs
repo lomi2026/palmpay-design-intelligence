@@ -16,10 +16,6 @@ test('administration mutations refresh the current management view without a sta
   const expectedRefresh = {
     createCategoryAction: 'refreshAdmin()',
     createTagAction: 'refreshAdmin()',
-    updateCategoryStatusAction: 'refreshAdmin()',
-    updateTagStatusAction: 'refreshAdmin()',
-    updateTeamAction: 'refreshAdmin(true)',
-    updateUserStatusAction: 'refreshAdmin(true)',
     assignRoleAction: 'refreshAdmin(true)',
     removeUserRoleAction: 'refreshAdmin(true)',
   };
@@ -31,6 +27,23 @@ test('administration mutations refresh the current management view without a sta
     assert.ok(action, `${actionName} should exist`);
     assert.match(action, new RegExp(refreshCall.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
+});
+
+test('edit saves return acknowledgements without waiting for page reads and have bounded API waits', () => {
+  const actions = read('../src/app/workspace/admin/actions.ts');
+  const form = read('../src/app/workspace/admin/admin-edit-form.tsx');
+  const feedback = read('../src/app/workspace/admin/admin-feedback.tsx');
+  for (const name of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction']) {
+    const action = actions.match(new RegExp(`export async function ${name}\\b[\\s\\S]*?(?=export async function|$)`))?.[0];
+    assert.match(action, /return saveEdit\(/);
+    assert.doesNotMatch(action, /refreshAdmin\(/);
+  }
+  assert.match(actions, /AbortSignal\.timeout\(15_000\)/);
+  assert.match(actions, /保存结果暂未确认/);
+  assert.match(form, /useActionState/);
+  assert.match(form, /showAdminFeedback\(result\)/);
+  assert.match(form, /startTransition\(\(\) => router\.refresh\(\)\)/);
+  assert.match(feedback, /role=\{success \? 'status' : 'alert'\}/);
 });
 
 test('management selects submit the visible value and accept refreshed server defaults', () => {

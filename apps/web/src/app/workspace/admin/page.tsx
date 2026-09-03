@@ -11,6 +11,7 @@ import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import { WorkspaceStatusBadge } from '@/components/workspace/workspace-status-badge';
 import { AdminSubmitButton } from './admin-submit-button';
 import { AdminEditForm } from './admin-edit-form';
+import { AdminFeedback } from './admin-feedback';
 import {
   assignRoleAction,
   createCategoryAction,
@@ -173,6 +174,7 @@ export default async function AdminPage({
   const controlClass = 'text-[var(--v9-text)]';
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
+      <AdminFeedback />
       <WorkspacePageHero description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" eyebrow="PLATFORM ADMINISTRATION" metric={heroMetric} title="用可追溯的规则，维护团队能力库。" />
       {/* All seven management views are intentionally full-prefetched after this
           page is visible. They are a compact, finite set, so tab changes use

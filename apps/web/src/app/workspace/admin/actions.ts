@@ -2,7 +2,8 @@
 
 import { refresh, revalidatePath } from 'next/cache';
 import { authenticatedApiHeaders } from '@/lib/auth';
-import { serverApiFetch } from '@/lib/api';
+import { ApiError, serverApiFetch } from '@/lib/api';
+import type { AdminSaveResult } from './admin-save-result';
 
 async function api(path: string, init: RequestInit) {
   return serverApiFetch(path, {
@@ -18,6 +19,27 @@ function refreshAdmin(refreshShell = false) {
   revalidatePath('/workspace/admin');
   if (refreshShell) revalidatePath('/workspace', 'layout');
   refresh();
+}
+
+async function saveEdit(path: string, body: Record<string, unknown>): Promise<AdminSaveResult> {
+  try {
+    await api(path, {
+      method: 'PATCH',
+      signal: AbortSignal.timeout(15_000),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    // Return the write acknowledgement immediately. AdminEditForm refreshes the
+    // view separately, outside the save action's pending lifecycle.
+    return { status: 'success', message: '保存成功' };
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error instanceof ApiError
+        ? `保存失败：${error.message}`
+        : '保存结果暂未确认，可能是网络较慢。请刷新核对状态后再重试。',
+    };
+  }
 }
 
 export async function createCategoryAction(formData: FormData) {
@@ -44,54 +66,32 @@ export async function createTagAction(formData: FormData) {
 export async function updateCategoryStatusAction(formData: FormData) {
   const categoryId = String(formData.get('categoryId'));
   const status = String(formData.get('status'));
-  if (!categoryId || !status) return;
-  await api(`/api/admin/categories/${categoryId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-  refreshAdmin();
+  return saveEdit(`/api/admin/categories/${categoryId}`, { status });
 }
 
 export async function updateTagStatusAction(formData: FormData) {
   const tagId = String(formData.get('tagId'));
   const status = String(formData.get('status'));
-  if (!tagId || !status) return;
-  await api(`/api/admin/tags/${tagId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-  refreshAdmin();
+  return saveEdit(`/api/admin/tags/${tagId}`, { status });
 }
 export async function updateUserStatusAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
   const userId = String(formData.get('userId'));
   const replacementOwnerId = String(formData.get('replacementOwnerId') ?? '');
-  await api(`/api/organizations/${organizationId}/users/${userId}/status`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      status: String(formData.get('status')),
-      ...(replacementOwnerId ? { replacementOwnerId } : {}),
-    }),
+  return saveEdit(`/api/organizations/${organizationId}/users/${userId}/status`, {
+    status: String(formData.get('status')),
+    ...(replacementOwnerId ? { replacementOwnerId } : {}),
   });
-  refreshAdmin(true);
 }
 export async function updateTeamAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
   const teamId = String(formData.get('teamId'));
   const ownerId = String(formData.get('ownerId') ?? '');
-  await api(`/api/organizations/${organizationId}/teams/${teamId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: String(formData.get('name') ?? ''),
-      status: String(formData.get('status') ?? 'ACTIVE'),
-      ...(ownerId ? { ownerId } : {}),
-    }),
+  return saveEdit(`/api/organizations/${organizationId}/teams/${teamId}`, {
+    name: String(formData.get('name') ?? ''),
+    status: String(formData.get('status') ?? 'ACTIVE'),
+    ...(ownerId ? { ownerId } : {}),
   });
-  refreshAdmin(true);
 }
 export async function assignRoleAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
