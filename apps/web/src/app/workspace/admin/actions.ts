@@ -1,7 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { refresh, revalidatePath } from 'next/cache';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 
@@ -12,12 +11,13 @@ async function api(path: string, init: RequestInit) {
   });
 }
 
-function refreshAdmin(tab: 'taxonomy' | 'teams' | 'users' | 'roles', refreshShell = false) {
-  // Every administration tab is prefetched. Purge the cached route payload after
-  // a mutation so the redirect cannot restore the values from before the save.
+function refreshAdmin(refreshShell = false) {
+  // Keep the user on the current tab and return fresh server-component data in
+  // the action response. Redirecting back to the same prefetched URL can restore
+  // the browser's stale route payload even though the API mutation succeeded.
   revalidatePath('/workspace/admin');
   if (refreshShell) revalidatePath('/workspace', 'layout');
-  redirect(`/workspace/admin?tab=${tab}`);
+  refresh();
 }
 
 export async function createCategoryAction(formData: FormData) {
@@ -30,7 +30,7 @@ export async function createCategoryAction(formData: FormData) {
       contentTypes: [String(formData.get('contentType') ?? 'DESIGN_ASSET')],
     }),
   });
-  refreshAdmin('taxonomy');
+  refreshAdmin();
 }
 export async function createTagAction(formData: FormData) {
   await api('/api/admin/tags', {
@@ -38,7 +38,7 @@ export async function createTagAction(formData: FormData) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: String(formData.get('name') ?? '') }),
   });
-  refreshAdmin('taxonomy');
+  refreshAdmin();
 }
 
 export async function updateCategoryStatusAction(formData: FormData) {
@@ -50,7 +50,7 @@ export async function updateCategoryStatusAction(formData: FormData) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
   });
-  refreshAdmin('taxonomy');
+  refreshAdmin();
 }
 
 export async function updateTagStatusAction(formData: FormData) {
@@ -62,7 +62,7 @@ export async function updateTagStatusAction(formData: FormData) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
   });
-  refreshAdmin('taxonomy');
+  refreshAdmin();
 }
 export async function updateUserStatusAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
@@ -76,7 +76,7 @@ export async function updateUserStatusAction(formData: FormData) {
       ...(replacementOwnerId ? { replacementOwnerId } : {}),
     }),
   });
-  refreshAdmin('users', true);
+  refreshAdmin(true);
 }
 export async function updateTeamAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
@@ -91,7 +91,7 @@ export async function updateTeamAction(formData: FormData) {
       ...(ownerId ? { ownerId } : {}),
     }),
   });
-  refreshAdmin('teams', true);
+  refreshAdmin(true);
 }
 export async function assignRoleAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
@@ -105,7 +105,7 @@ export async function assignRoleAction(formData: FormData) {
       scopeId: organizationId,
     }),
   });
-  refreshAdmin('roles', true);
+  refreshAdmin(true);
 }
 
 export async function removeUserRoleAction(formData: FormData) {
@@ -116,5 +116,5 @@ export async function removeUserRoleAction(formData: FormData) {
   await api(`/api/organizations/${organizationId}/users/${userId}/roles/${userRoleId}`, {
     method: 'DELETE',
   });
-  refreshAdmin('roles', true);
+  refreshAdmin(true);
 }

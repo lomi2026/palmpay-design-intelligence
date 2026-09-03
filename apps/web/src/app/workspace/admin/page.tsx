@@ -9,6 +9,7 @@ import { serverApiFetch } from '@/lib/api';
 import { contentTypeLabel } from '@/lib/content-types';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import { WorkspaceStatusBadge } from '@/components/workspace/workspace-status-badge';
+import { AdminSubmitButton } from './admin-submit-button';
 import {
   assignRoleAction,
   createCategoryAction,
@@ -253,7 +254,7 @@ export default async function AdminPage({
                 <option value="AI_CASE">AI 案例</option>
                 <option value="AI_PROJECT">AI 项目</option>
               </NativeSelect>
-              <Button type="submit">新增分类</Button>
+              <AdminSubmitButton pendingLabel="新增中…">新增分类</AdminSubmitButton>
             </form>
             <ul className="mt-5 divide-y divide-white/10">
               {categories.map((item) => (
@@ -275,9 +276,9 @@ export default async function AdminPage({
                       <option value="ACTIVE">启用</option>
                       <option value="DISABLED">停用</option>
                     </NativeSelect>
-                    <Button type="submit" size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                    <AdminSubmitButton size="sm" variant="ghost" className="h-7 px-2 text-xs">
                       保存
-                    </Button>
+                    </AdminSubmitButton>
                   </form>
                 </li>
               ))}
@@ -292,7 +293,7 @@ export default async function AdminPage({
                 required
                 className={controlClass}
               />
-              <Button type="submit">新增</Button>
+              <AdminSubmitButton pendingLabel="新增中…">新增</AdminSubmitButton>
             </form>
             <ul className="mt-5 divide-y divide-white/10">
               {tags.map((item) => (
@@ -313,9 +314,9 @@ export default async function AdminPage({
                       <option value="DISABLED">停用</option>
                       <option value="MERGED">已合并</option>
                     </NativeSelect>
-                    <Button type="submit" size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                    <AdminSubmitButton size="sm" variant="ghost" className="h-7 px-2 text-xs">
                       保存
-                    </Button>
+                    </AdminSubmitButton>
                   </form>
                 </li>
               ))}
@@ -335,7 +336,7 @@ export default async function AdminPage({
                 <div><label className="text-xs text-white/45" htmlFor={`team-name-${team.id}`}>团队名称</label><Input id={`team-name-${team.id}`} name="name" defaultValue={team.name} required className="mt-1 border-white/15 bg-white/[.04] text-white" /><p className="mt-1 text-xs text-white/35">{team.code} · {team._count.members} 名成员</p></div>
                 <div><label className="text-xs text-white/45" htmlFor={`team-owner-${team.id}`}>负责人</label><NativeSelect id={`team-owner-${team.id}`} name="ownerId" defaultValue={team.owner?.id ?? ''} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-1 w-full">{team.owner ? null : <option value="">暂未指定</option>}{users.items.filter((member) => member.status === 'ACTIVE').map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}</NativeSelect></div>
                 <div><label className="text-xs text-white/45" htmlFor={`team-status-${team.id}`}>状态</label><NativeSelect id={`team-status-${team.id}`} name="status" defaultValue={team.status} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-1 w-full"><option value="ACTIVE">启用</option><option value="DISABLED">停用</option></NativeSelect></div>
-                <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><Button type="submit" size="sm">保存</Button>
+                <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><AdminSubmitButton size="sm">保存</AdminSubmitButton>
               </form>
             ))}
           </div>
@@ -378,9 +379,9 @@ export default async function AdminPage({
                       .filter((candidate) => candidate.id !== member.id && candidate.status === 'ACTIVE')
                       .map((candidate) => <option value={candidate.id} key={candidate.id}>{candidate.name}</option>)}
                   </NativeSelect>
-                  <Button type="submit" size="sm">
+                  <AdminSubmitButton size="sm" pendingLabel="更新中…">
                     更新
-                  </Button>
+                  </AdminSubmitButton>
                 </form>
               </div>
             ))}
@@ -414,7 +415,7 @@ export default async function AdminPage({
                           <option value="" disabled>{assignableRoles.length ? '添加角色' : '已拥有全部角色'}</option>
                           {assignableRoles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}
                         </NativeSelect>
-                        <Button type="submit" size="sm" variant="outline" disabled={!assignableRoles.length} className="border-white/15 bg-transparent text-white">授予</Button>
+                        <AdminSubmitButton size="sm" variant="outline" disabled={!assignableRoles.length} pendingLabel="授予中…" className="border-white/15 bg-transparent text-white">授予</AdminSubmitButton>
                       </form>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1.5">
