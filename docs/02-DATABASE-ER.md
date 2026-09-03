@@ -412,7 +412,7 @@ Priority:
 - name
 - normalized_name
 - usage_count
-- status: active | merged | disabled
+- status: active | merged | disabled; default disabled until explicitly enabled by an administrator
 - merged_to_id
 - created_at
 

@@ -1370,6 +1370,38 @@ test(
       ['taxonomy.category.create', 'taxonomy.category.update'],
     );
     assert.equal(auditEntries.every((entry) => entry.actorId === adminUser.id), true);
+
+    const tagName = `Integration tag ${runId}`;
+    const createdTagResponse = await fetch(`${baseUrl}/admin/tags`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ name: tagName }),
+    });
+    assert.equal(createdTagResponse.status, 201);
+    const createdTag = await createdTagResponse.json();
+    tagIds.push(createdTag.id);
+    assert.equal(createdTag.status, 'DISABLED');
+
+    for (const status of ['ACTIVE', 'DISABLED']) {
+      const updatedTagResponse = await fetch(`${baseUrl}/admin/tags/${createdTag.id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+        body: JSON.stringify({ status }),
+      });
+      assert.equal(updatedTagResponse.status, 200);
+      assert.equal((await updatedTagResponse.json()).status, status);
+    }
+
+    const tagAuditEntries = await prisma.auditLog.findMany({
+      where: { organizationId: organization.id, entityType: 'tag', entityId: createdTag.id },
+      select: { action: true, actorId: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    assert.deepEqual(
+      tagAuditEntries.map((entry) => entry.action),
+      ['taxonomy.tag.create', 'taxonomy.tag.update', 'taxonomy.tag.update'],
+    );
+    assert.equal(tagAuditEntries.every((entry) => entry.actorId === adminUser.id), true);
   },
 );
 

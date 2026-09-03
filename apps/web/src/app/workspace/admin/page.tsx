@@ -40,7 +40,7 @@ type User = {
   email: string;
   status: string;
   primaryTeam: { id: string; name: string; code: string } | null;
-  userRoles: Array<{ id: string; role: { name: string; code: string } }>;
+  userRoles: Array<{ id: string; role: { id: string; name: string; code: string } }>;
 };
 type Role = {
   id: string;
@@ -390,7 +390,48 @@ export default async function AdminPage({
       {tab === 'roles' ? (
         <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)]">
           <section className={panelClass}><h2 className="text-lg font-medium tracking-[-.025em]">系统角色权限</h2><p className="mt-1 text-xs text-white/45">权限矩阵由系统角色定义，授权后立即应用于页面和 API。</p><div className="mt-4 space-y-3">{roles.map((role) => <article className="rounded-xl border border-white/[.1] bg-black/[.16] p-4" key={role.id}><div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-medium">{role.name}</h3></div><Badge variant="outline" className="border-white/15 text-white/60">{role.rolePermissions.length} 项权限</Badge></div><div className="mt-3 flex flex-wrap gap-1.5">{role.rolePermissions.map(({ permission }) => <Badge variant="outline" className="border-white/10 text-[10px] text-white/45" key={permission.id}>{permission.name}</Badge>)}</div></article>)}</div></section>
-          <section className={panelClass}><h2 className="text-lg font-medium tracking-[-.025em]">用户角色授权</h2><p className="mt-1 text-xs text-white/45">一个用户可以拥有多个组织级角色。</p><div className="mt-4 divide-y divide-white/10">{users.items.map((member) => <div className="py-4" key={member.id}><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm">{member.name}</p><p className="text-xs text-white/40">{member.email}</p></div><form action={assignRoleAction} className="flex gap-2"><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><NativeSelect name="roleId" defaultValue="" required className="h-8 min-w-0 rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white"><option value="" disabled>添加角色</option>{roles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}</NativeSelect><Button type="submit" size="sm" variant="outline" className="border-white/15 bg-transparent text-white">授予</Button></form></div><div className="mt-3 flex flex-wrap gap-1.5">{member.userRoles.length ? member.userRoles.map((entry) => <form action={removeUserRoleAction} key={entry.id}><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="userId" value={member.id} /><input type="hidden" name="userRoleId" value={entry.id} /><Button type="submit" size="sm" variant="outline" className="h-7 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white">{entry.role.name} ×</Button></form>) : <span className="text-xs text-white/45">无角色</span>}</div></div>)}</div></section>
+          <section className={panelClass}>
+            <h2 className="text-lg font-medium tracking-[-.025em]">用户角色授权</h2>
+            <p className="mt-1 text-xs text-white/45">一个用户可以拥有多个组织级角色。</p>
+            <div className="mt-4 divide-y divide-white/10">
+              {users.items.map((member) => {
+                const assignedRoleIds = new Set(member.userRoles.map((entry) => entry.role.id));
+                const assignableRoles = roles.filter((role) => !assignedRoleIds.has(role.id));
+                return (
+                  <div className="py-4" key={member.id}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div><p className="text-sm">{member.name}</p><p className="text-xs text-white/40">{member.email}</p></div>
+                      <form action={assignRoleAction} className="flex gap-2">
+                        <input type="hidden" name="organizationId" value={user.organizationId} />
+                        <input type="hidden" name="userId" value={member.id} />
+                        <NativeSelect
+                          name="roleId"
+                          defaultValue=""
+                          required
+                          disabled={!assignableRoles.length}
+                          className="h-8 min-w-0 rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white"
+                        >
+                          <option value="" disabled>{assignableRoles.length ? '添加角色' : '已拥有全部角色'}</option>
+                          {assignableRoles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}
+                        </NativeSelect>
+                        <Button type="submit" size="sm" variant="outline" disabled={!assignableRoles.length} className="border-white/15 bg-transparent text-white">授予</Button>
+                      </form>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {member.userRoles.length ? member.userRoles.map((entry) => (
+                        <form action={removeUserRoleAction} key={entry.id}>
+                          <input type="hidden" name="organizationId" value={user.organizationId} />
+                          <input type="hidden" name="userId" value={member.id} />
+                          <input type="hidden" name="userRoleId" value={entry.id} />
+                          <Button type="submit" size="sm" variant="outline" className="h-7 border-white/15 bg-transparent px-2 text-xs text-white/70 hover:bg-white/10 hover:text-white">{entry.role.name} ×</Button>
+                        </form>
+                      )) : <span className="text-xs text-white/45">无角色</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         </div>
       ) : null}
       {tab === 'audit' ? (

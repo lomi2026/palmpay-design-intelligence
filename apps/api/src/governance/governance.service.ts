@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../database/prisma.service';
+import { TagStatus } from '../generated/prisma/enums';
 import { AuditService } from './audit.service';
 import type {
   AdminContentQueryDto,
@@ -113,7 +114,12 @@ export class GovernanceService {
     const normalizedName = input.name.trim().toLocaleLowerCase('zh-CN');
     try {
       const created = await this.prisma.tag.create({
-        data: { organizationId: user.organizationId, name: input.name.trim(), normalizedName },
+        data: {
+          organizationId: user.organizationId,
+          name: input.name.trim(),
+          normalizedName,
+          status: TagStatus.DISABLED,
+        },
       });
       await this.audit.write({
         organizationId: user.organizationId,
