@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
+import { TaxonomyFields, type TaxonomyOptions } from '@/components/workspace/taxonomy-fields';
 
 type Team = { id: string; name: string; code: string };
 type ContentType = 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT';
@@ -25,9 +26,11 @@ const contentTypes: Array<{ value: ContentType; label: string; description: stri
 
 export function CreateDraftForm({
   teams,
+  taxonomy,
   initialContentType = 'DESIGN_ASSET',
 }: {
   teams: Team[];
+  taxonomy: TaxonomyOptions;
   initialContentType?: ContentType;
 }) {
   const router = useRouter();
@@ -38,7 +41,7 @@ export function CreateDraftForm({
   }, [router, state.id]);
 
   return (
-    <form action={action} className="mt-6 overflow-hidden rounded-[20px] border border-[var(--v9-line)] bg-[var(--v9-panel)]">
+    <form action={action} onResetCapture={(event) => { event.preventDefault(); event.stopPropagation(); }} className="mt-6 overflow-hidden rounded-[20px] border border-[var(--v9-line)] bg-[var(--v9-panel)]">
       <section className="border-b border-[var(--v9-line)] p-5 md:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-[11px] font-semibold tracking-[.16em] text-white/45">01 / 内容类型</p><h2 className="mt-2 text-[22px] font-semibold tracking-[-.04em] text-white">选择要沉淀的团队能力</h2></div><p className="max-w-sm text-[12px] leading-5 text-white/45">不同类型会使用对应字段结构；创建后均以私有草稿开始。</p></div>
         <input name="contentType" type="hidden" value={contentType} />
@@ -49,6 +52,7 @@ export function CreateDraftForm({
         <div className="hidden md:block" />
         <label className="grid gap-1.5 text-sm text-white/75 md:col-span-2">标题<Input className="border-white/15 bg-black/25 text-white placeholder:text-white/35" name="title" placeholder="用清晰、可检索的标题说明内容" required /></label>
         <label className="grid gap-1.5 text-sm text-white/75 md:col-span-2">摘要<Textarea className="min-h-20 border-white/15 bg-black/25 text-white placeholder:text-white/35" name="summary" placeholder="说明它解决什么问题、适用于哪些场景" /></label>
+        <div className="md:col-span-2"><TaxonomyFields key={contentType} options={taxonomy} contentType={contentType} /></div>
         <div className="md:col-span-2"><ContentTypeFields contentType={contentType} /></div>
       </section>
       {state.error ? <p className="px-5 text-sm text-red-400 md:px-6">{state.error}</p> : null}

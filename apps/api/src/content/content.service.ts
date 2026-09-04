@@ -7,7 +7,7 @@ import type { ContentListQueryDto } from './content.dto';
 import { EngagementService } from '../engagement/engagement.service';
 
 const contentCardInclude = {
-  category: { select: { id: true, name: true, code: true } },
+  category: { select: { id: true, name: true, code: true, status: true } },
   owner: { select: { id: true, name: true, avatarUrl: true } },
   team: { select: { id: true, name: true, code: true } },
   projectDetail: {

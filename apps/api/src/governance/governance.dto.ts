@@ -52,6 +52,9 @@ export class RecordEventDto {
 }
 
 export class AdminContentQueryDto {
+  @IsOptional() @IsUUID() categoryId?: string;
+  @IsOptional() @IsUUID() tagId?: string;
+
   @IsOptional()
   @IsEnum(ContentType)
   type?: ContentType;

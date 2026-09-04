@@ -266,6 +266,8 @@ Rules:
 - Published versions are immutable.
 - Editing published content creates a new version.
 - body stores the complete version snapshot.
+- `body.taxonomy` stores the version's `{ categoryId, tagIds }`. Dedicated draft API fields are validated server-side; user-provided nested taxonomy is never trusted. Legacy versions without this key fall back to the content's existing relations when creating an edit draft; immutable historical versions are not rewritten.
+- Draft-only content projects taxonomy to `contents.category_id` / `content_tags` on save. For published content, editing changes only the draft snapshot; publication projects reviewed taxonomy in the same transaction as version promotion and detail projection.
 - Same content cannot reuse a version number.
 
 Unique:
@@ -412,6 +414,7 @@ Priority:
 - name
 - normalized_name
 - usage_count
+- The administration API computes `usageCount` from real, non-deleted, same-organization content relations instead of trusting the legacy stored counter. Published revisions do not change the count until publication; historical versions are excluded.
 - status: active | merged | disabled; default disabled until explicitly enabled by an administrator
 - merged_to_id
 - created_at

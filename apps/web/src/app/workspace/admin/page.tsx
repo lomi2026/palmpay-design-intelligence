@@ -35,7 +35,7 @@ type AdminContent = {
   }>;
   total: number;
 };
-type Category = { id: string; name: string; code: string; status: string; contentTypes: string[] };
+type Category = { id: string; name: string; code: string; status: string; contentTypes: string[]; usageCount: number };
 type Tag = { id: string; name: string; status: string; usageCount: number };
 type User = {
   id: string;
@@ -97,9 +97,14 @@ const modules: Record<string, string> = {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; categoryId?: string; tagId?: string; page?: string }>;
 }) {
-  const { tab: requestedTab = 'content' } = await searchParams;
+  const { tab: requestedTab = 'content', categoryId, tagId, page: requestedPage } = await searchParams;
+  const page = Math.max(1, Number.parseInt(requestedPage ?? '1', 10) || 1);
+  const contentQuery = new URLSearchParams({ pageSize: '50', page: String(page) });
+  if (categoryId) contentQuery.set('categoryId', categoryId);
+  if (tagId) contentQuery.set('tagId', tagId);
+  const contentPageHref = (nextPage: number) => `/workspace/admin?tab=content&${new URLSearchParams({ ...(categoryId ? { categoryId } : {}), ...(tagId ? { tagId } : {}), page: String(nextPage) })}`;
   const tab: AdminTab = isAdminTab(requestedTab) ? requestedTab : 'content';
   const user = await loadCurrentUser();
   if (
@@ -127,7 +132,7 @@ export default async function AdminPage({
   let audit: Audit = { items: [] };
 
   if (tab === 'content' && user.permissions.includes('content.edit_all')) {
-    contents = await serverApiFetch<AdminContent>('/api/admin/contents?pageSize=100', { headers });
+    contents = await serverApiFetch<AdminContent>(`/api/admin/contents?${contentQuery}`, { headers });
   }
   if (tab === 'taxonomy' && user.permissions.includes('taxonomy.manage')) {
     [categories, tags] = await Promise.all([
@@ -202,7 +207,8 @@ export default async function AdminPage({
         <section className={`mt-5 ${panelClass}`}>
           <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/[.1] pb-4">
             <div>
-              <h2 className="text-lg font-medium tracking-[-.025em]">正式内容</h2>
+              <h2 className="text-lg font-medium tracking-[-.025em]">{categoryId || tagId ? '关联内容' : '正式内容'}</h2>
+              {categoryId || tagId ? <p className="mt-2 text-xs text-[var(--v9-muted)]">显示当前正式关联；已发布内容尚未发布的修改不计入。<Link className="ml-2 underline" href="/workspace/admin?tab=taxonomy">返回分类与标签</Link><Link className="ml-2 underline" href="/workspace/admin?tab=content">清除筛选</Link></p> : null}
             </div>
             <span className="rounded-full border border-white/[.12] bg-black/20 px-3 py-1 text-xs text-white/55">{contents.total} 项</span>
           </div>
@@ -213,12 +219,12 @@ export default async function AdminPage({
                 key={item.id}
               >
                 <div>
-                  <Link
+                  {item.status === 'PUBLISHED' ? <Link
                     className="hover:underline"
                     href={`/workspace/${modules[item.contentType]}/${item.slug}`}
                   >
                     {item.title}
-                  </Link>
+                  </Link> : <span>{item.title}</span>}
                   <p className="mt-1 text-xs text-white/45">
                     {contentTypeLabel(item.contentType)} · {item.owner.name}
                   </p>
@@ -228,12 +234,18 @@ export default async function AdminPage({
             ))}
             {!contents.items.length ? <p className="py-10 text-center text-sm text-white/45">当前组织范围内没有可管理的正式内容。</p> : null}
           </div>
+          <nav aria-label="内容分页" className="mt-4 flex items-center justify-end gap-4 text-xs">
+            {page > 1 ? <Link href={contentPageHref(page - 1)}>上一页</Link> : null}
+            <span>第 {page} 页 · 共 {contents.total} 项</span>
+            {page * 50 < contents.total ? <Link href={contentPageHref(page + 1)}>下一页</Link> : null}
+          </nav>
         </section>
       ) : null}
       {tab === 'taxonomy' ? (
         <section className="mt-7 grid gap-5 lg:grid-cols-2">
           <div className={panelClass}>
             <h2 className="text-lg font-medium tracking-[-.025em]">分类</h2>
+            <p className="mt-2 text-xs leading-5 text-[var(--v9-muted)]">停用只阻止新增选择，历史关联保留。关联数为未删除内容的当前正式关联，不含已发布内容尚未发布的修改。</p>
             <form action={createCategoryAction} className="mt-4 grid gap-2">
               <Input
                 name="name"
@@ -270,6 +282,7 @@ export default async function AdminPage({
                     <em className="ml-2 not-italic text-xs text-white/40">{item.code}</em>
                   </span>
                   <AdminEditForm action={updateCategoryStatusAction} className="flex items-center gap-2">
+                    {user.permissions.includes('content.edit_all') ? <Link className="text-xs text-[var(--v9-muted)] underline" href={`/workspace/admin?tab=content&categoryId=${item.id}`}>关联 {item.usageCount} 项</Link> : <span className="text-xs">关联 {item.usageCount} 项</span>}
                     <input type="hidden" name="categoryId" value={item.id} />
                     <NativeSelect
                       name="status"
@@ -307,7 +320,7 @@ export default async function AdminPage({
                   <span>{item.name}</span>
                   <AdminEditForm action={updateTagStatusAction} className="flex items-center gap-2">
                     <input type="hidden" name="tagId" value={item.id} />
-                    <span className="text-xs text-white/50">使用 {item.usageCount}</span>
+                    {user.permissions.includes('content.edit_all') ? <Link className="text-xs text-[var(--v9-muted)] underline" href={`/workspace/admin?tab=content&tagId=${item.id}`}>关联 {item.usageCount} 项</Link> : <span className="text-xs">关联 {item.usageCount} 项</span>}
                     <NativeSelect
                       name="status"
                       defaultValue={item.status}

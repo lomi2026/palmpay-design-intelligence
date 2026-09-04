@@ -29,10 +29,10 @@ export function CatalogFilterControls({
   extraControls?: ReactNode;
 }) {
   const categories = Array.from(
-    new Map(contents.filter((item) => item.category).map((item) => [item.category!.id, item.category!])).values(),
+    new Map(contents.filter((item) => item.category?.status === 'ACTIVE').map((item) => [item.category!.id, item.category!])).values(),
   );
   const tags = Array.from(
-    new Map(contents.flatMap((item) => item.tags.map(({ tag }) => [tag.normalizedName, tag] as const))).values(),
+    new Map(contents.flatMap((item) => item.tags.filter(({ tag }) => tag.status === 'ACTIVE').map(({ tag }) => [tag.normalizedName, tag] as const))).values(),
   );
   const statuses = Array.from(new Set(contents.map((item) => item.verificationStatus))).sort();
   const hasFilters = Boolean(
