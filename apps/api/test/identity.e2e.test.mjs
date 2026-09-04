@@ -467,6 +467,79 @@ before(async () => {
   await waitForServer();
 });
 
+test('taxonomy selection is scoped, status-aware, durable and published atomically', { skip: !integrationEnabled }, async () => {
+  async function request(path, method = 'GET', body, email = memberEmail, expected = 200) {
+    const response = await fetch(`${baseUrl}${path}`, { method, headers: { 'x-dev-user-email': email, 'Content-Type': 'application/json' }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+    const result = await response.json();
+    assert.equal(response.status, expected, JSON.stringify(result));
+    return result;
+  }
+  const category = await request('/admin/categories', 'POST', { name: 'Taxonomy E2E', code: `taxonomy-${runId}`, contentTypes: ['DESIGN_ASSET'] }, adminEmail, 201);
+  categoryIds.push(category.id);
+  const tag = await request('/admin/tags', 'POST', { name: `Taxonomy ${runId}` }, adminEmail, 201);
+  tagIds.push(tag.id);
+  assert.equal(tag.status, 'DISABLED');
+  let options = await request('/content-drafts/taxonomy');
+  assert.equal(options.tags.some((item) => item.id === tag.id), false);
+  const input = { contentType: 'DESIGN_ASSET', title: `Taxonomy lifecycle ${runId}`, summary: 'Test taxonomy publication', teamId: team.id, body: completeAssetBody() };
+  await request('/content-drafts', 'POST', { ...input, tagIds: [tag.id] }, memberEmail, 400);
+  await request(`/admin/tags/${tag.id}`, 'PATCH', { status: 'ACTIVE' }, adminEmail);
+  const selection = { categoryId: category.id, tagIds: [tag.id] };
+  await request('/content-drafts', 'POST', { ...input, ...selection, contentType: 'AI_SKILL' }, memberEmail, 400);
+  const draft = await request('/content-drafts', 'POST', { ...input, ...selection }, memberEmail, 201);
+  contentIds.push(draft.id);
+  assert.deepEqual(draft.draftVersion.body.taxonomy, selection);
+  await request(`/admin/tags/${tag.id}`, 'PATCH', { status: 'DISABLED' }, adminEmail);
+  await request(`/admin/categories/${category.id}`, 'PATCH', { status: 'DISABLED' }, adminEmail);
+  options = await request('/content-drafts/taxonomy');
+  assert.equal(options.categories.some((item) => item.id === category.id), false);
+  assert.equal(options.tags.some((item) => item.id === tag.id), false);
+  await request(`/content-drafts/${draft.id}`, 'PATCH', { ...selection, title: input.title });
+  const loaded = await request(`/content-drafts/${draft.id}`);
+  assert.deepEqual(loaded.taxonomy, selection);
+  assert.equal(loaded.taxonomyOptions.tags.find((item) => item.id === tag.id).status, 'DISABLED');
+  const tagList = await request('/admin/tags', 'GET', undefined, adminEmail);
+  assert.equal(tagList.find((item) => item.id === tag.id).usageCount, 1);
+  const categoryList = await request('/admin/categories', 'GET', undefined, adminEmail);
+  assert.equal(categoryList.find((item) => item.id === category.id).usageCount, 1);
+  const linked = await request(`/admin/contents?tagId=${tag.id}`, 'GET', undefined, adminEmail);
+  assert.equal(linked.total, 1);
+  assert.equal(linked.items[0].id, draft.id);
+  await request(`/admin/contents?tagId=${tag.id}`, 'GET', undefined, memberEmail, 403);
+  // Publishing a previously saved association retains it even if an admin disabled it later.
+  async function publish() {
+    const review = await request(`/reviews/content/${draft.id}/submit`, 'POST', { message: 'Taxonomy review' }, memberEmail, 201);
+    await request(`/reviews/${review.id}/assign`, 'PATCH', { reviewerId: reviewerUser.id }, adminEmail);
+    await request(`/reviews/${review.id}/approve`, 'POST', { comment: 'Validated taxonomy' }, reviewerEmail, 201);
+    await request(`/content-drafts/${draft.id}/publish`, 'POST', undefined, adminEmail, 201);
+  }
+  await publish();
+  const publishedV1 = await request(`/contents/${draft.slug}`);
+  assert.equal(publishedV1.category.id, category.id);
+  assert.equal(publishedV1.tags[0].tag.status, 'DISABLED');
+  await request(`/content-drafts/${draft.id}/from-published`, 'POST', undefined, memberEmail, 201);
+  await request(`/content-drafts/${draft.id}`, 'PATCH', { categoryId: null, tagIds: [], body: { ...input.body, taxonomy: selection } });
+  const clearedDraft = await request(`/content-drafts/${draft.id}`);
+  assert.deepEqual(clearedDraft.taxonomy, { categoryId: null, tagIds: [] });
+  const unchanged = await request(`/contents/${draft.slug}`);
+  assert.equal(unchanged.category.id, category.id);
+  assert.equal(unchanged.tags[0].tag.id, tag.id);
+  await request(`/content-drafts/${draft.id}`, 'PATCH', selection, memberEmail, 400);
+  await publish();
+  const publishedV2 = await request(`/contents/${draft.slug}`);
+  assert.equal(publishedV2.category, null);
+  assert.deepEqual(publishedV2.tags, []);
+  const oldVersion = await prisma.contentVersion.findUniqueOrThrow({ where: { id: publishedV1.currentVersion.id } });
+  assert.deepEqual(oldVersion.body.taxonomy, selection);
+  assert.equal((await request('/admin/tags', 'GET', undefined, adminEmail)).find((item) => item.id === tag.id).usageCount, 0);
+  await request(`/admin/tags/${tag.id}`, 'PATCH', { status: 'ACTIVE' }, adminEmail);
+  await request(`/admin/categories/${category.id}`, 'PATCH', { status: 'ACTIVE' }, adminEmail);
+  options = await request('/content-drafts/taxonomy');
+  assert.equal(options.tags.some((item) => item.id === tag.id), true);
+  assert.equal(options.categories.some((item) => item.id === category.id), true);
+  await request(`/content-drafts/${draft.id}/unpublish`, 'POST', undefined, adminEmail, 201);
+});
+
 after(async () => {
   if (!integrationEnabled) return;
   server?.kill('SIGTERM');
@@ -997,7 +1070,7 @@ test(
       await approveAndPublish(created.id, `Review ${fixture.contentType} v1.`);
       const firstDetail = await request(`/contents/${created.slug}`, 'GET', memberEmail);
       assert.equal(firstDetail.currentVersion.id, versionOneId);
-      assert.deepEqual(firstDetail.currentVersion.body, fixture.bodyV1);
+      assert.deepEqual(firstDetail.currentVersion.body, { ...fixture.bodyV1, taxonomy: { categoryId: null, tagIds: [] } });
       assert.equal(
         firstDetail[fixture.detailKey][fixture.detailField],
         fixture.bodyV1[fixture.detailField],
@@ -1019,7 +1092,7 @@ test(
 
       const secondDetail = await request(`/contents/${created.slug}`, 'GET', memberEmail);
       assert.equal(secondDetail.currentVersion.versionNumber, 2);
-      assert.deepEqual(secondDetail.currentVersion.body, fixture.bodyV2);
+      assert.deepEqual(secondDetail.currentVersion.body, { ...fixture.bodyV2, taxonomy: { categoryId: null, tagIds: [] } });
       assert.equal(
         secondDetail[fixture.detailKey][fixture.detailField],
         fixture.valueV2,
@@ -1033,9 +1106,9 @@ test(
       assert.equal(storedVersions.length, 2);
       assert.equal(storedVersions[0].id, versionOneId);
       assert.equal(storedVersions[0].versionStatus, 'PUBLISHED');
-      assert.deepEqual(storedVersions[0].body, fixture.bodyV1);
+      assert.deepEqual(storedVersions[0].body, { ...fixture.bodyV1, taxonomy: { categoryId: null, tagIds: [] } });
       assert.equal(storedVersions[1].versionStatus, 'PUBLISHED');
-      assert.deepEqual(storedVersions[1].body, fixture.bodyV2);
+      assert.deepEqual(storedVersions[1].body, { ...fixture.bodyV2, taxonomy: { categoryId: null, tagIds: [] } });
     }
   },
 );
@@ -1148,7 +1221,7 @@ test(
     assert.equal(draftContent.currentVersionId, original.currentVersionId);
     assert.equal(draftContent.draftVersion.versionNumber, 2);
     assert.equal(draftContent.draftVersion.baseVersionId, original.currentVersionId);
-    assert.deepEqual(draftContent.draftVersion.body, original.currentVersion.body);
+    assert.deepEqual(draftContent.draftVersion.body, { ...original.currentVersion.body, taxonomy: { categoryId: null, tagIds: [] } });
 
     const memberContributions = await fetch(`${baseUrl}/content-drafts`, {
       headers: { 'x-dev-user-email': memberEmail },
@@ -1180,7 +1253,7 @@ test(
     assert.equal(afterAutosave.title, original.title);
     assert.equal(afterAutosave.currentVersion.title, original.currentVersion.title);
     assert.equal(afterAutosave.draftVersion.title, 'Edited draft title');
-    assert.deepEqual(afterAutosave.draftVersion.body, completeAssetBody(['new draft only']));
+    assert.deepEqual(afterAutosave.draftVersion.body, { ...completeAssetBody(['new draft only']), taxonomy: { categoryId: null, tagIds: [] } });
 
     const submit = await fetch(`${baseUrl}/reviews/content/${publishedContent.id}/submit`, {
       method: 'POST',
@@ -1370,6 +1443,38 @@ test(
       ['taxonomy.category.create', 'taxonomy.category.update'],
     );
     assert.equal(auditEntries.every((entry) => entry.actorId === adminUser.id), true);
+
+    const tagName = `Integration tag ${runId}`;
+    const createdTagResponse = await fetch(`${baseUrl}/admin/tags`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+      body: JSON.stringify({ name: tagName }),
+    });
+    assert.equal(createdTagResponse.status, 201);
+    const createdTag = await createdTagResponse.json();
+    tagIds.push(createdTag.id);
+    assert.equal(createdTag.status, 'DISABLED');
+
+    for (const status of ['ACTIVE', 'DISABLED']) {
+      const updatedTagResponse = await fetch(`${baseUrl}/admin/tags/${createdTag.id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
+        body: JSON.stringify({ status }),
+      });
+      assert.equal(updatedTagResponse.status, 200);
+      assert.equal((await updatedTagResponse.json()).status, status);
+    }
+
+    const tagAuditEntries = await prisma.auditLog.findMany({
+      where: { organizationId: organization.id, entityType: 'tag', entityId: createdTag.id },
+      select: { action: true, actorId: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    assert.deepEqual(
+      tagAuditEntries.map((entry) => entry.action),
+      ['taxonomy.tag.create', 'taxonomy.tag.update', 'taxonomy.tag.update'],
+    );
+    assert.equal(tagAuditEntries.every((entry) => entry.actorId === adminUser.id), true);
   },
 );
 

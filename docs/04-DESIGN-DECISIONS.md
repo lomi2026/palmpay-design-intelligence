@@ -297,3 +297,22 @@ This previous delivery order is superseded by Decision 25. It remains as histori
 - Test users sign in with the email address of a pre-provisioned active account. The backend must still resolve that account before issuing a short-lived signed session and must retain all RBAC and disabled-user checks.
 - The login page should start warming the sleeping test API when opened, explain that the first connection may take about one minute, and expose a clear pending state while login is running.
 - This decision applies only to the isolated acceptance environment. Formal production authentication still requires enterprise OIDC/SSO and must not reuse the passwordless test adapter.
+
+## 30. Dark-mode visual comfort baseline (2026-08-31)
+
+- By explicit user decision, the full platform dark theme must reduce long-session eye strain while preserving the approved restrained black-and-white direction, compact density and information architecture.
+- Dark mode uses one centralized semantic palette across the public home, Workspace shell, catalogs, details, contribution flows, governance, analytics, administration and shadcn portals.
+- Approved dark foundations:
+  - page background `#121416`
+  - sidebar `#0F1113`
+  - primary surface `#15181B`
+  - card surface `#181B1F`
+  - raised / field surface `#20242A`
+  - hover / accent surface `#282D34`
+  - primary text `#E1E5E9`
+  - secondary text `#B2B8C0`
+  - supporting copy `#A5ACB5`
+  - metadata `#9099A5`
+- Near-pure black page backgrounds and near-pure white non-interactive headings are no longer the dark-mode baseline. High-contrast light surfaces remain reserved for compact primary actions, not large information cards.
+- Large inverse white governance or analytics cards must use the shared dark surface hierarchy in dark mode to avoid abrupt luminance jumps. Light mode remains fully supported through the same semantic variables.
+- Decorative grids and glows must remain quieter than content. They use centralized grid/glow tokens and cannot rely on page-specific 10% white lines.

@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsObject, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { ArrayMaxSize, ArrayUnique, IsArray, IsEnum, IsObject, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { ContentType, ContentVisibility } from '../generated/prisma/enums';
 
 export class CreateDraftDto {
@@ -18,6 +18,13 @@ export class CreateDraftDto {
   @IsOptional()
   @IsUUID()
   categoryId?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ArrayUnique()
+  @IsUUID('4', { each: true })
+  tagIds?: string[];
 
   @IsOptional()
   @IsUUID()
@@ -50,6 +57,13 @@ export class AutosaveDraftDto {
   @IsOptional()
   @IsUUID()
   categoryId?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ArrayUnique()
+  @IsUUID('4', { each: true })
+  tagIds?: string[];
 
   @IsOptional()
   @IsEnum(ContentVisibility)

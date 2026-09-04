@@ -5,7 +5,7 @@ import { ApiError, serverApiFetch } from '@/lib/api';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { DraftPreviewContent } from '@/components/workspace/draft-preview-content';
 
-type Draft = { id: string; title: string; summary: string | null; contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT'; draftVersion: { body: unknown; versionNumber: number; versionStatus: string } | null; attachments: Array<{ id: string; file: { originalName: string; mimeType: string; sizeBytes: string } }> };
+import type { Draft } from '../../draft-editor';
 
 async function getDraft(id: string) {
   try {

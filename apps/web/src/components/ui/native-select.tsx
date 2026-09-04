@@ -1,6 +1,6 @@
 'use client';
 
-import { Children, isValidElement, useState, type ReactNode, type SelectHTMLAttributes } from 'react';
+import { Children, isValidElement, useRef, useState, type ReactNode, type SelectHTMLAttributes } from 'react';
 
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -49,12 +49,29 @@ export function NativeSelect({
   const options = collectOptions(children);
   const initialValue = String(controlledValue ?? defaultValue ?? options[0]?.value ?? EMPTY_VALUE) || EMPTY_VALUE;
   const [uncontrolledValue, setUncontrolledValue] = useState(initialValue);
+  const [previousInitialValue, setPreviousInitialValue] = useState(initialValue);
+
+  if (controlledValue === undefined && previousInitialValue !== initialValue) {
+    setPreviousInitialValue(initialValue);
+    setUncontrolledValue(initialValue);
+  }
+
   const value = controlledValue === undefined ? uncontrolledValue : String(controlledValue) || EMPTY_VALUE;
+  const submissionInput = useRef<HTMLInputElement>(null);
+
+  function handleValueChange(nextValue: string) {
+    // Update the successful form control immediately as well as React state, so
+    // a fast click on the adjacent submit button cannot send the previous value.
+    if (submissionInput.current) {
+      submissionInput.current.value = nextValue === EMPTY_VALUE ? '' : nextValue;
+    }
+    setUncontrolledValue(nextValue);
+  }
 
   return (
     <span className={cn('relative inline-flex min-w-0', containerClassName)}>
-      {name ? <input name={name} type="hidden" value={value === EMPTY_VALUE ? '' : value} /> : null}
-      <Select disabled={disabled} onValueChange={setUncontrolledValue} value={value}>
+      {name ? <input name={name} ref={submissionInput} type="hidden" value={value === EMPTY_VALUE ? '' : value} /> : null}
+      <Select disabled={disabled} onValueChange={handleValueChange} value={value}>
         <SelectTrigger
           aria-describedby={ariaDescribedBy}
           aria-label={ariaLabel}

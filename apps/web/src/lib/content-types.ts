@@ -21,7 +21,7 @@ export interface ContentCard {
   verificationStatus: string;
   publishedAt: string | null;
   updatedAt: string;
-  category: { id: string; name: string; code: string } | null;
+  category: { id: string; name: string; code: string; status?: string } | null;
   owner: { id: string; name: string; avatarUrl: string | null };
   team: { id: string; name: string; code: string };
   projectDetail?: {
@@ -40,7 +40,7 @@ export interface ContentCard {
     body: unknown;
   } | null;
   coverFile: ContentFile | null;
-  tags: Array<{ tag: { id: string; name: string; normalizedName: string } }>;
+  tags: Array<{ tag: { id: string; name: string; normalizedName: string; status?: string } }>;
 }
 
 export type ContentType = ContentCard['contentType'];

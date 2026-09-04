@@ -613,7 +613,7 @@ model Tag {
   name           String    @db.VarChar(100)
   normalizedName String    @map("normalized_name") @db.VarChar(100)
   usageCount     Int       @default(0) @map("usage_count")
-  status         TagStatus @default(ACTIVE)
+  status         TagStatus @default(DISABLED)
   mergedToId     String?   @map("merged_to_id") @db.Uuid
   createdAt      DateTime  @default(now()) @map("created_at")
 

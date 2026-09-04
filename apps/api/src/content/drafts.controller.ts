@@ -15,6 +15,12 @@ import { DraftsService } from './drafts.service';
 export class DraftsController {
   constructor(private readonly drafts: DraftsService) {}
 
+  @Get('taxonomy')
+  @RequirePermissions('content.read')
+  taxonomy(@CurrentUser() user: AuthenticatedUser) {
+    return this.drafts.availableTaxonomy(user);
+  }
+
   @Get()
   @RequirePermissions('content.read')
   listMine(@CurrentUser() user: AuthenticatedUser) {

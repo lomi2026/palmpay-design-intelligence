@@ -20,6 +20,7 @@ import { AuditService } from '../governance/audit.service';
 import { EngagementService } from '../engagement/engagement.service';
 import { assertContentComplete } from './content-completeness';
 import { upsertPublishedContentDetail } from './content-detail-projection';
+import { projectTaxonomy, taxonomySnapshot, validateTaxonomy, withTaxonomy, type TaxonomySelection } from './content-taxonomy';
 
 @Injectable()
 export class DraftsService {
@@ -76,6 +77,8 @@ export class DraftsService {
     if (!team)
       throw new BadRequestException('The selected team is not available in your organization.');
     const draft = await this.prisma.$transaction(async (tx) => {
+      const taxonomy = { categoryId: input.categoryId ?? null, tagIds: input.tagIds ?? [] };
+      await validateTaxonomy(tx, user.organizationId, input.contentType, taxonomy);
       const content = await tx.content.create({
         data: {
           organizationId: user.organizationId,
@@ -99,10 +102,11 @@ export class DraftsService {
           versionStatus: ContentStatus.DRAFT,
           title: input.title,
           summary: input.summary,
-          body: input.body as Prisma.InputJsonValue,
+          body: withTaxonomy(input.body, taxonomy),
           createdById: user.id,
         },
       });
+      await projectTaxonomy(tx, content.id, user.id, taxonomy);
       return tx.content.update({
         where: { id: content.id },
         data: { draftVersionId: version.id },
@@ -124,7 +128,7 @@ export class DraftsService {
   async createFromPublished(user: AuthenticatedUser, contentId: string) {
     const content = await this.prisma.content.findFirst({
       where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
-      include: { currentVersion: true, draftVersion: true },
+      include: { currentVersion: true, draftVersion: true, tags: true },
     });
     if (!content) throw new NotFoundException('Content was not found.');
     if (!this.canEditContent(user, content.ownerId)) {
@@ -166,10 +170,7 @@ export class DraftsService {
           baseVersionId: publishedVersionId,
           title: publishedVersion.title,
           summary: publishedVersion.summary,
-          body:
-            publishedVersion.body === null
-              ? Prisma.JsonNull
-              : (publishedVersion.body as Prisma.InputJsonValue),
+          body: withTaxonomy(publishedVersion.body, taxonomySnapshot(publishedVersion.body, content)),
           createdById: user.id,
         },
       });
@@ -198,7 +199,7 @@ export class DraftsService {
   async publishApproved(user: AuthenticatedUser, contentId: string) {
     const content = await this.prisma.content.findFirst({
       where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
-      include: { draftVersion: true },
+      include: { draftVersion: true, tags: true },
     });
     if (!content) throw new NotFoundException('Content was not found.');
     if (!content.draftVersion)
@@ -240,6 +241,11 @@ export class DraftsService {
         content.organizationId,
         content.draftVersion!.body,
       );
+
+      // Only the reviewed snapshot becomes the live catalog associations.
+      const taxonomy = taxonomySnapshot(content.draftVersion!.body, content);
+      await validateTaxonomy(tx, user.organizationId, content.contentType, taxonomy, taxonomy);
+      await projectTaxonomy(tx, content.id, user.id, taxonomy);
 
       const published = await tx.content.updateMany({
         where: { id: content.id, draftVersionId: content.draftVersion!.id },
@@ -327,8 +333,26 @@ export class DraftsService {
     if (!draft)
       throw new ConflictException('This content does not have an editable draft version.');
 
-    const [updatedContent, updatedVersion] = await this.prisma.$transaction([
-      this.prisma.content.update({
+    const [updatedContent, updatedVersion] = await this.prisma.$transaction(async (tx) => {
+      const previous = taxonomySnapshot(draft.body, content);
+      const taxonomy = {
+        categoryId: input.categoryId === undefined ? previous.categoryId : input.categoryId,
+        tagIds: input.tagIds ?? previous.tagIds,
+      };
+      await validateTaxonomy(tx, user.organizationId, content.contentType, taxonomy, previous);
+      const changed = await tx.contentVersion.updateMany({
+        where: { id: draft.id, versionStatus: { in: [ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED] } },
+        data: {
+          ...(input.title !== undefined ? { title: input.title } : {}),
+          ...(input.summary !== undefined ? { summary: input.summary } : {}),
+          ...(input.versionLabel !== undefined ? { versionLabel: input.versionLabel } : {}),
+          ...(input.changeSummary !== undefined ? { changeSummary: input.changeSummary } : {}),
+          body: withTaxonomy(input.body ?? draft.body, taxonomy),
+        },
+      });
+      if (changed.count !== 1) throw new ConflictException('此草稿已提交审核，请刷新后重试。');
+      if (content.status !== ContentStatus.PUBLISHED) await projectTaxonomy(tx, content.id, user.id, taxonomy);
+      const updatedContent = await tx.content.update({
         where: { id: content.id },
         data: {
           ...(content.status === ContentStatus.PUBLISHED
@@ -336,22 +360,13 @@ export class DraftsService {
             : {
                 ...(input.title !== undefined ? { title: input.title } : {}),
                 ...(input.summary !== undefined ? { summary: input.summary } : {}),
-                ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
                 ...(input.visibility !== undefined ? { visibility: input.visibility } : {}),
               }),
         },
-      }),
-      this.prisma.contentVersion.update({
-        where: { id: draft.id },
-        data: {
-          ...(input.title !== undefined ? { title: input.title } : {}),
-          ...(input.summary !== undefined ? { summary: input.summary } : {}),
-          ...(input.versionLabel !== undefined ? { versionLabel: input.versionLabel } : {}),
-          ...(input.changeSummary !== undefined ? { changeSummary: input.changeSummary } : {}),
-          ...(input.body !== undefined ? { body: input.body as Prisma.InputJsonValue } : {}),
-        },
-      }),
-    ]);
+      });
+      const updatedVersion = await tx.contentVersion.findUniqueOrThrow({ where: { id: draft.id } });
+      return [updatedContent, updatedVersion] as const;
+    });
     if (input.attachmentFileIds !== undefined) {
       const fileIds = [...new Set(input.attachmentFileIds)];
       await this.prisma.$transaction(
@@ -407,6 +422,8 @@ export class DraftsService {
       : [];
     return {
       ...this.serialize(content),
+      taxonomy: taxonomySnapshot(content.draftVersion?.body, content),
+      taxonomyOptions: await this.availableTaxonomy(user, taxonomySnapshot(content.draftVersion?.body, content)),
       attachments: attachments.map((attachment) => ({
         ...attachment,
         file: { ...attachment.file, sizeBytes: attachment.file.sizeBytes.toString() },
@@ -432,10 +449,26 @@ export class DraftsService {
     return { items };
   }
 
+  async availableTaxonomy(user: AuthenticatedUser, selected?: TaxonomySelection) {
+    const [categories, tags] = await Promise.all([
+      this.prisma.category.findMany({
+        where: { organizationId: user.organizationId, OR: [{ status: 'ACTIVE' }, ...(selected?.categoryId ? [{ id: selected.categoryId }] : [])] },
+        select: { id: true, name: true, status: true, contentTypes: true },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      }),
+      this.prisma.tag.findMany({
+        where: { organizationId: user.organizationId, OR: [{ status: 'ACTIVE' }, { id: { in: selected?.tagIds ?? [] } }] },
+        select: { id: true, name: true, status: true },
+        orderBy: { name: 'asc' },
+      }),
+    ]);
+    return { categories, tags };
+  }
+
   private async findEditableDraft(user: AuthenticatedUser, contentId: string) {
     const content = await this.prisma.content.findFirst({
       where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
-      include: { draftVersion: true },
+      include: { draftVersion: true, tags: true },
     });
     if (!content) throw new NotFoundException('Content was not found.');
     if (!this.canEditContent(user, content.ownerId)) {

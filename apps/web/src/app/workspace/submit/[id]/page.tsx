@@ -4,9 +4,8 @@ import { ApiError, serverApiFetch } from '@/lib/api';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { workspaceStatusLabel } from '@/lib/workspace-status';
 import { contentTypeLabel } from '@/lib/content-types';
-import { DraftEditor } from '../draft-editor';
+import { DraftEditor, type Draft } from '../draft-editor';
 
-type Draft = { id: string; title: string; summary: string | null; contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT'; status: string; draftVersion: { body: unknown; changeSummary: string | null; versionNumber: number; versionStatus: string } | null; attachments: Array<{ id: string; fileId: string; file: { originalName: string; mimeType: string; sizeBytes: string } }> };
 
 export default async function DraftPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

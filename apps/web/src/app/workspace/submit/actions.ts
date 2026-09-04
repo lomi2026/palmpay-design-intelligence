@@ -32,6 +32,8 @@ export async function createDraftAction(_: ActionState, formData: FormData): Pro
       body: JSON.stringify({
         contentType: formData.get('contentType'),
         teamId: formData.get('teamId'),
+        categoryId: optionalText(formData.get('categoryId')),
+        tagIds: formData.getAll('tagIds'),
         title: formData.get('title'),
         summary: optionalText(formData.get('summary')),
         body: structuredBody(String(formData.get('contentType') ?? ''), formData),
@@ -80,6 +82,8 @@ export async function autosaveDraftAction(_: ActionState, formData: FormData): P
         title: formData.get('title'),
         summary: optionalText(formData.get('summary')),
         changeSummary: optionalText(formData.get('changeSummary')),
+        categoryId: optionalText(formData.get('categoryId')) ?? null,
+        tagIds: formData.getAll('tagIds'),
         body: structuredBody(String(formData.get('contentType') ?? ''), formData),
       }),
     });
@@ -99,6 +103,8 @@ export async function saveAndPreviewDraftAction(formData: FormData) {
       title: formData.get('title'),
       summary: optionalText(formData.get('summary')),
       changeSummary: optionalText(formData.get('changeSummary')),
+      categoryId: optionalText(formData.get('categoryId')) ?? null,
+      tagIds: formData.getAll('tagIds'),
       body: structuredBody(String(formData.get('contentType') ?? ''), formData),
     }),
   });

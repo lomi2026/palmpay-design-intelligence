@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../database/prisma.service';
+import { TagStatus } from '../generated/prisma/enums';
 import { AuditService } from './audit.service';
 import type {
   AdminContentQueryDto,
@@ -23,6 +24,8 @@ export class GovernanceService {
       deletedAt: null,
       contentType: query.type,
       status: query.status,
+      categoryId: query.categoryId,
+      ...(query.tagId ? { tags: { some: { tagId: query.tagId } } } : {}),
       ...(query.search
         ? {
             OR: [
@@ -49,11 +52,13 @@ export class GovernanceService {
     return { items, total, page: query.page, pageSize: query.pageSize };
   }
 
-  listCategories(user: AuthenticatedUser) {
-    return this.prisma.category.findMany({
+  async listCategories(user: AuthenticatedUser) {
+    const categories = await this.prisma.category.findMany({
       where: { organizationId: user.organizationId },
+      include: { _count: { select: { contents: { where: { organizationId: user.organizationId, deletedAt: null } } } } },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     });
+    return categories.map(({ _count, ...category }) => ({ ...category, usageCount: _count.contents }));
   }
 
   async createCategory(user: AuthenticatedUser, input: CreateCategoryDto) {
@@ -102,18 +107,25 @@ export class GovernanceService {
     return updated;
   }
 
-  listTags(user: AuthenticatedUser) {
-    return this.prisma.tag.findMany({
+  async listTags(user: AuthenticatedUser) {
+    const tags = await this.prisma.tag.findMany({
       where: { organizationId: user.organizationId },
-      orderBy: [{ usageCount: 'desc' }, { name: 'asc' }],
+      include: { _count: { select: { contents: { where: { content: { organizationId: user.organizationId, deletedAt: null } } } } } },
+      orderBy: { name: 'asc' },
     });
+    return tags.map(({ _count, ...tag }) => ({ ...tag, usageCount: _count.contents }));
   }
 
   async createTag(user: AuthenticatedUser, input: CreateTagDto) {
     const normalizedName = input.name.trim().toLocaleLowerCase('zh-CN');
     try {
       const created = await this.prisma.tag.create({
-        data: { organizationId: user.organizationId, name: input.name.trim(), normalizedName },
+        data: {
+          organizationId: user.organizationId,
+          name: input.name.trim(),
+          normalizedName,
+          status: TagStatus.DISABLED,
+        },
       });
       await this.audit.write({
         organizationId: user.organizationId,

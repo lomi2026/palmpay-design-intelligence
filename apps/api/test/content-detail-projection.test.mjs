@@ -222,6 +222,8 @@ test('autosave preserves the published detail and publish switches it inside the
   let insideTransaction = false;
   let detailUpsertCount = 0;
   let content = {
+    categoryId: null,
+    tags: [],
     id: contentId,
     contentType: 'DESIGN_ASSET',
     organizationId: user.organizationId,
@@ -232,9 +234,12 @@ test('autosave preserves the published detail and publish switches it inside the
   };
   const tx = {
     contentVersion: {
-      updateMany: async () => ({ count: 1 }),
+      updateMany: async ({ data }) => { Object.assign(draftVersion, data); return { count: 1 }; },
+      findUniqueOrThrow: async () => draftVersion,
     },
+    contentTag: { deleteMany: async () => ({ count: 0 }) },
     content: {
+      update: async ({ data }) => ({ ...content, ...data }),
       updateMany: async () => ({ count: 1 }),
       findUniqueOrThrow: async () => ({ ...content, currentVersion: draftVersion }),
       findMany: async () => [],
