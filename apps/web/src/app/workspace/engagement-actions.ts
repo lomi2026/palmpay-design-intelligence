@@ -17,7 +17,7 @@ export async function favoriteAction(formData: FormData) {
   const active = formData.get('active') === 'true';
   if (!contentId) return;
   await request(`/api/contents/${contentId}/favorite`, { method: active ? 'DELETE' : 'POST' });
-  revalidatePath('/workspace/favorites');
+  revalidatePath('/workspace', 'layout');
   revalidatePath('/workspace/recent');
   const returnTo = String(formData.get('returnTo') ?? '/workspace/favorites');
   redirect(returnTo);
@@ -39,13 +39,14 @@ export async function searchResultAction(formData: FormData) {
 export async function usageConfirmationAction(formData: FormData) {
   const contentId = String(formData.get('contentId') ?? '');
   const projectContentId = String(formData.get('projectContentId') ?? '');
+  const projectName = String(formData.get('projectName') ?? '').trim();
   const note = String(formData.get('note') ?? '');
-  if (!contentId || !projectContentId)
+  if (!contentId || (!projectContentId && !projectName))
     redirect(`/workspace/usage?contentId=${encodeURIComponent(contentId)}&error=missing-project`);
   await request(`/api/contents/${contentId}/usage-confirmations`, {
     method: 'POST',
     body: JSON.stringify({
-      projectContentId,
+      ...(projectContentId ? { projectContentId } : { projectName }),
       note,
       sourcePage: `/workspace/usage?contentId=${contentId}`,
     }),

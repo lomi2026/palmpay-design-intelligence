@@ -1,36 +1,13 @@
-export function CatalogPageHeader({
-  eyebrow,
-  title,
-  description,
-  search,
-  count,
-  source,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-  search: string;
-  searchId: string;
-  searchPlaceholder: string;
-  count: string;
-  source?: string;
-  filterParams?: Record<string, string | undefined>;
+import Link from 'next/link';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+export function CatalogPageHeader({ title, description, count, createHref, createLabel }: {
+  eyebrow?: string; title: string; description?: string; search?: string;
+  searchId?: string; searchPlaceholder?: string; count: string; source?: string;
+  filterParams?: Record<string, string | undefined>; createHref?: string; createLabel?: string;
 }) {
-  return (
-    <header className="relative overflow-hidden rounded-[22px] border border-[var(--v9-line)] bg-[var(--v9-panel)] px-6 py-7 sm:px-8">
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--v9-grid-line)_1px,transparent_1px),linear-gradient(var(--v9-grid-line)_1px,transparent_1px)] bg-[size:48px_48px] opacity-60" />
-      <div className="relative">
-        <div className="max-w-2xl">
-          <p className="text-[11px] font-semibold tracking-[.2em] text-[var(--v9-subtle)]">{eyebrow}</p>
-          <h1 className="mt-3 text-[34px] font-semibold tracking-[-.055em] text-[var(--v9-text)]">{title}</h1>
-          <p className="mt-3 text-sm leading-6 text-[var(--v9-copy)]">{description}</p>
-        </div>
-      </div>
-      <div className="relative mt-6 flex flex-wrap items-center gap-2 text-[11px] text-[var(--v9-copy)]">
-        <span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-3 py-1.5">{count}</span>
-        {source ? <span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-3 py-1.5">{source}</span> : null}
-        {search ? <span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-3 py-1.5">搜索：{search}</span> : null}
-      </div>
-    </header>
-  );
+  return <header className="workspace-page-card !p-6 grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-stretch rounded-3xl bg-[var(--v9-panel)] shadow-none">
+    <div><h1 className="text-[32px] font-semibold leading-10 tracking-[-.045em]">{title}</h1>{description ? <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--v9-copy)]">{description}</p> : null}</div>
+    <div className="flex flex-col items-start justify-between gap-4 sm:items-end">{createHref ? <Button asChild className="h-10"><Link href={createHref}><Plus className="size-4" />{createLabel}</Link></Button> : null}<span className="text-sm text-muted-foreground">{count}</span></div>
+  </header>;
 }

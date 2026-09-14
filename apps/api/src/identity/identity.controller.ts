@@ -20,7 +20,10 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import {
   AssignUserRoleDto,
   UpdateTeamDto,
+  CreateTeamDto,
+  CreateUserDto,
   UpdateUserStatusDto,
+  UpdateUserNameDto,
   UserListQueryDto,
 } from './identity.dto';
 import { IdentityService } from './identity.service';
@@ -51,6 +54,20 @@ export class IdentityController {
     return this.identity.listTeams(organizationId);
   }
 
+  @Post('teams')
+  @RequirePermissions('user.manage')
+  createTeam(@Param('organizationId', new ParseUUIDPipe()) organizationId: string, @Body() input: CreateTeamDto, @CurrentUser() user: AuthenticatedUser) {
+    this.assertOrganization(user, organizationId);
+    return this.identity.createTeam(organizationId, input, user.id);
+  }
+
+  @Delete('teams/:teamId')
+  @RequirePermissions('user.manage')
+  deleteTeam(@Param('organizationId', new ParseUUIDPipe()) organizationId: string, @Param('teamId', new ParseUUIDPipe()) teamId: string, @CurrentUser() user: AuthenticatedUser) {
+    this.assertOrganization(user, organizationId);
+    return this.identity.deleteTeam(organizationId, teamId, user.id);
+  }
+
   @Patch('teams/:teamId')
   @RequirePermissions('user.manage')
   updateTeam(
@@ -61,6 +78,20 @@ export class IdentityController {
   ) {
     this.assertOrganization(user, organizationId);
     return this.identity.updateTeam(organizationId, teamId, input, user.id);
+  }
+
+  @Post('users')
+  @RequirePermissions('user.manage')
+  createUser(@Param('organizationId', new ParseUUIDPipe()) organizationId: string, @Body() input: CreateUserDto, @CurrentUser() user: AuthenticatedUser) {
+    this.assertOrganization(user, organizationId);
+    return this.identity.createUser(organizationId, input, user.id);
+  }
+
+  @Delete('users/:userId')
+  @RequirePermissions('user.manage')
+  deleteUser(@Param('organizationId', new ParseUUIDPipe()) organizationId: string, @Param('userId', new ParseUUIDPipe()) userId: string, @CurrentUser() user: AuthenticatedUser) {
+    this.assertOrganization(user, organizationId);
+    return this.identity.deleteUser(organizationId, userId, user.id);
   }
 
   @Get('users')
@@ -83,6 +114,18 @@ export class IdentityController {
   ) {
     this.assertOrganization(user, organizationId);
     return this.identity.getUser(organizationId, userId);
+  }
+
+  @Patch('users/:userId/name')
+  @RequirePermissions('user.manage')
+  updateUserName(
+    @Param('organizationId', new ParseUUIDPipe()) organizationId: string,
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Body() input: UpdateUserNameDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    this.assertOrganization(user, organizationId);
+    return this.identity.updateUserName(organizationId, userId, input, user.id);
   }
 
   @Patch('users/:userId/status')

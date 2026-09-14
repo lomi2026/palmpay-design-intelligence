@@ -4,10 +4,10 @@ import test from 'node:test';
 import { workspaceStatus, workspaceStatusLabel } from '../src/lib/workspace-status.ts';
 import { contentTypeLabel } from '../src/lib/content-types.ts';
 
-test('formal content and review statuses use one Chinese label system', () => {
-  assert.deepEqual(workspaceStatus('CHANGES_REQUESTED'), { label: '待修改', tone: 'warning' });
+test('formal content statuses use one Chinese label system', () => {
+  assert.deepEqual(workspaceStatus('DRAFT'), { label: '草稿', tone: 'neutral' });
   assert.deepEqual(workspaceStatus('PUBLISHED'), { label: '已发布', tone: 'success' });
-  assert.equal(workspaceStatusLabel('PENDING'), '待审核');
+  assert.equal(workspaceStatusLabel('ARCHIVED'), '已归档');
 });
 
 test('verification and account statuses keep semantic tones', () => {

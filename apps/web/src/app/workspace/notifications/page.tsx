@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Bell } from 'lucide-react';
+import { ArrowLeft, Bell } from 'lucide-react';
 
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
@@ -35,13 +35,13 @@ export default async function NotificationsPage() {
 
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
+      <Link className="mb-6 inline-flex items-center gap-2 text-xs text-[var(--v9-muted)] transition hover:text-[var(--v9-text)]" href="/workspace">
+        <ArrowLeft className="size-4" />返回工作台
+      </Link>
       <WorkspacePageHero
-        description={notifications.unreadCount
-          ? `${notifications.unreadCount} 条未读审核通知需要处理。`
-          : '所有审核、分配与决定的提醒都会在这里留痕。'}
         eyebrow="NOTIFICATIONS"
         metric={{ value: notifications.unreadCount, label: '未读通知' }}
-        title="把需要处理的协作信号留在同一个队列。"
+        title="通知中心"
       >
         {notifications.unreadCount ? (
           <form action={markAllNotificationsReadAction}>
@@ -58,7 +58,7 @@ export default async function NotificationsPage() {
       </WorkspacePageHero>
 
       {notifications.items.length ? (
-        <div className="mt-5 grid gap-3">
+        <div className="mt-6 grid gap-4">
           {notifications.items.map((notification) => {
             const target = notificationTarget(notification);
             return (
@@ -119,7 +119,7 @@ export default async function NotificationsPage() {
           })}
         </div>
       ) : (
-        <WorkspaceEmptyState className="mt-5">暂时没有通知。</WorkspaceEmptyState>
+        <WorkspaceEmptyState className="mt-6">暂时没有通知。</WorkspaceEmptyState>
       )}
     </main>
   );

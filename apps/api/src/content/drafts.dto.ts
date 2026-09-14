@@ -89,3 +89,9 @@ export class AutosaveDraftDto {
   @IsUUID('4', { each: true })
   attachmentFileIds?: string[];
 }
+
+export class DraftCoverDto {
+  @IsOptional()
+  @IsUUID()
+  fileId?: string | null;
+}

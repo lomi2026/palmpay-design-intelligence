@@ -1,6 +1,34 @@
+## 2026-09-14 合并版本发布准备
+
+已按用户决定合并 A 老首页与 B 工作台，移除运行时 A/B 构建选择。包含此前本地验收的直接发布、AI 工具、封面缓存、中文提示、分类标签、团队与用户管理、姓名编辑、删除后重新添加以及统一间距。前端 49 项、后端 74 项测试通过（数据库测试零跳过），生产构建和前后端源码 Lint 通过；本地浏览器验证首页进入工作台、返回首页、详情直达主题正确。线上结果在发布后补充。
+
+另一台电脑请先读 README.md 的继续开发章节，拉取最新 main，勿复制旧构建文件或把本地密钥提交仓库。
+
+## 2026-09-13 体验审视与两套本地预览
+
+完成发布表单、预览与设计资产/AI 工具/AI Skill/AI 案例详情的共用字段结构；编辑按章节组织，关联内容按名称选择。修复预览旧缓存、发布/删除后的跳转、历史字段回填、自定义选择器自动保存、收藏状态与附件传输限制。A 保留原有中性风格并统一细节；B 提供灰紫/白色卡片、局部青柠强调的新首页与工作台，支持深浅主题和手机布局。两者共用正式 API 与组织数据。
+
+本轮 Web 47 项、API 定向回归 26 项通过，两个生产构建及其类型检查通过，前端源码 Lint 与差异检查通过；四类内容完整流程、封面/9 MB 附件、关联、收藏、移动弹层实测通过，48 个主要页面/视口组合无横向溢出，管理七分区只读检查完成。QA 内容已软删除；历史/审计按现有规则保留。未部署线上，未改动认证、角色或数据库结构。
+
+预览 A： http://127.0.0.1:3000/workspace ；B： http://127.0.0.1:3002/ 。详见 [体验审视报告](17-EXPERIENCE-DESIGN-REVIEW-2026-09-13.md)。
+
+## 2026-09-12 内容删除与设计资产封面验收
+
+作者和管理员可删除权限范围内内容，删除与审计同事务，正式列表和详情排除已删除内容。设计资产卡片已替换旧模拟缩略图为灰色占位；创建和编辑支持可选封面上传、替换、移除，封面使用版本 COVER 关联，发布时同步。图片经文件权限校验展示，不计入下载。
+
+API 64 项测试、Web 38 项测试全部通过，无跳过；类型检查、Lint、生产构建通过。本地真实 PNG 上传、字节读取、封面发布/移除、版本隔离、非图片拒绝、作者草稿/已发布删除及管理员删除已验证。资产、提交和内容管理页面返回 200，入口及占位已生效。仅本地更新，未部署线上。
+
+## 2026-09-12 最新决定：提交即发布（替代下文旧审核流程）
+
+本地验收完成：API 63 项测试全部通过（含真实 PostgreSQL 集成测试，无跳过），Web 38 项测试全部通过；前后端类型检查、Lint、Web 生产构建和差异检查通过。五类内容首次发布、更新版本、目录读取、附件访问及权限边界通过；旧审核接口返回 404，审核角色和权限不存在，角色管理及提交页返回 200。迁移已应用到本地，线上尚未部署。
+
+取消内容审核及独立发布审批，移除审核中心、审核角色、审核权限、审核待办和审核统计。具备内容编辑权限的作者或管理员可以保存草稿并提交发布；服务端完整度校验通过后，在同一事务中发布版本、详情与分类标签，立即进入原有可见范围内的目录。登录、组织隔离、内容归属及其他管理权限保持有效。
+
+已有审核中、退回或待发布版本恢复为可编辑草稿，由作者决定何时发布，不自动公开历史内容。历史审核及审计表保留用于数据追溯，不提供审核操作或提醒。旧审核人角色移除，原角色用户按原范围转换为普通成员。AI 输出的人工复核说明属于内容字段，不是平台审批流程。
+
 # PalmPay体验设计Hub — Current Project Status
 
-Last Updated: 2026-09-04
+Last Updated: 2026-09-12
 
 ## Current Phase
 
@@ -8,7 +36,11 @@ Last Updated: 2026-09-04
 
 ## Current Objective
 
-The user-approved taxonomy linkage is locally implemented and verified on 2026-09-04. All four authoring flows now offer type-appropriate single-category and multi-tag selection; disabled options are excluded from new selection and normal catalog filter options, while existing disabled associations are retained and marked in the editor/preview. The API validates organization, status and content type and ignores untrusted nested taxonomy input. Version snapshots hold taxonomy, and publication atomically promotes reviewed associations without modifying the current published content during drafting. Administration counts real non-deleted current associations and exposes permission-gated, paginated linked-content lists. API tests pass 55/55 (15 real PostgreSQL integration checks, zero skips), Web tests pass 40/40, both builds/typechecks and lints pass. Chrome acceptance verified two-way tag saves with success notices, creation/edit persistence, historical disabled labels, preview, filter exclusion and exact association counts/lists. The temporary browser draft was soft-deleted and the tested tag restored to disabled. Local acceptance at `http://localhost:3000` now uses API `http://127.0.0.1:3001` and isolated database `palmpay_taxonomy_acceptance_20260904`; it no longer writes to the remote acceptance API. Existing localhost sessions may need a fresh email login. No remote deployment is claimed; frontend/backend co-deployment and remote acceptance remain pending. Details and API behavior: `docs/16-TAXONOMY-LINKAGE-ACCEPTANCE.md`.
+On 2026-09-12, by explicit user request, AI tools became a fifth formal content type (`AI_TOOL`) with dedicated form fields, draft serialization/preview, publication projection into `ai_tool_details`, and permission-filtered catalog/detail/create/edit links. The existing independent-review and publication boundaries remain intact. Local HTTP acceptance verified creation, autosave and reload, draft exclusion from published lists, submission, independent reviewer assignment/approval, publication, detail reads and archival; the temporary acceptance record was archived. Web production build, typecheck, lint and 47 Web tests passed. API build/lint and runnable regression checks passed; 15 existing database integration suite cases were skipped in that runner, separately from the live local acceptance above. The local database `palmpay_design_hub` is now at all eight migrations, including the previously pending disabled-tag-default migration and the new AI-tool migration. No remote deployment was performed; deployment requires the migration and coordinated API/Web release.
+
+The user-approved taxonomy linkage is locally implemented and verified on 2026-09-04. All four authoring flows now offer type-appropriate single-category and multi-tag selection; disabled options are excluded from new selection and normal catalog filter options, while existing disabled associations are retained and marked in the editor/preview. The API validates organization, status and content type and ignores untrusted nested taxonomy input. Version snapshots hold taxonomy, and publication atomically promotes reviewed associations without modifying the current published content during drafting. Administration counts real non-deleted current associations and exposes permission-gated, paginated linked-content lists. API tests pass 55/55 (15 real PostgreSQL integration checks, zero skips), Web tests pass 40/40, both builds/typechecks and lints pass. Chrome acceptance verified two-way tag saves with success notices, creation/edit persistence, historical disabled labels, preview, filter exclusion and exact association counts/lists. The temporary browser draft was soft-deleted and the tested tag restored to disabled. Local acceptance at `http://localhost:3000` now uses API `http://127.0.0.1:3001` and isolated database `palmpay_taxonomy_acceptance_20260904`; it no longer writes to the remote acceptance API. Existing localhost sessions may need a fresh email login. This previously local-only work is now released: see the production verification below. Details and API behavior: `docs/16-TAXONOMY-LINKAGE-ACCEPTANCE.md`.
+
+On 2026-09-04 the user explicitly authorized publishing the code to `lomi2026/palmpay-design-intelligence`. Backend commit `91d96c9` deployed successfully through Render (`dep-dad18kks728c73a7ef60`). The first Vercel result was only **Preview**, not the formal domain: its success alone did not update the public application. A history-preserving release merge `d1057be` into `main` has the exact same source tree as `91d96c9` and completed Vercel **Production** deployment `6255747400`. The formal domain `https://palmpay-design-intelligence-web.vercel.app` now serves the taxonomy controls and administration/comfort fixes. Authenticated HTTP acceptance on that exact domain verified both tag statuses and rendered hidden-field values, active-only authoring options, real linked-content counts, the new submission controls, and unauthenticated admin rejection (401). The two final API writes took 361/367 ms including network; all 33 tag statuses match their pre-test values. Browser automation repeatedly timed out, so this is not claimed as a fresh browser-click replay; the prior local browser evidence remains separate. Earlier status entries calling feature-branch Vercel builds deployed must be read as Preview unless a Production deployment is explicitly identified.
 
 Close the high-priority content-integrity, scoped-RBAC and authentication-recovery gaps found by the 2026-07-31 prelaunch audit, then execute the deployed contributor → reviewer → administrator acceptance flow. Production release merge `eb14ed8` preserves the previous `main` history while publishing the accepted `codex/v1-project-handoff` tree.
 

@@ -1,7 +1,7 @@
-const FRESH_ON_ENTRY_ROUTES = new Set(['/workspace/recent']);
-
 export function shouldPrefetchWorkspaceRoute(href: string) {
-  return !FRESH_ON_ENTRY_ROUTES.has(href.split('?')[0] ?? href);
+  const [pathname, query] = href.split('?');
+  return pathname !== '/workspace/recent'
+    && !(pathname === '/workspace/favorites' && new URLSearchParams(query).get('tab') === 'recent');
 }
 
 export function filterWorkspaceWarmRoutes(routes: string[]) {

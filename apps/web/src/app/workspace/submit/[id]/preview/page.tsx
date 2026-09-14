@@ -1,15 +1,14 @@
+import { loadEditorDraft } from '@/lib/load-editor-draft';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { ApiError, serverApiFetch } from '@/lib/api';
-import { authenticatedApiHeaders } from '@/lib/auth';
+import { ApiError } from '@/lib/api';
 import { DraftPreviewContent } from '@/components/workspace/draft-preview-content';
 
-import type { Draft } from '../../draft-editor';
 
 async function getDraft(id: string) {
   try {
-    return await serverApiFetch<Draft>(`/api/content-drafts/${encodeURIComponent(id)}`, { headers: await authenticatedApiHeaders() });
+    return await loadEditorDraft(id);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) notFound();
     if (error instanceof ApiError && error.status === 409) redirect('/workspace/submissions');

@@ -25,7 +25,6 @@ test('dark theme uses the approved low-glare semantic palette', () => {
 
 test('large governance callouts no longer flash pure white in dark mode', () => {
   const calloutFiles = [
-    '../src/app/workspace/insights/page.tsx',
     '../src/app/workspace/overview/page.tsx',
     '../src/app/workspace/ai-projects/[slug]/page.tsx',
   ];

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 type NativeSelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   containerClassName?: string;
+  onValueChange?: (value: string) => void;
 };
 
 type SelectOption = {
@@ -37,6 +38,7 @@ export function NativeSelect({
   children,
   className,
   containerClassName,
+  onValueChange,
   defaultValue,
   disabled,
   id,
@@ -66,6 +68,7 @@ export function NativeSelect({
       submissionInput.current.value = nextValue === EMPTY_VALUE ? '' : nextValue;
     }
     setUncontrolledValue(nextValue);
+    onValueChange?.(nextValue === EMPTY_VALUE ? '' : nextValue);
   }
 
   return (

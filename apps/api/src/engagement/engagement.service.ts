@@ -1,4 +1,6 @@
+import { searchTerms, containsPattern } from './search-terms';
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -156,22 +158,26 @@ export class EngagementService {
     contentId: string,
     input: CreateUsageConfirmationDto,
   ) {
+    const manualName = input.projectName?.trim();
+    if (!input.projectContentId && !manualName) throw new BadRequestException('请选择项目或手动填写项目名称。');
+    if (input.projectContentId && manualName) throw new BadRequestException('请选择一种项目关联方式。');
     const [content, project] = await Promise.all([
       this.findAccessibleContent(user, contentId),
-      this.prisma.content.findFirst({
+      input.projectContentId ? this.prisma.content.findFirst({
         where: {
           id: input.projectContentId,
           contentType: ContentType.AI_PROJECT,
           ...this.publishedAccessWhere(user),
         },
         select: { id: true, title: true, projectDetail: { select: { projectCode: true } } },
-      }),
+      }) : Promise.resolve(null),
     ]);
-    if (!project) throw new NotFoundException('The referenced AI project is not available.');
-    const reference = project.projectDetail?.projectCode ?? project.id;
+    if (input.projectContentId && !project) throw new NotFoundException('The referenced AI project is not available.');
+    const reference = project ? (project.projectDetail?.projectCode ?? project.id) : manualName!;
     const metadata = {
-      projectContentId: project.id,
-      projectTitle: project.title,
+      ...(project ? { projectContentId: project.id } : {}),
+      projectTitle: project?.title ?? manualName!,
+      projectSource: project ? 'catalog' : 'manual',
       ...(input.note ? { note: input.note } : {}),
     };
     await this.prisma.$transaction([
@@ -186,7 +192,7 @@ export class EngagementService {
           metadata,
         },
       }),
-      this.prisma.usageEvent.create({
+      ...(project ? [this.prisma.usageEvent.create({
         data: {
           organizationId: user.organizationId,
           userId: user.id,
@@ -196,14 +202,14 @@ export class EngagementService {
           ...(input.sourcePage ? { sourcePage: input.sourcePage } : {}),
           metadata: { contentId: content.id, contentTitle: content.title },
         },
-      }),
+      })] : []),
     ]);
     return {
       confirmed: true,
       project: {
-        id: project.id,
-        title: project.title,
-        projectCode: project.projectDetail?.projectCode ?? null,
+        id: project?.id ?? null,
+        title: project?.title ?? manualName,
+        projectCode: project?.projectDetail?.projectCode ?? null,
       },
     };
   }
@@ -362,6 +368,8 @@ export class EngagementService {
     const tagFilter = input.tag
       ? Prisma.sql`AND EXISTS (SELECT 1 FROM "content_tags" ct2 JOIN "tags" t2 ON t2.id = ct2.tag_id WHERE ct2.content_id = c.id AND t2.normalized_name = ${input.tag.trim().toLowerCase()})`
       : Prisma.empty;
+    const terms = searchTerms(keyword);
+    const fragments = terms.length ? Prisma.join(terms.map(term => Prisma.sql`plain_text ILIKE ${containsPattern(term)}`), ' AND ') : Prisma.sql`FALSE`;
     const rows = await this.prisma.$queryRaw<Array<{ id: string; score: number }>>(Prisma.sql`
       WITH searchable AS (
         SELECT c.id,
@@ -383,7 +391,7 @@ export class EngagementService {
       )
       SELECT id, ts_rank(document, plainto_tsquery('simple', ${keyword}))::float AS score
       FROM searchable
-      WHERE document @@ plainto_tsquery('simple', ${keyword}) OR plain_text ILIKE ${`%${keyword}%`}
+      WHERE document @@ plainto_tsquery('simple', ${keyword}) OR plain_text ILIKE ${containsPattern(keyword)} OR (${fragments})
       ORDER BY score DESC, id ASC
     `);
     return rows.map((row) => row.id);

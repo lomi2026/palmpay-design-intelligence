@@ -24,8 +24,8 @@ export default async function SearchPage({
     : null;
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
-      <WorkspacePageHero description="在全部正式内容中搜索；结果会先按你的组织与权限范围过滤。" eyebrow="GLOBAL SEARCH" metric={result ? { value: result.total, label: '可访问结果' } : undefined} title="用一个关键词，找到可复用的团队经验。" />
-      <form className="mt-5 flex max-w-3xl gap-2">
+      <WorkspacePageHero eyebrow="GLOBAL SEARCH" metric={result ? { value: result.total, label: '可访问结果' } : undefined} title="用一个关键词，找到可复用的团队经验。" />
+      <form className="mt-6 flex max-w-3xl gap-2">
         <Input
           name="q"
           defaultValue={query}
@@ -39,11 +39,11 @@ export default async function SearchPage({
       </form>
       {result ? (
         <section className="mt-6">
-          <p className="mb-5 text-sm text-white/50">
+          <p className="mb-6 text-sm text-white/50">
             “{query}”共找到 {result.total} 项可访问内容
           </p>
           {result.items.length ? (
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {result.items.map((content) => (
                 <div className="relative" key={content.id}>
                   <ContentCard content={content} />
@@ -53,7 +53,7 @@ export default async function SearchPage({
                     <input
                       type="hidden"
                       name="href"
-                      value={`/workspace/${content.contentType === 'DESIGN_ASSET' ? 'design-assets' : content.contentType === 'AI_SKILL' ? 'ai-skills' : content.contentType === 'AI_CASE' ? 'ai-cases' : 'ai-projects'}/${content.slug}`}
+                      value={`/workspace/${content.contentType === 'DESIGN_ASSET' ? 'design-assets' : content.contentType === 'AI_SKILL' ? 'ai-skills' : content.contentType === 'AI_CASE' ? 'ai-cases' : content.contentType === 'AI_TOOL' ? 'ai-tools' : 'ai-projects'}/${content.slug}`}
                     />
                     <button
                       aria-label={`打开 ${content.title}`}

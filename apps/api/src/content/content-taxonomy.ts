@@ -36,13 +36,13 @@ export async function validateTaxonomy(
   if (selection.categoryId) {
     const category = await tx.category.findFirst({ where: { id: selection.categoryId, organizationId } });
     if (!category || (category.id !== previous.categoryId &&
-      (category.status !== 'ACTIVE' || !category.contentTypes.includes(contentType)))) {
+      (category.deletedAt || category.status !== 'ACTIVE' || !category.contentTypes.includes(contentType)))) {
       throw new BadRequestException('所选分类已停用、不适用于此内容类型，或不属于当前组织。请重新选择。');
     }
   }
   if (selection.tagIds.length) {
     const tags = await tx.tag.findMany({ where: { id: { in: selection.tagIds }, organizationId } });
-    if (tags.length !== selection.tagIds.length || tags.some((tag) => tag.status !== 'ACTIVE' && !previous.tagIds.includes(tag.id))) {
+    if (tags.length !== selection.tagIds.length || tags.some((tag) => (tag.deletedAt || tag.status !== 'ACTIVE') && !previous.tagIds.includes(tag.id))) {
       throw new BadRequestException('所选标签已停用或不属于当前组织。请重新选择。');
     }
   }

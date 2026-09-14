@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
@@ -10,7 +11,10 @@ import { RoleScopeType, UserStatus } from '../generated/prisma/enums';
 import type {
   AssignUserRoleDto,
   UpdateTeamDto,
+  CreateTeamDto,
+  CreateUserDto,
   UpdateUserStatusDto,
+  UpdateUserNameDto,
   UserListQueryDto,
 } from './identity.dto';
 import { AuditService } from '../governance/audit.service';
@@ -50,11 +54,83 @@ export class IdentityService {
     });
   }
 
+  async deleteUser(organizationId: string, userId: string, actorId: string) {
+    if (userId === actorId) throw new BadRequestException('不能删除当前登录的账号。');
+    return this.prisma.$transaction(async tx => {
+      const user = await tx.user.findFirst({ where: { id: userId, organizationId, deletedAt: null } });
+      if (!user) throw new NotFoundException('用户不存在或已删除。');
+      const [contents, teams] = await Promise.all([
+        tx.content.count({ where: { organizationId, ownerId: userId, deletedAt: null } }),
+        tx.team.count({ where: { organizationId, ownerId: userId } }),
+      ]);
+      if (contents) throw new ConflictException('该用户仍负责内容，请先在停用操作中选择接任人并完成内容转移，再删除账号。');
+      if (teams) throw new ConflictException('该用户仍是团队负责人，请先在团队管理中更换负责人。');
+      await tx.userRole.deleteMany({ where: { userId } });
+      await tx.user.update({ where: { id: userId }, data: { deletedAt: new Date(), status: UserStatus.DISABLED, primaryTeamId: null } });
+      await tx.auditLog.create({ data: { organizationId, actorId, action: 'user.delete', entityType: 'user', entityId: userId, beforeData: { name: user.name, email: user.email }, afterData: { deleted: true } } });
+      return { deleted: true };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }
+
+  async createUser(organizationId: string, input: CreateUserDto, actorId: string) {
+    const name = input.name.trim();
+    const email = input.email.trim().toLowerCase();
+    if (!name) throw new BadRequestException('请填写用户姓名。');
+    try {
+      return await this.prisma.$transaction(async tx => {
+        const [existing, team, role] = await Promise.all([
+          tx.user.findFirst({ where: { organizationId, email: { equals: email, mode: 'insensitive' } } }),
+          tx.team.findFirst({ where: { id: input.teamId, organizationId, status: 'ACTIVE' } }),
+          tx.role.findFirst({ where: { id: input.roleId, OR: [{ organizationId: null }, { organizationId }] } }),
+        ]);
+        if (existing && !existing.deletedAt) throw new ConflictException('该邮箱已存在，请在用户列表中管理现有账号。');
+        if (!team) throw new BadRequestException('请选择当前组织内已启用的团队。');
+        if (!role) throw new BadRequestException('请选择当前组织可用的角色。');
+        if (existing) await tx.userRole.deleteMany({ where: { userId: existing.id } });
+        const data = {
+          organizationId, name, email, primaryTeamId: team.id, status: UserStatus.ACTIVE,
+          userRoles: { create: { roleId: role.id, scopeType: RoleScopeType.ORGANIZATION, scopeId: organizationId, createdBy: actorId } },
+        };
+        const created = existing
+          ? await tx.user.update({ where: { id: existing.id }, data: { ...data, deletedAt: null }, include: userDetails })
+          : await tx.user.create({ data, include: userDetails });
+        await tx.auditLog.create({ data: { organizationId, actorId, action: existing ? 'user.restore' : 'user.create', entityType: 'user', entityId: created.id, afterData: { name, email, primaryTeamId: team.id, roleId: role.id, scopeType: 'ORGANIZATION', status: 'ACTIVE' } } });
+        return created;
+      });
+    } catch (error) {
+      if (typeof error === 'object' && error && 'code' in error && error.code === 'P2002') throw new ConflictException('该邮箱已存在，请在用户列表中管理现有账号。');
+      throw error;
+    }
+  }
+
+  async createTeam(organizationId: string, input: CreateTeamDto, actorId: string) {
+    const name = input.name.trim();
+    if (!name) throw new BadRequestException('请填写团队名称。');
+    if (input.ownerId && !await this.prisma.user.findFirst({ where: { id: input.ownerId, organizationId, deletedAt: null, status: 'ACTIVE' } })) throw new BadRequestException('请选择当前组织内的有效负责人。');
+    const created = await this.prisma.team.create({ data: { organizationId, name, code: `team-${randomUUID()}`, ownerId: input.ownerId } });
+    await this.audit.write({ organizationId, actorId, action: 'team.create', entityType: 'team', entityId: created.id, afterData: created });
+    return created;
+  }
+
+  async deleteTeam(organizationId: string, teamId: string, actorId: string) {
+    const deleted = await this.prisma.$transaction(async tx => {
+      await tx.$queryRaw(Prisma.sql`SELECT id FROM teams WHERE id = ${teamId}::uuid AND organization_id = ${organizationId}::uuid FOR UPDATE`);
+      const team = await tx.team.findFirst({ where: { id: teamId, organizationId }, include: { _count: { select: { members: true, contents: true, children: true, suggestedProjects: true } } } });
+      if (!team) throw new NotFoundException('团队不存在或已删除。');
+      if (Object.values(team._count).some(count => count > 0)) throw new ConflictException('该团队仍有关联成员、内容或项目，请先调整归属；暂不使用可选择停用。');
+      await tx.team.delete({ where: { id: teamId } });
+      return team;
+    });
+    await this.audit.write({ organizationId, actorId, action: 'team.delete', entityType: 'team', entityId: teamId, beforeData: deleted });
+    return { deleted: true };
+  }
+
   async updateTeam(organizationId: string, teamId: string, input: UpdateTeamDto, actorId: string) {
     if (input.name === undefined && input.ownerId === undefined && input.status === undefined) {
       throw new BadRequestException('At least one team field must be provided.');
     }
 
+    if (input.name !== undefined && !input.name.trim()) throw new BadRequestException('请填写团队名称。');
     const team = await this.prisma.team.findFirst({ where: { id: teamId, organizationId } });
     if (!team) throw new NotFoundException('Team not found.');
 
@@ -118,6 +194,18 @@ export class IdentityService {
     });
     if (!user) throw new NotFoundException('User not found.');
     return user;
+  }
+
+  async updateUserName(organizationId: string, userId: string, input: UpdateUserNameDto, actorId: string) {
+    const name = input.name.trim();
+    if (!name) throw new BadRequestException('请填写用户姓名。');
+    return this.prisma.$transaction(async tx => {
+      const existing = await tx.user.findFirst({ where: { id: userId, organizationId, deletedAt: null } });
+      if (!existing) throw new NotFoundException('用户不存在或已删除。');
+      const updated = await tx.user.update({ where: { id: userId }, data: { name }, include: userDetails });
+      await tx.auditLog.create({ data: { organizationId, actorId, action: 'user.update', entityType: 'user', entityId: userId, beforeData: { name: existing.name }, afterData: { name } } });
+      return updated;
+    });
   }
 
   async updateUserStatus(

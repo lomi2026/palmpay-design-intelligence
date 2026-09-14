@@ -8,25 +8,29 @@ function actions() {
   const source = readFileSync(new URL('../src/app/workspace/submit/actions.ts', import.meta.url), 'utf8');
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const requests = [];
+  const revalidated = [];
   const actionModule = { exports: {} };
   const imports = {
     '@/lib/auth': { authenticatedApiHeaders: async () => ({ Authorization: 'test' }) },
     '@/lib/api': { serverApiFetch: async (path, init) => { requests.push({ path, ...init }); return { id: 'draft' }; } },
+    'next/cache': { revalidatePath: (path) => revalidated.push(path) },
     'next/navigation': { redirect: () => {} },
   };
-  runInNewContext(code, { module: actionModule, exports: actionModule.exports, require: (name) => imports[name] });
-  return { actions: actionModule.exports, requests };
+  runInNewContext(code, { File, FormData, module: actionModule, exports: actionModule.exports, require: (name) => imports[name] });
+  return { actions: actionModule.exports, requests, revalidated };
 }
 
 test('create, autosave and preview all submit the category and multiple tag IDs', async () => {
   const f = new FormData();
   f.set('id', 'draft'); f.set('contentType', 'AI_SKILL'); f.set('title', 'test'); f.set('categoryId', 'category');
   f.append('tagIds', 'tag-1'); f.append('tagIds', 'tag-2');
+  f.set('teamId', '11111111-1111-4111-8111-111111111111');
   const a = actions();
   await a.actions.createDraftAction({}, f);
   await a.actions.autosaveDraftAction({}, f);
   await a.actions.saveAndPreviewDraftAction(f);
   assert.equal(a.requests.length, 3);
+  assert.deepEqual(a.revalidated, ['/workspace/submit/draft']);
   for (const request of a.requests) {
     const body = JSON.parse(request.body);
     assert.equal(body.categoryId, 'category');
@@ -54,4 +58,27 @@ test('catalog options exclude disabled records while draft controls preserve sel
   assert.match(fields, /已停用/);
   assert.match(editor, /onResetCapture/);
   assert.match(editor, /onChange=\{scheduleAutosave\}/);
+});
+
+
+test('AI tool creation, autosave and preview preserve dedicated tool fields', async () => {
+  const f = new FormData();
+  for (const [key, value] of Object.entries({ id: 'draft', contentType: 'AI_TOOL', title: 'Tool', websiteUrl: 'https://example.test', vendor: 'Team', platforms: 'Web\nMobile', scenarios: 'Design', usageGuide: 'Steps', limitations: 'Limits', pricingModel: 'Free' })) f.set(key, value);
+  f.set('teamId', '11111111-1111-4111-8111-111111111111');
+  const a = actions();
+  await a.actions.createDraftAction({}, f);
+  await a.actions.autosaveDraftAction({}, f);
+  await a.actions.saveAndPreviewDraftAction(f);
+  assert.equal(a.requests.length, 3);
+  assert.deepEqual(a.revalidated, ['/workspace/submit/draft']);
+  for (const request of a.requests) {
+    const body = JSON.parse(request.body).body;
+    assert.equal(body.websiteUrl, 'https://example.test');
+    assert.equal(body.vendor, 'Team');
+    assert.deepEqual(body.platforms, ['Web', 'Mobile']);
+    assert.equal(body.usageGuide, 'Steps');
+    assert.equal(body.limitations, 'Limits');
+    assert.equal(body.pricingModel, 'Free');
+    assert.equal(body.projectCode, undefined);
+  }
 });

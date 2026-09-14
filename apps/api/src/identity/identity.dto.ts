@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsEmail,
   IsInt,
   IsOptional,
   IsString,
@@ -72,4 +73,23 @@ export class AssignUserRoleDto {
 
   @IsUUID()
   scopeId!: string;
+}
+
+export class CreateTeamDto {
+  @IsString() @MinLength(1) @MaxLength(100) name!: string;
+  @IsOptional() @IsUUID() ownerId?: string;
+}
+
+export class CreateUserDto {
+  @IsEmail() @MaxLength(320) email!: string;
+  @IsString() @MinLength(1) @MaxLength(100) name!: string;
+  @IsUUID() roleId!: string;
+  @IsUUID() teamId!: string;
+}
+
+export class UpdateUserNameDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name!: string;
 }

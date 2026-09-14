@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview:a:build": "NEXT_DIST_DIR=.next-preview-a next build",
+    "preview:a": "NEXT_DIST_DIR=.next-preview-a next start --hostname 127.0.0.1 --port 3000",
+    "preview:b:build": "DESIGN_VARIANT=studio NEXT_DIST_DIR=.next-preview-b next build",
+    "preview:b": "DESIGN_VARIANT=studio NEXT_DIST_DIR=.next-preview-b next start --hostname 127.0.0.1 --port 3002"
   },
   "dependencies": {
     "@hookform/resolvers": "latest",

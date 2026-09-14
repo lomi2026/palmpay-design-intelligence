@@ -9,60 +9,25 @@ export class NotificationsService {
   async list(user: AuthenticatedUser) {
     const [items, unreadCount] = await Promise.all([
       this.prisma.notification.findMany({
-        where: { receiverId: user.id },
+        where: { receiverId: user.id, NOT: { type: { startsWith: 'review_' } } },
         orderBy: { createdAt: 'desc' },
         take: 100,
       }),
-      this.prisma.notification.count({ where: { receiverId: user.id, readAt: null } }),
+      this.prisma.notification.count({ where: { receiverId: user.id, NOT: { type: { startsWith: 'review_' } }, readAt: null } }),
     ]);
-    const reviewIds = items.flatMap((item) =>
-      item.type === 'review_changes_requested' &&
-      item.relatedEntityType === 'review_request' &&
-      item.relatedEntityId
-        ? [item.relatedEntityId]
-        : [],
-    );
-    const reviews = reviewIds.length
-      ? await this.prisma.reviewRequest.findMany({
-          where: {
-            id: { in: reviewIds },
-            content: { organizationId: user.organizationId, deletedAt: null },
-          },
-          select: {
-            id: true,
-            status: true,
-            content: {
-              select: { id: true, slug: true, contentType: true, status: true },
-            },
-          },
-        })
-      : [];
-    const reviewsById = new Map(reviews.map((review) => [review.id, review]));
-
-    return {
-      items: items.map((item) => ({
-        ...item,
-        relatedReview:
-          item.type === 'review_changes_requested' &&
-          item.relatedEntityType === 'review_request' &&
-          item.relatedEntityId
-            ? reviewsById.get(item.relatedEntityId) ?? null
-            : null,
-      })),
-      unreadCount,
-    };
+    return { items, unreadCount };
   }
 
   async unreadCount(user: AuthenticatedUser) {
     return {
       unreadCount: await this.prisma.notification.count({
-        where: { receiverId: user.id, readAt: null },
+        where: { receiverId: user.id, NOT: { type: { startsWith: 'review_' } }, readAt: null },
       }),
     };
   }
 
   async markRead(user: AuthenticatedUser, id: string) {
-    const updated = await this.prisma.notification.updateMany({ where: { id, receiverId: user.id, readAt: null }, data: { readAt: new Date() } });
+    const updated = await this.prisma.notification.updateMany({ where: { id, receiverId: user.id, NOT: { type: { startsWith: 'review_' } }, readAt: null }, data: { readAt: new Date() } });
     if (updated.count) return { id, read: true };
     const notification = await this.prisma.notification.findUnique({ where: { id } });
     if (!notification) throw new NotFoundException('Notification was not found.');
@@ -71,7 +36,7 @@ export class NotificationsService {
   }
 
   async markAllRead(user: AuthenticatedUser) {
-    await this.prisma.notification.updateMany({ where: { receiverId: user.id, readAt: null }, data: { readAt: new Date() } });
+    await this.prisma.notification.updateMany({ where: { receiverId: user.id, NOT: { type: { startsWith: 'review_' } }, readAt: null }, data: { readAt: new Date() } });
     return { read: true };
   }
 }

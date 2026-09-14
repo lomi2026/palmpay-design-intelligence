@@ -1,52 +1,62 @@
 'use client';
 
-import { ChevronDown, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-
+import { DropdownMenu } from 'radix-ui';
+import { useFormStatus } from 'react-dom';
 import { logout } from '@/app/login/actions';
-import { Button } from '@/components/ui/button';
 
-export function WorkspaceAccountMenu({ name, roleLabel }: { name: string; roleLabel: string }) {
+const itemClass = 'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--v9-text)] outline-none focus:bg-[var(--v9-soft-hover)] data-[highlighted]:bg-[var(--v9-soft-hover)]';
+
+function LogoutItem() {
+  const { pending } = useFormStatus();
+  return <DropdownMenu.Item asChild disabled={pending} onSelect={(event) => event.preventDefault()}>
+    <button type="submit" className={itemClass} disabled={pending}><LogOut className="size-4" />{pending ? '正在退出…' : '退出登录'}</button>
+  </DropdownMenu.Item>;
+}
+
+export function WorkspaceAccountMenu({ name, email, roleLabel }: { name: string; email: string; roleLabel: string }) {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openedByHover = useRef(false);
+  const cancelClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 180);
+  };
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
 
-  useEffect(() => {
-    if (!open) return;
-
-    function closeFromOutside(event: PointerEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-
-    function closeFromKeyboard(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false);
-    }
-
-    document.addEventListener('pointerdown', closeFromOutside);
-    document.addEventListener('keydown', closeFromKeyboard);
-    return () => {
-      document.removeEventListener('pointerdown', closeFromOutside);
-      document.removeEventListener('keydown', closeFromKeyboard);
-    };
-  }, [open]);
-
-  return (
-    <div className="relative" ref={containerRef}>
+  return <DropdownMenu.Root modal={false} open={open} onOpenChange={(value) => { cancelClose(); setOpen(value); }}>
+    <DropdownMenu.Trigger asChild>
       <button
-        aria-expanded={open}
-        aria-haspopup="menu"
-        className="flex h-10 cursor-pointer items-center gap-2 rounded-[10px] px-2 hover:bg-[var(--v9-soft-hover)]"
-        onClick={() => setOpen((current) => !current)}
+        aria-label="账号菜单"
+        className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full bg-[var(--v9-raised)] text-[11px] font-bold text-[var(--v9-text)] outline-none transition hover:bg-[var(--v9-soft-hover)] focus-visible:ring-2 focus-visible:ring-[var(--v9-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--v9-bg)]"
         type="button"
+        onPointerEnter={(event) => { if (event.pointerType === 'mouse') { cancelClose(); if (!open) { openedByHover.current = true; setOpen(true); } } }}
+        onPointerLeave={(event) => { if (event.pointerType === 'mouse') scheduleClose(); }}
+        onPointerDown={(event) => { cancelClose(); if (open && openedByHover.current) { event.preventDefault(); openedByHover.current = false; } }}
+      >PA</button>
+    </DropdownMenu.Trigger>
+    <DropdownMenu.Portal>
+      <DropdownMenu.Content
+        align="end" sideOffset={8}
+        className="z-50 w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-[var(--v9-line)] bg-[var(--v9-panel-2)] p-1 shadow-xl"
+        onPointerEnter={cancelClose}
+        onPointerLeave={(event) => { if (event.pointerType === 'mouse') scheduleClose(); }}
+        onCloseAutoFocus={(event) => { if (openedByHover.current) event.preventDefault(); openedByHover.current = false; }}
       >
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[var(--v9-raised)] text-[11px] font-bold">{name.slice(0, 2).toUpperCase()}</span>
-        <span className="hidden text-left leading-4 lg:block"><strong className="block text-[12px]">{name}</strong><em className="block text-[11px] not-italic text-[var(--v9-muted)]">{roleLabel}</em></span>
-        <ChevronDown className={`size-3 text-[var(--v9-muted)] transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open ? (
-        <form action={logout} className="absolute right-0 top-11 w-28 rounded-lg border border-[var(--v9-line)] bg-[var(--v9-panel-2)] p-1 shadow-xl" role="menu">
-          <Button type="submit" variant="ghost" className="w-full justify-start text-[var(--v9-text)] hover:bg-[var(--v9-soft-hover)] hover:text-[var(--v9-text)]"><LogOut className="size-4" />退出</Button>
-        </form>
-      ) : null}
-    </div>
-  );
+        <DropdownMenu.Label className="px-3 py-3">
+          <p className="text-sm font-semibold text-[var(--v9-text)]">{name}</p>
+          <p className="mt-2 text-xs font-normal text-[var(--v9-subtle)]">登录邮箱</p>
+          <p className="mt-1 break-all text-sm font-normal text-[var(--v9-text)]">{email}</p>
+          <p className="mt-2 text-xs font-normal text-[var(--v9-muted)]">角色：{roleLabel}</p>
+        </DropdownMenu.Label>
+        <DropdownMenu.Separator className="mx-2 my-1 h-px bg-[var(--v9-line)]" />
+        <form action={logout}><LogoutItem /></form>
+      </DropdownMenu.Content>
+    </DropdownMenu.Portal>
+  </DropdownMenu.Root>;
 }

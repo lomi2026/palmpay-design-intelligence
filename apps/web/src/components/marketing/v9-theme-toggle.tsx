@@ -11,9 +11,10 @@ const themeChangeEvent = 'v9-theme-change';
 
 function savedTheme(): Theme {
   try {
-    const current = window.localStorage.getItem('ppux-theme');
+    const current = window.localStorage.getItem(document.documentElement.dataset.design === 'studio' ? 'ppux-theme-studio' : 'ppux-theme');
     if (current === 'light' || current === 'dark') return current;
 
+    if (document.documentElement.dataset.design === 'studio') return 'light';
     const legacy = window.localStorage.getItem('pp-theme');
     const value = legacy ? JSON.parse(legacy) : null;
     return value === 'light' ? 'light' : 'dark';
@@ -38,7 +39,7 @@ export function V9ThemeToggle() {
   function toggleTheme() {
     const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark';
     try {
-      window.localStorage.setItem('ppux-theme', nextTheme);
+      window.localStorage.setItem(document.documentElement.dataset.design === 'studio' ? 'ppux-theme-studio' : 'ppux-theme', nextTheme);
       window.localStorage.setItem('pp-theme', JSON.stringify(nextTheme));
     } catch {
       // Theme preference is optional and must never block access to the public home.

@@ -9,6 +9,10 @@ import { DraftsService } from '../dist/content/drafts.service.js';
 const validUuid = '3f66f052-dbe9-4e52-9fd4-0146878fc5c5';
 
 const fixtures = {
+  AI_TOOL: {
+    delegate: 'aIToolDetail', changedField: 'usageGuide', changedValue: 'Updated instructions',
+    body: { websiteUrl: 'https://example.test/tool', vendor: 'Test vendor', platforms: ['Web'], scenarios: ['Design'], usageGuide: 'Read the guide', limitations: 'Review outputs', pricingModel: 'Free' },
+  },
   DESIGN_ASSET: {
     delegate: 'assetDetail',
     changedField: 'assetType',
@@ -165,9 +169,9 @@ test('invalid required enum and list data is rejected instead of silently discar
   );
 });
 
-test('upserts all four detail models and updates the same row on a second publication', async () => {
+test('upserts all five detail models and updates the same row on a second publication', async () => {
   const calls = Object.fromEntries(
-    ['assetDetail', 'skillDetail', 'caseDetail', 'aIProjectDetail'].map((delegate) => [delegate, []]),
+    ['assetDetail', 'skillDetail', 'caseDetail', 'aIProjectDetail', 'aIToolDetail'].map((delegate) => [delegate, []]),
   );
   const tx = Object.fromEntries(
     Object.entries(calls).map(([delegate, delegateCalls]) => [
@@ -208,7 +212,7 @@ test('autosave preserves the published detail and publish switches it inside the
     id: 'publisher-id',
     organizationId: 'organization-id',
     primaryTeamId: 'team-id',
-    permissions: ['content.edit_all', 'content.publish'],
+    permissions: ['content.edit_all'],
   };
   const draftVersion = {
     id: 'draft-version-id',
@@ -233,6 +237,7 @@ test('autosave preserves the published detail and publish switches it inside the
     draftVersion,
   };
   const tx = {
+    attachmentRelation: { findFirst: async () => null },
     contentVersion: {
       updateMany: async ({ data }) => { Object.assign(draftVersion, data); return { count: 1 }; },
       findUniqueOrThrow: async () => draftVersion,
@@ -291,10 +296,16 @@ test('autosave preserves the published detail and publish switches it inside the
   assert.equal(publishedDetail.assetType, 'PUBLISHED_STANDARD');
   assert.equal(detailUpsertCount, 0);
 
-  draftVersion.versionStatus = 'APPROVED';
   content = { ...content, draftVersion };
-  await service.publishApproved(user, contentId);
+  await service.publish(user, contentId);
   assert.equal(detailUpsertCount, 1);
   assert.equal(publishedDetail.assetType, 'UPDATED_DRAFT_STANDARD');
   assert.equal(insideTransaction, false);
+});
+
+test('AI tool publication rejects unsafe and credential-bearing website URLs', () => {
+  for (const websiteUrl of ['javascript:alert(1)', 'data:text/html,test', '/relative', 'https://user:password@example.test']) {
+    assert.throws(() => projectContentDetail('AI_TOOL', { ...fixtures.AI_TOOL.body, websiteUrl }));
+  }
+  assert.equal(projectContentDetail('AI_TOOL', fixtures.AI_TOOL.body).data.websiteUrl, 'https://example.test/tool');
 });

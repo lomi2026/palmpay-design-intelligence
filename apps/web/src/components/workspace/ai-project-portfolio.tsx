@@ -112,9 +112,9 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
           <div>
             <h2 className="text-[24px] font-semibold tracking-[-.045em] text-white md:text-[30px]" id="portfolio-overview-title">项目探索组合</h2>
           </div>
-          <p className="max-w-md text-[12px] leading-5 text-white/45">项目状态与优先级均来自已发布内容；建议优先验证不替代正式立项和审批。</p>
+
         </div>
-        <div className="mt-5 grid gap-px overflow-hidden rounded-[18px] border border-white/[.1] bg-white/[.1] sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-6 grid gap-px overflow-hidden rounded-[18px] border border-white/[.1] bg-white/[.1] sm:grid-cols-2 lg:grid-cols-5">
           {[
             ['探索项目', projects.length, '已发布项目总数'],
             ['可进入验证', stageCounts.ready, '可立项或试点中'],
@@ -129,17 +129,17 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
             </div>
           ))}
         </div>
-        {suggestedProjects.length ? <div className="mt-7"><div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><Sparkles className="size-3.5" />建议优先验证</div><div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">{suggestedProjects.map(({ project, rank }) => <Link className="group rounded-[16px] border border-white/[.1] bg-white/[.025] p-4 transition hover:border-white/[.25] hover:bg-white/[.055]" href={`/workspace/ai-projects/${project.slug}`} key={project.id}><div className="flex items-center justify-between gap-3"><span className="font-mono text-[11px] font-semibold tracking-[.08em] text-white/65">{project.projectDetail?.projectCode ?? 'AI'}</span><span className="text-[10px] text-white/42">优先级 #{rank}</span></div><h3 className="mt-5 line-clamp-2 min-h-10 text-[15px] font-semibold leading-5 tracking-[-.025em] text-white">{project.title}</h3><p className="mt-2 line-clamp-2 text-[11px] leading-5 text-white/48">{project.summary ?? '尚未补充项目摘要。'}</p><span className="mt-4 inline-flex items-center gap-1 text-[11px] text-white/55 transition group-hover:text-white">查看项目 <ArrowUpRight className="size-3.5" /></span></Link>)}</div></div> : null}
+        {suggestedProjects.length ? <div className="mt-6"><div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><Sparkles className="size-3.5" />建议优先验证</div><div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{suggestedProjects.map(({ project, rank }) => <Link className="suggested-project-card group rounded-[16px] border border-white/[.1] bg-white/[.025] p-4 transition hover:border-white/[.25] hover:bg-white/[.055]" href={`/workspace/ai-projects/${project.slug}`} key={project.id}><div className="flex items-center justify-between gap-3"><span className="font-mono text-[11px] font-semibold tracking-[.08em] text-white/65">{project.projectDetail?.projectCode ?? 'AI'}</span><span className="text-[10px] text-white/42">优先级 #{rank}</span></div><h3 className="mt-6 line-clamp-2 min-h-10 text-[15px] font-semibold leading-5 tracking-[-.025em] text-white">{project.title}</h3><p className="mt-2 line-clamp-2 text-[11px] leading-5 text-white/48">{project.summary ?? '尚未补充项目摘要。'}</p><span className="mt-4 inline-flex items-center gap-1 text-[11px] text-white/55 transition group-hover:text-white">查看项目 <ArrowUpRight className="size-3.5" /></span></Link>)}</div></div> : null}
       </section>
       <div className="overflow-hidden rounded-[20px] border border-white/[.11] bg-[#101011]">
-        <div className="flex flex-col gap-5 border-b border-white/[.1] px-5 py-5 md:px-6">
+        <div className="flex flex-col gap-6 border-b border-white/[.1] px-5 py-5 md:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><SlidersHorizontal className="size-3.5" />按探索维度筛选</div>
             <div className="text-[12px] text-white/45">显示 <strong className="font-semibold text-white">{filteredProjects.length}</strong> / {projects.length} 个项目</div>
           </div>
           <div className="grid gap-4 2xl:grid-cols-[1.15fr_1fr_.9fr]">
             {(['domain', 'value', 'stage'] as const).map((type) => (
-              <div className="grid grid-cols-[56px_minmax(0,1fr)] items-start gap-3" key={type}>
+              <div className="grid grid-cols-[56px_minmax(0,1fr)] items-start gap-4" key={type}>
                 <span className="pt-2 text-[10px] font-semibold tracking-[.12em] text-white/40">{type === 'domain' ? '领域' : type === 'value' ? '目标价值' : '项目阶段'}</span>
                 <div className="flex flex-wrap gap-2">{options[type].map((option) => <FilterChip active={filters[type] === option} key={option} onClick={() => setFilter(type, option)}>{option}</FilterChip>)}</div>
               </div>
@@ -169,7 +169,7 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
                     <Badge className="rounded-full border-white/[.12] bg-white/[.035] px-2.5 text-[10px] font-medium text-white/65" variant="outline">{projectDomain(project)}</Badge>
                     <Badge className="rounded-full border-white/[.12] bg-white/[.035] px-2.5 text-[10px] font-medium text-white/65" variant="outline">{projectValue(project)}</Badge>
                   </div>
-                  <div className="flex items-center gap-2 md:justify-end"><WorkspaceStatusBadge status={project.verificationStatus} /><span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-2 py-0.5 text-[10px] text-[var(--v9-muted)]">优先级：{priorityLabel(priority)}</span></div>
+                  <div className="flex items-center gap-2 md:justify-end"><span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-2 py-0.5 text-[10px] text-[var(--v9-muted)]">优先级：{priorityLabel(priority)}</span></div>
                 </article>
               );
             })}
@@ -178,7 +178,7 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
           <div className="px-6 py-16 text-center">
             <p className="text-[15px] font-semibold text-white">没有符合当前筛选条件的项目</p>
             <p className="mt-2 text-[13px] text-white/45">可清除筛选，查看所有已发布的项目探索方向。</p>
-            {hasFilters ? <Button className="mt-5 border-white/[.14] bg-transparent text-white hover:bg-white/[.07] hover:text-white" onClick={() => setFilters({ domain: '全部领域', value: '全部价值', stage: '全部阶段' })} variant="outline">清除筛选</Button> : null}
+            {hasFilters ? <Button className="mt-6 border-white/[.14] bg-transparent text-white hover:bg-white/[.07] hover:text-white" onClick={() => setFilters({ domain: '全部领域', value: '全部价值', stage: '全部阶段' })} variant="outline">清除筛选</Button> : null}
           </div>
         )}
       </div>

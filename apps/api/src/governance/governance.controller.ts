@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -112,6 +112,18 @@ export class GovernanceController {
     @Body() body: UpdateTagDto,
   ) {
     return this.governance.updateTag(user, tagId, body);
+  }
+
+  @Delete('categories/:categoryId')
+  @RequirePermissions('taxonomy.manage')
+  deleteCategory(@CurrentUser() user: AuthenticatedUser, @Param('categoryId') categoryId: string) {
+    return this.governance.deleteCategory(user, categoryId);
+  }
+
+  @Delete('tags/:tagId')
+  @RequirePermissions('taxonomy.manage')
+  deleteTag(@CurrentUser() user: AuthenticatedUser, @Param('tagId') tagId: string) {
+    return this.governance.deleteTag(user, tagId);
   }
 
   @Get('audit-logs')

@@ -1,10 +1,14 @@
 'use server';
 
+import { userError } from '@/lib/user-error';
+
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
+import { uploadDraftAttachmentAction } from './attachment-actions';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
-export type ActionState = { error?: string; id?: string; savedAt?: string; submitted?: boolean };
+export type ActionState = { error?: string; id?: string; savedAt?: string; publishedHref?: string };
 
 function optionalText(value: FormDataEntryValue | null) {
   const result = typeof value === 'string' ? value.trim() : '';
@@ -18,6 +22,7 @@ function lines(formData: FormData, key: string) {
 
 function structuredBody(contentType: string, formData: FormData) {
   const text = (key: string) => optionalText(formData.get(key));
+  if (contentType === 'AI_TOOL') return { websiteUrl: text('websiteUrl'), vendor: text('vendor'), platforms: lines(formData, 'platforms'), scenarios: lines(formData, 'scenarios'), usageGuide: text('usageGuide'), limitations: text('limitations'), pricingModel: text('pricingModel') };
   if (contentType === 'DESIGN_ASSET') return { assetType: text('assetType'), platforms: lines(formData, 'platforms'), scenarios: lines(formData, 'scenarios'), unsuitableScenarios: lines(formData, 'unsuitableScenarios'), problemStatement: text('problemStatement'), usageGuide: text('usageGuide'), resourceLinks: lines(formData, 'resourceLinks'), relatedAssetIds: lines(formData, 'relatedAssetIds') };
   if (contentType === 'AI_SKILL') return { goal: text('goal'), scenarios: lines(formData, 'scenarios'), unsuitableScenarios: lines(formData, 'unsuitableScenarios'), applicableRoles: lines(formData, 'applicableRoles'), inputRequirements: text('inputRequirements'), outputSchema: text('outputSchema'), promptTemplate: text('promptTemplate'), executionSteps: text('executionSteps'), exampleInput: text('exampleInput'), exampleOutput: text('exampleOutput'), humanReviewRules: text('humanReviewRules'), limitations: text('limitations'), recommendedModels: lines(formData, 'recommendedModels'), dataSecurityLevel: text('dataSecurityLevel'), promptVersion: text('promptVersion') };
   if (contentType === 'AI_CASE') return { background: text('background'), originalProblem: text('originalProblem'), originalProcess: text('originalProcess'), aiIntervention: text('aiIntervention'), aiResponsibilities: text('aiResponsibilities'), humanResponsibilities: text('humanResponsibilities'), resultSummary: text('resultSummary'), beforeAfterComparison: text('beforeAfterComparison'), sampleSize: text('sampleSize'), validationMethod: text('validationMethod'), dataResult: text('dataResult'), limitations: text('limitations'), reusableConclusion: text('reusableConclusion'), relatedSkillContentId: text('relatedSkillContentId'), relatedProjectContentId: text('relatedProjectContentId') };
@@ -26,12 +31,15 @@ function structuredBody(contentType: string, formData: FormData) {
 
 export async function createDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
   try {
+    const teamId = String(formData.get('teamId') ?? '').trim();
+    if (!teamId) return { error: '请先选择归属团队。' };
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(teamId)) return { error: '归属团队信息无效，请重新选择团队后重试。' };
     const draft = await serverApiFetch<{ id: string }>('/api/content-drafts', {
       method: 'POST',
       headers: { ...(await authenticatedApiHeaders()), 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contentType: formData.get('contentType'),
-        teamId: formData.get('teamId'),
+        teamId,
         categoryId: optionalText(formData.get('categoryId')),
         tagIds: formData.getAll('tagIds'),
         title: formData.get('title'),
@@ -39,9 +47,15 @@ export async function createDraftAction(_: ActionState, formData: FormData): Pro
         body: structuredBody(String(formData.get('contentType') ?? ''), formData),
       }),
     });
+    const cover = formData.get('coverImage');
+    if (['DESIGN_ASSET', 'AI_TOOL'].includes(String(formData.get('contentType'))) && cover instanceof File && cover.size) {
+      const data = new FormData(); data.set('id', draft.id); data.set('cover', 'true'); data.set('file', cover);
+      const uploaded = await uploadDraftAttachmentAction({}, data);
+      if (uploaded.error) return { id: draft.id, error: `草稿已保存，封面上传失败：${uploaded.error}。请进入草稿重试。` };
+    }
     return { id: draft.id };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : '无法创建草稿。' };
+    return { error: userError(error, '无法创建草稿。') };
   }
 }
 
@@ -54,21 +68,7 @@ export async function createPublishedEditDraftAction(_: ActionState, formData: F
     });
     return { id: draft.id };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : '无法创建编辑草稿。' };
-  }
-}
-
-export async function submitReviewAction(_: ActionState, formData: FormData): Promise<ActionState> {
-  const id = String(formData.get("id") ?? "");
-  try {
-    await serverApiFetch(`/api/reviews/content/${id}/submit`, {
-      method: "POST",
-      headers: { ...(await authenticatedApiHeaders()), "Content-Type": "application/json" },
-      body: JSON.stringify({ message: optionalText(formData.get("message")) }),
-    });
-    return { submitted: true };
-  } catch (error) {
-    return { error: error instanceof Error ? error.message : "无法提交审核。" };
+    return { error: userError(error, '无法创建编辑草稿。') };
   }
 }
 
@@ -89,7 +89,7 @@ export async function autosaveDraftAction(_: ActionState, formData: FormData): P
     });
     return { savedAt: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : '自动保存失败。' };
+    return { error: userError(error, '自动保存失败。') };
   }
 }
 
@@ -108,6 +108,7 @@ export async function saveAndPreviewDraftAction(formData: FormData) {
       body: structuredBody(String(formData.get('contentType') ?? ''), formData),
     }),
   });
+  revalidatePath(`/workspace/submit/${encodeURIComponent(id)}`);
   redirect(`/workspace/submit/${encodeURIComponent(id)}/preview`);
 }
 
@@ -122,6 +123,24 @@ export async function contentLifecycleAction(_: ActionState, formData: FormData)
     });
     return { savedAt: operation === 'unpublish' ? '内容已下架。' : '内容已归档。' };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : '内容状态更新失败。' };
+    return { error: userError(error, '内容状态更新失败。') };
   }
+}
+
+export async function publishDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
+  const saved = await autosaveDraftAction({}, formData);
+  if (saved.error) return saved;
+  let publishedHref = '';
+  try {
+    const id = String(formData.get('id') ?? '');
+    const published = await serverApiFetch<{ contentType: string }>(`/api/content-drafts/${encodeURIComponent(id)}/publish`, {
+      method: 'POST', headers: await authenticatedApiHeaders(),
+    });
+    const segments: Record<string, string> = { DESIGN_ASSET: 'design-assets', AI_SKILL: 'ai-skills', AI_CASE: 'ai-cases', AI_PROJECT: 'ai-projects', AI_TOOL: 'ai-tools' };
+    publishedHref = `/workspace/${segments[published.contentType] ?? 'contributions'}`;
+  } catch (error) {
+    return { error: userError(error, '发布失败，请重试。') };
+  }
+  revalidatePath('/workspace', 'layout');
+  redirect(publishedHref);
 }

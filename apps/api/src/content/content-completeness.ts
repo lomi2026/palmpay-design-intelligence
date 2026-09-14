@@ -22,6 +22,11 @@ const common = [
 ] as const;
 
 const requirements: Record<ContentType, ReadonlyArray<readonly [string, string, 'text' | 'list' | 'value']>> = {
+  AI_TOOL: [
+    ['websiteUrl', '官网链接', 'text'], ['vendor', '提供方', 'text'],
+    ['platforms', '适用平台', 'list'], ['scenarios', '适用场景', 'list'],
+    ['usageGuide', '使用说明', 'text'], ['limitations', '限制与注意事项', 'text'], ['pricingModel', '收费方式', 'text'],
+  ],
   DESIGN_ASSET: [
     ['assetType', '资产类型', 'text'], ['platforms', '适用平台', 'list'], ['scenarios', '适用场景', 'list'],
     ['unsuitableScenarios', '不适用场景', 'list'], ['problemStatement', '解决的问题', 'text'],

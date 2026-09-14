@@ -56,11 +56,6 @@ export class DraftsService {
         draftVersion: {
           select: { id: true, versionNumber: true, versionStatus: true, versionLabel: true },
         },
-        reviewRequests: {
-          orderBy: { submittedAt: 'desc' },
-          take: 1,
-          select: { id: true, status: true, submittedAt: true },
-        },
       },
       orderBy: { updatedAt: 'desc' },
     });
@@ -145,14 +140,14 @@ export class DraftsService {
       throw new ConflictException('Published content is missing its current version reference.');
     if (content.draftVersion) {
       if (
-        new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED]).has(
+        new Set<ContentStatus>([ContentStatus.DRAFT]).has(
           content.draftVersion.versionStatus,
         )
       ) {
         return this.serialize(content);
       }
       throw new ConflictException(
-        'This content already has a draft version in review or awaiting publication.',
+        'This content already has a draft version.',
       );
     }
 
@@ -196,7 +191,55 @@ export class DraftsService {
     return this.serialize(draft);
   }
 
-  async publishApproved(user: AuthenticatedUser, contentId: string) {
+  async setCover(user: AuthenticatedUser, contentId: string, fileId: string | null) {
+    const content = await this.findEditableDraft(user, contentId);
+    if (!['DESIGN_ASSET', 'AI_TOOL'].includes(content.contentType)) throw new BadRequestException('Only design assets and AI tools support a cover.');
+    return this.prisma.$transaction(async (tx) => {
+      // Lock the draft against concurrent publication before changing its cover.
+      const editable = await tx.contentVersion.updateMany({ where: { id: content.draftVersion!.id, versionStatus: 'DRAFT' }, data: { versionStatus: 'DRAFT' } });
+      if (editable.count !== 1) throw new ConflictException('Draft has already been published.');
+      if (fileId) {
+        const file = await tx.fileAttachment.findFirst({ where: { id: fileId, organizationId: user.organizationId, deletedAt: null, uploadStatus: 'READY' } });
+        if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.mimeType) || file.sizeBytes > BigInt(5 * 1024 * 1024)) throw new BadRequestException('请选择不超过 5 MB 的 PNG、JPG 或 WebP 图片。');
+        if (file.uploadedById !== user.id && !user.permissions.includes('content.edit_all')) throw new ForbiddenException('You cannot use this file.');
+      }
+      await tx.attachmentRelation.deleteMany({ where: { entityType: AttachmentEntityType.VERSION, entityId: content.draftVersion!.id, usageType: AttachmentUsageType.COVER } });
+      if (fileId) await tx.attachmentRelation.create({ data: { entityType: AttachmentEntityType.VERSION, entityId: content.draftVersion!.id, usageType: AttachmentUsageType.COVER, fileId } });
+      return { saved: true };
+    });
+  }
+
+  async delete(user: AuthenticatedUser, contentId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const content = await tx.content.findFirst({
+        where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
+      });
+      if (!content) throw new NotFoundException('Content was not found.');
+      if (!this.canEditContent(user, content.ownerId)) {
+        throw new ForbiddenException('You cannot delete this content.');
+      }
+      const deletedAt = new Date();
+      const result = await tx.content.updateMany({
+        where: { id: content.id, organizationId: user.organizationId, ownerId: content.ownerId, deletedAt: null },
+        data: { deletedAt },
+      });
+      if (result.count !== 1) throw new ConflictException('Content changed; refresh and try again.');
+      await tx.contentRelation.deleteMany({ where: { OR: [{ sourceContentId: content.id }, { targetContentId: content.id }] } });
+      await tx.favorite.deleteMany({ where: { contentId: content.id } });
+      await tx.recentView.deleteMany({ where: { contentId: content.id } });
+      await tx.contentTag.deleteMany({ where: { contentId: content.id } });
+      await tx.usageEvent.deleteMany({ where: { organizationId: user.organizationId, OR: [{ contentId: content.id }, { metadata: { path: ['projectContentId'], equals: content.id } }] } });
+      await tx.auditLog.create({ data: {
+        organizationId: user.organizationId, actorId: user.id,
+        action: 'content.delete', entityType: 'content', entityId: content.id,
+        beforeData: { title: content.title, status: content.status },
+        afterData: { deletedAt: deletedAt.toISOString() },
+      } });
+      return { id: content.id, deleted: true };
+    });
+  }
+
+  async publish(user: AuthenticatedUser, contentId: string) {
     const content = await this.prisma.content.findFirst({
       where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
       include: { draftVersion: true, tags: true },
@@ -204,11 +247,12 @@ export class DraftsService {
     if (!content) throw new NotFoundException('Content was not found.');
     if (!content.draftVersion)
       throw new ConflictException('This content does not have a version awaiting publication.');
-    if (content.draftVersion.versionStatus !== ContentStatus.APPROVED) {
-      throw new ConflictException('Only an approved draft version can be published.');
+    if (!this.canEditContent(user, content.ownerId)) throw new ForbiddenException('You cannot publish this content.');
+    if (content.draftVersion.versionStatus !== ContentStatus.DRAFT) {
+      throw new ConflictException('Only a draft version can be published.');
     }
     if (
-      !new Set<ContentStatus>([ContentStatus.APPROVED, ContentStatus.PUBLISHED]).has(content.status)
+      !new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.PUBLISHED]).has(content.status)
     ) {
       throw new ConflictException('This content cannot be published in its current state.');
     }
@@ -227,7 +271,10 @@ export class DraftsService {
         where: {
           id: content.draftVersion!.id,
           contentId: content.id,
-          versionStatus: ContentStatus.APPROVED,
+          versionStatus: ContentStatus.DRAFT,
+          title: content.draftVersion!.title,
+          summary: content.draftVersion!.summary,
+          body: { equals: content.draftVersion!.body as Prisma.InputJsonValue },
         },
         data: { versionStatus: ContentStatus.PUBLISHED, publishedAt: now },
       });
@@ -242,13 +289,14 @@ export class DraftsService {
         content.draftVersion!.body,
       );
 
-      // Only the reviewed snapshot becomes the live catalog associations.
+      // Promote the validated draft snapshot atomically with its catalog associations.
       const taxonomy = taxonomySnapshot(content.draftVersion!.body, content);
       await validateTaxonomy(tx, user.organizationId, content.contentType, taxonomy, taxonomy);
       await projectTaxonomy(tx, content.id, user.id, taxonomy);
 
+      const cover = await tx.attachmentRelation.findFirst({ where: { entityType: AttachmentEntityType.VERSION, entityId: content.draftVersion!.id, usageType: AttachmentUsageType.COVER } });
       const published = await tx.content.updateMany({
-        where: { id: content.id, draftVersionId: content.draftVersion!.id },
+        where: { id: content.id, draftVersionId: content.draftVersion!.id, deletedAt: null },
         data: {
           currentVersionId: content.draftVersion!.id,
           draftVersionId: null,
@@ -256,7 +304,7 @@ export class DraftsService {
           title: content.draftVersion!.title,
           summary: content.draftVersion!.summary,
           publishedAt: now,
-          lastReviewedAt: now,
+          coverFileId: cover?.fileId ?? null,
         },
       });
       if (published.count !== 1)
@@ -341,7 +389,7 @@ export class DraftsService {
       };
       await validateTaxonomy(tx, user.organizationId, content.contentType, taxonomy, previous);
       const changed = await tx.contentVersion.updateMany({
-        where: { id: draft.id, versionStatus: { in: [ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED] } },
+        where: { id: draft.id, versionStatus: { in: [ContentStatus.DRAFT] } },
         data: {
           ...(input.title !== undefined ? { title: input.title } : {}),
           ...(input.summary !== undefined ? { summary: input.summary } : {}),
@@ -350,7 +398,7 @@ export class DraftsService {
           body: withTaxonomy(input.body ?? draft.body, taxonomy),
         },
       });
-      if (changed.count !== 1) throw new ConflictException('此草稿已提交审核，请刷新后重试。');
+      if (changed.count !== 1) throw new ConflictException('此草稿已发布，请刷新后重试。');
       if (content.status !== ContentStatus.PUBLISHED) await projectTaxonomy(tx, content.id, user.id, taxonomy);
       const updatedContent = await tx.content.update({
         where: { id: content.id },
@@ -390,7 +438,7 @@ export class DraftsService {
             );
           }
           await tx.attachmentRelation.deleteMany({
-            where: { entityType: AttachmentEntityType.VERSION, entityId: draft.id },
+            where: { entityType: AttachmentEntityType.VERSION, entityId: draft.id, usageType: AttachmentUsageType.ATTACHMENT },
           });
           if (fileIds.length) {
             await tx.attachmentRelation.createMany({
@@ -424,7 +472,8 @@ export class DraftsService {
       ...this.serialize(content),
       taxonomy: taxonomySnapshot(content.draftVersion?.body, content),
       taxonomyOptions: await this.availableTaxonomy(user, taxonomySnapshot(content.draftVersion?.body, content)),
-      attachments: attachments.map((attachment) => ({
+      coverFile: attachments.find((attachment) => attachment.usageType === AttachmentUsageType.COVER)?.file.id ?? null,
+      attachments: attachments.filter((attachment) => attachment.usageType !== AttachmentUsageType.COVER).map((attachment) => ({
         ...attachment,
         file: { ...attachment.file, sizeBytes: attachment.file.sizeBytes.toString() },
       })),
@@ -452,12 +501,12 @@ export class DraftsService {
   async availableTaxonomy(user: AuthenticatedUser, selected?: TaxonomySelection) {
     const [categories, tags] = await Promise.all([
       this.prisma.category.findMany({
-        where: { organizationId: user.organizationId, OR: [{ status: 'ACTIVE' }, ...(selected?.categoryId ? [{ id: selected.categoryId }] : [])] },
+        where: { organizationId: user.organizationId, OR: [{ status: 'ACTIVE', deletedAt: null }, ...(selected?.categoryId ? [{ id: selected.categoryId }] : [])] },
         select: { id: true, name: true, status: true, contentTypes: true },
         orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       }),
       this.prisma.tag.findMany({
-        where: { organizationId: user.organizationId, OR: [{ status: 'ACTIVE' }, { id: { in: selected?.tagIds ?? [] } }] },
+        where: { organizationId: user.organizationId, OR: [{ status: 'ACTIVE', deletedAt: null }, { id: { in: selected?.tagIds ?? [] } }] },
         select: { id: true, name: true, status: true },
         orderBy: { name: 'asc' },
       }),
@@ -476,16 +525,15 @@ export class DraftsService {
     }
     if (
       !content.draftVersion ||
-      !new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.CHANGES_REQUESTED]).has(
+      !new Set<ContentStatus>([ContentStatus.DRAFT]).has(
         content.draftVersion.versionStatus,
       )
     ) {
-      throw new ConflictException('Only a draft or change-requested version can be autosaved.');
+      throw new ConflictException('Only a draft version can be autosaved.');
     }
     if (
       !new Set<ContentStatus>([
         ContentStatus.DRAFT,
-        ContentStatus.CHANGES_REQUESTED,
         ContentStatus.PUBLISHED,
       ]).has(content.status)
     ) {
@@ -502,7 +550,7 @@ export class DraftsService {
     if (!content) throw new NotFoundException('Content was not found.');
     if (content.draftVersion) {
       throw new ConflictException(
-        'Content with an active draft, review or approved version cannot change lifecycle state.',
+        'Content with an active draft cannot change lifecycle state.',
       );
     }
     return content;

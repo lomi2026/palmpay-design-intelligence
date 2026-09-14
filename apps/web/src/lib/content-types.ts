@@ -12,7 +12,7 @@ export interface PublishedAttachment {
 
 export interface ContentCard {
   id: string;
-  contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT';
+  contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT' | 'AI_TOOL';
   title: string;
   slug: string;
   summary: string | null;
@@ -50,6 +50,7 @@ export const contentTypeLabels: Record<ContentType, string> = {
   AI_SKILL: 'AI Skill',
   AI_CASE: 'AI 案例',
   AI_PROJECT: 'AI 项目',
+  AI_TOOL: 'AI 工具',
 };
 
 export function contentTypeLabel(contentType: string) {

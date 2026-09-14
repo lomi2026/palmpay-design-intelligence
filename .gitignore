@@ -11,3 +11,5 @@ coverage/
 *.log
 *.tsbuildinfo
 apps/api/src/generated/prisma/
+
+.next-*/

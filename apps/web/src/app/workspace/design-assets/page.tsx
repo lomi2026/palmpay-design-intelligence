@@ -1,3 +1,4 @@
+import { CatalogPageHeader } from '@/components/workspace/catalog-page-header';
 import Link from 'next/link';
 import { Grid2X2, LayoutList, Plus } from 'lucide-react';
 
@@ -26,18 +27,17 @@ export default async function DesignAssetsPage({
     search?: string;
     categoryId?: string;
     tag?: string;
-    verificationStatus?: string;
     platform?: string;
     view?: string;
   }>;
 }) {
   const params = await searchParams;
   const search = params.search ?? '';
-  const { categoryId, tag, verificationStatus } = params;
+  const { categoryId, tag } = params;
   const platform: Platform = isPlatform(params.platform) ? params.platform : '全部平台';
   const view: View = params.view === 'list' ? 'list' : 'grid';
-  const filters = { search: search.trim() || undefined, categoryId, tag, verificationStatus, platform, view };
-  const apiFilters = { search: filters.search, categoryId, tag, verificationStatus };
+  const filters = { search: search.trim() || undefined, categoryId, tag, platform, view };
+  const apiFilters = { search: filters.search, categoryId, tag };
   const query = new URLSearchParams({ type: 'DESIGN_ASSET', pageSize: '100' });
   for (const [key, value] of Object.entries(apiFilters)) if (value) query.set(key, value);
   const baseQuery = new URLSearchParams({ type: 'DESIGN_ASSET', pageSize: '100' });
@@ -51,7 +51,7 @@ export default async function DesignAssetsPage({
     if (filters.search) next.set('search', filters.search);
     if (categoryId) next.set('categoryId', categoryId);
     if (tag) next.set('tag', tag);
-    if (verificationStatus) next.set('verificationStatus', verificationStatus);
+
     if (platform !== '全部平台') next.set('platform', platform);
     if (nextView !== 'grid') next.set('view', nextView);
     const suffix = next.toString();
@@ -61,18 +61,8 @@ export default async function DesignAssetsPage({
   const selectClass = 'h-10 min-w-32 rounded-lg border border-[var(--v9-line-strong)] bg-[var(--v9-field)] px-3 text-xs text-[var(--v9-text)] outline-none focus-visible:border-[var(--v9-text)] focus-visible:ring-3 focus-visible:ring-[var(--v9-soft-hover)]';
 
   return (
-    <main className="mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[.2em] text-[var(--v9-subtle)]">DESIGN ASSET LIBRARY</p>
-          <h1 className="mt-3 text-[32px] font-semibold leading-10 tracking-[-0.045em] text-white">设计资产</h1>
-          <p className="mt-1.5 text-sm text-white/48">搜索、判断并复用经过治理的团队设计资产。</p>
-        </div>
-        <Button asChild className="h-9 rounded-lg bg-white px-3.5 text-sm text-black hover:bg-white/90">
-          <Link href="/workspace/submit?type=DESIGN_ASSET"><Plus />新增资产</Link>
-        </Button>
-      </div>
-
+    <main className="mx-auto w-full max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
+      <CatalogPageHeader title="设计资产" description="搜索、判断并复用经过治理的团队设计资产。" count={`${contents.total} 个已发布资产`} createHref="/workspace/submit?type=DESIGN_ASSET" createLabel="新增资产" />
       <CatalogFilterControls
         contents={filterSource.items}
         extraControls={(

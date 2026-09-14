@@ -7,10 +7,6 @@ export type WorkspaceStatusDefinition = {
 
 const definitions: Record<string, WorkspaceStatusDefinition> = {
   DRAFT: { label: '草稿', tone: 'neutral' },
-  PENDING: { label: '待审核', tone: 'info' },
-  IN_REVIEW: { label: '审核中', tone: 'info' },
-  CHANGES_REQUESTED: { label: '待修改', tone: 'warning' },
-  APPROVED: { label: '已通过', tone: 'success' },
   PUBLISHED: { label: '已发布', tone: 'success' },
   UNPUBLISHED: { label: '已下架', tone: 'warning' },
   ARCHIVED: { label: '已归档', tone: 'neutral' },

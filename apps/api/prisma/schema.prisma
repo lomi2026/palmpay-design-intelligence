@@ -35,6 +35,7 @@ enum CategoryStatus {
 }
 
 enum ContentType {
+  AI_TOOL
   DESIGN_ASSET
   AI_SKILL
   AI_CASE
@@ -330,6 +331,7 @@ model Category {
   contentTypes   String[]       @default([]) @map("content_types")
   sortOrder      Int            @default(0) @map("sort_order")
   status         CategoryStatus @default(ACTIVE)
+  deletedAt DateTime? @map("deleted_at")
   createdAt      DateTime       @default(now()) @map("created_at")
   updatedAt      DateTime       @updatedAt @map("updated_at")
 
@@ -378,6 +380,7 @@ model Content {
   versions          ContentVersion[]  @relation("ContentVersions")
   currentVersion    ContentVersion?   @relation("CurrentContentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
   draftVersion      ContentVersion?   @relation("DraftContentVersion", fields: [draftVersionId], references: [id], onDelete: SetNull)
+  toolDetail        AIToolDetail?
   assetDetail       AssetDetail?
   skillDetail       SkillDetail?
   caseDetail        CaseDetail?       @relation("CaseContent")
@@ -615,6 +618,7 @@ model Tag {
   usageCount     Int       @default(0) @map("usage_count")
   status         TagStatus @default(DISABLED)
   mergedToId     String?   @map("merged_to_id") @db.Uuid
+  deletedAt DateTime? @map("deleted_at")
   createdAt      DateTime  @default(now()) @map("created_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
@@ -792,4 +796,17 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([actorId])
   @@map("audit_logs")
+}
+
+model AIToolDetail {
+  contentId String @id @map("content_id") @db.Uuid
+  websiteUrl String @map("website_url")
+  vendor String
+  platforms String[]
+  scenarios String[]
+  usageGuide String @map("usage_guide")
+  limitations String
+  pricingModel String @map("pricing_model")
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  @@map("ai_tool_details")
 }

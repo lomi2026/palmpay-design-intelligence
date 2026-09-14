@@ -1,5 +1,6 @@
 'use client';
 
+import { useFavoriteIds } from './favorite-context';
 import { Check, Copy, Heart, Link2, NotebookPen } from 'lucide-react';
 import { useActionState, useState } from 'react';
 import Link from 'next/link';
@@ -10,12 +11,14 @@ import { favoriteAction, recordContentShareAction } from '@/app/workspace/engage
 export function FavoriteControl({
   contentId,
   returnTo,
-  active = false,
+  active,
 }: {
   contentId: string;
   returnTo: string;
   active?: boolean;
 }) {
+  const favoriteIds = useFavoriteIds();
+  const isActive = active ?? favoriteIds.includes(contentId);
   const [, action, pending] = useActionState(
     async (_state: void | undefined, formData: FormData) => {
       await favoriteAction(formData);
@@ -26,7 +29,7 @@ export function FavoriteControl({
     <form action={action} className="shrink-0">
       <input type="hidden" name="contentId" value={contentId} />
       <input type="hidden" name="returnTo" value={returnTo} />
-      <input type="hidden" name="active" value={String(active)} />
+      <input type="hidden" name="active" value={String(isActive)} />
       <Button
         type="submit"
         variant="outline"
@@ -34,8 +37,8 @@ export function FavoriteControl({
         disabled={pending}
         className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
       >
-        <Heart className={active ? 'fill-current' : ''} />
-        {active ? '取消收藏' : '收藏'}
+        <Heart className={isActive ? 'fill-current' : ''} />
+        {isActive ? '取消收藏' : '收藏'}
       </Button>
     </form>
   );

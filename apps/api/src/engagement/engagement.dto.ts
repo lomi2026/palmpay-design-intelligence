@@ -40,8 +40,14 @@ export class SearchClickDto {
 }
 
 export class CreateUsageConfirmationDto {
+  @IsOptional()
   @IsUUID()
-  projectContentId!: string;
+  projectContentId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  projectName?: string;
 
   @IsOptional()
   @IsString()

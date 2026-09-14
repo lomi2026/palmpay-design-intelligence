@@ -21,6 +21,7 @@ const contentCardInclude = {
   },
   skillDetail: { select: { applicableRoles: true } },
   caseDetail: { select: { metricName: true } },
+  toolDetail: true,
   assetDetail: { select: { platforms: true, scenarios: true } },
   currentVersion: { select: { versionLabel: true, body: true } },
   coverFile: true,
@@ -113,6 +114,7 @@ export class ContentService {
           // Compatibility for historical imports created before version-bound attachments.
           { entityType: AttachmentEntityType.CONTENT, entityId: content.id },
         ],
+        usageType: { not: 'COVER' },
         file: { uploadStatus: 'READY', deletedAt: null },
       },
       include: { file: true },

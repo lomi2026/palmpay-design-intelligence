@@ -28,8 +28,6 @@ export const EVENT_TYPES = [
   'project_referenced',
   'content_create',
   'content_submit',
-  'review_approve',
-  'review_reject',
   'ai_run_start',
   'ai_run_success',
   'ai_run_fail',
@@ -87,9 +85,10 @@ export class CreateCategoryDto {
   @MaxLength(100)
   name!: string;
 
+  @IsOptional()
   @IsString()
   @MaxLength(100)
-  code!: string;
+  code?: string;
 
   @IsArray()
   @IsEnum(ContentType, { each: true })

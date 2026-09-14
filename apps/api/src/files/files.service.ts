@@ -112,6 +112,12 @@ export class FilesService {
     return { file: this.serialize(completed) };
   }
 
+  async createImageUrl(user: AuthenticatedUser, fileId: string) {
+    const file = await this.findDownloadableFile(user, fileId);
+    if (file.deletedAt || file.uploadStatus !== 'READY' || !['image/png', 'image/jpeg', 'image/webp'].includes(file.mimeType)) throw new NotFoundException('Image was not found.');
+    return this.storage.createDownloadUrl({ fileId: file.id, storageKey: file.storageKey });
+  }
+
   async createDownloadUrl(user: AuthenticatedUser, fileId: string) {
     const file = await this.findDownloadableFile(user, fileId);
     if (file.uploadStatus !== UploadStatus.READY || file.deletedAt) {

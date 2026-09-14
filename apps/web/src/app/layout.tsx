@@ -1,20 +1,26 @@
+import { RouteTheme } from '@/components/marketing/route-theme';
+import { LocalizedValidation } from '@/components/localized-validation';
 import type { Metadata } from 'next';
 import './globals.css';
+import './hub-design.css';
+import './workspace-spacing.css';
 
 export const metadata: Metadata = {
   title: 'PalmPay体验设计Hub',
   description: 'PalmPay Design Intelligence Hub',
 };
 
-const themeBootstrap = `(()=>{try{const current=localStorage.getItem('ppux-theme');const legacy=localStorage.getItem('pp-theme');const parsed=legacy?JSON.parse(legacy):null;const theme=current==='light'||current==='dark'?current:parsed==='light'?'light':'dark';document.documentElement.classList.toggle('dark',theme==='dark');document.documentElement.style.colorScheme=theme}catch{document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark'}})()`;
+const themeBootstrap = `(()=>{const studio=location.pathname==='/workspace'||location.pathname.startsWith('/workspace/');const root=document.documentElement;root.dataset.design=studio?'studio':'refined';let theme=studio?'light':'dark';try{const saved=localStorage.getItem(studio?'ppux-theme-studio':'ppux-theme');if(saved==='light'||saved==='dark')theme=saved}catch{}root.classList.toggle('dark',theme==='dark');root.style.colorScheme=theme})()`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning className="dark">
+    <html lang="zh-CN" suppressHydrationWarning data-design="refined" className="dark">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
       <body suppressHydrationWarning>
+        <RouteTheme />
+        <LocalizedValidation />
         {children}
       </body>
     </html>

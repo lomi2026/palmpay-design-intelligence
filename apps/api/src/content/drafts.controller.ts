@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { RequirePermissions } from '../auth/permissions.decorator';
 import { RbacGuard } from '../auth/rbac.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
-import { AutosaveDraftDto, CreateDraftDto } from './drafts.dto';
+import { AutosaveDraftDto, CreateDraftDto, DraftCoverDto } from './drafts.dto';
 import { DraftsService } from './drafts.service';
 
 @ApiTags('content drafts')
@@ -39,9 +39,8 @@ export class DraftsController {
   }
 
   @Post(':id/publish')
-  @RequirePermissions('content.publish')
-  publishApproved(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.drafts.publishApproved(user, id);
+  publish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.drafts.publish(user, id);
   }
 
   @Post(':id/unpublish')
@@ -54,6 +53,16 @@ export class DraftsController {
   @RequirePermissions('content.archive')
   archive(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.drafts.archive(user, id);
+  }
+
+  @Patch(':id/cover')
+  cover(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: DraftCoverDto) {
+    return this.drafts.setCover(user, id, body.fileId ?? null);
+  }
+
+  @Delete(':id')
+  delete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.drafts.delete(user, id);
   }
 
   @Get(':id')

@@ -53,7 +53,6 @@ export async function createCategoryAction(formData: FormData) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: String(formData.get('name') ?? ''),
-      code: String(formData.get('code') ?? ''),
       contentTypes: [String(formData.get('contentType') ?? 'DESIGN_ASSET')],
     }),
   });
@@ -115,4 +114,38 @@ export async function removeUserRoleAction(formData: FormData) {
   const userId = String(formData.get('userId'));
   const userRoleId = String(formData.get('userRoleId'));
   return saveEdit(`/api/organizations/${organizationId}/users/${userId}/roles/${userRoleId}`, undefined, 'DELETE', '角色移除');
+}
+
+
+export async function deleteCategoryAction(formData: FormData) {
+  const id = String(formData.get('categoryId') ?? '');
+  return saveEdit(`/api/admin/categories/${encodeURIComponent(id)}`, undefined, 'DELETE', '删除分类');
+}
+
+export async function deleteTagAction(formData: FormData) {
+  const id = String(formData.get('tagId') ?? '');
+  return saveEdit(`/api/admin/tags/${encodeURIComponent(id)}`, undefined, 'DELETE', '删除标签');
+}
+
+export async function createTeamAction(formData: FormData) {
+  const ownerId = String(formData.get('ownerId') ?? '');
+  return saveEdit(`/api/organizations/${String(formData.get('organizationId'))}/teams`, { name: String(formData.get('name') ?? '').trim(), ...(ownerId ? { ownerId } : {}) }, 'POST', '新增团队');
+}
+export async function deleteTeamAction(formData: FormData) {
+  return saveEdit(`/api/organizations/${String(formData.get('organizationId'))}/teams/${String(formData.get('teamId'))}`, undefined, 'DELETE', '删除团队');
+}
+
+export async function createUserAction(formData: FormData) {
+  return saveEdit(`/api/organizations/${String(formData.get('organizationId'))}/users`, {
+    name: String(formData.get('name') ?? '').trim(), email: String(formData.get('email') ?? '').trim().toLowerCase(),
+    roleId: String(formData.get('roleId') ?? ''), teamId: String(formData.get('teamId') ?? ''),
+  }, 'POST', '新增用户');
+}
+
+export async function deleteUserAction(formData: FormData) {
+  return saveEdit(`/api/organizations/${String(formData.get('organizationId'))}/users/${String(formData.get('userId'))}`, undefined, 'DELETE', '删除用户');
+}
+
+export async function updateUserNameAction(formData: FormData) {
+  return saveEdit(`/api/organizations/${String(formData.get("organizationId"))}/users/${String(formData.get("userId"))}/name`, { name: String(formData.get("name") ?? "").trim() });
 }

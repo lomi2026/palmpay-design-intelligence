@@ -15,13 +15,8 @@ const permissions = [
   ['content.create', 'content', '创建内容'],
   ['content.edit_own', 'content', '编辑自己的内容'],
   ['content.edit_all', 'content', '编辑全部内容'],
-  ['content.submit', 'content', '提交审核'],
-  ['content.publish', 'content', '发布内容'],
   ['content.unpublish', 'content', '下架内容'],
   ['content.archive', 'content', '归档内容'],
-  ['review.read', 'review', '查看审核'],
-  ['review.process', 'review', '处理审核'],
-  ['review.assign', 'review', '分配审核人'],
   ['analytics.read', 'analytics', '查看数据洞察'],
   ['user.manage', 'user', '管理用户'],
   ['taxonomy.manage', 'taxonomy', '管理分类和标签'],
@@ -32,16 +27,14 @@ const permissions = [
 
 const roles = [
   ['member', '设计成员'],
-  ['reviewer', '内容审核人'],
   ['admin', '平台管理员'],
   ['manager', '设计管理者'],
 ] as const;
 
 const rolePermissions: Record<(typeof roles)[number][0], readonly string[]> = {
-  member: ['content.read', 'content.create', 'content.edit_own', 'content.submit', 'ai.execute'],
-  reviewer: ['content.read', 'review.read', 'review.process'],
+  member: ['content.read', 'content.create', 'content.edit_own', 'ai.execute'],
   admin: permissions.map(([code]) => code),
-  manager: ['content.read', 'review.read', 'analytics.read'],
+  manager: ['content.read', 'analytics.read'],
 };
 
 async function main() {

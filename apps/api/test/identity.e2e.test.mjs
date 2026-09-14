@@ -56,6 +56,11 @@ const completeAssetBody = (blocks = []) => ({
 const publicationFixtures = () => {
   const fixtures = [
     {
+      contentType: 'AI_TOOL', detailKey: 'toolDetail', detailField: 'usageGuide',
+      bodyV1: { websiteUrl: 'https://example.com', vendor: 'Vendor', platforms: ['Web'], scenarios: ['Design'], usageGuide: 'Tool guide v1', limitations: 'Check outputs', pricingModel: 'Free' },
+      valueV2: 'Tool guide v2',
+    },
+    {
       contentType: 'DESIGN_ASSET',
       detailKey: 'assetDetail',
       detailField: 'assetType',
@@ -154,7 +159,7 @@ before(async () => {
   const [adminRole, memberRole, reviewerRole, managerRole] = await Promise.all([
     prisma.role.findUniqueOrThrow({ where: { code: 'admin' } }),
     prisma.role.findUniqueOrThrow({ where: { code: 'member' } }),
-    prisma.role.findUniqueOrThrow({ where: { code: 'reviewer' } }),
+    prisma.role.findUniqueOrThrow({ where: { code: 'member' } }),
     prisma.role.findUniqueOrThrow({ where: { code: 'manager' } }),
   ]);
   adminUser = await prisma.user.create({
@@ -255,7 +260,7 @@ before(async () => {
   });
 
   const submitPermission = await prisma.permission.findUniqueOrThrow({
-    where: { code: 'content.submit' },
+    where: { code: 'content.read' },
   });
   submitOnlyRole = await prisma.role.create({
     data: {
@@ -508,10 +513,7 @@ test('taxonomy selection is scoped, status-aware, durable and published atomical
   await request(`/admin/contents?tagId=${tag.id}`, 'GET', undefined, memberEmail, 403);
   // Publishing a previously saved association retains it even if an admin disabled it later.
   async function publish() {
-    const review = await request(`/reviews/content/${draft.id}/submit`, 'POST', { message: 'Taxonomy review' }, memberEmail, 201);
-    await request(`/reviews/${review.id}/assign`, 'PATCH', { reviewerId: reviewerUser.id }, adminEmail);
-    await request(`/reviews/${review.id}/approve`, 'POST', { comment: 'Validated taxonomy' }, reviewerEmail, 201);
-    await request(`/content-drafts/${draft.id}/publish`, 'POST', undefined, adminEmail, 201);
+    await request(`/content-drafts/${draft.id}/publish`, 'POST', undefined, memberEmail, 201);
   }
   await publish();
   const publishedV1 = await request(`/contents/${draft.slug}`);
@@ -851,7 +853,7 @@ test(
       });
       assert.equal(response.status, 200, `Expected manager access to ${path}`);
     }
-    for (const path of ['/reviews/queue', '/admin/contents?pageSize=20']) {
+    for (const path of ['/admin/contents?pageSize=20']) {
       const response = await fetch(`${baseUrl}${path}`, {
         headers: { 'x-dev-user-email': managerEmail },
       });
@@ -875,136 +877,10 @@ test(
 );
 
 test(
-  'review processing respects team scopes while preserving organization-scoped access',
-  { skip: !integrationEnabled },
-  async () => {
-    const teamQueue = await fetch(`${baseUrl}/reviews/queue`, {
-      headers: { 'x-dev-user-email': teamReviewerEmail },
-    });
-    assert.equal(teamQueue.status, 200);
-    const teamReviewIds = (await teamQueue.json()).items.map((item) => item.id);
-    assert.equal(teamReviewIds.includes(teamScopeReview.id), true);
-    assert.equal(teamReviewIds.includes(otherTeamReview.id), false);
-
-    const organizationQueue = await fetch(`${baseUrl}/reviews/queue`, {
-      headers: { 'x-dev-user-email': reviewerEmail },
-    });
-    assert.equal(organizationQueue.status, 200);
-    const organizationReviewIds = (await organizationQueue.json()).items.map((item) => item.id);
-    assert.equal(organizationReviewIds.includes(teamScopeReview.id), true);
-    assert.equal(organizationReviewIds.includes(otherTeamReview.id), true);
-
-    const blockedReviewerDirectory = await fetch(`${baseUrl}/reviews/reviewers`, {
-      headers: { 'x-dev-user-email': teamReviewerEmail },
-    });
-    assert.equal(blockedReviewerDirectory.status, 403);
-
-    const adminReviewers = await fetch(`${baseUrl}/reviews/reviewers`, {
-      headers: { 'x-dev-user-email': adminEmail },
-    });
-    assert.equal(adminReviewers.status, 200);
-    assert.equal(
-      (await adminReviewers.json()).items.some((item) => item.id === teamReviewerUser.id),
-      true,
-    );
-
-    const allowedDiff = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/diff`, {
-      headers: { 'x-dev-user-email': teamReviewerEmail },
-    });
-    assert.equal(allowedDiff.status, 200);
-    const blockedDiff = await fetch(`${baseUrl}/reviews/${otherTeamReview.id}/diff`, {
-      headers: { 'x-dev-user-email': teamReviewerEmail },
-    });
-    assert.equal(blockedDiff.status, 403);
-
-    const blockedAssignment = await fetch(`${baseUrl}/reviews/${otherTeamReview.id}/assign`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
-      body: JSON.stringify({ reviewerId: teamReviewerUser.id }),
-    });
-    assert.equal(blockedAssignment.status, 403);
-
-    await prisma.reviewRequest.update({
-      where: { id: otherTeamReview.id },
-      data: { assignedReviewerId: teamReviewerUser.id },
-    });
-    for (const operation of ['comment', 'approve']) {
-      const blockedDecision = await fetch(
-        `${baseUrl}/reviews/${otherTeamReview.id}/${operation}`,
-        {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
-          body: JSON.stringify({ comment: 'This other-team review must remain inaccessible.' }),
-        },
-      );
-      assert.equal(blockedDecision.status, 403, `Expected team-scope denial for ${operation}`);
-    }
-    await prisma.reviewRequest.update({
-      where: { id: otherTeamReview.id },
-      data: { assignedReviewerId: null },
-    });
-
-    const blockedTeamAssignment = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/assign`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
-      body: JSON.stringify({ reviewerId: teamReviewerUser.id }),
-    });
-    assert.equal(blockedTeamAssignment.status, 403);
-
-    const teamAssignment = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/assign`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
-      body: JSON.stringify({ reviewerId: teamReviewerUser.id }),
-    });
-    assert.equal(teamAssignment.status, 200);
-    const teamComment = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/comment`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
-      body: JSON.stringify({ comment: 'Team-scoped review note.' }),
-    });
-    assert.equal(teamComment.status, 201);
-    const teamApproval = await fetch(`${baseUrl}/reviews/${teamScopeReview.id}/approve`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': teamReviewerEmail },
-      body: JSON.stringify({ comment: 'Team-scoped approval.' }),
-    });
-    assert.equal(teamApproval.status, 201);
-
-    const organizationAssignment = await fetch(
-      `${baseUrl}/reviews/${otherTeamReview.id}/assign`,
-      {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
-        body: JSON.stringify({ reviewerId: reviewerUser.id }),
-      },
-    );
-    assert.equal(organizationAssignment.status, 200);
-    const organizationComment = await fetch(
-      `${baseUrl}/reviews/${otherTeamReview.id}/comment`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
-        body: JSON.stringify({ comment: 'Organization-scoped review note.' }),
-      },
-    );
-    assert.equal(organizationComment.status, 201);
-    const organizationApproval = await fetch(
-      `${baseUrl}/reviews/${otherTeamReview.id}/approve`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
-        body: JSON.stringify({ comment: 'Organization-scoped approval.' }),
-      },
-    );
-    assert.equal(organizationApproval.status, 201);
-  },
-);
-
-test(
   'content submission requires edit-own or edit-all authority in addition to ownership',
   { skip: !integrationEnabled },
   async () => {
-    const response = await fetch(`${baseUrl}/reviews/content/${submitOnlyDraftContent.id}/submit`, {
+    const response = await fetch(`${baseUrl}/content-drafts/${submitOnlyDraftContent.id}/publish`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-dev-user-email': managerEmail },
       body: JSON.stringify({ message: 'Ownership alone must not allow submission.' }),
@@ -1018,7 +894,7 @@ test(
 );
 
 test(
-  'all content types persist approved detail projections and preserve prior version bodies',
+  'all content types publish draft detail projections and preserve prior version bodies',
   { skip: !integrationEnabled },
   async () => {
     async function request(path, method, email, body) {
@@ -1038,20 +914,8 @@ test(
       return text ? JSON.parse(text) : null;
     }
 
-    async function approveAndPublish(contentId, message) {
-      const review = await request(
-        `/reviews/content/${contentId}/submit`,
-        'POST',
-        memberEmail,
-        { message },
-      );
-      await request(`/reviews/${review.id}/assign`, 'PATCH', adminEmail, {
-        reviewerId: reviewerUser.id,
-      });
-      await request(`/reviews/${review.id}/approve`, 'POST', reviewerEmail, {
-        comment: 'Approved by the content projection integration test.',
-      });
-      await request(`/content-drafts/${contentId}/publish`, 'POST', adminEmail);
+    async function approveAndPublish(contentId) {
+      await request(`/content-drafts/${contentId}/publish`, 'POST', memberEmail);
     }
 
     for (const fixture of publicationFixtures()) {
@@ -1114,93 +978,6 @@ test(
 );
 
 test(
-  'a contributor can revise and resubmit after an independent reviewer requests changes',
-  { skip: !integrationEnabled },
-  async () => {
-    const submit = await fetch(`${baseUrl}/reviews/content/${memberDraftContent.id}/submit`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
-      body: JSON.stringify({ message: 'Please review the first draft.' }),
-    });
-    assert.equal(submit.status, 201);
-    const firstReview = await prisma.reviewRequest.findFirstOrThrow({
-      where: { contentId: memberDraftContent.id, status: 'PENDING' },
-    });
-
-    const assign = await fetch(`${baseUrl}/reviews/${firstReview.id}/assign`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
-      body: JSON.stringify({ reviewerId: reviewerUser.id }),
-    });
-    assert.equal(assign.status, 200);
-    const requestChanges = await fetch(`${baseUrl}/reviews/${firstReview.id}/request-changes`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
-      body: JSON.stringify({ comment: 'Please add a concrete usage guide.' }),
-    });
-    assert.equal(requestChanges.status, 201);
-
-    const afterRequestChanges = await prisma.content.findUniqueOrThrow({
-      where: { id: memberDraftContent.id },
-      include: { draftVersion: true },
-    });
-    assert.equal(afterRequestChanges.status, 'CHANGES_REQUESTED');
-    assert.equal(afterRequestChanges.draftVersion.versionStatus, 'CHANGES_REQUESTED');
-
-    const revise = await fetch(`${baseUrl}/content-drafts/${memberDraftContent.id}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
-      body: JSON.stringify({
-        title: 'Revised integration draft',
-        changeSummary: 'Added the requested usage guide.',
-        body: completeAssetBody(),
-      }),
-    });
-    assert.equal(revise.status, 200);
-    const resubmit = await fetch(`${baseUrl}/reviews/content/${memberDraftContent.id}/submit`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
-      body: JSON.stringify({ message: 'Updated according to the reviewer feedback.' }),
-    });
-    assert.equal(resubmit.status, 201);
-
-    const reviews = await prisma.reviewRequest.findMany({
-      where: { contentId: memberDraftContent.id },
-      orderBy: { createdAt: 'asc' },
-    });
-    assert.equal(reviews.length, 2);
-    assert.equal(reviews[0].status, 'CHANGES_REQUESTED');
-    assert.equal(reviews[1].status, 'PENDING');
-
-    const reassign = await fetch(`${baseUrl}/reviews/${reviews[1].id}/assign`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
-      body: JSON.stringify({ reviewerId: reviewerUser.id }),
-    });
-    assert.equal(reassign.status, 200);
-    const approve = await fetch(`${baseUrl}/reviews/${reviews[1].id}/approve`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
-      body: JSON.stringify({ comment: 'Revision is complete and approved.' }),
-    });
-    assert.equal(approve.status, 201);
-    const publish = await fetch(`${baseUrl}/content-drafts/${memberDraftContent.id}/publish`, {
-      method: 'POST',
-      headers: { 'x-dev-user-email': adminEmail },
-    });
-    assert.equal(publish.status, 201);
-
-    const published = await prisma.content.findUniqueOrThrow({
-      where: { id: memberDraftContent.id },
-      include: { currentVersion: true },
-    });
-    assert.equal(published.status, 'PUBLISHED');
-    assert.equal(published.draftVersionId, null);
-    assert.equal(published.currentVersion.title, 'Revised integration draft');
-  },
-);
-
-test(
   'editing published content creates an immutable next draft version',
   { skip: !integrationEnabled },
   async () => {
@@ -1255,116 +1032,10 @@ test(
     assert.equal(afterAutosave.draftVersion.title, 'Edited draft title');
     assert.deepEqual(afterAutosave.draftVersion.body, { ...completeAssetBody(['new draft only']), taxonomy: { categoryId: null, tagIds: [] } });
 
-    const submit = await fetch(`${baseUrl}/reviews/content/${publishedContent.id}/submit`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': memberEmail },
-      body: JSON.stringify({ message: 'Please review v2.' }),
-    });
-    assert.equal(submit.status, 201);
-    const afterSubmit = await prisma.content.findUniqueOrThrow({
-      where: { id: publishedContent.id },
-      include: { currentVersion: true, draftVersion: true },
-    });
-    assert.equal(afterSubmit.status, 'PUBLISHED');
-    assert.equal(afterSubmit.currentVersionId, original.currentVersionId);
-    assert.equal(afterSubmit.draftVersion.versionStatus, 'IN_REVIEW');
-
-    const review = await prisma.reviewRequest.findFirstOrThrow({
-      where: { versionId: afterSubmit.draftVersionId },
-    });
-    const assign = await fetch(`${baseUrl}/reviews/${review.id}/assign`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': adminEmail },
-      body: JSON.stringify({ reviewerId: reviewerUser.id }),
-    });
-    assert.equal(assign.status, 200);
-    const comment = await fetch(`${baseUrl}/reviews/${review.id}/comment`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
-      body: JSON.stringify({ comment: 'Internal reviewer note.' }),
-    });
-    assert.equal(comment.status, 201);
-    const submissions = await fetch(`${baseUrl}/reviews/mine`, {
-      headers: { 'x-dev-user-email': memberEmail },
-    });
-    assert.equal(submissions.status, 200);
-    const submissionItems = (await submissions.json()).items;
-    assert.equal(
-      submissionItems.some((item) => item.id === review.id),
-      true,
-    );
-    assert.equal(
-      submissionItems
-        .find((item) => item.id === review.id)
-        .actions.some((item) => item.action === 'COMMENT'),
-      true,
-    );
-    const reviewerNotifications = await fetch(`${baseUrl}/notifications`, {
-      headers: { 'x-dev-user-email': reviewerEmail },
-    });
-    assert.equal(reviewerNotifications.status, 200);
-    const reviewerNotificationItems = (await reviewerNotifications.json()).items;
-    assert.equal(
-      reviewerNotificationItems.some(
-        (item) => item.relatedEntityId === review.id && item.type === 'review_submitted',
-      ),
-      true,
-    );
-    const diffResponse = await fetch(`${baseUrl}/reviews/${review.id}/diff`, {
-      headers: { 'x-dev-user-email': reviewerEmail },
-    });
-    assert.equal(diffResponse.status, 200);
-    const diff = await diffResponse.json();
-    assert.equal(diff.baseVersion.versionNumber, 1);
-    assert.equal(diff.version.versionNumber, 2);
-    assert.deepEqual(
-      diff.changes.find((change) => change.path === 'title'),
-      {
-        path: 'title',
-        before: original.title,
-        after: 'Edited draft title',
-      },
-    );
-    assert.deepEqual(
-      diff.changes.find((change) => change.path === 'body.blocks'),
-      {
-        path: 'body.blocks',
-        before: [],
-        after: ['new draft only'],
-      },
-    );
-    const memberDiff = await fetch(`${baseUrl}/reviews/${review.id}/diff`, {
-      headers: { 'x-dev-user-email': memberEmail },
-    });
-    assert.equal(memberDiff.status, 403);
-    const approve = await fetch(`${baseUrl}/reviews/${review.id}/approve`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-dev-user-email': reviewerEmail },
-      body: JSON.stringify({ comment: 'Approved integration version.' }),
-    });
-    assert.equal(approve.status, 201);
-    const submitterNotifications = await fetch(`${baseUrl}/notifications`, {
-      headers: { 'x-dev-user-email': memberEmail },
-    });
-    assert.equal(submitterNotifications.status, 200);
-    const submitterNotificationItems = (await submitterNotifications.json()).items;
-    assert.equal(
-      submitterNotificationItems.some(
-        (item) => item.relatedEntityId === review.id && item.type === 'review_approved',
-      ),
-      true,
-    );
-
-    const memberPublish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/publish`, {
-      method: 'POST',
-      headers: { 'x-dev-user-email': memberEmail },
-    });
-    assert.equal(memberPublish.status, 403);
     const publish = await fetch(`${baseUrl}/content-drafts/${publishedContent.id}/publish`, {
-      method: 'POST',
-      headers: { 'x-dev-user-email': adminEmail },
+      method: 'POST', headers: { 'x-dev-user-email': memberEmail },
     });
-    assert.equal(publish.status, 201);
+    assert.equal(publish.status, 201, await publish.text());
 
     const afterPublish = await prisma.content.findUniqueOrThrow({
       where: { id: publishedContent.id },
@@ -1629,3 +1300,74 @@ test(
     assert.equal(disabledUserRequest.status, 403);
   },
 );
+
+
+test('retired review routes and privileges are unavailable even to administrators', { skip: !integrationEnabled }, async () => {
+  for (const path of ['/reviews/queue', '/reviews/reviewers', '/reviews/mine']) {
+    const response = await fetch(`${baseUrl}${path}`, { headers: { 'x-dev-user-email': adminEmail } });
+    assert.equal(response.status, 404);
+  }
+  const oldSubmit = await fetch(`${baseUrl}/reviews/content/${publishedContent.id}/submit`, { method: 'POST', headers: { 'x-dev-user-email': adminEmail } });
+  assert.equal(oldSubmit.status, 404);
+  assert.equal(await prisma.role.count({ where: { code: 'reviewer' } }), 0);
+  assert.equal(await prisma.permission.count({ where: { OR: [{ code: { startsWith: 'review.' } }, { code: { in: ['content.publish', 'content.submit'] } }] } }), 0);
+});
+
+
+test('asset covers are optional, versioned, access controlled and deleted contents disappear', { skip: !integrationEnabled }, async () => {
+  await prisma.user.update({ where: { id: memberUser.id }, data: { status: 'ACTIVE' } });
+  const { createHash } = await import('node:crypto');
+  async function request(path, method = 'GET', body, email = memberEmail, status = 200) {
+    const response = await fetch(`${baseUrl}${path}`, { method, headers: { 'x-dev-user-email': email, ...(body ? { 'Content-Type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+    const text = await response.text(); assert.equal(response.status, status, `${path}: ${text}`);
+    return text ? JSON.parse(text) : null;
+  }
+  const draft = await request('/content-drafts', 'POST', { contentType: 'DESIGN_ASSET', title: `Cover deletion fixture ${runId}`, summary: 'Image publication test', teamId: team.id, body: completeAssetBody() }, memberEmail, 201);
+  contentIds.push(draft.id);
+  assert.equal((await request(`/content-drafts/${draft.id}`)).coverFile, null);
+  const bytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS2kAAAAASUVORK5CYII=', 'base64');
+  const intent = await request('/files/upload-intents', 'POST', { originalName: 'cover.png', mimeType: 'image/png', sizeBytes: bytes.length, checksumSha256: createHash('sha256').update(bytes).digest('base64') }, memberEmail, 201);
+  try {
+    const uploaded = await fetch(intent.upload.url, { method: intent.upload.method, headers: intent.upload.headers, body: bytes });
+    assert.ok(uploaded.ok);
+    await request(`/files/${intent.file.id}/complete`, 'POST', undefined, memberEmail, 201);
+    await request(`/content-drafts/${draft.id}/cover`, 'PATCH', { fileId: publishedAttachmentFileId }, memberEmail, 400);
+    await request(`/content-drafts/${draft.id}/cover`, 'PATCH', { fileId: intent.file.id });
+    await request(`/content-drafts/${draft.id}`, 'PATCH', { attachmentFileIds: [] });
+    assert.equal((await request(`/content-drafts/${draft.id}`)).coverFile, intent.file.id);
+    await request(`/files/${intent.file.id}/image`, 'GET', undefined, reviewerEmail, 403);
+    const tool = await request('/content-drafts', 'POST', { contentType: 'AI_TOOL', title: `Tool cover ${runId}`, summary: 'Tool cover test', teamId: team.id, body: publicationFixtures().find((fixture) => fixture.contentType === 'AI_TOOL').bodyV1 }, memberEmail, 201);
+    contentIds.push(tool.id);
+    await request(`/content-drafts/${tool.id}/cover`, 'PATCH', { fileId: intent.file.id });
+    await request(`/content-drafts/${tool.id}/publish`, 'POST', undefined, memberEmail, 201);
+    assert.equal((await request(`/contents/${tool.slug}`)).coverFile.id, intent.file.id);
+
+    await request(`/content-drafts/${draft.id}/publish`, 'POST', undefined, memberEmail, 201);
+    assert.equal((await request(`/contents/${draft.slug}`)).coverFile.id, intent.file.id);
+    const image = await request(`/files/${intent.file.id}/image`, 'GET', undefined, reviewerEmail);
+    assert.deepEqual(Buffer.from(await (await fetch(image.url)).arrayBuffer()), bytes);
+    await request(`/content-drafts/${draft.id}/from-published`, 'POST', undefined, memberEmail, 201);
+    await request(`/content-drafts/${draft.id}/cover`, 'PATCH', { fileId: null });
+    assert.equal((await request(`/contents/${draft.slug}`)).coverFile.id, intent.file.id);
+    await request(`/content-drafts/${draft.id}/publish`, 'POST', undefined, memberEmail, 201);
+    assert.equal((await request(`/contents/${draft.slug}`)).coverFile, null);
+    await request(`/content-drafts/${draft.id}`, 'DELETE', undefined, reviewerEmail, 403);
+    await request(`/content-drafts/${draft.id}`, 'DELETE');
+    await request(`/contents/${draft.slug}`, 'GET', undefined, memberEmail, 404);
+    assert.equal((await request('/content-drafts')).items.some((item) => item.id === draft.id), false);
+    assert.equal((await request('/admin/contents', 'GET', undefined, adminEmail)).items.some((item) => item.id === draft.id), false);
+    assert.ok(await prisma.auditLog.findFirst({ where: { entityId: draft.id, action: 'content.delete' } }));
+    const other = await request('/content-drafts', 'POST', { contentType: 'DESIGN_ASSET', title: `Admin deletion fixture ${runId}`, teamId: team.id, body: {} }, memberEmail, 201);
+    contentIds.push(other.id);
+    await request(`/content-drafts/${other.id}`, 'DELETE', undefined, adminEmail);
+    const ownDraft = await request('/content-drafts', 'POST', { contentType: 'DESIGN_ASSET', title: `Own deleted draft ${runId}`, teamId: team.id, body: {} }, memberEmail, 201);
+    contentIds.push(ownDraft.id);
+    await request(`/content-drafts/${ownDraft.id}`, 'DELETE');
+    await request(`/content-drafts/${ownDraft.id}`, 'GET', undefined, memberEmail, 404);
+    assert.ok((await prisma.content.findUnique({ where: { id: other.id } })).deletedAt);
+  } finally {
+    await prisma.attachmentRelation.deleteMany({ where: { fileId: intent.file.id } });
+    await prisma.content.updateMany({ where: { coverFileId: intent.file.id }, data: { coverFileId: null } });
+    await prisma.fileAttachment.delete({ where: { id: intent.file.id } });
+  }
+});

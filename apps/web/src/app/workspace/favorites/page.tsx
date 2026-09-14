@@ -5,16 +5,44 @@ import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-stat
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentCard as ContentCardData } from '@/lib/content-types';
+import { RefreshRecentOnEntry } from '../recent/refresh-on-entry';
+import { PersonalTabs } from './personal-tabs';
 
-export default async function FavoritesPage() {
-  const result = await serverApiFetch<{
-    items: Array<{ createdAt: string; content: ContentCardData }>;
-  }>('/api/me/favorites', { headers: await authenticatedApiHeaders() });
+type FavoriteItem = { createdAt: string; content: ContentCardData };
+type RecentItem = { viewCount: number; lastViewedAt: string; content: ContentCardData };
+
+export default async function FavoritesPage({ searchParams }: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const activeTab = (await searchParams).tab === 'recent' ? 'recent' : 'favorites';
+  const headers = await authenticatedApiHeaders();
+  const recent = activeTab === 'recent'
+    ? await serverApiFetch<{ items: RecentItem[] }>('/api/me/recent-views', { headers })
+    : null;
+  const favorites = activeTab === 'favorites'
+    ? await serverApiFetch<{ items: FavoriteItem[] }>('/api/me/favorites', { headers })
+    : null;
+
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
-      <WorkspacePageHero description="收藏会同步到你的正式账号，可在其他设备继续使用；仅展示你仍具备访问权限的团队内容。" eyebrow="PERSONAL SPACE" metric={{ value: result.items.length, label: '已收藏内容' }} title="把值得复用的方法留在手边。" />
+      {recent ? <RefreshRecentOnEntry /> : null}
+      <WorkspacePageHero
+        eyebrow="PERSONAL SPACE"
+        metric={{ value: (recent ?? favorites)!.items.length, label: recent ? '近期内容' : '已收藏内容' }}
+        title="收藏与浏览"
+      />
+      <PersonalTabs activeTab={activeTab}>
+        {recent ? <RecentList result={recent} /> : <FavoriteList result={favorites!} />}
+      </PersonalTabs>
+    </main>
+  );
+}
+
+function FavoriteList({ result }: { result: { items: FavoriteItem[] } }) {
+  return (
+    <>
       {result.items.length ? (
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {result.items.map(({ content }) => (
             <div key={content.id}>
               <ContentCard content={content} />
@@ -25,10 +53,34 @@ export default async function FavoritesPage() {
           ))}
         </div>
       ) : (
-        <WorkspaceEmptyState className="mt-5">
+        <WorkspaceEmptyState>
           还没有收藏内容。浏览资产、Skill、案例或项目时可以加入收藏。
         </WorkspaceEmptyState>
       )}
-    </main>
+    </>
+  );
+}
+
+function RecentList({ result }: { result: { items: RecentItem[] } }) {
+  return (
+    <>
+      {result.items.length ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {result.items.map(({ content, viewCount, lastViewedAt }) => (
+            <div key={content.id}>
+              <ContentCard content={content} />
+              <p className="mt-2 text-xs text-white/40">
+                浏览 {viewCount} 次 ·{' '}
+                {new Intl.DateTimeFormat('zh-CN').format(new Date(lastViewedAt))}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <WorkspaceEmptyState>
+          最近没有浏览记录。打开一项正式内容后，它会出现在这里。
+        </WorkspaceEmptyState>
+      )}
+    </>
   );
 }

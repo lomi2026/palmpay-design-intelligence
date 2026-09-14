@@ -27,6 +27,10 @@ export class FilesController {
     return this.files.completeUpload(user, id);
   }
 
+  @Get(':id/image')
+  @RequirePermissions('content.read')
+  image(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) { return this.files.createImageUrl(user, id); }
+
   @Get(':id/download')
   @RequirePermissions('content.read')
   createDownloadUrl(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {

@@ -9,7 +9,7 @@ import {
 
 type DetailTransaction = Pick<
   Prisma.TransactionClient,
-  'assetDetail' | 'skillDetail' | 'caseDetail' | 'aIProjectDetail' | 'content' | 'team'
+  'aIToolDetail' | 'assetDetail' | 'skillDetail' | 'caseDetail' | 'aIProjectDetail' | 'content' | 'team'
 >;
 
 type AssetProjection = Omit<Prisma.AssetDetailUncheckedCreateInput, 'contentId'>;
@@ -18,6 +18,7 @@ type CaseProjection = Omit<Prisma.CaseDetailUncheckedCreateInput, 'contentId'>;
 type ProjectProjection = Omit<Prisma.AIProjectDetailUncheckedCreateInput, 'contentId'>;
 
 export type ContentDetailProjection =
+  | { contentType: typeof ContentType.AI_TOOL; data: Omit<Prisma.AIToolDetailUncheckedCreateInput, 'contentId'> }
   | { contentType: typeof ContentType.DESIGN_ASSET; data: AssetProjection }
   | { contentType: typeof ContentType.AI_SKILL; data: SkillProjection }
   | { contentType: typeof ContentType.AI_CASE; data: CaseProjection }
@@ -121,6 +122,19 @@ export function projectContentDetail(
 ): ContentDetailProjection {
   const body = bodyRecord(bodyValue);
   switch (contentType) {
+    case ContentType.AI_TOOL: {
+      const websiteUrl = requiredText(body, 'websiteUrl');
+      try {
+        const url = new URL(websiteUrl);
+        if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('invalid URL');
+      } catch { throw invalidDetail('websiteUrl', 'must be an HTTP(S) URL without credentials'); }
+      return { contentType, data: {
+        websiteUrl, vendor: requiredText(body, 'vendor'),
+        platforms: requiredTextList(body, 'platforms'), scenarios: requiredTextList(body, 'scenarios'),
+        usageGuide: requiredText(body, 'usageGuide'), limitations: requiredText(body, 'limitations'),
+        pricingModel: requiredText(body, 'pricingModel'),
+      } };
+    }
     case ContentType.DESIGN_ASSET:
       return {
         contentType,
@@ -217,6 +231,9 @@ export async function upsertPublishedContentDetail(
 ) {
   const projection = projectContentDetail(contentType, body);
   switch (projection.contentType) {
+    case ContentType.AI_TOOL:
+      await tx.aIToolDetail.upsert({ where: { contentId }, create: { contentId, ...projection.data }, update: projection.data });
+      return;
     case ContentType.DESIGN_ASSET:
       await tx.assetDetail.upsert({
         where: { contentId },

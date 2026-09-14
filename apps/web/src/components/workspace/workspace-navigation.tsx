@@ -5,14 +5,9 @@ import { usePathname } from 'next/navigation';
 import { type MouseEventHandler } from 'react';
 import {
   BarChart3,
-  Bell,
   BriefcaseBusiness,
   ChartNoAxesCombined,
-  ClipboardCheck,
-  Clock3,
-  FileCheck2,
   FilePenLine,
-  Heart,
   Layers3,
   LayoutDashboard,
   Lightbulb,
@@ -20,6 +15,7 @@ import {
   Send,
   Settings,
   Sparkles,
+  Wrench,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -40,8 +36,6 @@ type NavigationCapabilities = {
   canAnalyze: boolean;
   canCreate: boolean;
   canManage: boolean;
-  canReview: boolean;
-  canSubmit: boolean;
 };
 
 type NavigationProps = NavigationCapabilities & {
@@ -59,38 +53,9 @@ function navigationGroups({
   canAnalyze,
   canCreate,
   canManage,
-  canReview,
-  canSubmit,
   projectCount,
 }: NavigationProps): Array<{ label: string; items: NavigationItem[] }> {
   return [
-    {
-      label: '个人空间',
-      items: [
-        { href: '/workspace', label: '工作台', icon: LayoutDashboard },
-        { href: '/workspace/favorites', label: '我的收藏', icon: Heart },
-        { href: '/workspace/recent', label: '最近浏览', icon: Clock3 },
-        { href: '/workspace/notifications', label: '通知中心', icon: Bell },
-        ...(canCreate ? [{ href: '/workspace/contributions', label: '我的贡献', icon: FilePenLine }] : []),
-      ],
-    },
-    {
-      label: '知识与能力',
-      items: [
-        { href: '/workspace/design-assets', label: '设计资产', icon: Layers3 },
-        { href: '/workspace/ai-skills', label: 'AI Skill', icon: Sparkles },
-        { href: '/workspace/ai-projects', label: 'AI 项目库', icon: Lightbulb, badge: projectCount },
-        { href: '/workspace/ai-cases', label: 'AI 案例', icon: BriefcaseBusiness },
-      ],
-    },
-    {
-      label: '共建与治理',
-      items: [
-        ...(canCreate ? [{ href: '/workspace/submit', label: '提交内容', icon: Send }] : []),
-        ...(canSubmit ? [{ href: '/workspace/submissions', label: '我的提交', icon: FileCheck2 }] : []),
-        ...(canReview ? [{ href: '/workspace/reviews', label: '审核中心', icon: ClipboardCheck }] : []),
-      ],
-    },
     {
       label: '价值与数据',
       items: canAnalyze
@@ -99,6 +64,24 @@ function navigationGroups({
             { href: '/workspace/insights', label: '数据洞察', icon: ChartNoAxesCombined },
           ]
         : [],
+    },
+    {
+      label: '知识与能力',
+      items: [
+        { href: '/workspace/design-assets', label: '设计资产', icon: Layers3 },
+        { href: '/workspace/ai-tools', label: 'AI 工具', icon: Wrench },
+        { href: '/workspace/ai-skills', label: 'AI Skill', icon: Sparkles },
+        { href: '/workspace/ai-cases', label: 'AI 案例', icon: BriefcaseBusiness },
+        { href: '/workspace/ai-projects', label: 'AI 项目库', icon: Lightbulb, badge: projectCount },
+      ],
+    },
+    {
+      label: '个人空间',
+      items: [
+        { href: '/workspace', label: '工作台', icon: LayoutDashboard },
+        ...(canCreate ? [{ href: '/workspace/contributions', label: '我的贡献', icon: FilePenLine }] : []),
+        ...(canCreate ? [{ href: '/workspace/submit', label: '发布内容', icon: Send }] : []),
+      ],
     },
     {
       label: '平台管理',
@@ -192,15 +175,15 @@ export function WorkspaceMobileNavigation(props: NavigationProps) {
 const routeLabels: Array<[string, string]> = [
   ['/workspace/design-assets', '设计资产'],
   ['/workspace/ai-skills', 'AI Skill'],
-  ['/workspace/ai-projects', 'AI 项目库'],
   ['/workspace/ai-cases', 'AI 案例'],
-  ['/workspace/favorites', '我的收藏'],
-  ['/workspace/recent', '最近浏览'],
+  ['/workspace/ai-projects', 'AI 项目库'],
+  ['/workspace/ai-tools', 'AI 工具'],
+  ['/workspace/favorites', '收藏与浏览'],
+  ['/workspace/recent', '收藏与浏览'],
   ['/workspace/notifications', '通知中心'],
   ['/workspace/contributions', '我的贡献'],
-  ['/workspace/submissions', '我的提交'],
-  ['/workspace/submit', '提交内容'],
-  ['/workspace/reviews', '审核中心'],
+  ['/workspace/submissions', '我的贡献'],
+  ['/workspace/submit', '发布内容'],
   ['/workspace/overview', '价值总览'],
   ['/workspace/insights', '数据洞察'],
   ['/workspace/admin', '管理中心'],
@@ -216,6 +199,12 @@ export function WorkspaceBreadcrumb() {
     <div className="hidden items-center gap-2 text-[13px] text-[var(--v9-muted)] md:flex">
       <span>PalmPay UX</span>
       <span>›</span>
+      {pathname === '/workspace/notifications' ? (
+        <>
+          <Link className="hover:text-[var(--v9-text)]" href="/workspace">工作台</Link>
+          <span>›</span>
+        </>
+      ) : null}
       <strong className="font-semibold text-[var(--v9-text)]">{label}</strong>
     </div>
   );

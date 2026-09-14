@@ -8,8 +8,6 @@ type WorkspaceRouteWarmerProps = {
   canAnalyze: boolean;
   canCreate: boolean;
   canManage: boolean;
-  canReview: boolean;
-  canSubmit: boolean;
 };
 
 /**
@@ -27,15 +25,13 @@ export function WorkspaceRouteWarmer({
   canAnalyze,
   canCreate,
   canManage,
-  canReview,
-  canSubmit,
 }: WorkspaceRouteWarmerProps) {
   const router = useRouter();
   const routes = useMemo(() => {
     const nextRoutes = [
       '/workspace',
       '/workspace/favorites',
-      '/workspace/recent',
+      '/workspace/favorites?tab=recent',
       '/workspace/notifications',
       '/workspace/design-assets',
       '/workspace/ai-skills',
@@ -44,8 +40,6 @@ export function WorkspaceRouteWarmer({
     ];
 
     if (canCreate) nextRoutes.push('/workspace/contributions', '/workspace/submit');
-    if (canSubmit) nextRoutes.push('/workspace/submissions');
-    if (canReview) nextRoutes.push('/workspace/reviews');
     if (canAnalyze) nextRoutes.push('/workspace/overview', '/workspace/insights');
     if (canManage) {
       nextRoutes.push(
@@ -60,7 +54,7 @@ export function WorkspaceRouteWarmer({
     }
 
     return filterWorkspaceWarmRoutes(nextRoutes);
-  }, [canAnalyze, canCreate, canManage, canReview, canSubmit]);
+  }, [canAnalyze, canCreate, canManage]);
 
   useEffect(() => {
     let cancelled = false;

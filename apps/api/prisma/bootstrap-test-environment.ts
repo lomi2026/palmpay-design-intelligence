@@ -21,7 +21,7 @@ const teamName = 'PalmPay Experience Design';
 const acceptanceUsers = [
   { email: adminEmail, name: adminName, roles: ['member', 'manager', 'admin'] },
   { email: 'lomi2025@126.com', name: 'PalmPay Test Contributor', roles: ['member'] },
-  { email: 'lomi2024@126.com', name: 'PalmPay Test Reviewer', roles: ['reviewer'] },
+  { email: 'lomi2024@126.com', name: 'PalmPay Test Member', roles: ['member'] },
 ] as const;
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
@@ -33,7 +33,7 @@ async function main() {
   }
 
   const roles = await prisma.role.findMany({
-    where: { code: { in: ['admin', 'manager', 'member', 'reviewer'] } },
+    where: { code: { in: ['admin', 'manager', 'member'] } },
   });
   const rolesByCode = new Map(roles.map((role) => [role.code, role]));
   if (rolesByCode.size !== 4) {

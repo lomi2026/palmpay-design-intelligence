@@ -12,7 +12,7 @@ export class AnalyticsService {
   async overview(user: AuthenticatedUser) {
     const since = daysAgo(30);
     const organizationId = user.organizationId;
-    const [published, activeUsers, contributors, usageEvents, projects, verifiedCases, favorites] =
+    const [published, activeUsers, contributors, usageEvents, projects, publishedCaseRecords, favorites] =
       await Promise.all([
         this.prisma.content.groupBy({
           where: { organizationId, deletedAt: null, status: ContentStatus.PUBLISHED },
@@ -33,13 +33,14 @@ export class AnalyticsService {
         this.prisma.usageEvent.count({
           where: { organizationId, occurredAt: { gte: since }, eventType: 'project_referenced' },
         }),
-        this.prisma.content.count({
+        this.prisma.content.findMany({
           where: {
             organizationId,
             contentType: 'AI_CASE',
-            verificationStatus: 'VERIFIED',
+            status: ContentStatus.PUBLISHED,
             deletedAt: null,
           },
+          select: { currentVersion: { select: { body: true } } },
         }),
         this.prisma.favorite.count({
           where: {
@@ -50,16 +51,25 @@ export class AnalyticsService {
       ]);
     const countFor = (type: string) =>
       published.find((item) => item.contentType === type)?._count._all ?? 0;
+    const casesWithValidationRecords = publishedCaseRecords.filter(({ currentVersion }) => {
+      const body = currentVersion?.body;
+      if (!body || typeof body !== 'object' || Array.isArray(body)) return false;
+      return ['validationMethod', 'dataResult'].every(
+        (field) => typeof body[field] === 'string' && body[field].trim().length > 0,
+      );
+    }).length;
     return {
       periodDays: 30,
       publishedAssets: countFor('DESIGN_ASSET'),
+      publishedTools: countFor('AI_TOOL'),
+      publishedProjects: countFor('AI_PROJECT'),
       publishedSkills: countFor('AI_SKILL'),
-      publishedCases: countFor('AI_CASE'),
+      publishedCases: publishedCaseRecords.length,
       effectiveUsage30d: usageEvents,
       projectReferences30d: projects,
       activeUsers30d: activeUsers.length,
       contributors: contributors.length,
-      verifiedCases,
+      casesWithValidationRecords,
       favorites,
     };
   }
@@ -74,7 +84,6 @@ export class AnalyticsService {
       noResult,
       eventCounts,
       staleContent,
-      reviews,
     ] = await Promise.all([
       this.prisma.content.groupBy({
         where: { organizationId, deletedAt: null },
@@ -101,7 +110,7 @@ export class AnalyticsService {
         take: 10,
       }),
       this.prisma.usageEvent.groupBy({
-        where: { organizationId, occurredAt: { gte: since } },
+        where: { organizationId, occurredAt: { gte: since }, NOT: { eventType: { startsWith: 'review_' } } },
         by: ['eventType'],
         _count: { _all: true },
       }),
@@ -116,24 +125,7 @@ export class AnalyticsService {
         orderBy: { updatedAt: 'asc' },
         take: 20,
       }),
-      this.prisma.reviewRequest.findMany({
-        where: { content: { organizationId }, completedAt: { not: null } },
-        select: { submittedAt: true, completedAt: true, status: true },
-      }),
     ]);
-    const completed = reviews.filter((review) => review.completedAt);
-    const averageReviewHours = completed.length
-      ? Math.round(
-          (completed.reduce(
-            (sum, review) =>
-              sum + (review.completedAt!.getTime() - review.submittedAt.getTime()) / 3600000,
-            0,
-          ) /
-            completed.length) *
-            10,
-        ) / 10
-      : 0;
-    const rejected = completed.filter((review) => review.status === 'CHANGES_REQUESTED').length;
     return {
       periodDays: 30,
       contentStatus: contentStatus.map((item) => ({
@@ -157,10 +149,6 @@ export class AnalyticsService {
         count: item._count._all,
       })),
       staleContent,
-      governance: {
-        averageReviewHours,
-        returnRate: completed.length ? Math.round((rejected / completed.length) * 1000) / 10 : 0,
-      },
     };
   }
 }

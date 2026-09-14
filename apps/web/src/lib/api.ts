@@ -1,3 +1,5 @@
+import { userError } from './user-error';
+
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3001';
 
 export class ApiError extends Error {
@@ -17,7 +19,7 @@ async function apiError(response: Response) {
     if (Array.isArray(body.message)) message = body.message.join('；');
     else if (body.message) message = body.message;
   } catch {}
-  return new ApiError(response.status, message);
+  return new ApiError(response.status, userError(message, undefined, response.status));
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -38,6 +40,7 @@ export async function serverApiFetch<T>(path: string, init?: RequestInit): Promi
   const response = await fetch(`${serverApiBaseUrl}${path}`, {
     ...init,
     cache: 'no-store',
+    signal: init?.signal ?? AbortSignal.timeout(15000),
     headers: { Accept: 'application/json', ...init?.headers },
   });
 
