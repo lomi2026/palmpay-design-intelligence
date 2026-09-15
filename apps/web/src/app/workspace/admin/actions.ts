@@ -1,6 +1,5 @@
 'use server';
 
-import { refresh, revalidatePath } from 'next/cache';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { ApiError, serverApiFetch } from '@/lib/api';
 import type { AdminSaveResult } from './admin-save-result';
@@ -10,15 +9,6 @@ async function api(path: string, init: RequestInit) {
     ...init,
     headers: { ...(await authenticatedApiHeaders()), ...init.headers },
   });
-}
-
-function refreshAdmin(refreshShell = false) {
-  // Keep the user on the current tab and return fresh server-component data in
-  // the action response. Redirecting back to the same prefetched URL can restore
-  // the browser's stale route payload even though the API mutation succeeded.
-  revalidatePath('/workspace/admin');
-  if (refreshShell) revalidatePath('/workspace', 'layout');
-  refresh();
 }
 
 async function saveEdit(
@@ -48,23 +38,15 @@ async function saveEdit(
 }
 
 export async function createCategoryAction(formData: FormData) {
-  await api('/api/admin/categories', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: String(formData.get('name') ?? ''),
-      contentTypes: [String(formData.get('contentType') ?? 'DESIGN_ASSET')],
-    }),
-  });
-  refreshAdmin();
+  return saveEdit('/api/admin/categories', {
+    name: String(formData.get('name') ?? ''),
+    contentTypes: [String(formData.get('contentType') ?? 'DESIGN_ASSET')],
+  }, 'POST', '新增分类');
 }
 export async function createTagAction(formData: FormData) {
-  await api('/api/admin/tags', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: String(formData.get('name') ?? '') }),
-  });
-  refreshAdmin();
+  return saveEdit('/api/admin/tags', {
+    name: String(formData.get('name') ?? ''),
+  }, 'POST', '新增标签');
 }
 
 export async function updateCategoryStatusAction(formData: FormData) {

@@ -263,7 +263,7 @@ export default async function AdminPage({
               <p><strong>停用与删除：</strong>停用后不能新增选择，可再次启用；删除后移出管理列表，也不能新增选择。两者都不会删除已有内容，历史关联保留。</p>
               <p><strong>关联项：</strong>显示未删除内容当前保存的分类关联，不含已发布内容尚未发布的修改。</p>
             </div>
-            <form action={createCategoryAction} className="mt-4 grid gap-2">
+            <AdminEditForm action={createCategoryAction} resetOnSuccess className="mt-4 grid gap-2">
               <NativeSelect
                 name="contentType"
                 defaultValue="DESIGN_ASSET"
@@ -281,7 +281,7 @@ export default async function AdminPage({
                 className={controlClass}
               />
               <AdminSubmitButton pendingLabel="新增中…">新增分类</AdminSubmitButton>
-            </form>
+            </AdminEditForm>
             <ul className="mt-6 divide-y divide-white/10">
               {categories.map((item) => (
                 <li
@@ -324,7 +324,7 @@ export default async function AdminPage({
               <p><strong>启用与停用：</strong>新增标签默认停用，启用后才能在发布时选择。停用只限制新增选择，可再次启用。</p>
               <p><strong>删除影响：</strong>标签会移出管理列表，不能再新增选择；已有内容不会被删除，历史关联保留。</p>
             </div>
-            <form action={createTagAction} className="mt-4 flex gap-2">
+            <AdminEditForm action={createTagAction} resetOnSuccess className="mt-4 flex gap-2">
               <Input
                 name="name"
                 placeholder="新增标签"
@@ -332,7 +332,7 @@ export default async function AdminPage({
                 className={controlClass}
               />
               <AdminSubmitButton pendingLabel="新增中…">新增</AdminSubmitButton>
-            </form>
+            </AdminEditForm>
             <ul className="mt-6 divide-y divide-white/10">
               {tags.map((item) => (
                 <li

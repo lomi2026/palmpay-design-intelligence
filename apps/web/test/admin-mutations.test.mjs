@@ -4,27 +4,21 @@ import test from 'node:test';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
-test('administration mutations refresh the current management view without a stale redirect', () => {
+test('administration creation returns acknowledgement before refreshing the management view', () => {
   const actions = read('../src/app/workspace/admin/actions.ts');
+  const page = read('../src/app/workspace/admin/page.tsx');
 
-  assert.match(actions, /import \{ refresh, revalidatePath \} from 'next\/cache'/);
-  assert.match(actions, /revalidatePath\('\/workspace\/admin'\)/);
-  assert.match(actions, /revalidatePath\('\/workspace', 'layout'\)/);
-  assert.match(actions, /refresh\(\)/);
-  assert.doesNotMatch(actions, /redirect\(/);
-
-  const expectedRefresh = {
-    createCategoryAction: 'refreshAdmin()',
-    createTagAction: 'refreshAdmin()',
-  };
-
-  for (const [actionName, refreshCall] of Object.entries(expectedRefresh)) {
+  for (const actionName of ['createCategoryAction', 'createTagAction']) {
     const action = actions.match(
       new RegExp(`export async function ${actionName}\\b[\\s\\S]*?(?=export async function|$)`),
     )?.[0];
     assert.ok(action, `${actionName} should exist`);
-    assert.match(action, new RegExp(refreshCall.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(action, /return saveEdit\(/);
+    assert.doesNotMatch(action, /refreshAdmin\(/);
   }
+  assert.doesNotMatch(actions, /from 'next\/cache'/);
+  assert.match(page, /<AdminEditForm action=\{createCategoryAction\} resetOnSuccess/);
+  assert.match(page, /<AdminEditForm action=\{createTagAction\} resetOnSuccess/);
 });
 
 test('edit saves return acknowledgements without waiting for page reads and have bounded API waits', () => {
@@ -65,9 +59,9 @@ test('editing forms block automatic reset before Radix can restore mount-time va
   for (const action of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction']) {
     assert.match(page, new RegExp(`<AdminEditForm action=\\{${action}\\}`));
   }
-  // Creation clears normally; role grants clear only after confirmed success.
-  assert.match(page, /<form action=\{createCategoryAction\}/);
-  assert.match(page, /<form action=\{createTagAction\}/);
+  // Creation and role grants clear only after confirmed success.
+  assert.match(page, /<AdminEditForm action=\{createCategoryAction\} resetOnSuccess/);
+  assert.match(page, /<AdminEditForm action=\{createTagAction\} resetOnSuccess/);
   assert.match(page, /<AdminEditForm action=\{assignRoleAction\} resetOnSuccess/);
   assert.match(form, /if \(resetOnSuccess\)/);
   assert.match(form, /form\.current\?\.reset\(\)/);

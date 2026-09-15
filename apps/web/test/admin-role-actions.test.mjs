@@ -56,6 +56,32 @@ test('role grant returns a success notice after the authenticated API acknowledg
   assert.deepEqual(JSON.parse(requests[0].init.body), { roleId: 'role-test', scopeType: 'ORGANIZATION', scopeId: 'org-test' });
 });
 
+test('taxonomy creation returns success immediately and preserves submitted values', async () => {
+  const { actions, requests } = loadActions();
+  const category = new FormData();
+  category.set('name', 'Figma 插件');
+  category.set('contentType', 'AI_TOOL');
+  const tag = new FormData();
+  tag.set('name', '设计效率');
+
+  const categoryResult = await actions.createCategoryAction(category);
+  const tagResult = await actions.createTagAction(tag);
+  assert.equal(categoryResult.status, 'success');
+  assert.equal(categoryResult.message, '新增分类成功');
+  assert.equal(tagResult.status, 'success');
+  assert.equal(tagResult.message, '新增标签成功');
+  assert.equal(requests.length, 2);
+  assert.equal(requests[0].path, '/api/admin/categories');
+  assert.equal(requests[0].init.method, 'POST');
+  assert.deepEqual(JSON.parse(requests[0].init.body), {
+    name: 'Figma 插件',
+    contentTypes: ['AI_TOOL'],
+  });
+  assert.equal(requests[1].path, '/api/admin/tags');
+  assert.equal(requests[1].init.method, 'POST');
+  assert.deepEqual(JSON.parse(requests[1].init.body), { name: '设计效率' });
+});
+
 test('role removal returns its own notice and targets only the selected assignment', async () => {
   const { actions, requests } = loadActions();
   const result = await actions.removeUserRoleAction(fields({ userRoleId: 'assignment-test' }));
