@@ -65,7 +65,7 @@ export default async function RelatedContentPage({
       {error ? <p className="mt-4 rounded-xl border border-[var(--v9-status-danger-line)] bg-[var(--v9-status-danger-bg)] p-3 text-sm text-[var(--v9-status-danger-text)]">请选择关联目标。</p> : null}
       {contentId ? (
         <>
-          {canEdit ? <form
+          {canEdit ? <form data-card-surface=""
             action={createRelationAction}
             className="mt-6 grid gap-4 rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 md:grid-cols-[1fr_180px_auto] md:items-end"
           >
@@ -84,7 +84,7 @@ export default async function RelatedContentPage({
             <Button type="submit">添加关联</Button>
           </form> : null}
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <section className="rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6">
+            <section data-card-surface="" className="rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6">
               <h2 className="text-sm font-medium text-[var(--v9-text)]">此内容关联到</h2>
               <ul className="mt-3 space-y-2">
                 {relations?.outgoing.map((relation) => (
@@ -110,7 +110,7 @@ export default async function RelatedContentPage({
                 ))}
               </ul>
             </section>
-            <section className="rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6">
+            <section data-card-surface="" className="rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6">
               <h2 className="text-sm font-medium text-[var(--v9-text)]">被以下内容关联</h2>
               <ul className="mt-3 space-y-2">
                 {relations?.incoming.map((relation) => (

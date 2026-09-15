@@ -9,9 +9,9 @@ export function RouteTheme() {
     const studio = pathname === '/workspace' || pathname.startsWith('/workspace/');
     const root = document.documentElement;
     root.dataset.design = studio ? 'studio' : 'refined';
-    let theme = studio ? 'light' : 'dark';
+    let theme = 'dark';
     try {
-      const saved = localStorage.getItem(studio ? 'ppux-theme-studio' : 'ppux-theme');
+      const saved = localStorage.getItem('ppux-theme');
       if (saved === 'light' || saved === 'dark') theme = saved;
     } catch { /* Theme storage is optional. */ }
     root.classList.toggle('dark', theme === 'dark');

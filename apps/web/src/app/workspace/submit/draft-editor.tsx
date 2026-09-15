@@ -81,7 +81,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
   );
   return (
     <div className="composer-workspace">
-      <form
+      <form data-card-surface=""
         id={`content-editor-${draft.id}`}
         inert={publishing}
         action={action}

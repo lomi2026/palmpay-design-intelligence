@@ -114,7 +114,7 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
           </div>
 
         </div>
-        <div className="mt-6 grid gap-px overflow-hidden rounded-[18px] border border-white/[.1] bg-white/[.1] sm:grid-cols-2 lg:grid-cols-5">
+        <div data-card-surface="" className="mt-6 grid gap-px overflow-hidden rounded-[18px] border border-white/[.1] bg-white/[.1] sm:grid-cols-2 lg:grid-cols-5">
           {[
             ['探索项目', projects.length, '已发布项目总数'],
             ['可进入验证', stageCounts.ready, '可立项或试点中'],
@@ -129,10 +129,10 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
             </div>
           ))}
         </div>
-        {suggestedProjects.length ? <div className="mt-6"><div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><Sparkles className="size-3.5" />建议优先验证</div><div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{suggestedProjects.map(({ project, rank }) => <Link className="suggested-project-card group rounded-[16px] border border-white/[.1] bg-white/[.025] p-4 transition hover:border-white/[.25] hover:bg-white/[.055]" href={`/workspace/ai-projects/${project.slug}`} key={project.id}><div className="flex items-center justify-between gap-3"><span className="font-mono text-[11px] font-semibold tracking-[.08em] text-white/65">{project.projectDetail?.projectCode ?? 'AI'}</span><span className="text-[10px] text-white/42">优先级 #{rank}</span></div><h3 className="mt-6 line-clamp-2 min-h-10 text-[15px] font-semibold leading-5 tracking-[-.025em] text-white">{project.title}</h3><p className="mt-2 line-clamp-2 text-[11px] leading-5 text-white/48">{project.summary ?? '尚未补充项目摘要。'}</p><span className="mt-4 inline-flex items-center gap-1 text-[11px] text-white/55 transition group-hover:text-white">查看项目 <ArrowUpRight className="size-3.5" /></span></Link>)}</div></div> : null}
+        {suggestedProjects.length ? <div className="mt-6"><div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><Sparkles className="size-3.5" />建议优先验证</div><div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{suggestedProjects.map(({ project, rank }) => <Link data-card-surface="" className="suggested-project-card group rounded-[16px] border border-white/[.1] bg-white/[.025] p-4 transition hover:border-white/[.25] hover:bg-white/[.055]" href={`/workspace/ai-projects/${project.slug}`} key={project.id}><div className="flex items-center justify-between gap-3"><span className="font-mono text-[11px] font-semibold tracking-[.08em] text-white/65">{project.projectDetail?.projectCode ?? 'AI'}</span><span className="text-[10px] text-white/42">优先级 #{rank}</span></div><h3 className="mt-6 line-clamp-2 min-h-10 text-[15px] font-semibold leading-5 tracking-[-.025em] text-white">{project.title}</h3><p className="mt-2 line-clamp-2 text-[11px] leading-5 text-white/48">{project.summary ?? '尚未补充项目摘要。'}</p><span className="mt-4 inline-flex items-center gap-1 text-[11px] text-white/55 transition group-hover:text-white">查看项目 <ArrowUpRight className="size-3.5" /></span></Link>)}</div></div> : null}
       </section>
-      <div className="overflow-hidden rounded-[20px] border border-white/[.11] bg-[#101011]">
-        <div className="flex flex-col gap-6 border-b border-white/[.1] px-5 py-5 md:px-6">
+      <div data-card-surface="" className="overflow-hidden rounded-[20px] border border-white/[.11] bg-[#101011]">
+        <div className="workspace-filter-bar flex flex-col gap-6 border-b border-white/[.1] px-5 py-5 md:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><SlidersHorizontal className="size-3.5" />按探索维度筛选</div>
             <div className="text-[12px] text-white/45">显示 <strong className="font-semibold text-white">{filteredProjects.length}</strong> / {projects.length} 个项目</div>

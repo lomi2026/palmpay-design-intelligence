@@ -74,7 +74,7 @@ export default async function DesignAssetsPage({
               </NativeSelect>
             </label>
             <input name="view" type="hidden" value={view} />
-            <div aria-label="视图切换" className="flex h-10 items-center rounded-lg border border-[var(--v9-line-strong)] bg-[var(--v9-field)] p-1">
+            <div aria-label="视图切换" className="filter-view-switch flex h-10 items-center rounded-lg border border-[var(--v9-line-strong)] bg-[var(--v9-field)] p-1">
               <Button asChild size="icon-xs" variant="ghost">
                 <Link aria-label="卡片视图" aria-pressed={view === 'grid'} className={cn('size-7 rounded-md p-0', view === 'grid' ? 'bg-[var(--v9-soft-hover)] text-[var(--v9-text)]' : 'text-[var(--v9-muted)]')} href={viewHref('grid')}><Grid2X2 /></Link>
               </Button>

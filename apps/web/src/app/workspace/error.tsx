@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 export default function WorkspaceError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <main className="grid min-h-[calc(100vh-4rem)] place-items-center bg-[var(--v9-bg)] px-5 py-12">
-      <section className="w-full max-w-2xl overflow-hidden rounded-[26px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 text-center md:p-11">
+      <section data-card-surface="" className="w-full max-w-2xl overflow-hidden rounded-[26px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 text-center md:p-11">
         <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-[var(--v9-status-warning-line)] bg-[var(--v9-status-warning-bg)] text-[var(--v9-status-warning-text)]">
           <TriangleAlert className="size-5" />
         </span>

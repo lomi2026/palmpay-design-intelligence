@@ -81,7 +81,7 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
         </div>
       </header>
 
-      <form action="/workspace/contributions" method="get" className="mt-6 flex flex-wrap items-center gap-2">
+      <form action="/workspace/contributions" method="get" className="workspace-filter-bar mt-6 flex flex-wrap items-center gap-2">
         <label className="min-w-52 flex-1"><span className="sr-only">搜索内容</span><Input name="search" type="search" defaultValue={filters.search ?? ''} placeholder="搜索标题或摘要" className="h-10" /></label>
         <NativeSelect aria-label="分类" name="categoryId" defaultValue={filters.categoryId ?? ''} className="h-10 min-w-36"><option value="">全部分类</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}<option value="uncategorized">未分类</option></NativeSelect>
         <NativeSelect aria-label="发布状态" name="status" defaultValue={filters.status ?? ''} className="h-10 min-w-36"><option value="">全部发布状态</option><option value="DRAFT">草稿</option><option value="PUBLISHED">已发布</option><option value="UNPUBLISHED">已下架</option><option value="ARCHIVED">已归档</option></NativeSelect>

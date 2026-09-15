@@ -25,7 +25,7 @@ export default async function SearchPage({
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
       <WorkspacePageHero eyebrow="GLOBAL SEARCH" metric={result ? { value: result.total, label: '可访问结果' } : undefined} title="用一个关键词，找到可复用的团队经验。" />
-      <form className="mt-6 flex max-w-3xl gap-2">
+      <form className="workspace-filter-bar mt-6 flex max-w-3xl gap-2">
         <Input
           name="q"
           defaultValue={query}

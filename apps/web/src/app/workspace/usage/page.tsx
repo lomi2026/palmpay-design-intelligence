@@ -34,7 +34,7 @@ export default async function UsagePage({
           请选择项目，或手动填写项目名称后再提交。
         </p>
       ) : null}
-      <form
+      <form data-card-surface=""
         action={usageConfirmationAction}
         className="mt-6 space-y-5 rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 md:p-6"
       >

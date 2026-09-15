@@ -6,10 +6,10 @@ export default function WorkspaceLoading() {
       <div className="mt-3 h-4 w-full max-w-xl animate-pulse rounded bg-white/[0.07]" />
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }, (_, index) => (
-          <div key={index} className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/[0.035]" />
+          <div data-card-surface="" key={index} className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/[0.035]" />
         ))}
       </div>
-      <div className="mt-6 h-72 animate-pulse rounded-2xl border border-white/10 bg-white/[0.035]" />
+      <div data-card-surface="" className="mt-6 h-72 animate-pulse rounded-2xl border border-white/10 bg-white/[0.035]" />
     </main>
   );
 }

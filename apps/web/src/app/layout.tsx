@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'PalmPay Design Intelligence Hub',
 };
 
-const themeBootstrap = `(()=>{const studio=location.pathname==='/workspace'||location.pathname.startsWith('/workspace/');const root=document.documentElement;root.dataset.design=studio?'studio':'refined';let theme=studio?'light':'dark';try{const saved=localStorage.getItem(studio?'ppux-theme-studio':'ppux-theme');if(saved==='light'||saved==='dark')theme=saved}catch{}root.classList.toggle('dark',theme==='dark');root.style.colorScheme=theme})()`;
+const themeBootstrap = `(()=>{const studio=location.pathname==='/workspace'||location.pathname.startsWith('/workspace/');const root=document.documentElement;root.dataset.design=studio?'studio':'refined';let theme='dark';try{const saved=localStorage.getItem('ppux-theme');if(saved==='light'||saved==='dark')theme=saved}catch{}root.classList.toggle('dark',theme==='dark');root.style.colorScheme=theme})()`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
