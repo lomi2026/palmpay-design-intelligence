@@ -72,15 +72,17 @@ export async function createDraftAction(_: ActionState, formData: FormData): Pro
 
 export async function createPublishedEditDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const id = String(formData.get('id') ?? '');
+  let draftId = '';
   try {
     const draft = await serverApiFetch<{ id: string }>(`/api/content-drafts/${id}/from-published`, {
       method: 'POST',
       headers: await authenticatedApiHeaders(),
     });
-    return { id: draft.id };
+    draftId = draft.id;
   } catch (error) {
     return { error: userError(error, '无法创建编辑草稿。') };
   }
+  redirect(`/workspace/submit/${encodeURIComponent(draftId)}`);
 }
 
 export async function autosaveDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {

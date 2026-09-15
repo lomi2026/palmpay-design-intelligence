@@ -1,19 +1,13 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
 import { createPublishedEditDraftAction, type ActionState } from './submit/actions';
 import { Button } from '@/components/ui/button';
 
 const initialState: ActionState = {};
 
 export function PublishedEdit({ contentId }: { contentId: string }) {
-  const router = useRouter();
   const [state, action, pending] = useActionState(createPublishedEditDraftAction, initialState);
-
-  useEffect(() => {
-    if (state.id) router.push(`/workspace/submit/${state.id}`);
-  }, [router, state.id]);
 
   return (
     <form action={action} className="flex flex-col items-start gap-1.5">
