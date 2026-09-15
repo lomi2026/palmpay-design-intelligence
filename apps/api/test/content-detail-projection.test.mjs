@@ -297,9 +297,12 @@ test('autosave preserves the published detail and publish switches it inside the
   assert.equal(detailUpsertCount, 0);
 
   content = { ...content, draftVersion };
-  await service.publish(user, contentId);
+  await service.publish(user, contentId, {
+    title: 'Publish-click title',
+    body: { ...fixtures.DESIGN_ASSET.body, assetType: 'PUBLISH_CLICK_STANDARD' },
+  });
   assert.equal(detailUpsertCount, 1);
-  assert.equal(publishedDetail.assetType, 'UPDATED_DRAFT_STANDARD');
+  assert.equal(publishedDetail.assetType, 'PUBLISH_CLICK_STANDARD');
   assert.equal(insideTransaction, false);
 });
 

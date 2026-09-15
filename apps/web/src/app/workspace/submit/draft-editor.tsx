@@ -61,9 +61,9 @@ export function DraftEditor({ draft }: { draft: Draft }) {
   useEffect(() => {
     if (publishState.publishedHref) {
       router.replace(publishState.publishedHref);
-      router.refresh();
     }
   }, [publishState.publishedHref, router]);
+  const published = Boolean(publishState.publishedHref);
   const scheduleAutosave = () => {
     setValidation([]);
     if (publishing) return;
@@ -83,7 +83,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
     <div className="composer-workspace">
       <form data-card-surface=""
         id={`content-editor-${draft.id}`}
-        inert={publishing}
+        inert={publishing || published}
         action={action}
         onResetCapture={(event) => {
           event.preventDefault();
@@ -186,7 +186,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
             contentId={draft.id}
             title={draft.draftVersion?.title ?? draft.title}
             redirectTo="/workspace/contributions"
-            disabled={pending || publishing}
+            disabled={pending || publishing || published}
             className="h-11 px-4"
             onOpen={clearScheduledSave}
           />
@@ -215,7 +215,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
             formAction={publishAction}
             type="submit"
           >
-            {publishing ? '发布中…' : '发布内容'}
+            {published ? '发布成功，正在打开…' : publishing ? '发布中…' : '发布内容'}
           </Button>
         </div>
       </div>

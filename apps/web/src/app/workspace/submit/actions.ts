@@ -29,6 +29,17 @@ function structuredBody(contentType: string, formData: FormData) {
   return { projectCode: text('projectCode'), domain: text('domain'), targetValue: text('targetValue'), projectStage: text('projectStage'), priority: text('priority'), problemStatement: text('problemStatement'), solutionHypothesis: text('solutionHypothesis'), expectedOutcome: text('expectedOutcome'), riskLevel: text('riskLevel'), evaluationResult: text('evaluationResult'), relatedSkillIds: lines(formData, 'relatedSkillIds'), relatedCaseIds: lines(formData, 'relatedCaseIds'), convertedProjectRef: text('convertedProjectRef') };
 }
 
+function draftUpdate(formData: FormData) {
+  return {
+    title: formData.get('title'),
+    summary: optionalText(formData.get('summary')),
+    changeSummary: optionalText(formData.get('changeSummary')),
+    categoryId: optionalText(formData.get('categoryId')) ?? null,
+    tagIds: formData.getAll('tagIds'),
+    body: structuredBody(String(formData.get('contentType') ?? ''), formData),
+  };
+}
+
 export async function createDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
   try {
     const teamId = String(formData.get('teamId') ?? '').trim();
@@ -78,14 +89,7 @@ export async function autosaveDraftAction(_: ActionState, formData: FormData): P
     await serverApiFetch(`/api/content-drafts/${id}`, {
       method: 'PATCH',
       headers: { ...(await authenticatedApiHeaders()), 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: formData.get('title'),
-        summary: optionalText(formData.get('summary')),
-        changeSummary: optionalText(formData.get('changeSummary')),
-        categoryId: optionalText(formData.get('categoryId')) ?? null,
-        tagIds: formData.getAll('tagIds'),
-        body: structuredBody(String(formData.get('contentType') ?? ''), formData),
-      }),
+      body: JSON.stringify(draftUpdate(formData)),
     });
     return { savedAt: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) };
   } catch (error) {
@@ -99,14 +103,7 @@ export async function saveAndPreviewDraftAction(formData: FormData) {
   await serverApiFetch(`/api/content-drafts/${id}`, {
     method: 'PATCH',
     headers: { ...(await authenticatedApiHeaders()), 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      title: formData.get('title'),
-      summary: optionalText(formData.get('summary')),
-      changeSummary: optionalText(formData.get('changeSummary')),
-      categoryId: optionalText(formData.get('categoryId')) ?? null,
-      tagIds: formData.getAll('tagIds'),
-      body: structuredBody(String(formData.get('contentType') ?? ''), formData),
-    }),
+    body: JSON.stringify(draftUpdate(formData)),
   });
   revalidatePath(`/workspace/submit/${encodeURIComponent(id)}`);
   redirect(`/workspace/submit/${encodeURIComponent(id)}/preview`);
@@ -128,13 +125,13 @@ export async function contentLifecycleAction(_: ActionState, formData: FormData)
 }
 
 export async function publishDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
-  const saved = await autosaveDraftAction({}, formData);
-  if (saved.error) return saved;
   let publishedHref = '';
   try {
     const id = String(formData.get('id') ?? '');
     const published = await serverApiFetch<{ contentType: string }>(`/api/content-drafts/${encodeURIComponent(id)}/publish`, {
-      method: 'POST', headers: await authenticatedApiHeaders(),
+      method: 'POST',
+      headers: { ...(await authenticatedApiHeaders()), 'Content-Type': 'application/json' },
+      body: JSON.stringify(draftUpdate(formData)),
     });
     const segments: Record<string, string> = { DESIGN_ASSET: 'design-assets', AI_SKILL: 'ai-skills', AI_CASE: 'ai-cases', AI_PROJECT: 'ai-projects', AI_TOOL: 'ai-tools' };
     publishedHref = `/workspace/${segments[published.contentType] ?? 'contributions'}`;
@@ -142,5 +139,5 @@ export async function publishDraftAction(_: ActionState, formData: FormData): Pr
     return { error: userError(error, '发布失败，请重试。') };
   }
   revalidatePath('/workspace', 'layout');
-  redirect(publishedHref);
+  return { publishedHref };
 }

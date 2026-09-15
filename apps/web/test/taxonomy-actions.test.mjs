@@ -12,7 +12,7 @@ function actions() {
   const actionModule = { exports: {} };
   const imports = {
     '@/lib/auth': { authenticatedApiHeaders: async () => ({ Authorization: 'test' }) },
-    '@/lib/api': { serverApiFetch: async (path, init) => { requests.push({ path, ...init }); return { id: 'draft' }; } },
+    '@/lib/api': { serverApiFetch: async (path, init) => { requests.push({ path, ...init }); return path.endsWith('/publish') ? { contentType: 'AI_SKILL' } : { id: 'draft' }; } },
     'next/cache': { revalidatePath: (path) => revalidated.push(path) },
     'next/navigation': { redirect: () => {} },
   };
@@ -45,6 +45,32 @@ test('cleared category and tags are sent explicitly, not omitted on save', async
   const body = JSON.parse(a.requests[0].body);
   assert.equal(body.categoryId, null);
   assert.deepEqual(body.tagIds, []);
+});
+
+test('publish saves the latest form snapshot and publishes it in one API request', async () => {
+  const f = new FormData();
+  f.set('id', 'draft'); f.set('contentType', 'AI_SKILL'); f.set('title', 'Latest title');
+  f.set('promptTemplate', 'Latest prompt'); f.append('tagIds', 'tag-1');
+  const a = actions();
+  const result = await a.actions.publishDraftAction({}, f);
+  assert.equal(a.requests.length, 1);
+  assert.equal(a.requests[0].path, '/api/content-drafts/draft/publish');
+  assert.equal(a.requests[0].method, 'POST');
+  assert.equal(a.requests[0].headers['Content-Type'], 'application/json');
+  const body = JSON.parse(a.requests[0].body);
+  assert.equal(body.title, 'Latest title');
+  assert.equal(body.body.promptTemplate, 'Latest prompt');
+  assert.deepEqual(body.tagIds, ['tag-1']);
+  assert.equal(result.publishedHref, '/workspace/ai-skills');
+  assert.deepEqual(a.revalidated, ['/workspace']);
+});
+
+test('published acknowledgement ends before the catalog navigation and prevents repeat publishing', () => {
+  const editor = readFileSync(new URL('../src/app/workspace/submit/draft-editor.tsx', import.meta.url), 'utf8');
+  assert.match(editor, /router\.replace\(publishState\.publishedHref\)/);
+  assert.doesNotMatch(editor, /router\.refresh\(\)/);
+  assert.match(editor, /inert=\{publishing \|\| published\}/);
+  assert.match(editor, /发布成功，正在打开…/);
 });
 
 test('catalog options exclude disabled records while draft controls preserve selected historical values', () => {

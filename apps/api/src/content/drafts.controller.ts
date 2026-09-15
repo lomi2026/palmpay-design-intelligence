@@ -39,8 +39,8 @@ export class DraftsController {
   }
 
   @Post(':id/publish')
-  publish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.drafts.publish(user, id);
+  publish(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body?: AutosaveDraftDto) {
+    return this.drafts.publish(user, id, body);
   }
 
   @Post(':id/unpublish')

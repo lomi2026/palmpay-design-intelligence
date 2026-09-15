@@ -239,7 +239,8 @@ export class DraftsService {
     });
   }
 
-  async publish(user: AuthenticatedUser, contentId: string) {
+  async publish(user: AuthenticatedUser, contentId: string, input?: AutosaveDraftDto) {
+    if (input && Object.keys(input).length) await this.autosave(user, contentId, input);
     const content = await this.prisma.content.findFirst({
       where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
       include: { draftVersion: true, tags: true },
