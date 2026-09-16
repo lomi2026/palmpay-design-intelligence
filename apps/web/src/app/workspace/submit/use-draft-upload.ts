@@ -1,4 +1,5 @@
 'use client';
+import { showActionFeedback } from '@/components/workspace/action-feedback';
 import { userError } from '@/lib/user-error';
 import { useRef, useState } from 'react';
 import { prepareDraftUpload, completeDraftUpload, type AttachmentActionState } from './attachment-actions';
@@ -37,9 +38,10 @@ export function useDraftUpload() {
       setProgress(null); setStage('校验并保存文件…');
       const result = await completeDraftUpload(id, uploaded.fileId, cover);
       if (result.error) throw Error(result.error);
+      showActionFeedback('success', cover ? '封面保存成功' : '附件上传成功');
       transfer.current = null; setStage('已保存'); invalidateWorkspaceCache(['/workspace/contributions', '/workspace/submit']);
       return result;
-    } catch (reason) { const message = userError(reason, '上传失败，请重试。'); setError(message); setStage(''); return { error: message }; }
+    } catch (reason) { const message = userError(reason, '上传失败，请重试。'); setError(message); showActionFeedback('error', message); setStage(''); return { error: message }; }
     finally { lock.current = false; setPending(false); window.dispatchEvent(new CustomEvent('workspace-upload', { detail: { id, pending: false } })); }
   }
   return { upload, pending, progress, stage, error };

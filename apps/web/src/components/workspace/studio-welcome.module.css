@@ -17,8 +17,8 @@
 .stats { display: flex; justify-content: flex-end; gap: 16px; }
 .stat { display: flex; flex-direction: column; justify-content: center; gap: 8px; min-width: 96px; height: 96px; padding: 0 16px; border-radius: 16px; background: var(--v9-soft); }
 .stat strong { font-size: 28px; font-weight: 600; line-height: 32px; letter-spacing: -.04em; }
-.stat span { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted-foreground); }
-a.stat:hover span, .explore:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 4px; }
+.stat > span { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted-foreground); }
+a.stat:hover > span, .explore:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 4px; }
 a.stat:focus-visible, .explore:focus-visible { outline: 2px solid var(--ring); outline-offset: 6px; }
 @media (max-width: 800px) {
   .welcome { grid-template-columns: 1fr; padding: 24px; gap: 28px; }

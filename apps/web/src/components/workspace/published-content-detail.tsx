@@ -1,3 +1,4 @@
+import { ManagementMenu } from '@/components/workspace/management-menu';
 import { DeleteContentButton } from './delete-content-button';
 import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { notFound } from 'next/navigation';
@@ -59,7 +60,7 @@ export async function PublishedContentDetail({
     safeWebsite = ['http:', 'https:'].includes(u.protocol) && !u.username && !u.password;
   } catch {}
   return (
-    <main className="detail-page">
+    <main className="detail-page unified-detail-page" data-content-type={type}>
       <Link className="back-link" href={`/workspace/${route}`}>
         <ArrowLeft size={15} />
         返回{contentTypeLabel(type)}
@@ -78,8 +79,8 @@ export async function PublishedContentDetail({
             {type === 'AI_TOOL' && safeWebsite ? (
               <Button asChild>
                 <a href={website} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink size={15} aria-hidden="true" />
                   打开工具
-                  <ExternalLink size={15} />
                 </a>
               </Button>
             ) : null}
@@ -87,20 +88,22 @@ export async function PublishedContentDetail({
             <ContentEngagementLinks contentId={content.id} canonicalPath={`/workspace/${route}/${encodeURIComponent(content.slug)}`} />
             {canEdit ? <PublishedEdit contentId={content.id} /> : null}
             {canEdit || canArchive || canUnpublish ? (
-              <details className="management-menu">
+              <ManagementMenu>
                 <summary aria-label="更多管理操作">
                   <MoreHorizontal size={18} />
                 </summary>
                 <div>
                   <p>内容管理</p>
+                  <div className="flex items-start gap-3">
                   <ContentLifecycle
                     contentId={content.id}
                     canArchive={canArchive}
                     canUnpublish={canUnpublish}
                   />
-                  {canEdit ? <DeleteContentButton contentId={content.id} title={content.title} redirectTo={`/workspace/${route}`} className="mt-3" /> : null}
+                  {canEdit ? <DeleteContentButton filled contentId={content.id} title={content.title} redirectTo={`/workspace/${route}`} className="h-9 px-3 text-[12px]" /> : null}
+                  </div>
                 </div>
-              </details>
+              </ManagementMenu>
             ) : null}
           </div>
         </div>
@@ -111,7 +114,7 @@ export async function PublishedContentDetail({
         ) : null}
         <dl className="detail-metadata">
           {[
-            ['负责人', content.owner.name],
+            ['发布者', content.owner.name],
             ['维护团队', content.team.name],
             [
               '内容版本',

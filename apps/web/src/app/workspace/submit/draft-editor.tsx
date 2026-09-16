@@ -1,9 +1,10 @@
 'use client';
+import { showActionFeedback } from '@/components/workspace/action-feedback';
 
 import { useNavigationCache } from '@/components/workspace/navigation-cache';
 import { useUnsavedChanges } from '@/components/workspace/use-unsaved-changes';
 import { invalidateWorkspaceCache } from '@/components/workspace/cache-events';
-import { Send } from 'lucide-react';
+import { Eye, Save, Send } from 'lucide-react';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import {
@@ -65,7 +66,9 @@ export function DraftEditor({ draft }: { draft: Draft }) {
   const revision = useRef(0);
   const revisionInput = useRef<HTMLInputElement>(null);
   const [state, action, pending] = useActionState(async (previous: ActionState, data: FormData) => {
-    const result = await autosaveDraftAction(previous, data);
+    const result = await autosaveDraftAction(previous, data).catch((): ActionState => ({ error: '连接中断，操作结果暂未确认。请核对状态后重试。' }));
+    if (result.error) showActionFeedback('error', result.error, `draft:${draft.id}`);
+    else if (result.savedAt && data.get('__manualSave') === 'true') showActionFeedback('success', '草稿保存成功', `draft:${draft.id}`);
     if (result.savedAt) {
       if (Number(data.get('__editRevision')) === revision.current) setDirty(false);
       invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']);
@@ -78,7 +81,9 @@ export function DraftEditor({ draft }: { draft: Draft }) {
   const router = useRouter();
   const [publishState, publishAction, publishing] = useActionState(
     async (previous: ActionState, data: FormData) => {
-      const result = await publishDraftAction(previous, data);
+      const result = await publishDraftAction(previous, data).catch((): ActionState => ({ error: '连接中断，操作结果暂未确认。请核对状态后重试。' }));
+      if (result.error) showActionFeedback('error', result.error, `draft:${draft.id}`);
+      else if (result.publishedHref) showActionFeedback('success', '内容发布成功', `draft:${draft.id}`);
       if (result.publishedHref) { setDirty(false); invalidateWorkspaceCache(); if (result.publication) window.dispatchEvent(new CustomEvent('workspace-publication', { detail: result.publication })); cache?.begin(result.publishedHref); }
       return result;
     },
@@ -90,7 +95,9 @@ export function DraftEditor({ draft }: { draft: Draft }) {
     }
   }, [publishState.publishedHref, router]);
   const [previewState, previewAction, previewing] = useActionState(async (previous: ActionState, data: FormData) => {
-    const result = await saveDraftForPreviewAction(previous, data);
+    const result = await saveDraftForPreviewAction(previous, data).catch((): ActionState => ({ error: '连接中断，操作结果暂未确认。请核对状态后重试。' }));
+    if (result.error) showActionFeedback('error', result.error, `draft:${draft.id}`);
+    else if (result.previewHref) showActionFeedback('success', '草稿已保存，正在打开预览', `draft:${draft.id}`);
     if (result.previewHref) { setDirty(false); invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']); }
     return result;
   }, initialState);
@@ -138,7 +145,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
               new FormData(event.currentTarget),
             );
             setValidation(missing.map((field) => field.label));
-            if (missing.length) event.preventDefault();
+            if (missing.length) { event.preventDefault(); showActionFeedback('error', '请补充必填信息后再发布。', `draft:${draft.id}`); }
           }
         }}
         ref={formRef}
@@ -205,15 +212,17 @@ export function DraftEditor({ draft }: { draft: Draft }) {
           </div>
         ) : null}
         {state.error || publishState.error ? (
-          <p role="alert" className="text-sm text-red-400">
+          <p role="alert" className="text-sm text-destructive">
             {publishState.error || state.error}
           </p>
         ) : null}
       </form>
+      <div className={`composer-files ${['DESIGN_ASSET', 'AI_TOOL'].includes(draft.contentType) ? 'composer-files-paired' : ''}`}>
       {['DESIGN_ASSET', 'AI_TOOL'].includes(draft.contentType) ? (
         <DraftCover id={draft.id} fileId={draft.coverFile} />
       ) : null}
       <DraftAttachments attachments={draft.attachments} contentId={draft.id} />
+      </div>
 
       {previewState.error ? <p role="alert" className="mt-4 text-sm text-destructive">{previewState.error}</p> : null}
       {uploads > 0 ? <p role="status" className="mt-4 text-sm text-muted-foreground">文件正在处理，完成后可预览或发布；你可以继续编辑文字。</p> : null}
@@ -224,6 +233,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
         </p>
         <div className="flex flex-wrap gap-2">
           <DeleteContentButton
+            filled
             contentId={draft.id}
             title={draft.draftVersion?.title ?? draft.title}
             redirectTo="/workspace/contributions"
@@ -232,7 +242,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
             onOpen={clearScheduledSave}
           />
           <Button
-            className="h-10 border-white/[.16] bg-transparent px-4 text-white hover:bg-white/[.08] hover:text-white"
+            className="h-10 px-4"
             form={`content-editor-${draft.id}`}
             data-preview="true"
             disabled={pending || publishing || published || previewing || uploads > 0}
@@ -240,14 +250,16 @@ export function DraftEditor({ draft }: { draft: Draft }) {
             type="submit"
             variant="outline"
           >
+            <Eye aria-hidden="true" />
             {previewing ? '正在保存并打开…' : '预览草稿'}
           </Button>
           <Button
-            variant="outline" size="default" className="h-10 px-5"
+            name="__manualSave" value="true" variant="outline" size="default" className="h-10 px-5"
             form={`content-editor-${draft.id}`}
             disabled={pending || publishing || previewing}
             type="submit"
           >
+            <Save aria-hidden="true" />
             {pending ? '保存中…' : '保存草稿'}
           </Button>
           <Button

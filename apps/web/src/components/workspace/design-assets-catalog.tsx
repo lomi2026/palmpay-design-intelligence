@@ -1,4 +1,5 @@
 'use client';
+import { ContentViewCount } from '@/components/workspace/content-view-count';
 
 import { CardDetailLink } from './card-detail-link';
 import { useMemo } from 'react';
@@ -76,9 +77,9 @@ export function DesignAssetsCatalog({
                   <p className="mt-2 line-clamp-2 min-h-10 text-sm text-[var(--v9-muted)]">{content.summary}</p>
                 </CardHeader>
 
-                <CardFooter className="mx-4 flex justify-between border-t border-[var(--v9-line)] bg-transparent px-0 py-4 text-xs text-[var(--v9-subtle)]">
-                  <span>{legacy?.owner ?? content.owner.name} {legacy?.version ?? content.currentVersion?.versionLabel ?? ''}</span>
-                  <span className="ml-auto">{updatedDate ? <time dateTime={content.updatedAt} title="最近更新">{updatedDate}</time> : null}</span>
+                <CardFooter className="catalog-card-footer mx-4 flex justify-between border-t border-[var(--v9-line)] bg-transparent px-0 py-4 text-xs text-[var(--v9-subtle)]">
+                  <div className="catalog-card-byline"><span>发布者 · {content.owner.name}</span>
+                  <ContentViewCount count={content.viewCount} /></div><span className="ml-auto">{updatedDate ? <time dateTime={content.updatedAt} title="最近更新">{updatedDate}</time> : null}</span>
                 </CardFooter>
               </Card>
             );

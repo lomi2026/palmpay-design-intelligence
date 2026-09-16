@@ -1,4 +1,5 @@
 'use client';
+import { showActionFeedback } from '@/components/workspace/action-feedback';
 
 import { Download, Paperclip } from 'lucide-react';
 import { useActionState, useEffect } from 'react';
@@ -15,7 +16,7 @@ function formatSize(value: string) {
 }
 
 function AttachmentDownload({ attachment }: { attachment: PublishedAttachment }) {
-  const [state, action, pending] = useActionState(downloadPublishedAttachmentAction, initialState);
+  const [state, action, pending] = useActionState(async (previous: DownloadAttachmentState, data: FormData) => { const result = await downloadPublishedAttachmentAction(previous, data).catch((): DownloadAttachmentState => ({ error: '连接中断，操作结果暂未确认。请核对状态后重试。' })); if (result.error) showActionFeedback('error', result.error); else if (result.url) showActionFeedback('success', '下载链接已准备好，正在打开'); return result; }, initialState);
   useEffect(() => {
     if (!state.url) return;
     const anchor = document.createElement('a');
@@ -24,7 +25,7 @@ function AttachmentDownload({ attachment }: { attachment: PublishedAttachment })
     anchor.rel = 'noopener noreferrer';
     anchor.click();
   }, [state.url]);
-  return <li className="flex items-center justify-between gap-3 rounded-xl border border-white/[.1] bg-black/20 px-3 py-2.5"><div className="min-w-0"><p className="truncate text-sm text-white/80">{attachment.file.originalName}</p><p className="mt-0.5 text-[11px] text-white/40">{attachment.file.mimeType} · {formatSize(attachment.file.sizeBytes)}</p></div><form data-managed-cache="" action={action}><input name="fileId" type="hidden" value={attachment.file.id} /><Button className="h-8 rounded-lg border-white/[.14] bg-white/[.04] px-2.5 text-xs text-white hover:bg-white/[.1]" disabled={pending} size="sm" type="submit" variant="outline"><Download />{pending ? '准备中…' : '下载'}</Button></form>{state.error ? <p className="basis-full text-[11px] text-red-400">{state.error}</p> : null}</li>;
+  return <li className="flex items-center justify-between gap-3 rounded-xl border border-white/[.1] bg-black/20 px-3 py-2.5"><div className="min-w-0"><p className="truncate text-sm text-white/80">{attachment.file.originalName}</p><p className="mt-0.5 text-[11px] text-white/40">{attachment.file.mimeType} · {formatSize(attachment.file.sizeBytes)}</p></div><form data-managed-cache="" action={action}><input name="fileId" type="hidden" value={attachment.file.id} /><Button className="h-8 rounded-lg border-white/[.14] bg-white/[.04] px-2.5 text-xs text-white hover:bg-white/[.1]" disabled={pending} size="sm" type="submit" variant="outline"><Download />{pending ? '准备中…' : '下载'}</Button></form>{state.error ? <p role="alert" className="basis-full text-[11px] text-destructive">{state.error}</p> : null}</li>;
 }
 
 export function PublishedAttachments({ attachments }: { attachments: PublishedAttachment[] }) {

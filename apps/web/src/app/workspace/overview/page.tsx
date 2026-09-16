@@ -53,7 +53,7 @@ async function OverviewPage() {
           <div className="flex flex-col items-start xl:pt-6">
 
             <h1 className="mt-3 max-w-3xl text-[34px] font-semibold leading-[1.08] tracking-[-.055em] text-white sm:text-[46px]">价值总览</h1>
-            <p className="mt-4 max-w-2xl text-[14px] leading-7 text-white/55">让设计资产被复用，让设计价值被衡量。从内容积累、实际使用到项目引用，了解团队设计能力带来的价值。</p>
+            <p className="mt-4 max-w-2xl text-[14px] leading-7 text-white/55">让设计资产被复用，让设计价值被衡量。从内容积累、实际使用到项目引用，了解团队设计能力带来的价值。汇集设计资产、AI 工具、Skill 与实践案例，帮助团队找到可复用的方法，将已有经验应用到新的业务问题中。结合使用确认、项目关联与案例验证记录，持续观察内容如何支持设计协作，为后续的资产完善、能力建设与项目探索提供依据。</p>
             <div className="mt-auto pt-6"><Button asChild><Link prefetch={false} href="/workspace/ai-projects">查看 AI 项目库 <ChartNoAxesCombined className="size-4" /></Link></Button></div>
           </div>
           <div data-clickable-card="" data-card-surface="" className="relative isolate rounded-[16px] border border-white/[.12] bg-black/[.24] p-6">

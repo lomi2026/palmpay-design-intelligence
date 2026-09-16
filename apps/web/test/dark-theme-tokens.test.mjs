@@ -31,6 +31,6 @@ test('large governance callouts no longer flash pure white in dark mode', () => 
     const source = read(file);
     assert.doesNotMatch(source, /bg-white p-6 text-black/);
     assert.doesNotMatch(source, /border-white bg-white py-0 text-\[#090909\]/);
-    assert.match(source, /bg-(?:card|\[var\(--v9-panel-2\)\])/);
+    assert.match(source, /bg-(?:card|\[var\(--v9-panel(?:-2)?\)\])/);
   }
 });

@@ -1,6 +1,7 @@
 'use client';
+import { ContentViewCount } from './content-view-count';
 
-import { WorkspaceDataLink as Link } from './workspace-data-link';
+import { CardDetailLink } from './card-detail-link';
 import { AnimatedNumber } from './dashboard-motion';
 import { ArrowUpRight, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
@@ -140,12 +141,12 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
             </div>
           ))}
         </div>
-        {suggestedProjects.length ? <div className="mt-6"><div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><Sparkles className="size-3.5" />建议优先验证</div><div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{suggestedProjects.map(({ project, rank }) => <Link data-card-surface="" className="suggested-project-card group rounded-[16px] border border-white/[.1] bg-white/[.025] p-4 transition hover:border-white/[.25] hover:bg-white/[.055]" href={`/workspace/ai-projects/${project.slug}`} key={project.id}><div className="flex items-center justify-between gap-3"><span className="font-mono text-[11px] font-semibold tracking-[.08em] text-white/65">{project.projectDetail?.projectCode ?? 'AI'}</span><span className="text-[10px] text-white/42">优先级 #{rank}</span></div><h3 className="mt-6 line-clamp-2 min-h-10 text-[15px] font-semibold leading-5 tracking-[-.025em] text-white">{project.title}</h3><p className="mt-2 line-clamp-2 text-[11px] leading-5 text-white/48">{project.summary ?? '尚未补充项目摘要。'}</p><span className="mt-4 inline-flex items-center gap-1 text-[11px] text-white/55 transition group-hover:text-white">查看项目 <ArrowUpRight className="size-3.5" /></span></Link>)}</div></div> : null}
+        {suggestedProjects.length ? <div className="mt-6"><div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><Sparkles className="size-3.5" />建议优先验证</div><div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{suggestedProjects.map(({ project, rank }) => <article data-clickable-card="" data-card-surface="" className="suggested-project-card group relative isolate rounded-[16px] border border-white/[.1] p-4" key={project.id}><CardDetailLink href={`/workspace/ai-projects/${project.slug}`} title={project.title} /><div className="flex items-center justify-between gap-3"><span className="font-mono text-[11px] font-semibold tracking-[.08em] text-white/65">{project.projectDetail?.projectCode ?? 'AI'}</span><span className="text-[10px] text-white/42">优先级 #{rank}</span></div><h3 className="mt-6 line-clamp-2 min-h-10 text-[15px] font-semibold leading-5 tracking-[-.025em] text-white">{project.title}</h3><p className="mt-2 line-clamp-2 text-[11px] leading-5 text-white/48">{project.summary ?? '尚未补充项目摘要。'}</p><span className="mt-4 inline-flex items-center gap-1 text-[11px] text-white/55 transition group-hover:text-white">查看详情 <ArrowUpRight className="size-3.5" /></span><div className="mt-3"><ContentViewCount count={project.viewCount} /></div></article>)}</div></div> : null}
       </section>
       <div data-card-surface="" className="overflow-hidden rounded-[24px] border border-white/[.11] bg-[#101011]">
-        <div className="workspace-filter-bar flex flex-col gap-6 border-b border-white/[.1] px-5 py-5 md:px-6">
+        <div className="project-filter-bar workspace-filter-bar flex flex-col gap-6 border-b border-white/[.1] px-5 py-5 md:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-[12px] font-medium text-white/65"><SlidersHorizontal className="size-3.5" />按探索维度筛选</div>
+            <div className="project-filter-heading mb-2 flex items-center gap-2 text-[16px] font-bold text-[var(--v9-text)]"><SlidersHorizontal className="size-4" />按探索维度筛选</div>
             <div className="text-[12px] text-white/45">显示 <strong className="font-semibold text-white">{filteredProjects.length}</strong> / {projects.length} 个项目</div>
           </div>
           <div className="grid gap-4 2xl:grid-cols-[1.15fr_1fr_.9fr]">
@@ -159,28 +160,29 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
         </div>
 
         {filteredProjects.length ? (
-          <div className="grid divide-y divide-white/[.1]">
+          <div className="grid divide-y divide-white/[.1] pt-3">
             {filteredProjects.map((project) => {
               const detail = project.projectDetail;
               const stage = stageLabels[projectStage(project) as ProjectStage];
               const priority = detail?.priority ?? 'MEDIUM';
               return (
-                <article className="group grid gap-4 px-5 py-5 transition hover:bg-white/[.035] md:grid-cols-[84px_minmax(0,1fr)_minmax(168px,.42fr)_auto] md:items-center md:gap-6 md:px-6" key={project.id}>
+                <article className="group relative isolate mx-4 grid gap-4 px-1 py-5 transition hover:bg-white/[.035] md:grid-cols-[84px_minmax(0,1fr)_minmax(168px,.42fr)_auto] md:items-center md:gap-6 md:px-2" key={project.id}>
+                  <CardDetailLink href={`/workspace/ai-projects/${project.slug}`} title={project.title} />
                   <div className="flex items-center justify-between gap-3 md:block">
                     <span className="font-mono text-[13px] font-semibold tracking-[.08em] text-white">{detail?.projectCode ?? 'AI'}</span>
                     <WorkspaceStatusBadge className="mt-2" label={stage} status={projectStage(project)} />
                   </div>
                   <div className="min-w-0">
-                    <Link className="inline-flex items-start gap-2 text-[17px] font-semibold leading-6 tracking-[-.025em] text-white transition group-hover:text-white/80" href={`/workspace/ai-projects/${project.slug}`}>
+                    <span className="inline-flex items-start gap-2 text-[17px] font-semibold leading-6 tracking-[-.025em] text-white transition group-hover:text-white/80">
                       <span>{project.title}</span><ArrowUpRight className="mt-1 size-4 shrink-0 text-white/45 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" />
-                    </Link>
+                    </span>
                     <p className="mt-1.5 max-w-3xl text-[13px] leading-6 text-white/52">{project.summary ?? '暂无项目说明'}</p>
                   </div>
                   <div className="flex flex-wrap gap-1.5 md:justify-start">
                     <Badge className="rounded-full border-white/[.12] bg-white/[.035] px-2.5 text-[10px] font-medium text-white/65" variant="outline">{projectDomain(project)}</Badge>
                     <Badge className="rounded-full border-white/[.12] bg-white/[.035] px-2.5 text-[10px] font-medium text-white/65" variant="outline">{projectValue(project)}</Badge>
                   </div>
-                  <div className="flex items-center gap-2 md:justify-end"><span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-2 py-0.5 text-[10px] text-[var(--v9-muted)]">优先级：{priorityLabel(priority)}</span></div>
+                  <div className="flex flex-wrap items-center gap-2 md:justify-end"><ContentViewCount count={project.viewCount} /><span className="rounded-full border border-[var(--v9-line)] bg-[var(--v9-soft)] px-2 py-0.5 text-[10px] text-[var(--v9-muted)]">优先级：{priorityLabel(priority)}</span></div>
                 </article>
               );
             })}

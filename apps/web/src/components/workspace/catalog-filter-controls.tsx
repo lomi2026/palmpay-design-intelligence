@@ -32,7 +32,7 @@ export function CatalogFilterControls({
     new Map(contents.filter((item) => item.category?.status === 'ACTIVE').map((item) => [item.category!.id, item.category!])).values(),
   );
   const tags = Array.from(
-    new Map(contents.flatMap((item) => item.tags.filter(({ tag }) => tag.status === 'ACTIVE').map(({ tag }) => [tag.normalizedName, tag] as const))).values(),
+    new Map(contents.flatMap((item) => item.tags.filter(({ tag }) => tag.status === 'ACTIVE' && (!tag.contentTypes?.length || tag.contentTypes.includes(item.contentType))).map(({ tag }) => [tag.normalizedName, tag] as const))).values(),
   );
   const hasFilters = Boolean(
     filters.categoryId ||

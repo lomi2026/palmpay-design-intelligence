@@ -30,7 +30,7 @@ export function ContentCard({ content }: { content: ContentCardData }) {
       </CardHeader>
 
       <CardFooter className="mt-auto flex items-center justify-between border-[var(--v9-line)] bg-transparent px-5 pt-5 text-xs text-[var(--v9-subtle)]">
-        <span>负责人 · {content.owner.name}</span>
+        <span>发布者 · {content.owner.name}</span>
         <span>{content.team.name}</span>
       </CardFooter>
     </Card>

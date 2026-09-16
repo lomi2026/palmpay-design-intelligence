@@ -45,6 +45,7 @@ export async function createCategoryAction(formData: FormData) {
 }
 export async function createTagAction(formData: FormData) {
   return saveEdit('/api/admin/tags', {
+    contentTypes: formData.getAll('contentTypes').map(String),
     name: String(formData.get('name') ?? ''),
   }, 'POST', '新增标签');
 }
@@ -67,6 +68,8 @@ export async function updateUserAction(formData: FormData) {
   return saveEdit(`/api/organizations/${organizationId}/users/${userId}`, {
     name: String(formData.get('name') ?? '').trim(),
     status: String(formData.get('status')),
+    ...(formData.has('email') ? { email: String(formData.get('email')).trim().toLowerCase() } : {}),
+    ...(formData.has('teamId') ? { teamId: String(formData.get('teamId') ?? '') || null } : {}),
     ...(replacementOwnerId ? { replacementOwnerId } : {}),
   });
 }

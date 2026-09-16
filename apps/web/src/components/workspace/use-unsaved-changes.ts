@@ -1,16 +1,23 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
+import { useIsNavigationSnapshot, useNavigationCache } from './navigation-cache';
 const decisions = new WeakMap<Event, boolean>();
 export function confirmWorkspaceNavigation() {
   return window.dispatchEvent(new Event('workspace-before-navigate', { cancelable: true }));
 }
 export function useUnsavedChanges(dirty: boolean) {
-  const current = useRef(dirty);
-  useEffect(() => { current.current = dirty; }, [dirty]);
+  const pathname = usePathname();
+  const ownerPath = useRef(pathname);
+  const snapshot = useIsNavigationSnapshot();
+  const cache = useNavigationCache();
+  const current = useRef(false);
+  const navigating = useRef(false);
+  useEffect(() => { current.current = dirty && !snapshot && ownerPath.current === pathname; navigating.current = Boolean(cache?.pending) && !cache?.failed; }, [dirty, snapshot, pathname, cache?.pending, cache?.failed]);
   useEffect(() => {
     const confirm = (event: Event) => {
       if (decisions.has(event)) return decisions.get(event);
-      if (!current.current) return true;
+      if (!current.current || navigating.current) return true;
       const answer = window.confirm('还有未保存的更改或上传任务。确定离开吗？'); decisions.set(event, answer); return answer;
     };
     const unload = (event: BeforeUnloadEvent) => { if (current.current) { event.preventDefault(); event.returnValue = ''; } };

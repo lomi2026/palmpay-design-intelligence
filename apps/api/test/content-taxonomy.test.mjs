@@ -40,3 +40,13 @@ test('existing disabled relations can be retained or removed, not newly added', 
   await assert.rejects(validateTaxonomy(tx, 'other-org', 'DESIGN_ASSET', selected, selected), /分类/);
   await assert.rejects(validateTaxonomy(tx, 'org', 'DESIGN_ASSET', selected, empty), /分类/);
 });
+
+test('tag page scope rejects new cross-type links but preserves historical links', async () => {
+  const selection = { categoryId: null, tagIds: ['tag'] };
+  const tx = database(category, { ...tag, contentTypes: ['AI_SKILL'] });
+  await validateTaxonomy(tx, 'org', 'AI_SKILL', selection);
+  await assert.rejects(validateTaxonomy(tx, 'org', 'AI_CASE', selection), /不适用于此内容类型/);
+  await validateTaxonomy(tx, 'org', 'AI_CASE', selection, selection);
+  await validateTaxonomy(database(category, { ...tag, contentTypes: [] }), 'org', 'AI_CASE', selection);
+  await assert.rejects(validateTaxonomy(tx, 'other-org', 'AI_SKILL', selection), /标签/);
+});

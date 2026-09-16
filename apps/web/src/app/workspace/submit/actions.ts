@@ -82,6 +82,7 @@ export async function createPublishedEditDraftAction(_: ActionState, formData: F
   } catch (error) {
     return { error: userError(error, '无法创建编辑草稿。') };
   }
+  if (formData.get('__managedCache') === 'true') return { id: draftId };
   redirect(`/workspace/submit/${encodeURIComponent(draftId)}`);
 }
 

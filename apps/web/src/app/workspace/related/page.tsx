@@ -1,3 +1,4 @@
+import { PreviousPageLink } from '@/components/workspace/previous-page-link';
 import { EngagementForm } from '@/components/workspace/engagement-form';
 import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { RelatedPicker } from './related-picker';
@@ -58,9 +59,7 @@ async function RelatedContentPage({
   );
   return (
     <main className="mx-auto max-w-[1100px] px-5 py-8 md:px-8 md:py-10">
-      <Link href="/workspace" className="text-sm text-[var(--v9-muted)] transition hover:text-[var(--v9-text)]">
-        ← 返回工作台
-      </Link>
+      <PreviousPageLink fallback={source ? `/workspace/${moduleFor(source.contentType)}/${source.slug}` : "/workspace"} />
       <div className="mt-6"><WorkspacePageHero eyebrow="CONTENT GRAPH" metric={contentId ? { value: (relations?.outgoing.length ?? 0) + (relations?.incoming.length ?? 0), label: '已有连接' } : undefined} title="关联内容" /></div>
       {success ? <p className="mt-4 rounded-xl border border-[var(--v9-status-success-line)] bg-[var(--v9-status-success-bg)] p-3 text-sm text-[var(--v9-status-success-text)]">内容关联已保存。</p> : null}
       {error ? <p className="mt-4 rounded-xl border border-[var(--v9-status-danger-line)] bg-[var(--v9-status-danger-bg)] p-3 text-sm text-[var(--v9-status-danger-text)]">请选择关联目标。</p> : null}

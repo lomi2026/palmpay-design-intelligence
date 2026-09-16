@@ -36,8 +36,10 @@ export function AdminEditForm({ action, resetOnSuccess = false, onSuccess, ...pr
             if (field instanceof HTMLInputElement && field.type !== 'hidden' && field.value === String(formData.get(name) ?? '')) field.value = value;
           }
         }
+        showAdminFeedback(response);
         return response;
       } catch {
+        showAdminFeedback({ status: 'error', message: '连接中断，操作结果暂未确认。请刷新核对状态后再重试。' });
         return { status: 'error', message: '连接中断，操作结果暂未确认。请刷新核对状态后再重试。' };
       }
     },
@@ -47,7 +49,6 @@ export function AdminEditForm({ action, resetOnSuccess = false, onSuccess, ...pr
   useUnsavedChanges(dirty || pending);
   useEffect(() => {
     if (result.status === 'idle') return;
-    showAdminFeedback(result);
     // Run after the write action has settled. A slow follow-up read must not
     // keep a successfully saved row in the form's pending state.
     if (result.status === 'success') {

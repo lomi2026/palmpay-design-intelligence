@@ -80,7 +80,7 @@ test('catalog options exclude disabled records while draft controls preserve sel
   assert.match(filters, /category\?\.status === 'ACTIVE'/);
   assert.match(filters, /tag.status === 'ACTIVE'/);
   assert.match(fields, /contentTypes.includes\(contentType\)/);
-  assert.match(fields, /tag.status === 'ACTIVE' \|\| tagIds.includes\(tag.id\)/);
+  assert.match(fields, /tag\.contentTypes\.includes\(contentType\).*\|\| tagIds.includes\(tag.id\)/);
   assert.match(fields, /已停用/);
   assert.match(editor, /onResetCapture/);
   assert.match(editor, /onChange=\{scheduleAutosave\}/);

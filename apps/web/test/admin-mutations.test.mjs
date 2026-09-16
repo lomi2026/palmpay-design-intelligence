@@ -17,14 +17,14 @@ test('administration creation returns acknowledgement before refreshing the mana
     assert.doesNotMatch(action, /refreshAdmin\(/);
   }
   assert.doesNotMatch(actions, /from 'next\/cache'/);
-  assert.match(page, /<AdminEditForm action=\{createCategoryAction\} resetOnSuccess/);
-  assert.match(page, /<AdminEditForm action=\{createTagAction\} resetOnSuccess/);
+  assert.match(page, /<AddTaxonomyDialog kind="category"/);
+  assert.match(page, /<AddTaxonomyDialog kind="tag"/);
 });
 
 test('edit saves return acknowledgements without waiting for page reads and have bounded API waits', () => {
   const actions = read('../src/app/workspace/admin/actions.ts');
   const form = read('../src/app/workspace/admin/admin-edit-form.tsx');
-  const feedback = read('../src/app/workspace/admin/admin-feedback.tsx');
+  const feedback = read('../src/components/workspace/action-feedback.tsx');
   for (const name of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserAction', 'assignRoleAction', 'removeUserRoleAction']) {
     const action = actions.match(new RegExp(`export async function ${name}\\b[\\s\\S]*?(?=export async function|$)`))?.[0];
     assert.match(action, /return saveEdit\(/);
@@ -33,7 +33,7 @@ test('edit saves return acknowledgements without waiting for page reads and have
   assert.match(actions, /AbortSignal\.timeout\(15_000\)/);
   assert.match(actions, /结果暂未确认/);
   assert.match(form, /useActionState/);
-  assert.match(form, /showAdminFeedback\(result\)/);
+  assert.match(form, /showAdminFeedback\(response\)/);
   assert.match(form, /startTransition\(\(\) => router\.refresh\(\)\)/);
   assert.match(feedback, /role=\{success \? 'status' : 'alert'\}/);
 });
@@ -60,8 +60,8 @@ test('editing forms block automatic reset before Radix can restore mount-time va
     assert.match(page, new RegExp(`<AdminEditForm action=\\{${action}\\}`));
   }
   // Creation and role grants clear only after confirmed success.
-  assert.match(page, /<AdminEditForm action=\{createCategoryAction\} resetOnSuccess/);
-  assert.match(page, /<AdminEditForm action=\{createTagAction\} resetOnSuccess/);
+  assert.match(page, /<AddTaxonomyDialog kind="category"/);
+  assert.match(page, /<AddTaxonomyDialog kind="tag"/);
   assert.match(page, /<AdminEditForm action=\{assignRoleAction\} resetOnSuccess/);
   assert.match(form, /if \(resetOnSuccess\)/);
   assert.match(form, /form\.current\?\.reset\(\)/);

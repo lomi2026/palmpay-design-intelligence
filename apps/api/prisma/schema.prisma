@@ -611,6 +611,7 @@ model AIProjectDetail {
 }
 
 model Tag {
+  contentTypes String[] @default([]) @map("content_types")
   id             String    @id @default(uuid()) @db.Uuid
   organizationId String    @map("organization_id") @db.Uuid
   name           String    @db.VarChar(100)

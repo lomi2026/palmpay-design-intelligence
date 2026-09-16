@@ -47,7 +47,7 @@ export default async function LoginPage({
             type="email"
           />
           {error ? (
-            <p className="text-sm text-red-400">{errorMessages[error] ?? '登录失败，请重试。'}</p>
+            <p role="alert" className="text-sm text-destructive">{errorMessages[error] ?? '登录失败，请重试。'}</p>
           ) : null}
           <LoginSubmitButton />
         </form>

@@ -227,13 +227,22 @@ export class IdentityService {
   private async saveUser(
     organizationId: string,
     userId: string,
-    input: UpdateUserStatusDto,
+    input: UpdateUserStatusDto & { email?: string; teamId?: string | null },
     actorId: string,
     name?: string,
   ) {
     const result = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.user.findFirst({ where: { id: userId, organizationId, deletedAt: null }, include: userDetails });
       if (!existing) throw new NotFoundException('User not found.');
+      const email = input.email?.trim().toLowerCase();
+      if (email && email !== existing.email) {
+        const duplicate = await tx.user.findFirst({ where: { organizationId, id: { not: userId }, email: { equals: email, mode: 'insensitive' } }, select: { id: true } });
+        if (duplicate) throw new ConflictException('该邮箱已被使用，请更换邮箱。');
+      }
+      if (input.teamId && input.teamId !== existing.primaryTeamId) {
+        const team = await tx.team.findFirst({ where: { id: input.teamId, organizationId, status: 'ACTIVE' }, select: { id: true } });
+        if (!team) throw new BadRequestException('请选择当前组织内已启用的团队。');
+      }
       const disabling = input.status === UserStatus.DISABLED && existing.status !== UserStatus.DISABLED;
       const ownedContent = disabling
         ? await tx.content.findMany({
@@ -326,7 +335,7 @@ export class IdentityService {
 
       const updated = await tx.user.update({
         where: { id: userId },
-        data: { status: input.status, ...(name !== undefined ? { name } : {}) },
+        data: { status: input.status, ...(name !== undefined ? { name } : {}), ...(email !== undefined ? { email } : {}), ...(input.teamId !== undefined ? { primaryTeamId: input.teamId } : {}) },
       });
       await tx.auditLog.create({
         data: {

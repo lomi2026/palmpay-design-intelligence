@@ -55,3 +55,11 @@ test('tag status updates persist the requested lifecycle state', async () => {
   assert.equal(calls.updates[0].status, 'ACTIVE');
   assert.equal(calls.audits[0].action, 'taxonomy.tag.update');
 });
+
+test('tag page scopes are persisted and audited; legacy tags default to universal', async () => {
+  const { service, calls } = fixture();
+  const created = await service.createTag(user, { name: 'Skill', contentTypes: ['AI_SKILL', 'AI_SKILL', 'AI_CASE'] });
+  assert.deepEqual(created.contentTypes, ['AI_SKILL', 'AI_CASE']);
+  assert.deepEqual(calls.audits[0].afterData.contentTypes, ['AI_SKILL', 'AI_CASE']);
+  assert.deepEqual((await service.createTag(user, { name: 'General' })).contentTypes, []);
+});

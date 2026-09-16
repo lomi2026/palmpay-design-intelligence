@@ -125,6 +125,7 @@ export class GovernanceService {
           organizationId: user.organizationId,
           name: input.name.trim(),
           normalizedName,
+          contentTypes: [...new Set(input.contentTypes ?? [])],
           status: TagStatus.DISABLED,
         },
       });
@@ -153,6 +154,7 @@ export class GovernanceService {
       where: { id: tagId },
       data: {
         name: input.name?.trim(),
+        contentTypes: input.contentTypes ? [...new Set(input.contentTypes)] : undefined,
         normalizedName: input.name?.trim().toLocaleLowerCase('zh-CN'),
         status: input.status,
       },

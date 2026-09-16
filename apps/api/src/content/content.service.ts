@@ -85,8 +85,14 @@ export class ContentService {
       this.prisma.content.count({ where }),
     ]);
 
+    const views = await this.prisma.recentView.groupBy({
+      by: ['contentId'],
+      where: { contentId: { in: items.map(item => item.id) } },
+      _sum: { viewCount: true },
+    });
+    const viewCounts = new Map(views.map(item => [item.contentId, item._sum.viewCount ?? 0]));
     return {
-      items: items.map((item) => this.serializeContentFiles(item)),
+      items: items.map((item) => ({ ...this.serializeContentFiles(item), viewCount: viewCounts.get(item.id) ?? 0 })),
       page: query.page,
       pageSize: query.pageSize,
       total,

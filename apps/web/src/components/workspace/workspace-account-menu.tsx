@@ -6,7 +6,7 @@ import { DropdownMenu } from 'radix-ui';
 import { useFormStatus } from 'react-dom';
 import { logout } from '@/app/login/actions';
 
-const itemClass = 'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--v9-text)] outline-none focus:bg-[var(--v9-soft-hover)] data-[highlighted]:bg-[var(--v9-soft-hover)]';
+const itemClass = 'flex w-full cursor-pointer items-center gap-2 rounded-[10px] px-3 py-2 text-sm text-[var(--v9-text)] outline-none focus:bg-[var(--v9-soft-hover)] data-[highlighted]:bg-[var(--v9-soft-hover)]';
 
 function LogoutItem() {
   const { pending } = useFormStatus();
@@ -16,6 +16,13 @@ function LogoutItem() {
 }
 
 export function WorkspaceAccountMenu({ name, email, roleLabel }: { name: string; email: string; roleLabel: string }) {
+  const displayName = name.trim();
+  const words = displayName.split(/\s+/).filter(Boolean);
+  const initials = Array.from(
+    words.length > 1 && !/\p{Script=Han}/u.test(displayName)
+      ? `${Array.from(words[0] ?? '')[0] ?? ''}${Array.from(words[words.length - 1] ?? '')[0] ?? ''}`
+      : displayName || '用户',
+  ).slice(0, 2).join('').toLocaleUpperCase();
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const openedByHover = useRef(false);
@@ -38,12 +45,12 @@ export function WorkspaceAccountMenu({ name, email, roleLabel }: { name: string;
         onPointerEnter={(event) => { if (event.pointerType === 'mouse') { cancelClose(); if (!open) { openedByHover.current = true; setOpen(true); } } }}
         onPointerLeave={(event) => { if (event.pointerType === 'mouse') scheduleClose(); }}
         onPointerDown={(event) => { cancelClose(); if (open && openedByHover.current) { event.preventDefault(); openedByHover.current = false; } }}
-      >PA</button>
+      >{initials}</button>
     </DropdownMenu.Trigger>
     <DropdownMenu.Portal>
       <DropdownMenu.Content
         align="end" sideOffset={8}
-        className="z-50 w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-[var(--v9-line)] bg-[var(--v9-panel-2)] p-1 shadow-xl"
+        className="z-50 w-64 max-w-[calc(100vw-2rem)] rounded-[12px] border border-[var(--v9-line)] bg-[var(--v9-panel-2)] p-1 shadow-xl"
         onPointerEnter={cancelClose}
         onPointerLeave={(event) => { if (event.pointerType === 'mouse') scheduleClose(); }}
         onCloseAutoFocus={(event) => { if (openedByHover.current) event.preventDefault(); openedByHover.current = false; }}

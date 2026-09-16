@@ -883,7 +883,7 @@ test(
     const response = await fetch(`${baseUrl}/content-drafts/${submitOnlyDraftContent.id}/publish`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-dev-user-email': managerEmail },
-      body: JSON.stringify({ message: 'Ownership alone must not allow submission.' }),
+      body: JSON.stringify({}),
     });
     assert.equal(response.status, 403);
     assert.equal(

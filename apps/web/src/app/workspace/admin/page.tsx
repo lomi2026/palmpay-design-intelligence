@@ -1,3 +1,8 @@
+import { EditUserDialog } from './edit-user-dialog';
+import { ContentFilters } from './content-filters';
+import { DeleteTeamButton } from './delete-team-button';
+import { TaxonomyList } from './taxonomy-list';
+import { AddTaxonomyDialog } from './add-taxonomy-dialog';
 import { ContentPresence } from '@/components/workspace/content-presence';
 import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
 import { CachedWorkspacePage, WorkspaceResults } from '@/components/workspace/navigation-cache';
@@ -18,17 +23,13 @@ import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import { WorkspaceStatusBadge } from '@/components/workspace/workspace-status-badge';
 import { AdminSubmitButton } from './admin-submit-button';
 import { AdminEditForm } from './admin-edit-form';
-import { AdminFeedback } from './admin-feedback';
 import {
   assignRoleAction,
-  createCategoryAction,
   deleteCategoryAction,
   deleteTagAction,
-  createTagAction,
   removeUserRoleAction,
   updateCategoryStatusAction,
   updateTeamAction,
-  deleteTeamAction,
   updateTagStatusAction,
   updateUserAction,
   updateUserNameAction,
@@ -47,7 +48,7 @@ type AdminContent = {
   total: number;
 };
 type Category = { id: string; name: string; code: string; status: string; contentTypes: string[]; usageCount: number };
-type Tag = { id: string; name: string; status: string; usageCount: number };
+type Tag = { contentTypes: string[]; id: string; name: string; status: string; usageCount: number };
 type User = {
   id: string;
   name: string;
@@ -109,14 +110,20 @@ const modules: Record<string, string> = {
 async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; categoryId?: string; tagId?: string; page?: string }>;
+  searchParams: Promise<{ tab?: string; categoryId?: string; tagId?: string; page?: string; type?: string; status?: string; search?: string }>;
 }) {
-  const { tab: requestedTab = 'content', categoryId, tagId, page: requestedPage } = await searchParams;
+  const { tab: requestedTab = 'content', categoryId, tagId, page: requestedPage, type: requestedType = '', status: requestedStatus = '', search: requestedSearch = '' } = await searchParams;
+  const type = Object.hasOwn(modules, requestedType) ? requestedType : '';
+  const status = ['DRAFT', 'PUBLISHED', 'UNPUBLISHED', 'ARCHIVED'].includes(requestedStatus) ? requestedStatus : '';
+  const search = requestedSearch.trim().slice(0, 200);
   const page = Math.max(1, Number.parseInt(requestedPage ?? '1', 10) || 1);
   const contentQuery = new URLSearchParams({ pageSize: '50', page: String(page) });
+  if (type) contentQuery.set('type', type);
+  if (status) contentQuery.set('status', status);
+  if (search) contentQuery.set('search', search);
   if (categoryId) contentQuery.set('categoryId', categoryId);
   if (tagId) contentQuery.set('tagId', tagId);
-  const contentPageHref = (nextPage: number) => `/workspace/admin?tab=content&${new URLSearchParams({ ...(categoryId ? { categoryId } : {}), ...(tagId ? { tagId } : {}), page: String(nextPage) })}`;
+  const contentPageHref = (nextPage: number) => `/workspace/admin?tab=content&${new URLSearchParams({ ...(type ? { type } : {}), ...(status ? { status } : {}), ...(search ? { search } : {}), ...(categoryId ? { categoryId } : {}), ...(tagId ? { tagId } : {}), page: String(nextPage) })}`;
   const tab: AdminTab = isAdminTab(requestedTab) ? requestedTab : 'content';
   const user = await loadCurrentUser();
   if (
@@ -195,7 +202,6 @@ async function AdminPage({
   const controlClass = 'text-[var(--v9-text)]';
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
-      <AdminFeedback />
       <WorkspacePageHero eyebrow="PLATFORM ADMINISTRATION" metric={heroMetric} title="管理中心" description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" />
       <WorkspaceTabs path="/workspace/admin" active={tab} items={adminTabs} />
       <WorkspaceResults>
@@ -208,6 +214,7 @@ async function AdminPage({
             </div>
             <span className="rounded-full border border-white/[.12] bg-black/20 px-3 py-1 text-xs text-white/55">{contents.total} 项</span>
           </div>
+          <ContentFilters key={`${type}:${status}:${search}:${categoryId}:${tagId}`} type={type} status={status} search={search} categoryId={categoryId} tagId={tagId} />
           <div className="mt-4 divide-y divide-white/10">
             {contents.items.map((item) => (
               <ContentPresence id={item.id} key={item.id}><div
@@ -228,7 +235,7 @@ async function AdminPage({
                 <div className="flex items-center gap-3"><WorkspaceStatusBadge status={item.status} /><DeleteContentButton contentId={item.id} title={item.title} /></div>
               </div></ContentPresence>
             ))}
-            {!contents.items.length ? <p className="py-10 text-center text-sm text-white/45">当前组织范围内没有可管理的内容。</p> : null}
+            {!contents.items.length ? <p className="py-10 text-center text-sm text-white/45">{type || status || search || categoryId || tagId ? "暂无符合筛选条件的内容。" : "当前组织范围内没有可管理的内容。"}</p> : null}
           </div>
           <nav aria-label="内容分页" className="mt-4 flex items-center justify-end gap-4 text-xs">
             {page > 1 ? <Link href={contentPageHref(page - 1)}>上一页</Link> : null}
@@ -240,33 +247,8 @@ async function AdminPage({
       {tab === 'taxonomy' ? (
         <section className="mt-6 grid gap-6 lg:grid-cols-2">
           <div className={panelClass}>
-            <h2 className="text-lg font-medium tracking-[-.025em]">分类</h2>
-            <p className="mt-3 text-xs leading-5 text-[var(--v9-muted)]">按内容类型管理分类，便于筛选查找。停用或删除不影响已有内容。</p>
-            <AdminEditForm action={createCategoryAction} resetOnSuccess className="mt-4 grid gap-2">
-              <NativeSelect fitOptions
-                name="contentType"
-                defaultValue="DESIGN_ASSET"
-                className="h-9 rounded-lg border border-white/15 bg-white/[.04] px-3 text-sm text-white"
-              >
-                <option value="DESIGN_ASSET">设计资产</option>
-                <option value="AI_SKILL">AI Skill</option>
-                <option value="AI_CASE">AI 案例</option>
-                <option value="AI_PROJECT">AI 项目</option><option value="AI_TOOL">AI 工具</option>
-              </NativeSelect>
-              <Input
-                name="name"
-                placeholder="分类名称"
-                required
-                className={controlClass}
-              />
-              <AdminSubmitButton pendingLabel="新增中…">新增分类</AdminSubmitButton>
-            </AdminEditForm>
-            <ul className="mt-6 divide-y divide-white/10">
-              {categories.map((item) => (
-                <li
-                  className="flex flex-wrap items-center gap-3 py-2 text-sm"
-                  key={item.id}
-                >
+            <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><h2 className="text-lg font-medium tracking-[-.025em]">分类</h2><p className="mt-1 text-xs text-[var(--v9-muted)]">按内容类型管理分类，便于筛选查找。停用或删除不影响已有内容。</p></div><AddTaxonomyDialog kind="category" /></div>
+            <TaxonomyList kind="category" items={categories.map(item => ({ id: item.id, contentTypes: item.contentTypes ?? [], content: <>
                   <span className="min-w-0 flex-1 basis-28" title={`${item.name} · ${item.code}`}>
                     <span className="block truncate">{item.name}</span>
                     <em className="block truncate not-italic text-xs text-white/40">{item.code}</em>
@@ -293,28 +275,12 @@ async function AdminPage({
                       <AdminSubmitButton size="default" variant="outline" pendingLabel="删除中…" className="h-10 w-12 shrink-0 border-border bg-transparent px-0 text-xs text-foreground">删除</AdminSubmitButton>
                     </AdminEditForm>
                   </div>
-                </li>
-              ))}
-            </ul>
+                </> }))} />
           </div>
           <div className={panelClass}>
-            <h2 className="text-lg font-medium tracking-[-.025em]">标签</h2><p className="mt-3 text-xs leading-5 text-[var(--v9-muted)]">用标签补充内容主题，支持多选。新增标签默认停用，启用后可用于发布。</p>
-            <AdminEditForm action={createTagAction} resetOnSuccess className="mt-4 flex items-start gap-3">
-              <Input
-                name="name"
-                placeholder="新增标签"
-                required
-                className={controlClass}
-              />
-              <AdminSubmitButton pendingLabel="新增中…">新增</AdminSubmitButton>
-            </AdminEditForm>
-            <ul className="mt-6 divide-y divide-white/10">
-              {tags.map((item) => (
-                <li
-                  className="flex flex-wrap items-center gap-3 py-2 text-sm"
-                  key={item.id}
-                >
-                  <span className="min-w-0 flex-1 basis-28 truncate" title={item.name}>{item.name}</span>
+            <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><h2 className="text-lg font-medium tracking-[-.025em]">标签</h2><p className="mt-1 text-xs text-[var(--v9-muted)]">按适用页面管理标签，支持多选。新增标签默认停用，启用后可用于发布。</p></div><AddTaxonomyDialog kind="tag" /></div>
+            <TaxonomyList kind="tag" items={tags.map(item => ({ id: item.id, contentTypes: item.contentTypes ?? [], content: <>
+                  <span className="min-w-0 flex-1 basis-28" title={item.name}><span className="block truncate">{item.name}</span><span className="mt-1 block text-xs text-[var(--v9-muted)]">{item.contentTypes?.length ? item.contentTypes.map(type => ({ DESIGN_ASSET: "设计资产", AI_TOOL: "AI 工具", AI_SKILL: "AI Skill", AI_CASE: "AI 案例", AI_PROJECT: "AI 项目库" }[type] ?? type)).join("、") : "通用"}</span></span>
                   <div className="ml-auto flex shrink-0 items-center gap-[12px]">
                     <AdminEditForm action={updateTagStatusAction} className="flex items-center gap-3">
                       <input type="hidden" name="tagId" value={item.id} />
@@ -338,9 +304,7 @@ async function AdminPage({
                       <AdminSubmitButton size="default" variant="outline" pendingLabel="删除中…" className="h-10 w-12 shrink-0 border-border bg-transparent px-0 text-xs text-foreground">删除</AdminSubmitButton>
                     </AdminEditForm>
                   </div>
-                </li>
-              ))}
-            </ul>
+                </> }))} />
           </div>
         </section>
       ) : null}
@@ -352,12 +316,12 @@ async function AdminPage({
           </div>
           <div className="mt-4 divide-y divide-white/10">
             {teams.map((team) => (
-              <div key={team.id}><AdminEditForm action={updateTeamAction} className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_max-content_max-content_100px] lg:items-start" key={team.id}>
+              <div key={team.id}><AdminEditForm action={updateTeamAction} className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_max-content_max-content_max-content] lg:items-start" key={team.id}>
                 <div><label className="block text-xs leading-[1.6] text-white/45" htmlFor={`team-name-${team.id}`}>团队名称</label><Input id={`team-name-${team.id}`} name="name" defaultValue={team.name} required className="mt-2 max-w-[600px] border-white/15 bg-white/[.04] text-white" /><p className="mt-1 text-xs text-white/35">{team._count.members} 名成员</p></div>
                 <div><label className="block text-xs leading-[1.6] text-white/45" htmlFor={`team-owner-${team.id}`}>负责人</label><NativeSelect fitOptions id={`team-owner-${team.id}`} name="ownerId" defaultValue={team.owner?.id ?? ''} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-2 w-full">{team.owner ? null : <option value="">暂未指定</option>}{users.items.filter((member) => member.status === 'ACTIVE').map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}</NativeSelect></div>
                 <div><label className="block text-xs leading-[1.6] text-white/45" htmlFor={`team-status-${team.id}`}>状态</label><NativeSelect fitOptions id={`team-status-${team.id}`} name="status" defaultValue={team.status} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-2 w-full"><option value="ACTIVE">启用</option><option value="DISABLED">停用</option></NativeSelect></div>
-                <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><div className="grid gap-2 text-xs"><span aria-hidden="true" className="hidden leading-[1.6] lg:block">&nbsp;</span><AdminSubmitButton size="default">保存</AdminSubmitButton></div>
-              </AdminEditForm><details className="pb-4 text-right text-sm"><summary className="cursor-pointer text-destructive">删除团队</summary><AdminEditForm action={deleteTeamAction} className="mt-3 flex flex-wrap items-center justify-end gap-3"><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><span className="text-xs text-muted-foreground">确认删除“{team.name}”？有关联数据时无法删除。</span><AdminSubmitButton variant="destructive" size="sm">确认删除</AdminSubmitButton></AdminEditForm></details></div>
+                <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><div className="grid gap-2 text-xs"><span aria-hidden="true" className="hidden leading-[1.6] lg:block">&nbsp;</span><div className="flex items-center gap-3"><DeleteTeamButton organizationId={user.organizationId} teamId={team.id} name={team.name} /><AdminSubmitButton size="default" className="w-[100px]">保存</AdminSubmitButton></div></div>
+              </AdminEditForm></div>
             ))}
           </div>
         </section>
@@ -368,7 +332,7 @@ async function AdminPage({
           <div className="mt-4 divide-y divide-white/10">
             {users.items.map((member) => (
               <div className="space-y-3 py-4" key={member.id}>
-                <AdminEditForm action={updateUserAction} className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_max-content_max-content_80px]">
+                <AdminEditForm action={updateUserAction} className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_max-content_max-content_max-content]">
                   <input type="hidden" name="organizationId" value={user.organizationId} />
                   <input type="hidden" name="userId" value={member.id} />
                   <div className="min-w-0">
@@ -383,9 +347,9 @@ async function AdminPage({
                     <option value="">停用时转移内容至</option>
                     {users.items.filter(candidate => candidate.id !== member.id && candidate.status === 'ACTIVE').map(candidate => <option value={candidate.id} key={candidate.id}>{candidate.name}</option>)}
                   </NativeSelect>
-                  <AdminSubmitButton pendingLabel="保存中…">保存</AdminSubmitButton>
+                  <div className="flex items-center gap-3"><EditUserDialog organizationId={user.organizationId} member={member} teams={teams} />{member.id !== user.id ? <DeleteUserButton organizationId={user.organizationId} userId={member.id} name={member.name} /> : null}<AdminSubmitButton pendingLabel="保存中…">保存</AdminSubmitButton></div>
                 </AdminEditForm>
-                {member.id !== user.id ? <div className="lg:col-span-2 flex justify-end"><DeleteUserButton organizationId={user.organizationId} userId={member.id} name={member.name} /></div> : null}
+
               </div>
             ))}
           </div>

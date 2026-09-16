@@ -1,3 +1,4 @@
+import { ActionFeedback } from '@/components/workspace/action-feedback';
 import { NavigationCacheProvider, NavigationCacheOutlet } from '@/components/workspace/navigation-cache';
 import { WorkspaceDataLink } from '@/components/workspace/workspace-data-link';
 import { FavoriteProvider } from '@/components/workspace/favorite-context';
@@ -79,6 +80,6 @@ export default async function WorkspaceLayout({ children }: Readonly<{ children:
         <header className="sticky top-0 z-20 flex h-16 items-center border-b border-[var(--v9-line)] bg-[color-mix(in_srgb,var(--v9-bg)_95%,transparent)] px-4 backdrop-blur-xl md:px-8"><WorkspaceMobileNavigation {...navigationProps} /><WorkspaceBreadcrumb /><WorkspaceSearchShortcut /><div className="ml-auto flex items-center gap-2"><Button asChild variant="outline" size="icon-sm" className="size-10 rounded-[12px] border-border bg-background text-foreground hover:bg-muted hover:text-foreground"><WorkspaceDataLink href="/workspace/favorites" aria-label="收藏与浏览" title="收藏与浏览"><Heart className="size-4" /></WorkspaceDataLink></Button><V9ThemeToggle /><NotificationBadge initialUnreadCount={notifications.unreadCount} key={`notifications-${notifications.unreadCount}`} /><WorkspaceAccountMenu email={user.email} name={user.name} roleLabel={roleLabel} /></div></header>
         <NavigationCacheOutlet>{children}</NavigationCacheOutlet>
       </div>
-    </div></FavoriteProvider></NavigationCacheProvider>
+    </div><ActionFeedback /></FavoriteProvider></NavigationCacheProvider>
   );
 }

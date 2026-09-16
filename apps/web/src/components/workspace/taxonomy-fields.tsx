@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export type TaxonomySelection = { categoryId: string | null; tagIds: string[] };
 export type TaxonomyOptions = {
   categories: { id: string; name: string; status: string; contentTypes: string[] }[];
-  tags: { id: string; name: string; status: string }[];
+  tags: { id: string; name: string; status: string; contentTypes?: string[] }[];
 };
 
 export function TaxonomyFields({ options, contentType, initialSelection, onChange }: {
@@ -33,11 +33,11 @@ export function TaxonomyFields({ options, contentType, initialSelection, onChang
       {!categories.length ? <p className="text-xs text-[var(--v9-muted)]">此内容类型暂无可用分类，可先保存草稿。</p> : null}
     </div>
     <div className="grid gap-2"><span className="text-sm">标签（多选）</span><div className="flex flex-wrap gap-2">
-      {options.tags.filter((tag) => tag.status === 'ACTIVE' || tagIds.includes(tag.id)).map((tag) => {
+      {options.tags.filter((tag) => (tag.status === 'ACTIVE' && (!tag.contentTypes?.length || tag.contentTypes.includes(contentType))) || tagIds.includes(tag.id)).map((tag) => {
         const selected = tagIds.includes(tag.id);
-        return <Button key={tag.id} type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => { setTagIds(selected ? tagIds.filter((id) => id !== tag.id) : [...tagIds, tag.id]); onChange?.(); }}>{tag.name}{tag.status !== 'ACTIVE' ? '（已停用）' : ''}{selected ? ' ×' : ''}</Button>;
+        return <Button key={tag.id} type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => { setTagIds(selected ? tagIds.filter((id) => id !== tag.id) : [...tagIds, tag.id]); onChange?.(); }}>{tag.name}{tag.status !== 'ACTIVE' ? '（已停用）' : tag.contentTypes?.length && !tag.contentTypes.includes(contentType) ? '（不再适用，历史关联）' : ''}{selected ? ' ×' : ''}</Button>;
       })}
-      {!options.tags.length ? <p className="text-xs text-[var(--v9-muted)]">暂无可用标签，可先保存草稿。</p> : null}
+      {!options.tags.some(tag => (tag.status === 'ACTIVE' && (!tag.contentTypes?.length || tag.contentTypes.includes(contentType))) || tagIds.includes(tag.id)) ? <p className="text-xs text-[var(--v9-muted)]">暂无可用标签，可先保存草稿。</p> : null}
     </div></div>
   </fieldset>;
 }

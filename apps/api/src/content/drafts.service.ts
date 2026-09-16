@@ -523,7 +523,7 @@ export class DraftsService {
       }),
       this.prisma.tag.findMany({
         where: { organizationId: user.organizationId, OR: [{ status: 'ACTIVE', deletedAt: null }, { id: { in: selected?.tagIds ?? [] } }] },
-        select: { id: true, name: true, status: true },
+        select: { id: true, name: true, status: true, contentTypes: true },
         orderBy: { name: 'asc' },
       }),
     ]);

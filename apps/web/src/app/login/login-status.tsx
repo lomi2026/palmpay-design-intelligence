@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type ServiceStatus = 'connecting' | 'ready' | 'slow';
@@ -30,8 +31,8 @@ export function LoginServiceStatus() {
   }, []);
 
   const message = {
-    connecting: '正在连接测试服务，首次启动可能需要约 1 分钟。',
-    ready: '测试服务已连接，可直接登录。',
+    connecting: '正在检查服务连接…',
+    ready: '服务连接正常，请输入邮箱登录。',
     slow: '测试服务连接较慢；点击登录后会继续等待，请稍候。',
   }[status];
 
@@ -48,11 +49,13 @@ export function LoginSubmitButton() {
   return (
     <Button
       aria-disabled={pending}
-      className="h-11 w-full bg-white text-black hover:bg-white/85"
+      aria-busy={pending}
+      className="h-11 w-full bg-white text-black hover:bg-white/85 disabled:opacity-75"
       disabled={pending}
       type="submit"
     >
-      {pending ? '正在登录，请稍候…' : '继续'}
+      {pending ? <LoaderCircle aria-hidden="true" className="size-4 shrink-0 animate-spin motion-reduce:animate-none" /> : null}
+      <span role="status" aria-live="polite">{pending ? '正在登录，请稍候…' : '继续'}</span>
     </Button>
   );
 }

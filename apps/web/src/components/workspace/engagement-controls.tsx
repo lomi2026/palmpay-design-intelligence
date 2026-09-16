@@ -1,8 +1,8 @@
 'use client';
+import { showActionFeedback } from './action-feedback';
 
 import { useFavoriteIds, useFavoriteActions } from './favorite-context';
-import { Check, Copy, Heart, Link2, NotebookPen } from 'lucide-react';
-import { useState } from 'react';
+import { Copy, Heart, Link2, NotebookPen } from 'lucide-react';
 import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ export function FavoriteControl({
   const pending = change?.pending ?? false;
   return <div className="shrink-0">
     <Button type="button" variant="outline" size={size} disabled={pending || !favorites} aria-pressed={isActive} aria-busy={pending} className="favorite-control rounded-[12px] px-3 text-[12px]" onClick={() => void favorites?.toggle(contentId, isActive)}>
-      <Heart className={isActive ? 'fill-current' : ''} />{isActive ? '取消收藏' : '收藏'}
+      <Heart className={isActive ? 'fill-current' : ''} />{pending ? (isActive ? '收藏中…' : '取消中…') : isActive ? '取消收藏' : '收藏'}
     </Button>
     {change?.error ? <p role="alert" className="mt-1 max-w-48 text-xs text-destructive">{change.error}</p> : null}
   </div>;
@@ -62,7 +62,6 @@ export function ContentEngagementLinks({ contentId, canonicalPath }: { contentId
 
 function ContentShareButton({ contentId, canonicalPath }: { contentId: string; canonicalPath: string }) {
   const pathname = canonicalPath;
-  const [copied, setCopied] = useState(false);
 
   async function copyCanonicalLink() {
     const link = `${window.location.origin}${pathname}`;
@@ -77,10 +76,9 @@ function ContentShareButton({ contentId, canonicalPath }: { contentId: string; c
       input.select();
       const copiedWithFallback = document.execCommand('copy');
       input.remove();
-      if (!copiedWithFallback) return;
+      if (!copiedWithFallback) { showActionFeedback('error', '复制失败，请重试。'); return; }
     }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+    showActionFeedback('success', '链接已复制');
     try {
       await recordContentShareAction(contentId, pathname);
     } catch {
@@ -88,5 +86,5 @@ function ContentShareButton({ contentId, canonicalPath }: { contentId: string; c
     }
   }
 
-  return <Button aria-label={copied ? '链接已复制' : '复制链接'} className="h-9 rounded-[12px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white" onClick={copyCanonicalLink} type="button" variant="outline">{copied ? <Check /> : <Copy />}{copied ? '已复制' : '复制链接'}</Button>;
+  return <Button aria-label="复制链接" className="h-9 rounded-[12px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white" onClick={copyCanonicalLink} type="button" variant="outline"><Copy />复制链接</Button>;
 }

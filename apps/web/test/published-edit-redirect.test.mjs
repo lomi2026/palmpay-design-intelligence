@@ -70,8 +70,11 @@ test('published content edit keeps the current page and shows an API error', asy
   assert.equal(redirects.length, 0);
 });
 
-test('published edit button no longer depends on a client effect for navigation', () => {
-  const component = readFileSync(new URL('../src/app/workspace/published-edit.tsx', import.meta.url), 'utf8');
-  assert.doesNotMatch(component, /useRouter|useEffect|router\.push/);
-  assert.match(component, /useActionState\(createPublishedEditDraftAction/);
+test('managed published edit returns a confirmed draft for feedback before navigation', async () => {
+  const { action, redirects, requests } = loadAction();
+  const form = editForm(); form.set('__managedCache', 'true');
+  const result = await action({}, form);
+  assert.equal(result.id, 'draft/with space');
+  assert.equal(redirects.length, 0);
+  assert.equal(requests.length, 1);
 });

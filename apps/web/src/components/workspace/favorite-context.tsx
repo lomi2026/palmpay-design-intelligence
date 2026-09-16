@@ -1,4 +1,5 @@
 'use client';
+import { showActionFeedback } from '@/components/workspace/action-feedback';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { favoriteAction } from '@/app/workspace/engagement-actions';
@@ -40,8 +41,10 @@ export function FavoriteProvider({ ids, projectCount, children }: { ids: string[
       const result = await favoriteAction(data);
       if (result.error) throw Error(result.error);
       setChanges(previous => ({ ...previous, [id]: { active: !active, pending: false } }));
+      showActionFeedback('success', active ? '已取消收藏' : '收藏成功', `favorite:${id}`);
       invalidateWorkspaceCache(['/workspace', '/workspace/favorites', '/workspace/overview']);
     } catch {
+      showActionFeedback('error', '收藏状态更新失败，请重试。', `favorite:${id}`);
       setChanges(previous => ({ ...previous, [id]: { active, pending: false, error: '收藏状态更新失败，请重试。' } }));
     } finally { generation.current += 1; locks.current.delete(id); }
   }, []);

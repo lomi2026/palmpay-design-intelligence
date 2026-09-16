@@ -11,6 +11,7 @@ export interface PublishedAttachment {
 }
 
 export interface ContentCard {
+  viewCount?: number;
   id: string;
   contentType: 'DESIGN_ASSET' | 'AI_SKILL' | 'AI_CASE' | 'AI_PROJECT' | 'AI_TOOL';
   title: string;
@@ -40,7 +41,7 @@ export interface ContentCard {
     body: unknown;
   } | null;
   coverFile: ContentFile | null;
-  tags: Array<{ tag: { id: string; name: string; normalizedName: string; status?: string } }>;
+  tags: Array<{ tag: { id: string; name: string; normalizedName: string; contentTypes?: string[]; status?: string } }>;
 }
 
 export type ContentType = ContentCard['contentType'];

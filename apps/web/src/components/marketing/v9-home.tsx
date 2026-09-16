@@ -38,7 +38,7 @@ export function V9Home() {
             <a className="rounded-lg px-3 py-2 hover:bg-accent hover:text-foreground" href="#cases">AI 案例</a>
             <a className="rounded-lg px-3 py-2 hover:bg-accent hover:text-foreground" href="#impact">业务影响</a>
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="home-header-actions ml-auto flex items-center gap-2">
             <Button asChild variant="outline" size="sm" className="hidden h-10 w-[180px] min-w-0 justify-start overflow-hidden rounded-[12px] border-border bg-white/[.035] px-3 text-[12px] font-normal text-muted-foreground hover:bg-accent hover:text-foreground md:inline-flex">
               <Link href="/workspace/search">
                 <Search className="size-3.5 shrink-0" />

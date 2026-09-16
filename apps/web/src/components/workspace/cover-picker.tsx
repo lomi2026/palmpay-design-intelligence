@@ -4,7 +4,7 @@ import { ImagePlus, Upload, X } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
-export function CoverPicker({ name, fileId, disabled, onSelected }: { name: string; fileId?: string | null; disabled?: boolean; onSelected?: (selected: boolean) => void }) {
+export function CoverPicker({ name, fileId, disabled, onSelected, autoSubmit = false }: { name: string; fileId?: string | null; disabled?: boolean; onSelected?: (selected: boolean) => void; autoSubmit?: boolean }) {
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -20,6 +20,7 @@ export function CoverPicker({ name, fileId, disabled, onSelected }: { name: stri
       setFile(null); setPreview(null); onSelected?.(false); return;
     }
     setError(''); setFile(next); setPreview(next ? URL.createObjectURL(next) : null); onSelected?.(Boolean(next));
+    if (next && autoSubmit) input.current?.form?.requestSubmit();
   }
   const src = preview ?? (fileId ? `/api/content-images/${fileId}` : null);
   return <div className="space-y-3">

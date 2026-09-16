@@ -42,8 +42,8 @@ export async function validateTaxonomy(
   }
   if (selection.tagIds.length) {
     const tags = await tx.tag.findMany({ where: { id: { in: selection.tagIds }, organizationId } });
-    if (tags.length !== selection.tagIds.length || tags.some((tag) => (tag.deletedAt || tag.status !== 'ACTIVE') && !previous.tagIds.includes(tag.id))) {
-      throw new BadRequestException('所选标签已停用或不属于当前组织。请重新选择。');
+    if (tags.length !== selection.tagIds.length || tags.some((tag) => (tag.deletedAt || tag.status !== 'ACTIVE' || (tag.contentTypes?.length && !tag.contentTypes.includes(contentType))) && !previous.tagIds.includes(tag.id))) {
+      throw new BadRequestException('所选标签已停用、不适用于此内容类型，或不属于当前组织。请重新选择。');
     }
   }
 }

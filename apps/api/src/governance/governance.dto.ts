@@ -111,9 +111,11 @@ export class UpdateCategoryDto {
 }
 
 export class CreateTagDto {
+  @IsOptional() @IsArray() @IsEnum(ContentType, { each: true }) contentTypes?: ContentType[];
   @IsString() @MaxLength(100) name!: string;
 }
 export class UpdateTagDto {
+  @IsOptional() @IsArray() @IsEnum(ContentType, { each: true }) contentTypes?: ContentType[];
   @IsOptional() @IsString() @MaxLength(100) name?: string;
   @IsOptional() @IsEnum(TagStatus) status?: TagStatus;
 }

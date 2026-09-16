@@ -95,6 +95,8 @@ export class UpdateUserNameDto {
 }
 
 export class UpdateUserDto extends UpdateUserStatusDto {
+  @IsOptional() @IsEmail() @MaxLength(320) email?: string;
+  @IsOptional() @IsUUID() teamId?: string | null;
   @IsString()
   @MinLength(1)
   @MaxLength(100)

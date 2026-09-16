@@ -1,4 +1,5 @@
 'use client';
+import { showActionFeedback } from '@/components/workspace/action-feedback';
 
 import { invalidateWorkspaceCache } from '@/components/workspace/cache-events';
 import { useNavigationCache } from '@/components/workspace/navigation-cache';
@@ -41,7 +42,7 @@ export function CreateDraftForm({
   const router = useRouter();
   const begin = useNavigationCache()?.begin;
   const [dirty, setDirty] = useState(false);
-  const [state, action, pending] = useActionState(async (previous: ActionState, data: FormData) => { const result = await createDraftAction(previous, data); if (result.id) { setDirty(false); invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']); } return result; }, initialState);
+  const [state, action, pending] = useActionState(async (previous: ActionState, data: FormData) => { const result = await createDraftAction(previous, data).catch((): ActionState => ({ error: '连接中断，操作结果暂未确认。请核对状态后重试。' })); if (result.error) showActionFeedback('error', result.error); else if (result.id) showActionFeedback('success', '草稿创建成功'); if (result.id) { setDirty(false); invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']); } return result; }, initialState);
   useUnsavedChanges(dirty && !state.id);
   const [contentType, setContentType] = useState<ContentType>(initialContentType);
   useEffect(() => {
@@ -64,7 +65,7 @@ export function CreateDraftForm({
         {['DESIGN_ASSET', 'AI_TOOL'].includes(contentType) ? <div className="space-y-3 md:col-span-2"><h3 className="text-sm font-medium">封面图片 <span className="text-muted-foreground">选填</span></h3><CoverPicker name="coverImage" disabled={pending} /></div> : null}
         <p className="text-sm leading-6 text-[var(--text-description)] md:col-span-2">下一步完善使用方法和发布信息。现在只会创建私人草稿。</p>
       </section>
-      {state.error ? <p className="px-5 text-sm text-red-400 md:px-6">{state.error}</p> : null}
+      {state.error ? <p role="alert" className="px-5 text-sm text-destructive md:px-6">{state.error}</p> : null}
       <div className="flex items-center justify-between border-t border-white/10 px-5 py-4 md:px-6">{state.id ? <Button asChild><Link href={`/workspace/submit/${state.id}`}>进入已保存草稿</Link></Button> : <Button className="bg-white text-black hover:bg-white/85" disabled={pending} type="submit"><Plus aria-hidden="true" />{pending ? '正在创建…' : '创建草稿并继续'}</Button>}</div>
     </form>
   );

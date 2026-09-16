@@ -91,7 +91,7 @@ export function NativeSelect({
             {options.map(option => <span aria-hidden="true" className="invisible col-start-1 row-start-1 whitespace-nowrap" key={option.value}>{option.label}</span>)}
           </span> : <SelectValue />}
         </SelectTrigger>
-        <SelectContent align="start" position="popper" sideOffset={4}>
+        <SelectContent data-density={options.length <= 3 && options.every(option => ['ACTIVE', 'DISABLED', 'INACTIVE'].includes(option.value)) ? 'compact' : 'regular'} align="start" position="popper" sideOffset={4}>
           {options.map((option) => (
             <SelectItem disabled={option.disabled} key={option.value} value={option.value}>
               {option.label}

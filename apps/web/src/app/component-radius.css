@@ -22,3 +22,9 @@
   [data-card-link] { border-radius: inherit !important; }
   [data-slot='tabs-list'][data-variant='line'] { border-radius: 0 !important; }
 }
+@layer component-states {
+  [data-slot='select-content'][data-slot][data-slot] { border-radius: 12px !important; }
+  [data-slot='select-content'] [data-slot='select-item'] { border-radius: 10px !important; }
+  [data-slot='select-content'][data-slot][data-slot][data-density='compact'],
+  [data-slot='select-content'][data-slot][data-slot][data-density='compact'] [data-slot='select-item'] { border-radius: 8px !important; }
+}

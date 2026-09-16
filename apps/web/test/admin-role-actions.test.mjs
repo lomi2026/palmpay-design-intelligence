@@ -79,7 +79,7 @@ test('taxonomy creation returns success immediately and preserves submitted valu
   });
   assert.equal(requests[1].path, '/api/admin/tags');
   assert.equal(requests[1].init.method, 'POST');
-  assert.deepEqual(JSON.parse(requests[1].init.body), { name: '设计效率' });
+  assert.deepEqual(JSON.parse(requests[1].init.body), { name: '设计效率', contentTypes: [] });
 });
 
 test('role removal returns its own notice and targets only the selected assignment', async () => {

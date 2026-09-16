@@ -158,3 +158,22 @@ test('combined save rejects whitespace-only names before any write', async () =>
   await assert.rejects(service.updateUser('organization-1', 'user-1', { name: '  ', status: 'ACTIVE' }, 'admin-1'), error => error.getStatus() === 400);
   assert.deepEqual(calls.updates, []);
 });
+
+test('profile edits normalize email, validate team scope and audit both changes atomically', async () => {
+  const existing = { id: 'u', organizationId: 'org', email: 'old@example.com', primaryTeamId: 'old-team', status: 'ACTIVE' };
+  const writes = [], audits = [];
+  let duplicate = false, validTeam = true;
+  const tx = {
+    user: { findFirst: async ({where}) => where.id === 'u' ? existing : duplicate ? {id:'other'} : null, update: async ({data}) => { writes.push(data); return {...existing,...data}; } },
+    team: { findFirst: async ({where}) => { assert.equal(where.organizationId,'org'); assert.equal(where.status,'ACTIVE'); return validTeam ? {id:'new-team'} : null; } },
+    auditLog: {create:async ({data})=>audits.push(data)},
+  };
+  const service = new IdentityService({$transaction:async fn=>fn(tx)}, {});
+  const input = {name:'Updated',status:'ACTIVE',email:' NEW@EXAMPLE.COM ',teamId:'new-team'};
+  const result = await service.updateUser('org','u',input,'admin');
+  assert.equal(result.email,'new@example.com'); assert.equal(result.primaryTeamId,'new-team');
+  assert.equal(audits[0].afterData.email,'new@example.com'); assert.equal(audits[0].beforeData.email,'old@example.com');
+  duplicate=true; await assert.rejects(service.updateUser('org','u',input,'admin'),error=>error.getStatus()===409);
+  duplicate=false;validTeam=false;await assert.rejects(service.updateUser('org','u',input,'admin'),error=>error.getStatus()===400);
+  assert.equal(writes.length,1);
+});
