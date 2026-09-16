@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 type NativeSelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   containerClassName?: string;
+  fitOptions?: boolean;
   onValueChange?: (value: string) => void;
 };
 
@@ -38,6 +39,7 @@ export function NativeSelect({
   children,
   className,
   containerClassName,
+  fitOptions = false,
   onValueChange,
   defaultValue,
   disabled,
@@ -45,6 +47,7 @@ export function NativeSelect({
   name,
   required,
   value: controlledValue,
+  'aria-invalid': ariaInvalid,
   'aria-label': ariaLabel,
   'aria-describedby': ariaDescribedBy,
 }: NativeSelectProps) {
@@ -72,17 +75,21 @@ export function NativeSelect({
   }
 
   return (
-    <span className={cn('relative inline-flex min-w-0', containerClassName)}>
+    <span className={cn('relative inline-flex min-w-0', containerClassName)} style={fitOptions ? { width: 'max-content', maxWidth: '100%' } : undefined}>
       {name ? <input name={name} ref={submissionInput} type="hidden" value={value === EMPTY_VALUE ? '' : value} /> : null}
       <Select disabled={disabled} onValueChange={handleValueChange} value={value}>
         <SelectTrigger
           aria-describedby={ariaDescribedBy}
           aria-label={ariaLabel}
           aria-required={required}
-          className={className}
+          aria-invalid={ariaInvalid}
+          className={cn(className, fitOptions && '!w-full')}
           id={id}
         >
-          <SelectValue />
+          {fitOptions ? <span className="grid min-w-0 text-left">
+            <span className="col-start-1 row-start-1 min-w-0"><SelectValue /></span>
+            {options.map(option => <span aria-hidden="true" className="invisible col-start-1 row-start-1 whitespace-nowrap" key={option.value}>{option.label}</span>)}
+          </span> : <SelectValue />}
         </SelectTrigger>
         <SelectContent align="start" position="popper" sideOffset={4}>
           {options.map((option) => (

@@ -14,6 +14,7 @@ import type {
   CreateTeamDto,
   CreateUserDto,
   UpdateUserStatusDto,
+  UpdateUserDto,
   UpdateUserNameDto,
   UserListQueryDto,
 } from './identity.dto';
@@ -208,16 +209,32 @@ export class IdentityService {
     });
   }
 
+  async updateUser(organizationId: string, userId: string, input: UpdateUserDto, actorId: string) {
+    const name = input.name.trim();
+    if (!name || name.length > 100) throw new BadRequestException('Invalid user name.');
+    return this.saveUser(organizationId, userId, input, actorId, name);
+  }
+
   async updateUserStatus(
     organizationId: string,
     userId: string,
     input: UpdateUserStatusDto,
     actorId: string,
   ) {
-    const existing = await this.getUser(organizationId, userId);
-    const disabling =
-      input.status === UserStatus.DISABLED && existing.status !== UserStatus.DISABLED;
+    return this.saveUser(organizationId, userId, input, actorId);
+  }
+
+  private async saveUser(
+    organizationId: string,
+    userId: string,
+    input: UpdateUserStatusDto,
+    actorId: string,
+    name?: string,
+  ) {
     const result = await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.user.findFirst({ where: { id: userId, organizationId, deletedAt: null }, include: userDetails });
+      if (!existing) throw new NotFoundException('User not found.');
+      const disabling = input.status === UserStatus.DISABLED && existing.status !== UserStatus.DISABLED;
       const ownedContent = disabling
         ? await tx.content.findMany({
             where: { organizationId, ownerId: userId, deletedAt: null },
@@ -309,13 +326,13 @@ export class IdentityService {
 
       const updated = await tx.user.update({
         where: { id: userId },
-        data: { status: input.status },
+        data: { status: input.status, ...(name !== undefined ? { name } : {}) },
       });
       await tx.auditLog.create({
         data: {
           organizationId,
           actorId,
-          action: input.status === UserStatus.DISABLED ? 'user.disable' : 'user.status.update',
+          action: input.status === UserStatus.DISABLED ? 'user.disable' : name !== undefined ? 'user.update' : 'user.status.update',
           entityType: 'user',
           entityId: userId,
           beforeData: JSON.parse(JSON.stringify(existing)) as Prisma.InputJsonValue,

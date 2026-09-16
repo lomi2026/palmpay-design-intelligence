@@ -49,7 +49,7 @@ export function V9ThemeToggle() {
   return (
     <Button
       aria-label={theme === 'dark' ? '切换至浅色主题' : '切换至深色主题'}
-      className="size-10 rounded-[10px] border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
+      className="size-10 rounded-[12px] border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
       onClick={toggleTheme}
       size="icon-sm"
       type="button"

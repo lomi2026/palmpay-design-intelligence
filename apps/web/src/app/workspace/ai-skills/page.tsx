@@ -1,11 +1,11 @@
-import Link from 'next/link';
-import { ArrowRight, Plus } from 'lucide-react';
+import { CardDetailLink } from '@/components/workspace/card-detail-link';
+import { FavoriteControl } from '@/components/workspace/engagement-controls';
+import { ArrowRight } from 'lucide-react';
 import { serverApiFetch } from '@/lib/api';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import type { ContentCard, ContentListResponse } from '@/lib/content-types';
 import { CatalogPageHeader } from '@/components/workspace/catalog-page-header';
 import { CatalogFilterControls } from '@/components/workspace/catalog-filter-controls';
-import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
 
@@ -32,22 +32,17 @@ export default async function AISkillsPage({ searchParams }: { searchParams: Pro
       {skills.items.length ? (
         <section className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {skills.items.map((skill) => (
-            <Link
-              aria-label={`打开 ${skill.title}`}
-              className="block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-[var(--v9-soft-hover)]"
-              href={`/workspace/ai-skills/${skill.slug}`}
-              key={skill.id}
-            >
-              <Card className="group h-full min-h-60 border border-[var(--v9-line)] bg-[var(--v9-panel)] py-5 shadow-none transition hover:-translate-y-0.5 hover:border-[var(--v9-line-strong)] hover:bg-[var(--v9-panel-2)]">
+            <Card key={skill.id} className="group relative isolate h-full min-h-60 border border-[var(--v9-line)] bg-[var(--v9-panel)] py-5 shadow-none transition">
+                <CardDetailLink href={`/workspace/ai-skills/${skill.slug}`} title={skill.title} />
                 <CardHeader>
+                  <div className="relative z-20 inline-flex w-fit"><FavoriteControl contentId={skill.id} returnTo="/workspace/ai-skills" /></div>
 
-                  <CardTitle className="mt-4 text-[19px] leading-7 text-[var(--v9-text)] transition group-hover:text-[var(--v9-muted)]">{skill.title}</CardTitle>
+                  <CardTitle className="mt-4 text-[19px] leading-7 text-[var(--v9-text)] transition">{skill.title}</CardTitle>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--v9-copy)]">{skill.summary ?? '暂无说明'}</p>
                 </CardHeader>
 
-                <CardFooter className="mt-auto justify-between border-[var(--v9-line)] bg-transparent px-5 pt-5 text-xs text-[var(--v9-subtle)]"><span>负责人 · {skill.owner.name}</span><span className="inline-flex items-center gap-1 text-[var(--v9-copy)] transition group-hover:text-[var(--v9-text)]">打开方法 <ArrowRight className="size-3" /></span></CardFooter>
+                <CardFooter className="mt-auto justify-between border-[var(--v9-line)] bg-transparent px-5 pt-5 text-xs text-[var(--v9-subtle)]"><span>负责人 · {skill.owner.name}</span><span className="inline-flex items-center gap-1 text-[var(--v9-copy)] transition">打开方法 <ArrowRight className="size-3" /></span></CardFooter>
               </Card>
-            </Link>
           ))}
         </section>
       ) : <WorkspaceEmptyState className="mt-6 py-16 text-center">没有找到可访问的 AI Skill。</WorkspaceEmptyState>}

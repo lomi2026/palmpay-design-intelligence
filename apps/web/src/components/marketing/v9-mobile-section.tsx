@@ -43,7 +43,7 @@ export function V9MobileSection({ children, className, header, headerClassName, 
             <button
               aria-controls={`${id}-content`}
               aria-expanded={isExpanded}
-              className="mt-[14px] inline-flex h-9 shrink-0 items-center justify-center gap-1.5 self-stretch rounded-[10px] border border-white/[.12] bg-white/[.035] px-3 text-[12px] font-semibold text-white/70 transition hover:bg-white/[.08] hover:text-white"
+              className="mt-[14px] inline-flex h-9 shrink-0 items-center justify-center gap-1.5 self-stretch rounded-[12px] border border-white/[.12] bg-white/[.035] px-3 text-[12px] font-semibold text-white/70 transition hover:bg-white/[.08] hover:text-white"
               onClick={() => setIsExpanded((expanded) => !expanded)}
               type="button"
             >

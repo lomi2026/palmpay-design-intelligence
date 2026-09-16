@@ -92,7 +92,7 @@ export function NotificationBadge({ initialUnreadCount }: { initialUnreadCount: 
     <WorkspaceDataLink
       href="/workspace/notifications"
       aria-label={unreadCount ? `通知中心，${unreadCount} 条未读通知` : '通知中心'}
-      className="relative grid size-10 place-items-center rounded-[10px] border border-border bg-background text-foreground hover:bg-muted hover:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50"
+      className="relative grid size-10 place-items-center rounded-[12px] border border-border bg-background text-foreground hover:bg-muted hover:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50"
     >
       <Bell className="size-4" />
       {unreadCount ? (

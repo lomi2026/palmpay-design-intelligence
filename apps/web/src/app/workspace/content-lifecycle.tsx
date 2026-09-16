@@ -11,8 +11,8 @@ function LifecycleButtons({ canArchive, canUnpublish }: { canArchive: boolean; c
   const { pending, data } = useFormStatus();
   const operation = pending ? data?.get('operation') : null;
   return <div className="flex flex-wrap justify-start gap-3">
-    {canUnpublish ? <Button variant="outline" className="h-9 rounded-[10px] border-[var(--v9-status-warning-line)] bg-[var(--v9-status-warning-bg)] px-3 text-[12px] text-[var(--v9-status-warning-text)]" disabled={pending} name="operation" type="submit" value="unpublish" aria-busy={operation === 'unpublish'} title="下架后将不再显示在目录中">{operation === 'unpublish' ? '下架中…' : '下架内容'}</Button> : null}
-    {canArchive ? <Button variant="destructive" className="h-9 rounded-[10px] px-3 text-[12px]" disabled={pending} name="operation" type="submit" value="archive" aria-busy={operation === 'archive'} title="归档后将不再显示在目录中">{operation === 'archive' ? '归档中…' : '归档内容'}</Button> : null}
+    {canUnpublish ? <Button variant="outline" className="h-9 rounded-[12px] border-[var(--v9-status-warning-line)] bg-[var(--v9-status-warning-bg)] px-3 text-[12px] text-[var(--v9-status-warning-text)]" disabled={pending} name="operation" type="submit" value="unpublish" aria-busy={operation === 'unpublish'} title="下架后将不再显示在目录中">{operation === 'unpublish' ? '下架中…' : '下架内容'}</Button> : null}
+    {canArchive ? <Button variant="destructive" className="h-9 rounded-[12px] px-3 text-[12px]" disabled={pending} name="operation" type="submit" value="archive" aria-busy={operation === 'archive'} title="归档后将不再显示在目录中">{operation === 'archive' ? '归档中…' : '归档内容'}</Button> : null}
   </div>;
 }
 

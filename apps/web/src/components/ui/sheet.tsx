@@ -60,7 +60,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute right-4 top-4 grid size-9 place-items-center rounded-[10px] border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30">
+        <SheetPrimitive.Close className="absolute right-4 top-4 grid size-9 place-items-center rounded-[12px] border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30">
           <XIcon className="size-4" />
           <span className="sr-only">关闭菜单</span>
         </SheetPrimitive.Close>

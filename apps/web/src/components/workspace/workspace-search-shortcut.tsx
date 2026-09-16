@@ -43,7 +43,7 @@ export function WorkspaceSearchShortcut() {
         <Button
           variant="outline"
           aria-label="全局搜索"
-          className="mx-auto flex h-10 w-10 lg:h-9 lg:w-[450px] justify-start rounded-[10px] border-[var(--v9-line)] bg-[var(--v9-field)] px-3 lg:px-4 text-[12px] font-normal text-[var(--v9-subtle)] hover:bg-[var(--v9-soft-hover)] hover:text-[var(--v9-text)] lg:flex"
+          className="mx-auto flex h-10 w-10 lg:h-9 lg:w-[450px] justify-start rounded-[12px] border-[var(--v9-line)] bg-[var(--v9-field)] px-3 lg:px-4 text-[12px] font-normal text-[var(--v9-subtle)] hover:bg-[var(--v9-soft-hover)] hover:text-[var(--v9-text)] lg:flex"
         >
           <Search className="size-4 lg:mr-2" /><span className="hidden lg:inline">搜索资产、工具、Skill、案例或项目</span>
           <kbd className="ml-auto hidden lg:inline rounded border border-[var(--v9-line)] px-1.5 py-0.5 text-[10px]">⌘K</kbd>
@@ -67,7 +67,7 @@ export function WorkspaceSearchShortcut() {
             />
             <Button className="h-14 shrink-0 px-5" type="submit"><Search className="size-4" />搜索</Button>
           </div>
-          <div className="mt-6 flex flex-wrap items-center gap-2"><span className="mr-1 text-xs text-muted-foreground">试试搜索</span>{['设计组件', '数据分析', '移动端', '体验优化'].map(term => <button key={term} type="button" className="rounded-full bg-muted px-3 py-2 text-xs transition hover:bg-accent" onClick={() => setQuery(term)}>{term}</button>)}</div>
+          <div className="mt-6 flex flex-wrap items-center gap-2"><span className="mr-1 text-xs text-muted-foreground">试试搜索</span>{['设计组件', '数据分析', '移动端', '体验优化'].map(term => <button key={term} type="button" className="rounded-[12px] bg-muted px-3 py-2 text-xs transition hover:bg-accent" onClick={() => setQuery(term)}>{term}</button>)}</div>
           <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground"><span>支持部分名称 · 空格组合关键词</span><span>Enter 搜索 · Esc 关闭</span></div>
         </form>
       </DialogContent>

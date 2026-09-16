@@ -89,7 +89,7 @@ export async function PublishedContentDetail({
                 </a>
               </Button>
             ) : null}
-            <FavoriteControl contentId={content.id} returnTo={`/workspace/${route}/${slug}`} />
+            <FavoriteControl size="md" contentId={content.id} returnTo={`/workspace/${route}/${slug}`} />
             <ContentEngagementLinks contentId={content.id} />
             {canEdit ? <PublishedEdit contentId={content.id} /> : null}
             {canEdit || canArchive || canUnpublish ? (

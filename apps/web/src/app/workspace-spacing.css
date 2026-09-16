@@ -1,5 +1,5 @@
 /* Shared rhythm for both workspace themes. Compact controls use 8/12/16;
-   cards and sections use 24; desktop page gutters use 32. */
+   cards and sections use 24; desktop page gutters use 40. */
 .workspace-shell {
   --space-control: 8px;
   --space-field: 12px;
@@ -7,10 +7,12 @@
   --space-card: 24px;
   --space-section: 24px;
   --space-page: 32px;
+  --space-gutter: 40px;
 }
 .workspace-shell > div > main {
   width: 100%;
   padding: var(--space-page) !important;
+  padding-inline: var(--space-gutter) !important;
   padding-bottom: 48px !important;
 }
 .workspace-shell main .workspace-page-card,
@@ -56,7 +58,7 @@ html[data-design='studio'] .workspace-shell .detail-hero,
 .workspace-shell main th,
 .workspace-shell main td { padding: 16px; }
 @media (max-width: 767px) {
-  .workspace-shell { --space-page: 16px; --space-card: 16px; --space-section: 16px; }
+  .workspace-shell { --space-page: 16px; --space-gutter: 20px; --space-card: 16px; --space-section: 16px; }
   .workspace-shell > div > main { padding-bottom: 32px !important; }
   .workspace-shell .workspace-filter-bar > label:first-child { flex-basis: 100%; min-width: 0; }
   .workspace-shell .detail-metadata { gap: 16px; }

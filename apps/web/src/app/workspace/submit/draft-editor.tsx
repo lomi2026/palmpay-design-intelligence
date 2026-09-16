@@ -1,5 +1,7 @@
 'use client';
 
+import { Send } from 'lucide-react';
+
 import { useActionState, useEffect, useRef, useState } from 'react';
 import {
   autosaveDraftAction,
@@ -187,11 +189,11 @@ export function DraftEditor({ draft }: { draft: Draft }) {
             title={draft.draftVersion?.title ?? draft.title}
             redirectTo="/workspace/contributions"
             disabled={pending || publishing || published}
-            className="h-11 px-4"
+            className="h-10 px-4"
             onOpen={clearScheduledSave}
           />
           <Button
-            className="h-11 border-white/[.16] bg-transparent px-4 text-white hover:bg-white/[.08] hover:text-white"
+            className="h-10 border-white/[.16] bg-transparent px-4 text-white hover:bg-white/[.08] hover:text-white"
             form={`content-editor-${draft.id}`}
             formAction={saveAndPreviewDraftAction}
             type="submit"
@@ -200,7 +202,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
             预览草稿
           </Button>
           <Button
-            className="h-11 bg-white px-5 font-semibold text-black hover:bg-white/85"
+            variant="outline" size="default" className="h-10 px-5"
             form={`content-editor-${draft.id}`}
             disabled={pending || publishing}
             type="submit"
@@ -208,13 +210,14 @@ export function DraftEditor({ draft }: { draft: Draft }) {
             {pending ? '保存中…' : '保存草稿'}
           </Button>
           <Button
-            className="h-11 px-5"
+            className="h-10 px-5"
             disabled={pending || publishing}
             form={`content-editor-${draft.id}`}
             data-publish="true"
             formAction={publishAction}
             type="submit"
           >
+            <Send aria-hidden="true" />
             {published ? '发布成功，正在打开…' : publishing ? '发布中…' : '发布内容'}
           </Button>
         </div>

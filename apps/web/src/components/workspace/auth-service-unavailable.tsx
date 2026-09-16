@@ -13,7 +13,7 @@ export function AuthServiceUnavailable() {
 
   return (
     <main className="v9-source-home grid min-h-screen place-items-center bg-[var(--v9-bg)] px-6 py-12 text-[var(--v9-text)]">
-      <section data-card-surface="" className="w-full max-w-[560px] rounded-[28px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 shadow-2xl shadow-black/30 sm:p-10">
+      <section data-card-surface="" className="w-full max-w-[560px] rounded-[24px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 shadow-2xl shadow-black/30 sm:p-10">
         <h1 className="text-[30px] font-semibold tracking-[-.045em]">认证服务暂时不可用</h1>
         <p className="mt-3 text-sm leading-6 text-[var(--v9-muted)]">
           你的登录会话没有被判定为失效。测试服务可能正在唤醒，请稍候后重试。

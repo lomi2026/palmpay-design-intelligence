@@ -49,10 +49,10 @@ function contributionAction(item: Contribution) {
   if (item.status === 'ARCHIVED' || item.status === 'UNPUBLISHED') return null;
   const draftStatus = item.draftVersion?.versionStatus;
   if (draftStatus === 'DRAFT') {
-    return { href: `/workspace/submit/${item.id}`, label: '继续编辑', icon: FilePenLine };
+    return { href: `/workspace/submit/${item.id}`, label: '编辑', icon: FilePenLine };
   }
   if (item.currentVersion && detailSegments[item.contentType]) {
-    return { href: `/workspace/${detailSegments[item.contentType]}/${item.slug}`, label: '查看已发布内容', icon: ArrowRight };
+    return { href: `/workspace/${detailSegments[item.contentType]}/${item.slug}`, label: '查看详情', icon: ArrowRight };
   }
   return null;
 }
@@ -120,15 +120,17 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
                     <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/50">{item.summary || '暂未填写摘要。'}</p>
                     <p className="mt-3 text-xs text-white/35">更新于 {new Date(item.updatedAt).toLocaleString('zh-CN')}</p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
+                  <div className="flex shrink-0 flex-col items-start gap-3 sm:items-end">
                     <WorkspaceStatusBadge status={effectiveStatus} />{item.status === 'PUBLISHED' && item.draftVersion ? <span className="text-xs text-muted-foreground">有未发布修改</span> : null}
-                    {user.permissions.includes('content.edit_own') || user.permissions.includes('content.edit_all') ? <DeleteContentButton contentId={item.id} title={item.title} /> : null}
-                    {['ARCHIVED', 'UNPUBLISHED'].includes(item.status) && (user.permissions.includes('content.edit_own') || user.permissions.includes('content.edit_all')) ? <PublishedEdit contentId={item.id} label="继续编辑" /> : null}
+                    <div className="flex flex-wrap items-center gap-3">
+                    {['ARCHIVED', 'UNPUBLISHED'].includes(item.status) && (user.permissions.includes('content.edit_own') || user.permissions.includes('content.edit_all')) ? <PublishedEdit contentId={item.id} label="编辑" /> : null}
                     {permittedAction ? (
                       <Button asChild variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.07] hover:text-white">
                         <Link href={permittedAction.href}><permittedAction.icon className="size-4" /> {permittedAction.label}</Link>
                       </Button>
                     ) : null}
+                    {user.permissions.includes('content.edit_own') || user.permissions.includes('content.edit_all') ? <DeleteContentButton neutral contentId={item.id} title={item.title} /> : null}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

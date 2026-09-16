@@ -12,10 +12,12 @@ export function FavoriteControl({
   contentId,
   returnTo,
   active,
+  size = 'sm',
 }: {
   contentId: string;
   returnTo: string;
   active?: boolean;
+  size?: 'sm' | 'md';
 }) {
   const favoriteIds = useFavoriteIds();
   const isActive = active ?? favoriteIds.includes(contentId);
@@ -33,11 +35,11 @@ export function FavoriteControl({
       <Button
         type="submit"
         variant="outline"
-        size="sm"
+        size={size}
         disabled={pending}
         aria-pressed={isActive}
         aria-busy={pending}
-        className="favorite-control h-9 rounded-[10px] px-3 text-[12px]"
+        className="favorite-control rounded-[12px] px-3 text-[12px]"
       >
         <Heart className={isActive ? 'fill-current' : ''} />
         {isActive ? '取消收藏' : '收藏'}
@@ -52,8 +54,8 @@ export function ContentEngagementLinks({ contentId }: { contentId: string }) {
       <Button
         asChild
         variant="outline"
-        size="sm"
-        className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
+        size="md"
+        className="h-9 rounded-[12px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
       >
         <Link href={`/workspace/usage?contentId=${contentId}`}>
           <NotebookPen />
@@ -63,8 +65,8 @@ export function ContentEngagementLinks({ contentId }: { contentId: string }) {
       <Button
         asChild
         variant="outline"
-        size="sm"
-        className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
+        size="md"
+        className="h-9 rounded-[12px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
       >
         <Link href={`/workspace/related?contentId=${contentId}`}>
           <Link2 />
@@ -104,5 +106,5 @@ function ContentShareButton({ contentId }: { contentId: string }) {
     }
   }
 
-  return <Button aria-label={copied ? '链接已复制' : '复制链接'} className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white" onClick={copyCanonicalLink} type="button" variant="outline">{copied ? <Check /> : <Copy />}{copied ? '已复制' : '复制链接'}</Button>;
+  return <Button aria-label={copied ? '链接已复制' : '复制链接'} className="h-9 rounded-[12px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white" onClick={copyCanonicalLink} type="button" variant="outline">{copied ? <Check /> : <Copy />}{copied ? '已复制' : '复制链接'}</Button>;
 }

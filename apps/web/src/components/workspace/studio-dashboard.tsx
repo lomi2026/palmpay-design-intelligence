@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import styles from './studio-welcome.module.css';
 import {
   ArrowUpRight,
   ArrowRight,
@@ -42,42 +44,33 @@ export async function StudioDashboard() {
   const pending = drafts.items.filter((item) => item.status === 'DRAFT' || item.draftVersion);
   return (
     <main className="studio-dashboard">
-      <div className="studio-greeting">
+      <section className={styles.welcome} aria-labelledby="workspace-welcome-title">
         <div>
-          <p className="eyebrow">PALMPAY · DESIGN WORKSPACE</p>
-          <h1>好设计，从这里继续。</h1>
-          <p>找到团队的方法，也留下你的下一次灵感。</p>
+          <p className={`eyebrow ${styles.eyebrow}`}>PALMPAY · DESIGN WORKSPACE</p>
+          <h1 id="workspace-welcome-title" className={styles.title}>好设计，从这里继续。</h1>
+          <p className={styles.description}>找到团队的方法，也留下你的下一次灵感。</p>
+          <div className={styles.actions}>
+            {canCreate ? (
+              <Button asChild size="default">
+                <Link href="/workspace/submit"><Plus aria-hidden="true" />发布内容</Link>
+              </Button>
+            ) : null}
+            <Link className={styles.explore} href="/workspace/design-assets">
+              探索设计资产 <ArrowUpRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
-        {canCreate ? (
-          <Link className="studio-primary" href="/workspace/submit">
-            <Plus size={17} />
-            发布内容
-          </Link>
-        ) : null}
-      </div>
-      <section className="studio-feature">
-        <div>
-          <span className="studio-dot-label">你的设计工作空间</span>
-          <h2>
-            把一次经验，
-            <br />
-            变成团队的共同能力。
-          </h2>
-          <Link href="/workspace/design-assets">
-            探索设计资产 <ArrowUpRight size={18} />
-          </Link>
-        </div>
-        <div className="studio-feature-stats">
-          <div>
-            <span>可用内容</span>
+        <div className={styles.stats}>
+          <div className={styles.stat}>
             <strong>{catalog.total}</strong>
-            <p>按你的权限可见</p>
+            <span>可用内容</span>
           </div>
-          <div>
-            <span>继续完善</span>
-            <strong>{pending.length}</strong>
-            <p>你的未完成草稿</p>
-          </div>
+          {canCreate ? (
+            <Link data-clickable-card="" className={styles.stat} href={pending.length === 1 && pending[0] ? `/workspace/submit/${pending[0].id}` : '#dashboard-drafts'} aria-label={`${pending.length} 项待完善草稿，继续创作`}>
+              <strong>{pending.length}</strong>
+              <span>待完善草稿 <ArrowUpRight size={14} aria-hidden="true" /></span>
+            </Link>
+          ) : null}
         </div>
       </section>
       <section className="studio-entry-grid">
@@ -126,7 +119,7 @@ export async function StudioDashboard() {
             ))}
           </div>
         </section>
-        <section className="studio-panel studio-drafts">
+        <section id="dashboard-drafts" className="studio-panel studio-drafts scroll-mt-24">
           <header>
             <div>
               <p className="eyebrow">继续创作</p>

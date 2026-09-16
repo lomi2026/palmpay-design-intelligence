@@ -110,7 +110,7 @@ function WorkspaceNavigationLink({
       aria-current={active ? 'page' : undefined}
       onClick={onClick}
       className={cn(
-        'flex h-10 items-center gap-3 rounded-[10px] px-3 text-[13px] transition',
+        'flex h-10 items-center gap-3 rounded-[12px] px-3 text-[13px] transition',
         active
           ? 'bg-[var(--v9-soft-hover)] font-semibold text-[var(--v9-text)]'
           : 'text-[var(--v9-muted)] hover:bg-[var(--v9-soft)] hover:text-[var(--v9-text)]',

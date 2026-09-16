@@ -1,4 +1,6 @@
 import { WorkspaceDataLink } from '@/components/workspace/workspace-data-link';
+import { AddTeamDialog } from './add-team-dialog';
+import { AddUserDialog } from './add-user-dialog';
 import { DeleteUserButton } from './delete-user-button';
 import { DeleteContentButton } from '@/components/workspace/delete-content-button';
 import { redirect } from 'next/navigation';
@@ -24,11 +26,9 @@ import {
   removeUserRoleAction,
   updateCategoryStatusAction,
   updateTeamAction,
-  createTeamAction,
-  createUserAction,
   deleteTeamAction,
   updateTagStatusAction,
-  updateUserStatusAction,
+  updateUserAction,
   updateUserNameAction,
 } from './actions';
 
@@ -205,8 +205,8 @@ export default async function AdminPage({
             size="sm"
             className={
               tab === key
-                ? ''
-                : 'border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white'
+                ? '!h-10 rounded-lg'
+                : '!h-10 rounded-lg border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white'
             }
           >
             <WorkspaceDataLink aria-current={tab === key ? 'page' : undefined} href={`/workspace/admin?tab=${key}`}>
@@ -227,7 +227,7 @@ export default async function AdminPage({
           <div className="mt-4 divide-y divide-white/10">
             {contents.items.map((item) => (
               <div
-                className="flex flex-wrap items-center justify-between gap-3 py-3.5 text-sm"
+                className="flex flex-wrap items-start justify-between gap-3 py-3.5 text-sm"
                 key={item.id}
               >
                 <div>
@@ -257,13 +257,9 @@ export default async function AdminPage({
         <section className="mt-6 grid gap-6 lg:grid-cols-2">
           <div className={panelClass}>
             <h2 className="text-lg font-medium tracking-[-.025em]">分类</h2>
-            <div className="mt-3 space-y-2 text-xs leading-5 text-[var(--v9-muted)]">
-              <p><strong>用途：</strong>按内容类型细分目录，例如在“设计资产”下建立“组件规范”“设计验收”。发布内容时可选一个分类，方便按分类筛选查找。</p>
-              <p><strong>停用与删除：</strong>停用后不能新增选择，可再次启用；删除后移出管理列表，也不能新增选择。两者都不会删除已有内容，历史关联保留。</p>
-              <p><strong>关联项：</strong>显示未删除内容当前保存的分类关联，不含已发布内容尚未发布的修改。</p>
-            </div>
+            <p className="mt-3 text-xs leading-5 text-[var(--v9-muted)]">按内容类型管理分类，便于筛选查找。停用或删除不影响已有内容。</p>
             <AdminEditForm action={createCategoryAction} resetOnSuccess className="mt-4 grid gap-2">
-              <NativeSelect
+              <NativeSelect fitOptions
                 name="contentType"
                 defaultValue="DESIGN_ASSET"
                 className="h-9 rounded-lg border border-white/15 bg-white/[.04] px-3 text-sm text-white"
@@ -292,10 +288,10 @@ export default async function AdminPage({
                     <em className="block truncate not-italic text-xs text-white/40">{item.code}</em>
                   </span>
                   <div className="ml-auto flex shrink-0 items-center gap-[12px]">
-                    <AdminEditForm action={updateCategoryStatusAction} className="flex items-center gap-2">
+                    <AdminEditForm action={updateCategoryStatusAction} className="flex items-center gap-3">
                       {user.permissions.includes('content.edit_all') ? <Link className="w-[72px] shrink-0 whitespace-nowrap text-right text-xs text-[var(--v9-muted)] underline" href={`/workspace/admin?tab=content&categoryId=${item.id}`}>关联 {item.usageCount} 项</Link> : <span className="w-[72px] shrink-0 whitespace-nowrap text-right text-xs">关联 {item.usageCount} 项</span>}
                       <input type="hidden" name="categoryId" value={item.id} />
-                      <NativeSelect
+                      <NativeSelect fitOptions
                         name="status"
                         defaultValue={item.status}
                         containerClassName="w-20 shrink-0"
@@ -304,13 +300,13 @@ export default async function AdminPage({
                         <option value="ACTIVE">启用</option>
                         <option value="DISABLED">停用</option>
                       </NativeSelect>
-                      <AdminSubmitButton size="sm" variant="ghost" className="h-7 w-12 shrink-0 px-0 text-xs">
+                      <AdminSubmitButton size="default" variant="outline" className="h-10 w-12 shrink-0 border-border bg-transparent px-0 text-xs">
                         保存
                       </AdminSubmitButton>
                     </AdminEditForm>
                     <AdminEditForm action={deleteCategoryAction} className="shrink-0">
                       <input type="hidden" name="categoryId" value={item.id} />
-                      <AdminSubmitButton size="sm" variant="ghost" pendingLabel="删除中…" className="h-7 w-12 shrink-0 px-0 text-xs text-[var(--v9-status-danger-text)]">删除</AdminSubmitButton>
+                      <AdminSubmitButton size="default" variant="outline" pendingLabel="删除中…" className="h-10 w-12 shrink-0 border-border bg-transparent px-0 text-xs text-foreground">删除</AdminSubmitButton>
                     </AdminEditForm>
                   </div>
                 </li>
@@ -318,12 +314,8 @@ export default async function AdminPage({
             </ul>
           </div>
           <div className={panelClass}>
-            <h2 className="text-lg font-medium tracking-[-.025em]">标签</h2><div className="mt-3 space-y-2 text-xs leading-5 text-[var(--v9-muted)]">
-              <p><strong>用途：</strong>补充内容的主题或特点，例如“移动端”“设计质量”。一项内容可选多个标签，方便跨分类筛选相关内容。</p>
-              <p><strong>启用与停用：</strong>新增标签默认停用，启用后才能在发布时选择。停用只限制新增选择，可再次启用。</p>
-              <p><strong>删除影响：</strong>标签会移出管理列表，不能再新增选择；已有内容不会被删除，历史关联保留。</p>
-            </div>
-            <AdminEditForm action={createTagAction} resetOnSuccess className="mt-4 flex gap-2">
+            <h2 className="text-lg font-medium tracking-[-.025em]">标签</h2><p className="mt-3 text-xs leading-5 text-[var(--v9-muted)]">用标签补充内容主题，支持多选。新增标签默认停用，启用后可用于发布。</p>
+            <AdminEditForm action={createTagAction} resetOnSuccess className="mt-4 flex items-start gap-3">
               <Input
                 name="name"
                 placeholder="新增标签"
@@ -340,10 +332,10 @@ export default async function AdminPage({
                 >
                   <span className="min-w-0 flex-1 basis-28 truncate" title={item.name}>{item.name}</span>
                   <div className="ml-auto flex shrink-0 items-center gap-[12px]">
-                    <AdminEditForm action={updateTagStatusAction} className="flex items-center gap-2">
+                    <AdminEditForm action={updateTagStatusAction} className="flex items-center gap-3">
                       <input type="hidden" name="tagId" value={item.id} />
                       {user.permissions.includes('content.edit_all') ? <Link className="w-[72px] shrink-0 whitespace-nowrap text-right text-xs text-[var(--v9-muted)] underline" href={`/workspace/admin?tab=content&tagId=${item.id}`}>关联 {item.usageCount} 项</Link> : <span className="w-[72px] shrink-0 whitespace-nowrap text-right text-xs">关联 {item.usageCount} 项</span>}
-                      <NativeSelect
+                      <NativeSelect fitOptions
                         name="status"
                         defaultValue={item.status}
                         containerClassName="w-20 shrink-0"
@@ -353,13 +345,13 @@ export default async function AdminPage({
                         <option value="DISABLED">停用</option>
                         <option value="MERGED">已合并</option>
                       </NativeSelect>
-                      <AdminSubmitButton size="sm" variant="ghost" className="h-7 w-12 shrink-0 px-0 text-xs">
+                      <AdminSubmitButton size="default" variant="outline" className="h-10 w-12 shrink-0 border-border bg-transparent px-0 text-xs">
                         保存
                       </AdminSubmitButton>
                     </AdminEditForm>
                     <AdminEditForm action={deleteTagAction} className="shrink-0">
                       <input type="hidden" name="tagId" value={item.id} />
-                      <AdminSubmitButton size="sm" variant="ghost" pendingLabel="删除中…" className="h-7 w-12 shrink-0 px-0 text-xs text-[var(--v9-status-danger-text)]">删除</AdminSubmitButton>
+                      <AdminSubmitButton size="default" variant="outline" pendingLabel="删除中…" className="h-10 w-12 shrink-0 border-border bg-transparent px-0 text-xs text-foreground">删除</AdminSubmitButton>
                     </AdminEditForm>
                   </div>
                 </li>
@@ -370,23 +362,17 @@ export default async function AdminPage({
       ) : null}
       {tab === 'teams' ? (
         <section className={`mt-6 ${panelClass}`}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div><h2 className="text-lg font-medium tracking-[-.025em]">团队管理</h2><p className="mt-1 text-xs text-white/45">新增团队，编辑名称、负责人和状态。仅无成员、内容或项目关联的团队可删除；有关联时请先调整归属，或选择停用。</p></div>
-            <span className="rounded-full border border-white/[.12] bg-black/20 px-3 py-1 text-xs text-white/55">{teams.length} 个团队</span>
+            <AddTeamDialog organizationId={user.organizationId} users={users.items} />
           </div>
-          <AdminEditForm action={createTeamAction} resetOnSuccess className="mt-6 grid gap-4 border-b border-[var(--v9-line)] pb-6 lg:grid-cols-[minmax(0,1fr)_220px_140px_100px] lg:items-start">
-            <input type="hidden" name="organizationId" value={user.organizationId} />
-            <label className="grid gap-2 text-xs">团队名称<Input name="name" required maxLength={100} placeholder="输入新团队名称" /></label>
-            <label className="grid gap-2 text-xs">负责人<NativeSelect name="ownerId" defaultValue="" className="h-9 w-full"><option value="">暂不指定</option>{users.items.filter(u => u.status === 'ACTIVE').map(u => <option key={u.id} value={u.id}>{u.name}</option>)}</NativeSelect></label>
-            <div className="hidden lg:block" /><AdminSubmitButton className="!h-10 lg:!mt-6" pendingLabel="新增中…">新增团队</AdminSubmitButton>
-          </AdminEditForm>
           <div className="mt-4 divide-y divide-white/10">
             {teams.map((team) => (
-              <div key={team.id}><AdminEditForm action={updateTeamAction} className="grid gap-4 py-4 lg:grid-cols-[minmax(0,1fr)_220px_140px_100px] lg:items-start" key={team.id}>
-                <div><label className="text-xs text-white/45" htmlFor={`team-name-${team.id}`}>团队名称</label><Input id={`team-name-${team.id}`} name="name" defaultValue={team.name} required className="mt-1 border-white/15 bg-white/[.04] text-white" /><p className="mt-1 text-xs text-white/35">{team._count.members} 名成员</p></div>
-                <div><label className="text-xs text-white/45" htmlFor={`team-owner-${team.id}`}>负责人</label><NativeSelect id={`team-owner-${team.id}`} name="ownerId" defaultValue={team.owner?.id ?? ''} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-1 w-full">{team.owner ? null : <option value="">暂未指定</option>}{users.items.filter((member) => member.status === 'ACTIVE').map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}</NativeSelect></div>
-                <div><label className="text-xs text-white/45" htmlFor={`team-status-${team.id}`}>状态</label><NativeSelect id={`team-status-${team.id}`} name="status" defaultValue={team.status} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-1 w-full"><option value="ACTIVE">启用</option><option value="DISABLED">停用</option></NativeSelect></div>
-                <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><AdminSubmitButton className="!h-10 lg:!mt-[26px]" size="sm">保存修改</AdminSubmitButton>
+              <div key={team.id}><AdminEditForm action={updateTeamAction} className="grid gap-3 py-4 lg:grid-cols-[minmax(0,1fr)_max-content_max-content_100px] lg:items-start" key={team.id}>
+                <div><label className="block text-xs leading-[1.6] text-white/45" htmlFor={`team-name-${team.id}`}>团队名称</label><Input id={`team-name-${team.id}`} name="name" defaultValue={team.name} required className="mt-2 max-w-[600px] border-white/15 bg-white/[.04] text-white" /><p className="mt-1 text-xs text-white/35">{team._count.members} 名成员</p></div>
+                <div><label className="block text-xs leading-[1.6] text-white/45" htmlFor={`team-owner-${team.id}`}>负责人</label><NativeSelect fitOptions id={`team-owner-${team.id}`} name="ownerId" defaultValue={team.owner?.id ?? ''} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-2 w-full">{team.owner ? null : <option value="">暂未指定</option>}{users.items.filter((member) => member.status === 'ACTIVE').map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}</NativeSelect></div>
+                <div><label className="block text-xs leading-[1.6] text-white/45" htmlFor={`team-status-${team.id}`}>状态</label><NativeSelect fitOptions id={`team-status-${team.id}`} name="status" defaultValue={team.status} className="h-9 w-full rounded-lg border border-white/15 bg-[#111] px-2 text-sm text-white" containerClassName="mt-2 w-full"><option value="ACTIVE">启用</option><option value="DISABLED">停用</option></NativeSelect></div>
+                <input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><div className="grid gap-2 text-xs"><span aria-hidden="true" className="hidden leading-[1.6] lg:block">&nbsp;</span><AdminSubmitButton size="default">保存</AdminSubmitButton></div>
               </AdminEditForm><details className="pb-4 text-right text-sm"><summary className="cursor-pointer text-destructive">删除团队</summary><AdminEditForm action={deleteTeamAction} className="mt-3 flex flex-wrap items-center justify-end gap-3"><input type="hidden" name="organizationId" value={user.organizationId} /><input type="hidden" name="teamId" value={team.id} /><span className="text-xs text-muted-foreground">确认删除“{team.name}”？有关联数据时无法删除。</span><AdminSubmitButton variant="destructive" size="sm">确认删除</AdminSubmitButton></AdminEditForm></details></div>
             ))}
           </div>
@@ -394,60 +380,26 @@ export default async function AdminPage({
       ) : null}
       {tab === 'users' ? (
         <section className={`mt-6 ${panelClass}`}>
-          <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-medium tracking-[-.025em]">用户管理</h2><p className="mt-1 text-xs text-white/45">新增成员并设置角色与归属团队；已有账号的角色可在“角色权限”中调整。</p></div><span className="rounded-full border border-white/[.12] bg-black/20 px-3 py-1 text-xs text-white/55">{users.items.length} 个用户</span></div>
-          <AdminEditForm action={createUserAction} resetOnSuccess className="mt-6 space-y-4 border-b border-[var(--v9-line)] pb-6">
-            <input type="hidden" name="organizationId" value={user.organizationId} />
-            <h3 className="text-sm font-semibold">新增用户</h3>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <label className="grid gap-2 text-sm">用户邮箱<Input type="email" name="email" required maxLength={320} placeholder="请输入登录邮箱" /></label>
-              <label className="grid gap-2 text-sm">用户姓名<Input name="name" required maxLength={100} placeholder="请输入姓名" /></label>
-              <label className="grid gap-2 text-sm">用户角色<NativeSelect name="roleId" required defaultValue="" className="w-full"><option value="">请选择角色</option>{roles.map(role => <option key={role.id} value={role.id}>{role.name}</option>)}</NativeSelect></label>
-              <label className="grid gap-2 text-sm">归属团队<NativeSelect name="teamId" required defaultValue="" className="w-full"><option value="">请选择团队</option>{teams.filter(team => team.status === 'ACTIVE').map(team => <option key={team.id} value={team.id}>{team.name}</option>)}</NativeSelect></label>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted-foreground">创建后账号启用，所选角色在当前组织内生效。用户通过现有登录方式进入平台。</p><AdminSubmitButton pendingLabel="添加中…">添加用户</AdminSubmitButton></div>
-          </AdminEditForm>
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-lg font-medium tracking-[-.025em]">用户管理</h2><p className="mt-1 text-xs text-white/45">新增成员并设置角色与归属团队；已有账号的角色可在“角色权限”中调整。</p></div><AddUserDialog organizationId={user.organizationId} roles={roles} teams={teams} /></div>
           <div className="mt-4 divide-y divide-white/10">
             {users.items.map((member) => (
-              <div
-                className="grid gap-4 py-4 lg:grid-cols-[minmax(0,1fr)_430px] lg:items-center"
-                key={member.id}
-              >
-                <div>
-                  <AdminEditForm action={updateUserNameAction} className="mb-2 flex flex-wrap items-center gap-2">
-                    <input type="hidden" name="organizationId" value={user.organizationId} />
-                    <input type="hidden" name="userId" value={member.id} />
-                    <Input name="name" defaultValue={member.name} aria-label={`${member.email} 的姓名`} required maxLength={100} className="max-w-[280px]" />
-                    <AdminSubmitButton pendingLabel="保存中…">保存姓名</AdminSubmitButton>
-                  </AdminEditForm>
-                  <p className="text-xs text-white/45">{member.email}</p>
-                  <p className="mt-2 text-xs text-white/40">{member.primaryTeam?.name ?? '尚未加入主团队'} · {member.userRoles.map((entry) => entry.role.name).join('、') || '无角色'}</p>
-                </div>
-                <AdminEditForm action={updateUserStatusAction} className="grid gap-2 sm:grid-cols-[110px_minmax(0,1fr)_auto]">
+              <div className="space-y-3 py-4" key={member.id}>
+                <AdminEditForm action={updateUserAction} className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_max-content_max-content_80px]">
                   <input type="hidden" name="organizationId" value={user.organizationId} />
                   <input type="hidden" name="userId" value={member.id} />
-                  <NativeSelect
-                    name="status"
-                    defaultValue={member.status}
-                    className="h-8 rounded-lg border border-white/15 bg-white/[.04] px-2 text-sm text-white"
-                  >
-                    <option value="ACTIVE">启用</option>
-                    <option value="INVITED">邀请中</option>
-                    <option value="DISABLED">停用</option>
+                  <div className="min-w-0">
+                    <Input name="name" defaultValue={member.name} aria-label={`${member.email} 的姓名`} required maxLength={100} className="max-w-[280px]" />
+                    <p className="mt-2 text-xs text-white/45">{member.email}</p>
+                    <p className="mt-2 text-xs text-white/40">{member.primaryTeam?.name ?? '尚未加入主团队'} · {member.userRoles.map((entry) => entry.role.name).join('、') || '无角色'}</p>
+                  </div>
+                  <NativeSelect fitOptions name="status" defaultValue={member.status} aria-label={`${member.email} 的状态`} className="w-full">
+                    <option value="ACTIVE">启用</option><option value="INVITED">邀请中</option><option value="DISABLED">停用</option>
                   </NativeSelect>
-                  <NativeSelect
-                    name="replacementOwnerId"
-                    defaultValue=""
-                    aria-label="停用时的新内容负责人"
-                    className="h-8 min-w-0 rounded-lg border border-white/15 bg-white/[.04] px-2 text-sm text-white"
-                  >
-                    <option value="">停用时转移内容至…</option>
-                    {users.items
-                      .filter((candidate) => candidate.id !== member.id && candidate.status === 'ACTIVE')
-                      .map((candidate) => <option value={candidate.id} key={candidate.id}>{candidate.name}</option>)}
+                  <NativeSelect fitOptions name="replacementOwnerId" defaultValue="" aria-label="停用时的新内容负责人" className="w-full min-w-0">
+                    <option value="">停用时转移内容至</option>
+                    {users.items.filter(candidate => candidate.id !== member.id && candidate.status === 'ACTIVE').map(candidate => <option value={candidate.id} key={candidate.id}>{candidate.name}</option>)}
                   </NativeSelect>
-                  <AdminSubmitButton size="sm" pendingLabel="更新中…">
-                    更新
-                  </AdminSubmitButton>
+                  <AdminSubmitButton pendingLabel="保存中…">保存</AdminSubmitButton>
                 </AdminEditForm>
                 {member.id !== user.id ? <div className="lg:col-span-2 flex justify-end"><DeleteUserButton organizationId={user.organizationId} userId={member.id} name={member.name} /></div> : null}
               </div>
@@ -467,17 +419,17 @@ export default async function AdminPage({
                 const assignableRoles = roles.filter((role) => !assignedRoleIds.has(role.id));
                 return (
                   <div className="py-4" key={member.id}>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div><AdminEditForm action={updateUserNameAction} className="mb-2 flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1"><AdminEditForm action={updateUserNameAction} className="mb-2 flex items-start gap-3">
                     <input type="hidden" name="organizationId" value={user.organizationId} />
                     <input type="hidden" name="userId" value={member.id} />
-                    <Input name="name" defaultValue={member.name} aria-label={`${member.email} 的姓名`} required maxLength={100} className="max-w-[280px]" />
-                    <AdminSubmitButton pendingLabel="保存中…">保存姓名</AdminSubmitButton>
+                    <Input name="name" defaultValue={member.name} aria-label={`${member.email} 的姓名`} required maxLength={100} className="min-w-0 flex-1" />
+                    <AdminSubmitButton pendingLabel="保存中…">保存</AdminSubmitButton>
                   </AdminEditForm><p className="text-xs text-white/40">{member.email}</p></div>
-                      <AdminEditForm action={assignRoleAction} resetOnSuccess className="flex gap-2">
+                      <AdminEditForm action={assignRoleAction} resetOnSuccess className="flex items-start gap-3">
                         <input type="hidden" name="organizationId" value={user.organizationId} />
                         <input type="hidden" name="userId" value={member.id} />
-                        <NativeSelect
+                        <NativeSelect fitOptions
                           name="roleId"
                           defaultValue=""
                           required
@@ -487,7 +439,7 @@ export default async function AdminPage({
                           <option value="" disabled>{assignableRoles.length ? '添加角色' : '已拥有全部角色'}</option>
                           {assignableRoles.map((role) => <option value={role.id} key={role.id}>{role.name}</option>)}
                         </NativeSelect>
-                        <AdminSubmitButton size="sm" variant="outline" disabled={!assignableRoles.length} pendingLabel="授予中…" className="border-white/15 bg-transparent text-white">授予</AdminSubmitButton>
+                        <AdminSubmitButton size="default" variant="outline" disabled={!assignableRoles.length} pendingLabel="授予中…" className="border-white/15 bg-transparent text-white">授予</AdminSubmitButton>
                       </AdminEditForm>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1.5">

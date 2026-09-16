@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CoverPicker } from '@/components/workspace/cover-picker';
 import { useRouter } from 'next/navigation';
-import { BriefcaseBusiness, FileText, Layers3, Sparkles, Wrench } from 'lucide-react';
+import { Plus, BriefcaseBusiness, FileText, Layers3, Sparkles, Wrench } from 'lucide-react';
 
 import { createDraftAction, type ActionState } from './actions';
 import { Button } from '@/components/ui/button';
@@ -43,11 +43,11 @@ export function CreateDraftForm({
   }, [router, state.id, state.error]);
 
   return (
-    <form data-card-surface="" action={action} onResetCapture={(event) => { event.preventDefault(); event.stopPropagation(); }} className="composer-create mt-6 overflow-hidden rounded-[20px] border border-border bg-[var(--v9-panel)]">
+    <form data-card-surface="" action={action} onResetCapture={(event) => { event.preventDefault(); event.stopPropagation(); }} className="composer-create mt-6 overflow-hidden rounded-[24px] border border-border bg-[var(--v9-panel)]">
       <section className="border-b border-border p-6 md:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="mt-2 text-[22px] font-semibold tracking-[-.04em] text-white">内容类型</h2></div></div>
         <input name="contentType" type="hidden" value={contentType} />
-        <div className="mt-6 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">{[...contentTypes].sort((a,b) => ['DESIGN_ASSET','AI_TOOL','AI_SKILL','AI_PROJECT','AI_CASE'].indexOf(a.value)-['DESIGN_ASSET','AI_TOOL','AI_SKILL','AI_PROJECT','AI_CASE'].indexOf(b.value)).map(({ value, label, description, icon: Icon }) => <button aria-pressed={contentType === value} className={`rounded-[14px] border p-4 text-left text-foreground transition focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 ${contentType === value ? 'border-ring bg-accent' : 'border-border bg-[var(--surface-subtle)] hover:border-input hover:bg-accent'}`} key={value} onClick={() => setContentType(value)} type="button"><Icon className={contentType === value ? 'size-4 text-foreground' : 'size-4 text-[var(--text-secondary)]'} /><strong className="mt-6 block text-[14px]">{label}</strong><span className="mt-1.5 block text-[11px] leading-5 text-[var(--text-description)]">{description}</span></button>)}</div>
+        <div className="mt-6 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">{[...contentTypes].sort((a,b) => ['DESIGN_ASSET','AI_TOOL','AI_SKILL','AI_PROJECT','AI_CASE'].indexOf(a.value)-['DESIGN_ASSET','AI_TOOL','AI_SKILL','AI_PROJECT','AI_CASE'].indexOf(b.value)).map(({ value, label, description, icon: Icon }) => <button aria-pressed={contentType === value} className={`rounded-[16px] border p-4 text-left text-foreground transition focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 ${contentType === value ? 'border-ring bg-accent' : 'border-border bg-[var(--surface-subtle)] hover:border-input hover:bg-accent'}`} key={value} onClick={() => setContentType(value)} type="button"><Icon className={contentType === value ? 'size-4 text-foreground' : 'size-4 text-[var(--text-secondary)]'} /><strong className="mt-6 block text-[14px]">{label}</strong><span className="mt-1.5 block text-[11px] leading-5 text-[var(--text-description)]">{description}</span></button>)}</div>
       </section>
       <section className="grid gap-6 p-6 md:grid-cols-2 md:p-6">
         <label className="grid gap-1.5 text-sm text-white/75">归属团队<NativeSelect className="h-9 w-full rounded-lg border border-white/15 bg-black/25 px-3 text-sm text-white" containerClassName="w-full" name="teamId" required><option value="">请选择团队</option>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</NativeSelect></label>
@@ -59,7 +59,7 @@ export function CreateDraftForm({
         <p className="text-sm leading-6 text-[var(--text-description)] md:col-span-2">下一步完善使用方法和发布信息。现在只会创建私人草稿。</p>
       </section>
       {state.error ? <p className="px-5 text-sm text-red-400 md:px-6">{state.error}</p> : null}
-      <div className="flex items-center justify-between border-t border-white/10 px-5 py-4 md:px-6">{state.id ? <Button asChild><Link href={`/workspace/submit/${state.id}`}>进入已保存草稿</Link></Button> : <Button className="bg-white text-black hover:bg-white/85" disabled={pending} type="submit">{pending ? '正在创建…' : '创建草稿并继续'}</Button>}</div>
+      <div className="flex items-center justify-between border-t border-white/10 px-5 py-4 md:px-6">{state.id ? <Button asChild><Link href={`/workspace/submit/${state.id}`}>进入已保存草稿</Link></Button> : <Button className="bg-white text-black hover:bg-white/85" disabled={pending} type="submit"><Plus aria-hidden="true" />{pending ? '正在创建…' : '创建草稿并继续'}</Button>}</div>
     </form>
   );
 }

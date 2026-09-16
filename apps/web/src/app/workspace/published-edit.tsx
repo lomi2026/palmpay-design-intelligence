@@ -15,7 +15,7 @@ export function PublishedEdit({ contentId, label = '编辑内容' }: { contentId
       <Button
         title="创建或继续编辑草稿，重新发布前保持当前内容状态"
         variant="outline"
-        className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
+        className="h-9 rounded-[12px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
         disabled={pending}
         type="submit"
       >

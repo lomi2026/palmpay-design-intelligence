@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './hub-design.css';
 import './workspace-spacing.css';
+import './component-states.css';
+import './component-radius.css';
 
 export const metadata: Metadata = {
   title: 'PalmPay体验设计Hub',

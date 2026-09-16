@@ -69,7 +69,7 @@ export function ProjectReadingNavigation({ items }: { items: ReadingItem[] }) {
       <Sheet>
         <SheetTrigger asChild>
           <Button
-            className="fixed bottom-3 right-3 z-30 h-10 rounded-full border-border bg-background/95 px-3.5 text-[12px] font-semibold text-foreground shadow-[0_14px_38px_rgba(0,0,0,.32)] backdrop-blur hover:bg-muted hover:text-foreground md:bottom-[22px] md:right-[22px]"
+            className="fixed bottom-3 right-3 z-30 h-10 rounded-[12px] border-border bg-background/95 px-3.5 text-[12px] font-semibold text-foreground shadow-[0_14px_38px_rgba(0,0,0,.32)] backdrop-blur hover:bg-muted hover:text-foreground md:bottom-[22px] md:right-[22px]"
             size="sm"
             type="button"
             variant="outline"
@@ -78,7 +78,7 @@ export function ProjectReadingNavigation({ items }: { items: ReadingItem[] }) {
             目录
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-[min(340px,calc(100vw-32px))] border-border bg-background p-0 sm:right-4 sm:top-4 sm:bottom-4 sm:h-auto sm:rounded-[20px]" side="right">
+        <SheetContent className="w-[min(340px,calc(100vw-32px))] border-border bg-background p-0 sm:right-4 sm:top-4 sm:bottom-4 sm:h-auto sm:rounded-[24px]" side="right">
           <SheetHeader className="border-b border-border pr-14">
             <SheetTitle className="text-[18px]">内容目录</SheetTitle>
             <SheetDescription>点击章节快速定位，内容仍以当前正式版本为准。</SheetDescription>
@@ -87,7 +87,7 @@ export function ProjectReadingNavigation({ items }: { items: ReadingItem[] }) {
             {items.map((item, index) => (
               <SheetClose asChild key={item.id}>
                 <button
-                  className={`grid w-full grid-cols-[28px_minmax(0,1fr)] gap-2 rounded-[10px] px-3 py-2.5 text-left text-[12px] font-semibold leading-5 transition ${activeId === item.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                  className={`grid w-full grid-cols-[28px_minmax(0,1fr)] gap-2 rounded-[12px] px-3 py-2.5 text-left text-[12px] font-semibold leading-5 transition ${activeId === item.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                   onClick={() => scrollTo(item)}
                   type="button"
                 >

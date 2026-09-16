@@ -25,7 +25,7 @@ test('edit saves return acknowledgements without waiting for page reads and have
   const actions = read('../src/app/workspace/admin/actions.ts');
   const form = read('../src/app/workspace/admin/admin-edit-form.tsx');
   const feedback = read('../src/app/workspace/admin/admin-feedback.tsx');
-  for (const name of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction', 'assignRoleAction', 'removeUserRoleAction']) {
+  for (const name of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserAction', 'assignRoleAction', 'removeUserRoleAction']) {
     const action = actions.match(new RegExp(`export async function ${name}\\b[\\s\\S]*?(?=export async function|$)`))?.[0];
     assert.match(action, /return saveEdit\(/);
     assert.doesNotMatch(action, /refreshAdmin\(/);
@@ -56,7 +56,7 @@ test('editing forms block automatic reset before Radix can restore mount-time va
   assert.match(form, /onResetCapture/);
   assert.match(form, /event\.preventDefault\(\)/);
   assert.match(form, /event\.stopPropagation\(\)/);
-  for (const action of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserStatusAction']) {
+  for (const action of ['updateCategoryStatusAction', 'updateTagStatusAction', 'updateTeamAction', 'updateUserAction']) {
     assert.match(page, new RegExp(`<AdminEditForm action=\\{${action}\\}`));
   }
   // Creation and role grants clear only after confirmed success.

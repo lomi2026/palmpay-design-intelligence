@@ -8,13 +8,14 @@ import type { AdminSaveResult } from './admin-save-result';
 type AdminEditFormProps = Omit<ComponentProps<'form'>, 'action'> & {
   action: (formData: FormData) => Promise<AdminSaveResult>;
   resetOnSuccess?: boolean;
+  onSuccess?: () => void;
 };
 
 // React resets successful action forms. Radix Select listens for that native
 // reset event and restores its mount-time value, even for controlled selects.
 // Editing is not creation: retain the submitted fields while the action returns
 // refreshed server data instead of resetting them to the pre-edit snapshot.
-export function AdminEditForm({ action, resetOnSuccess = false, ...props }: AdminEditFormProps) {
+export function AdminEditForm({ action, resetOnSuccess = false, onSuccess, ...props }: AdminEditFormProps) {
   const router = useRouter();
   const form = useRef<HTMLFormElement>(null);
   const allowReset = useRef(false);
@@ -41,8 +42,9 @@ export function AdminEditForm({ action, resetOnSuccess = false, ...props }: Admi
         allowReset.current = false;
       }
       startTransition(() => router.refresh());
+      onSuccess?.();
     }
-  }, [result, router, resetOnSuccess]);
+  }, [result, router, resetOnSuccess, onSuccess]);
 
   return (
     <form

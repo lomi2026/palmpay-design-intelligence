@@ -7,7 +7,7 @@
 :root {
   --muted: #e8e8e7;
   --border: rgba(0, 0, 0, 0.09);
-  --radius-md: 0.625rem;
+  --radius-md: 12px;
   --background: #f5f5f4;
   --foreground: #151515;
   --card: #fff;
@@ -279,9 +279,7 @@ body {
   [class~='bg-[linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px)]'],
   [class~='bg-[linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px)]']
 ) {
-  background-image:
-    linear-gradient(var(--v9-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--v9-grid-line) 1px, transparent 1px) !important;
+  background-image: none !important;
 }
 
 .dark .v9-source-home :is(
@@ -552,29 +550,31 @@ html:not(.dark) .v9-source-home :is(
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 24px;
+  --radius-4xl: 24px;
 }
 
 .dark {
-  --background: #141414;
+  --minimum-text-size: 12px;
+  --minimum-copy-size: 13px;
+  --background: #181818;
   --foreground: #e5e5e5;
-  --card: #181818;
+  --card: #262626;
   --card-foreground: var(--foreground);
-  --popover: var(--card);
+  --popover: var(--secondary);
   --popover-foreground: var(--foreground);
   --primary: #f0f0f0;
   --primary-foreground: #141414;
-  --secondary: #1c1c1c;
+  --secondary: #363636;
   --secondary-foreground: var(--foreground);
-  --muted: #242424;
-  --muted-foreground: #999999;
-  --accent: rgba(255, 255, 255, 0.075);
+  --muted: #404040;
+  --muted-foreground: #b0b0b0;
+  --accent: var(--muted);
   --accent-foreground: var(--foreground);
   --destructive: var(--status-danger-text);
   --border: rgba(255, 255, 255, 0.09);
@@ -585,7 +585,7 @@ html:not(.dark) .v9-source-home :is(
   --chart-3: oklch(0.8 0.08 78);
   --chart-4: oklch(0.77 0.07 305);
   --chart-5: oklch(0.76 0.07 25);
-  --sidebar: #111111;
+  --sidebar: #141414;
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
@@ -593,15 +593,15 @@ html:not(.dark) .v9-source-home :is(
   --sidebar-accent-foreground: var(--foreground);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
-  --text-secondary: #b8b8b8;
-  --text-description: #acacac;
+  --text-secondary: #c4c4c4;
+  --text-description: #b8b8b8;
   --disabled-foreground: #777777;
-  --surface-subtle: rgba(255, 255, 255, 0.04);
-  --surface-raised: rgba(255, 255, 255, 0.11);
-  --field: #242424;
+  --surface-subtle: var(--secondary);
+  --surface-raised: var(--muted);
+  --field: var(--secondary);
   --inverse-border: rgba(0, 0, 0, 0.15);
   --inverse-surface: rgba(0, 0, 0, 0.1);
-  --grid-line: rgba(255, 255, 255, 0.025);
+  --grid-line: transparent;
   --glow: rgba(255, 255, 255, 0.045);
   --status-neutral-bg: rgba(255, 255, 255, 0.055);
   --status-neutral-line: rgba(255, 255, 255, 0.16);

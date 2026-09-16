@@ -23,6 +23,7 @@ import {
   CreateTeamDto,
   CreateUserDto,
   UpdateUserStatusDto,
+  UpdateUserDto,
   UpdateUserNameDto,
   UserListQueryDto,
 } from './identity.dto';
@@ -114,6 +115,18 @@ export class IdentityController {
   ) {
     this.assertOrganization(user, organizationId);
     return this.identity.getUser(organizationId, userId);
+  }
+
+  @Patch('users/:userId')
+  @RequirePermissions('user.manage')
+  updateUser(
+    @Param('organizationId', new ParseUUIDPipe()) organizationId: string,
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Body() input: UpdateUserDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    this.assertOrganization(user, organizationId);
+    return this.identity.updateUser(organizationId, userId, input, user.id);
   }
 
   @Patch('users/:userId/name')

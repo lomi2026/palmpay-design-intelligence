@@ -93,3 +93,10 @@ export class UpdateUserNameDto {
   @MaxLength(100)
   name!: string;
 }
+
+export class UpdateUserDto extends UpdateUserStatusDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name!: string;
+}

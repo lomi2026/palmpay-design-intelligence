@@ -77,7 +77,7 @@
 }
 .eyebrow {
   display: block;
-  font-size: 10px;
+  font-size: max(10px, var(--minimum-text-size, 0px));
   font-weight: 600;
   letter-spacing: 0.12em;
   color: var(--muted-foreground);
@@ -153,7 +153,7 @@
   gap: 10px;
   width: 100%;
   padding: 12px 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: left;
   color: var(--text-description);
   font-size: 12px;
@@ -175,7 +175,7 @@
   flex-shrink: 0;
   border: 1px solid var(--input);
   border-radius: 50%;
-  font-size: 10px;
+  font-size: max(10px, var(--minimum-text-size, 0px));
 }
 .editor-progress {
   margin-top: 32px;
@@ -195,7 +195,7 @@
   accent-color: var(--foreground);
 }
 .editor-progress p {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   line-height: 1.8;
 }
 .editor-section-body {
@@ -226,7 +226,7 @@
   font-weight: 500;
 }
 .editor-field .field-hint {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--muted-foreground);
   font-weight: 400;
 }
@@ -234,7 +234,7 @@
   color: var(--muted-foreground);
   font-weight: 400;
   margin-left: 8px;
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
 }
 .editor-field em {
   font-style: normal;
@@ -287,7 +287,7 @@
   background: var(--card);
   padding: 16px !important;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: 0 6px 24px #00000012;
 }
 .publish-validation {
@@ -308,7 +308,7 @@
   gap: 0 28px;
   padding: 32px;
   border: 1px solid var(--border);
-  border-radius: 22px;
+  border-radius: 24px;
   background: var(--card);
 }
 .detail-intro {
@@ -323,16 +323,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--muted-foreground);
 }
 .content-kind {
   display: inline-flex;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--accent);
   padding: 4px 8px;
   color: var(--text-description);
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   font-weight: 550;
 }
 .detail-summary {
@@ -364,7 +364,7 @@
   gap: 20px;
 }
 .detail-metadata dt {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--muted-foreground);
   margin-bottom: 5px;
 }
@@ -375,7 +375,7 @@
 .detail-cover {
   width: 235px;
   flex-shrink: 0;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   margin-bottom: 24px;
   align-self: flex-start;
@@ -391,7 +391,7 @@
   height: 36px;
   width: 36px;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .management-menu > summary::-webkit-details-marker {
   display: none;
@@ -405,11 +405,11 @@
   border: 1px solid var(--border);
   background: var(--card);
   box-shadow: 0 8px 28px #00000015;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 16px;
 }
 .management-menu p {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   margin-bottom: 12px;
   color: var(--muted-foreground);
 }
@@ -428,7 +428,7 @@
   padding: 28px;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 24px;
   scroll-margin-top: 90px;
 }
 .reading-section-heading {
@@ -444,7 +444,7 @@
   height: 28px;
   border-radius: 8px;
   background: var(--surface-subtle);
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--muted-foreground);
 }
 .reading-field-grid {
@@ -477,7 +477,7 @@
 }
 .prompt-field {
   padding: 20px;
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--surface-subtle);
   border: 1px solid var(--border);
 }
@@ -497,7 +497,7 @@
   gap: 10px;
   padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   margin-top: 8px;
 }
 .resource-list a span {
@@ -540,7 +540,7 @@ html[data-design='studio'] .workspace-shell > aside > a {
 html[data-design='studio'] .workspace-shell > aside nav a[aria-current='page'] {
   background: var(--foreground);
   color: var(--background);
-  border-radius: 13px;
+  border-radius: 12px;
 }
 html[data-design='studio'] .workspace-shell > aside nav a[aria-current='page'] svg {
   color: inherit;
@@ -554,16 +554,16 @@ html[data-design='studio'] .workspace-shell main > section[class*='rounded-'],
 html[data-design='studio'] .workspace-shell main > header {
   background-image: none !important;
   background-color: var(--card) !important;
-  border-radius: 26px;
+  border-radius: 24px;
   border-color: var(--border);
 }
 html[data-design='studio'] .workspace-shell .detail-hero {
   border: 0;
   padding: 36px;
-  border-radius: 28px;
+  border-radius: 24px;
 }
 html[data-design='studio'] .workspace-shell [data-slot='button'][data-variant='default'] {
-  border-radius: 999px;
+  border-radius: 12px;
 }
 html[data-design='studio'] .editor-outline nav button.is-current {
   background: var(--accent);
@@ -589,7 +589,7 @@ html[data-design='studio'] .workspace-shell .composer-create button[aria-pressed
 html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   background: var(--primary);
   color: var(--primary-foreground);
-  border-radius: 999px;
+  border-radius: 12px;
 }
 @media (max-width: 900px) {
   .editor-sections {
@@ -686,7 +686,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 12px 20px;
   background: var(--primary);
   color: var(--primary-foreground) !important;
@@ -704,10 +704,10 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   background: var(--card) !important;
   color: var(--foreground);
   padding: 32px 36px !important;
-  border-radius: 28px;
+  border-radius: 24px;
 }
 .studio-dot-label {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   letter-spacing: 0.07em;
   color: var(--text-secondary);
 }
@@ -742,7 +742,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   min-width: 110px;
 }
 .studio-feature-stats span {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--text-secondary);
 }
 .studio-feature-stats strong {
@@ -754,7 +754,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   margin: 10px 0;
 }
 .studio-feature-stats p {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--text-description);
 }
 .studio-entry-grid {
@@ -766,7 +766,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 .studio-entry-grid > a {
   padding: 20px;
   background: var(--card);
-  border-radius: 22px;
+  border-radius: 24px;
   transition: transform 0.2s;
 }
 .studio-entry-grid > a:hover {
@@ -790,7 +790,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 }
 .studio-entry-grid p {
   color: var(--text-description);
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   margin-top: 6px;
 }
 .studio-work-grid {
@@ -801,7 +801,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 .studio-panel {
   background: var(--card);
   padding: 26px;
-  border-radius: 26px;
+  border-radius: 24px;
 }
 .studio-panel > header {
   display: flex;
@@ -833,7 +833,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 }
 .studio-update-list p,
 .studio-draft-item p {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--text-description);
   margin-top: 5px;
 }
@@ -843,7 +843,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   width: 40px;
   height: 40px;
   background: var(--surface-subtle);
-  border-radius: 13px;
+  border-radius: 12px;
 }
 .studio-draft-item {
   display: flex;
@@ -957,7 +957,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   height: 38px;
   background: #29262e;
   color: white;
-  border-radius: 50%;
+  border-radius: 12px;
   cursor: pointer;
 }
 .studio-hero-links {
@@ -974,7 +974,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 .studio-hero-board {
   padding: 28px;
   background: #dedbe6;
-  border-radius: 36px;
+  border-radius: 24px;
   box-shadow: 0 24px 80px #4b385d12;
   transform: rotate(1deg);
   color: #29252f;
@@ -983,7 +983,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: max(10px, var(--minimum-text-size, 0px));
   letter-spacing: 0.1em;
 }
 .studio-board-title {
@@ -1000,7 +1000,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   align-items: center;
   gap: 18px;
   padding: 23px;
-  border-radius: 22px;
+  border-radius: 24px;
   margin: 12px 0;
   transition: transform 0.2s;
 }
@@ -1011,7 +1011,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   flex: 1;
 }
 .studio-board-card small {
-  font-size: 9px;
+  font-size: max(9px, var(--minimum-text-size, 0px));
   letter-spacing: 0.08em;
   opacity: 0.6;
 }
@@ -1021,7 +1021,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   margin: 6px 0 5px;
 }
 .studio-board-card p {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   opacity: 0.65;
 }
 .board-lime {
@@ -1037,7 +1037,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: max(10px, var(--minimum-text-size, 0px));
   margin-top: 24px;
 }
 .studio-capabilities {
@@ -1075,7 +1075,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 }
 .studio-capabilities > div > a > span {
   align-self: end;
-  font-size: 10px;
+  font-size: max(10px, var(--minimum-text-size, 0px));
   color: var(--muted-foreground);
 }
 .studio-capabilities > div > a > svg {
@@ -1099,7 +1099,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
   grid-template-columns: 1fr 1fr;
   gap: 10vw;
   background: var(--card);
-  border-radius: 32px;
+  border-radius: 24px;
   padding: 60px;
   margin-bottom: 80px;
 }
@@ -1223,7 +1223,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
     align-items: start;
   }
   .studio-home-nav .studio-primary {
-    font-size: 11px;
+    font-size: max(11px, var(--minimum-text-size, 0px));
     padding: 10px;
   }
   .studio-hero-board {
@@ -1265,7 +1265,7 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 .reference-picker small,
 .reference-picker p {
   display: block;
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--muted-foreground);
   padding: 8px;
 }
@@ -1277,12 +1277,12 @@ html[data-design='studio'] .workspace-shell .detail-toolbar > a:first-child {
 .editor-field > label small {
   font-weight: 400;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   margin-left: 8px;
 }
 [data-slot='dialog-content'] {
   padding: 24px;
-  border-radius: 20px;
+  border-radius: 24px;
 }
 [data-slot='dialog-title'] {
   font-size: 18px;
@@ -1357,7 +1357,7 @@ html[data-design='studio'] .workspace-shell main > .editor-page-heading {
   font-weight: 550;
 }
 .composer-taxonomy > summary > span {
-  font-size: 11px;
+  font-size: max(11px, var(--minimum-text-size, 0px));
   color: var(--muted-foreground);
   font-weight: 400;
   margin-left: 10px;
@@ -1465,4 +1465,103 @@ html:not(.dark) .workspace-shell button[aria-label='全局搜索'] {
   color: var(--foreground);
   border-color: var(--input);
   cursor: pointer;
+}
+
+/* Dark information surfaces use fixed levels instead of translucent stacking. */
+html.dark .v9-source-home :is(article, section, header, div, aside)[data-card-surface],
+html.dark .v9-source-home [data-slot='card'] {
+  background-color: var(--card) !important;
+  background-image: none !important;
+}
+html.dark .v9-source-home :is([data-card-surface], [data-slot='card']) :is(article, section, header, div, aside)[data-card-surface],
+html.dark .v9-source-home :is([data-card-surface], [data-slot='card']) [data-slot='card'] {
+  background-color: var(--secondary) !important;
+}
+/* Portals are mounted outside the page shell and share the raised surface. */
+html.dark :is([data-slot='dialog-content'], [data-slot='sheet-content'], [data-slot='popover-content'], [data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content'], [data-slot='select-content']) {
+  background-color: var(--popover);
+}
+/* Keep compact metadata readable without changing the light-theme type scale. */
+html.dark :is([class~='text-[8px]'], [class~='text-[9px]'], [class~='text-[10px]'], [class~='text-[11px]']) {
+  font-size: var(--minimum-text-size);
+  line-height: 1.6;
+}
+html.dark p:is([class~='text-[8px]'], [class~='text-[9px]'], [class~='text-[10px]'], [class~='text-[11px]'], [class~='text-[12px]'], [class~='text-xs']),
+html.dark :is(.studio-entry-grid p, .studio-feature-stats p, .studio-update-list p, .studio-draft-item p) {
+  font-size: var(--minimum-copy-size);
+  line-height: 1.6;
+}
+/* The active navigation item has an inverse surface; its count follows its text. */
+html.dark .workspace-shell nav a[aria-current='page'] [data-slot='badge'] {
+  color: inherit;
+}
+
+/* Standard form controls share a 40px hit area, including portalled dialogs. */
+[data-slot='input']:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+[data-slot='select-trigger'] {
+  height: 40px !important;
+  min-height: 40px;
+}
+
+/* Buttons use contextual sizes; form groups and dialog actions remain aligned. */
+[data-slot='button'][data-size='default'],
+[data-slot='button'][data-size='lg'] { height: 40px; }
+[data-slot='button'][data-size='md'] { height: 36px; }
+[data-slot='button'][data-size='sm'] { height: 32px; }
+[data-slot='dialog-content'] button[type='submit'],
+[data-slot='dialog-content'] button[data-variant='outline'],
+form:has([data-slot='input']:not([type='hidden']), [data-slot='select-trigger']) > [data-slot='button'] {
+  height: 40px;
+}
+
+/* Workspace gutters are measured from the content pane, outside the sidebar. */
+.workspace-shell.v9-source-home > div > main {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 20px;
+}
+@media (min-width: 768px) {
+  .workspace-shell.v9-source-home > div > main,
+  .workspace-shell > div > header {
+    padding-inline: 40px;
+  }
+}
+
+/* Select controls share the approved action-button corner radius. */
+[data-slot='select-trigger'] {
+  border-radius: 12px !important;
+}
+
+/* Shared interaction for cards that navigate as a whole. */
+:is(.workspace-shell, .studio-home, .v9-source-home) :is(
+  [data-slot='card']:has([data-card-link]),
+  a[data-card-surface],
+  a:has(> [data-slot='card']),
+  .studio-entry-grid > a,
+  .studio-draft-item, [data-clickable-card], .studio-board-card
+) {
+  transition: transform 0.2s ease !important;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(.workspace-shell, .studio-home, .v9-source-home) :is(
+    [data-slot='card']:has([data-card-link]),
+    a[data-card-surface],
+    a:has(> [data-slot='card']),
+    .studio-entry-grid > a,
+    .studio-draft-item, [data-clickable-card], .studio-board-card
+  ):hover {
+    translate: none !important;
+    transform: translateY(-3px) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.workspace-shell, .studio-home, .v9-source-home) :is(
+    [data-slot='card']:has([data-card-link]), a[data-card-surface],
+    a:has(> [data-slot='card']), .studio-entry-grid > a, .studio-draft-item, [data-clickable-card], .studio-board-card
+  ) {
+    transition: none !important;
+    transform: none !important;
+    translate: none !important;
+  }
 }

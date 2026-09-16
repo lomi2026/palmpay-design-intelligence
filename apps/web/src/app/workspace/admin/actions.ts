@@ -60,6 +60,17 @@ export async function updateTagStatusAction(formData: FormData) {
   const status = String(formData.get('status'));
   return saveEdit(`/api/admin/tags/${tagId}`, { status });
 }
+export async function updateUserAction(formData: FormData) {
+  const organizationId = String(formData.get('organizationId'));
+  const userId = String(formData.get('userId'));
+  const replacementOwnerId = String(formData.get('replacementOwnerId') ?? '');
+  return saveEdit(`/api/organizations/${organizationId}/users/${userId}`, {
+    name: String(formData.get('name') ?? '').trim(),
+    status: String(formData.get('status')),
+    ...(replacementOwnerId ? { replacementOwnerId } : {}),
+  });
+}
+
 export async function updateUserStatusAction(formData: FormData) {
   const organizationId = String(formData.get('organizationId'));
   const userId = String(formData.get('userId'));

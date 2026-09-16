@@ -137,3 +137,24 @@ test('changing a non-disable status does not require ownership transfer', async 
   assert.equal(updated.status, 'ACTIVE');
   assert.equal(calls.audits[0].action, 'user.status.update');
 });
+
+test('combined save updates trimmed name and status together', async () => {
+  const { service, calls } = serviceFixture();
+  const updated = await service.updateUser('organization-1', 'user-1', { name: ' New name ', status: 'INVITED' }, 'admin-1');
+  assert.equal(updated.name, 'New name');
+  assert.deepEqual(calls.updates, [{ name: 'New name', status: 'INVITED' }]);
+  assert.equal(calls.audits[0].action, 'user.update');
+});
+
+test('combined save cannot change name when disabling fails ownership validation', async () => {
+  const { service, calls } = serviceFixture({ ownedContent: [{ id: 'content-1' }] });
+  await assert.rejects(service.updateUser('organization-1', 'user-1', { name: 'New name', status: 'DISABLED' }, 'admin-1'), error => error.getStatus() === 409);
+  assert.deepEqual(calls.updates, []);
+  assert.deepEqual(calls.audits, []);
+});
+
+test('combined save rejects whitespace-only names before any write', async () => {
+  const { service, calls } = serviceFixture();
+  await assert.rejects(service.updateUser('organization-1', 'user-1', { name: '  ', status: 'ACTIVE' }, 'admin-1'), error => error.getStatus() === 400);
+  assert.deepEqual(calls.updates, []);
+});

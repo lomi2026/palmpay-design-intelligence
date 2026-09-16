@@ -33,7 +33,7 @@ export function WorkspaceAccountMenu({ name, email, roleLabel }: { name: string;
     <DropdownMenu.Trigger asChild>
       <button
         aria-label="账号菜单"
-        className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full bg-[var(--v9-raised)] text-[11px] font-bold text-[var(--v9-text)] outline-none transition hover:bg-[var(--v9-soft-hover)] focus-visible:ring-2 focus-visible:ring-[var(--v9-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--v9-bg)]"
+        className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-[12px] bg-[var(--v9-raised)] text-[11px] font-bold text-[var(--v9-text)] outline-none transition hover:bg-[var(--v9-soft-hover)] focus-visible:ring-2 focus-visible:ring-[var(--v9-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--v9-bg)]"
         type="button"
         onPointerEnter={(event) => { if (event.pointerType === 'mouse') { cancelClose(); if (!open) { openedByHover.current = true; setOpen(true); } } }}
         onPointerLeave={(event) => { if (event.pointerType === 'mouse') scheduleClose(); }}
