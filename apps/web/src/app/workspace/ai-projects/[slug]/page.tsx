@@ -1,5 +1,6 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { DetailActions } from '@/components/workspace/detail-actions';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { ApiError, serverApiFetch } from '@/lib/api';
@@ -31,7 +32,7 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   );
 }
 
-export default async function AIProjectDetailPage({
+async function AIProjectDetailPage({
   params,
   searchParams,
 }: {
@@ -46,7 +47,7 @@ export default async function AIProjectDetailPage({
       headers: await authenticatedApiHeaders(),
     });
   } catch (error: unknown) {
-    if (error instanceof ApiError && error.status === 404) notFound();
+    if (error instanceof ApiError && [403, 404].includes(error.status)) notFound();
     throw error;
   }
   const currentUser = await loadCurrentUser();
@@ -56,12 +57,6 @@ export default async function AIProjectDetailPage({
     currentUser?.permissions.includes('content.edit_all');
   const canUnpublish = currentUser?.permissions.includes('content.unpublish') ?? false;
   const canArchive = currentUser?.permissions.includes('content.archive') ?? false;
-  const usage = await serverApiFetch<{
-    usageCount: number;
-    projectReferences: number;
-    favoriteCount: number;
-  }>(`/api/contents/${project.id}/usage-summary`, { headers: await authenticatedApiHeaders() });
-
   const detail = project.projectDetail;
   const body = getImportedProjectBody(project.currentVersion?.body);
   const priority = body.prioritization;
@@ -90,10 +85,10 @@ export default async function AIProjectDetailPage({
           <div className="block">
             <div className="p-4 md:p-6">
               <p className="flex items-center gap-2 text-[12px] font-bold tracking-[.16em] text-white/50"><span className="size-1.5 rounded-full bg-white" />{projectCode}</p>
-              <div className="mt-6 flex flex-wrap items-start justify-between gap-6"><h1 className="max-w-[1000px] break-words text-[44px] font-semibold leading-[.98] tracking-[-.065em] text-white md:text-[clamp(46px,6.2vw,86px)]">{project.title}</h1><DetailActions><FavoriteControl size="md" contentId={project.id} returnTo={`/workspace/ai-projects/${project.slug}`} /><ContentEngagementLinks contentId={project.id} />{canEdit || canArchive || canUnpublish ? <div className="flex w-full flex-wrap items-start gap-3 border-t border-[var(--v9-line)] pt-3">{canEdit ? <PublishedEdit contentId={project.id} /> : null}<ContentLifecycle canArchive={canArchive} canUnpublish={canUnpublish} contentId={project.id} /></div> : null}</DetailActions></div>
+              <div className="mt-6 flex flex-wrap items-start justify-between gap-6"><h1 className="max-w-[1000px] break-words text-[44px] font-semibold leading-[.98] tracking-[-.065em] text-white md:text-[clamp(46px,6.2vw,86px)]">{project.title}</h1><DetailActions><FavoriteControl size="md" contentId={project.id} returnTo={`/workspace/ai-projects/${project.slug}`} /><ContentEngagementLinks contentId={project.id} canonicalPath={`/workspace/ai-projects/${encodeURIComponent(project.slug)}`} />{canEdit || canArchive || canUnpublish ? <div className="flex w-full flex-wrap items-start gap-3 border-t border-[var(--v9-line)] pt-3">{canEdit ? <PublishedEdit contentId={project.id} /> : null}<ContentLifecycle canArchive={canArchive} canUnpublish={canUnpublish} contentId={project.id} /></div> : null}</DetailActions></div>
               <p className="mt-6 max-w-[840px] text-[16px] leading-8 text-white/55 md:text-[18px]">{projectSummary}</p>
               <div className="mt-9 grid gap-2.5 md:grid-cols-3"><div data-card-surface="" className="rounded-[16px] border border-white/[.1] bg-[#090909] p-4"><small className="block text-[11px] font-bold text-white/45">当前阶段</small><strong className="mt-1.5 block text-[16px] leading-6 text-white">{stage}</strong></div><div data-card-surface="" className="rounded-[16px] border border-white/[.1] bg-[#090909] p-4"><small className="block text-[11px] font-bold text-white/45">验证状态</small><strong className="mt-1.5 block text-[16px] leading-6 text-white">{verificationLabels[project.verificationStatus] ?? project.verificationStatus}</strong></div><div data-card-surface="" className="rounded-[16px] border border-white/[.1] bg-[#090909] p-4"><small className="block text-[11px] font-bold text-white/45">建议团队</small><strong className="mt-1.5 block text-[16px] leading-6 text-white">{detail?.suggestedOwnerTeam?.name ?? project.team.name}</strong></div></div>
-              <div className="mt-6 grid gap-4 border-t border-[var(--v9-line)] pt-5 sm:grid-cols-3">{projectOutcomes.map(([label, value]) => <div key={label}><h2 className="text-sm font-semibold text-[var(--v9-text)]">{label}</h2><p className="mt-2 text-sm leading-6 text-[var(--v9-copy)]">{value}</p></div>)}</div><UsageSummary summary={usage} />
+              <div className="mt-6 grid gap-4 border-t border-[var(--v9-line)] pt-5 sm:grid-cols-3">{projectOutcomes.map(([label, value]) => <div key={label}><h2 className="text-sm font-semibold text-[var(--v9-text)]">{label}</h2><p className="mt-2 text-sm leading-6 text-[var(--v9-copy)]">{value}</p></div>)}</div><UsageSummary key={project.id} contentId={project.id} />
             </div>
 
           </div>
@@ -112,4 +107,8 @@ export default async function AIProjectDetailPage({
       </div>
     </main>
   );
+}
+
+export default async function CachedDetailPage(props: Parameters<typeof AIProjectDetailPage>[0]) {
+  return <CachedWorkspacePage>{await AIProjectDetailPage(props)}</CachedWorkspacePage>;
 }

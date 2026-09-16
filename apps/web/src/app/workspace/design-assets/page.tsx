@@ -1,6 +1,6 @@
-import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
+import { CachedWorkspacePage, WorkspaceResults } from '@/components/workspace/navigation-cache';
 import { CatalogPageHeader } from '@/components/workspace/catalog-page-header';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { Grid2X2, LayoutList, Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -89,7 +89,9 @@ async function DesignAssetsPage({
         pathname="/workspace/design-assets"
         searchPlaceholder="搜索资产名称、场景或描述"
       />
+      <WorkspaceResults>
       <DesignAssetsCatalog contents={contents.items} platform={platform} view={view} />
+      </WorkspaceResults>
     </main>
   );
 }

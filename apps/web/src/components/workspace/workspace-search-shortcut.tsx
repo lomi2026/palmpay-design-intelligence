@@ -1,5 +1,7 @@
 'use client';
+import { confirmWorkspaceNavigation } from '@/components/workspace/use-unsaved-changes';
 
+import { useNavigationCache } from './navigation-cache';
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
@@ -16,6 +18,7 @@ import { Input } from '@/components/ui/input';
 
 export function WorkspaceSearchShortcut() {
   const router = useRouter();
+  const cache = useNavigationCache();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -23,6 +26,7 @@ export function WorkspaceSearchShortcut() {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
+    if (!confirmWorkspaceNavigation()) return;
         setOpen(true);
       }
     };
@@ -33,7 +37,9 @@ export function WorkspaceSearchShortcut() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedQuery = query.trim();
-    router.push(`/workspace/search${trimmedQuery ? `?q=${encodeURIComponent(trimmedQuery)}` : ''}`);
+    const href = `/workspace/search${trimmedQuery ? `?q=${encodeURIComponent(trimmedQuery)}` : ''}`;
+    if (!navigator.onLine) { cache?.fail(() => { cache.begin(href); router.push(href); }); setOpen(false); return; }
+    if (href === location.pathname + location.search) { cache?.cancel(); router.refresh(); } else { cache?.begin(href); router.push(href); }
     setOpen(false);
   }
 

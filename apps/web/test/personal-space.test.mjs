@@ -13,6 +13,7 @@ function loadPage(relativePath, respond = async () => ({ items: [] })) {
   const requests = [];
   const jsx = (type, props) => type === 'CachedWorkspacePage' ? props.children : ({ type, props });
   const imports = {
+    '@/components/workspace/favorite-context': { FavoritePresence: 'FavoritePresence' },
     '@/components/workspace/navigation-cache': { CachedWorkspacePage: 'CachedWorkspacePage' },
     'react/jsx-runtime': { jsx, jsxs: jsx, Fragment: 'Fragment' },
     '@/components/content-card': { ContentCard: 'ContentCard' },

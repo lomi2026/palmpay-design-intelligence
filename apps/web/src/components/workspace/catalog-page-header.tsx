@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 export function CatalogPageHeader({ title, description, count, createHref, createLabel }: {

@@ -1,5 +1,5 @@
 import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { serverApiFetch } from '@/lib/api';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { CreateDraftForm } from './create-draft-form';

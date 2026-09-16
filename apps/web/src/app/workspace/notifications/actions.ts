@@ -43,3 +43,10 @@ export async function openNotificationAction(formData: FormData) {
   refreshNotifications();
   redirect(target);
 }
+
+export async function acknowledgeNotifications(notificationId?: string): Promise<{ error?: string; success?: boolean }> {
+  try {
+    await request(notificationId ? `/api/notifications/${encodeURIComponent(notificationId)}/read` : '/api/notifications/read-all', { method: 'PATCH' });
+    return { success: true };
+  } catch { return { error: '标记失败，请重试。' }; }
+}

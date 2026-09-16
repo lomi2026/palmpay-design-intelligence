@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { RefreshCw } from 'lucide-react';

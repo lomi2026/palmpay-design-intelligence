@@ -1,11 +1,12 @@
-import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
-import { WorkspaceDataLink } from '@/components/workspace/workspace-data-link';
+import { ContentPresence } from '@/components/workspace/content-presence';
+import { WorkspaceTabs } from '@/components/workspace/workspace-tabs';
+import { CachedWorkspacePage, WorkspaceResults } from '@/components/workspace/navigation-cache';
 import { AddTeamDialog } from './add-team-dialog';
 import { AddUserDialog } from './add-user-dialog';
 import { DeleteUserButton } from './delete-user-button';
 import { DeleteContentButton } from '@/components/workspace/delete-content-button';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -196,26 +197,8 @@ async function AdminPage({
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
       <AdminFeedback />
       <WorkspacePageHero eyebrow="PLATFORM ADMINISTRATION" metric={heroMetric} title="管理中心" description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" />
-      {/* Reload the data and shared shell when changing management sections. */}
-      <nav className="mt-6 flex flex-wrap gap-2">
-        {adminTabs.map(([key, label]) => (
-          <Button
-            asChild
-            key={key}
-            variant={tab === key ? 'default' : 'outline'}
-            size="sm"
-            className={
-              tab === key
-                ? '!h-10 rounded-lg'
-                : '!h-10 rounded-lg border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white'
-            }
-          >
-            <WorkspaceDataLink aria-current={tab === key ? 'page' : undefined} href={`/workspace/admin?tab=${key}`}>
-              {label}
-            </WorkspaceDataLink>
-          </Button>
-        ))}
-      </nav>
+      <WorkspaceTabs path="/workspace/admin" active={tab} items={adminTabs} />
+      <WorkspaceResults>
       {tab === 'content' ? (
         <section className={`mt-6 ${panelClass}`}>
           <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/[.1] pb-4">
@@ -227,7 +210,7 @@ async function AdminPage({
           </div>
           <div className="mt-4 divide-y divide-white/10">
             {contents.items.map((item) => (
-              <div
+              <ContentPresence id={item.id} key={item.id}><div
                 className="flex flex-wrap items-start justify-between gap-3 py-3.5 text-sm"
                 key={item.id}
               >
@@ -243,7 +226,7 @@ async function AdminPage({
                   </p>
                 </div>
                 <div className="flex items-center gap-3"><WorkspaceStatusBadge status={item.status} /><DeleteContentButton contentId={item.id} title={item.title} /></div>
-              </div>
+              </div></ContentPresence>
             ))}
             {!contents.items.length ? <p className="py-10 text-center text-sm text-white/45">当前组织范围内没有可管理的内容。</p> : null}
           </div>
@@ -485,6 +468,7 @@ async function AdminPage({
           <article className={panelClass}><h2 className="text-lg font-medium tracking-[-.025em]">当前环境边界</h2><dl className="mt-4 divide-y divide-white/10 text-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">认证</dt><dd>隔离开发认证</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">数据库</dt><dd>PostgreSQL 17</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">附件存储</dt><dd>Cloudflare R2</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-white/45">AI 接入网关</dt><dd className="text-white/45">尚未配置</dd></div></dl><p className="mt-4 text-xs leading-5 text-white/40">生产 SSO、Cloudflare R2 和 AI 数据边界确认后，才会开放对应的可写配置。</p></article>
         </section>
       ) : null}
+      </WorkspaceResults>
     </main>
   );
 }

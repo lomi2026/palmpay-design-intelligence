@@ -8,7 +8,7 @@ import { uploadDraftAttachmentAction } from './attachment-actions';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
-export type ActionState = { error?: string; id?: string; savedAt?: string; publishedHref?: string };
+export type ActionState = { error?: string; id?: string; savedAt?: string; publishedHref?: string; previewHref?: string; updatedStatus?: string; publication?: { title: string; summary: string | null; href: string; catalog: string } };
 
 function optionalText(value: FormDataEntryValue | null) {
   const result = typeof value === 'string' ? value.trim() : '';
@@ -126,24 +126,33 @@ export async function contentLifecycleAction(_: ActionState, formData: FormData)
   } catch (error) {
     return { error: userError(error, '内容状态更新失败。') };
   }
+  if (formData.get('inline') === 'true') return { updatedStatus: operation === 'archive' ? 'ARCHIVED' : 'UNPUBLISHED' };
   revalidatePath('/workspace', 'layout');
   redirect('/workspace/contributions');
 }
 
 export async function publishDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {
   let publishedHref = '';
+  let publication: ActionState['publication'];
   try {
     const id = String(formData.get('id') ?? '');
-    const published = await serverApiFetch<{ contentType: string }>(`/api/content-drafts/${encodeURIComponent(id)}/publish`, {
+    const published = await serverApiFetch<{ contentType: string; title?: string; summary?: string | null; slug?: string }>(`/api/content-drafts/${encodeURIComponent(id)}/publish`, {
       method: 'POST',
       headers: { ...(await authenticatedApiHeaders()), 'Content-Type': 'application/json' },
       body: JSON.stringify(draftUpdate(formData)),
     });
     const segments: Record<string, string> = { DESIGN_ASSET: 'design-assets', AI_SKILL: 'ai-skills', AI_CASE: 'ai-cases', AI_PROJECT: 'ai-projects', AI_TOOL: 'ai-tools' };
     publishedHref = `/workspace/${segments[published.contentType] ?? 'contributions'}`;
+    if (published.title && published.slug) publication = { title: published.title, summary: published.summary ?? null, href: `${publishedHref}/${encodeURIComponent(published.slug)}`, catalog: publishedHref };
   } catch (error) {
     return { error: userError(error, '发布失败，请重试。') };
   }
-  revalidatePath('/workspace', 'layout');
-  return { publishedHref };
+  if (formData.get('__managedCache') !== 'true') revalidatePath('/workspace', 'layout');
+  return { publishedHref, ...(publication ? { publication } : {}) };
+}
+
+export async function saveDraftForPreviewAction(previous: ActionState, formData: FormData): Promise<ActionState> {
+  const result = await autosaveDraftAction(previous, formData);
+  if (result.error) return result;
+  return { ...result, previewHref: `/workspace/submit/${encodeURIComponent(String(formData.get('id')))}/preview` };
 }

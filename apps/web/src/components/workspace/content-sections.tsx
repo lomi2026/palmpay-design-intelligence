@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { resolveContentReferences } from '@/lib/content-references';
 import { ArrowUpRight, FileText } from 'lucide-react';
 import { editorSections, fieldValue } from '@/lib/content-editor-schema';

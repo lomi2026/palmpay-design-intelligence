@@ -1,14 +1,15 @@
-import Link from 'next/link';
+import { EngagementForm } from '@/components/workspace/engagement-form';
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { UsageProjectField } from './usage-project-field';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
-import { usageConfirmationAction } from '../engagement-actions';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 
-export default async function UsagePage({
+async function UsagePage({
   searchParams,
 }: {
   searchParams: Promise<{ contentId?: string; success?: string; error?: string }>;
@@ -34,8 +35,8 @@ export default async function UsagePage({
           请选择项目，或手动填写项目名称后再提交。
         </p>
       ) : null}
-      <form data-card-surface=""
-        action={usageConfirmationAction}
+      <EngagementForm data-card-surface=""
+        kind="usage"
         className="mt-6 space-y-5 rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 md:p-6"
       >
         <input type="hidden" name="contentId" value={contentId} />
@@ -50,7 +51,9 @@ export default async function UsagePage({
           />
         </div>
         <Button className="bg-white text-black hover:bg-white/85" type="submit">确认使用并关联项目</Button>
-      </form>
+      </EngagementForm>
     </main>
   );
 }
+
+export default async function CachedPage(props: Parameters<typeof UsagePage>[0]) { return <CachedWorkspacePage cacheable={false}>{await UsagePage(props)}</CachedWorkspacePage>; }

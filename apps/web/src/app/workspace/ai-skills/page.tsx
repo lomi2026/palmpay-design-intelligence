@@ -1,4 +1,4 @@
-import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
+import { CachedWorkspacePage, WorkspaceResults } from '@/components/workspace/navigation-cache';
 import { CardDetailLink } from '@/components/workspace/card-detail-link';
 import { FavoriteControl } from '@/components/workspace/engagement-controls';
 import { ArrowRight } from 'lucide-react';
@@ -29,6 +29,7 @@ async function AISkillsPage({ searchParams }: { searchParams: Promise<{ search?:
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
       <CatalogPageHeader createHref={canCreate ? "/workspace/submit?type=AI_SKILL" : undefined} createLabel="新增Skill" eyebrow="AI CAPABILITIES" title="AI Skill" description="面向体验设计工作流的可复用 AI 方法。使用前需遵循输入边界并进行人工复核。" search={search} searchId="skill-search" searchPlaceholder="搜索名称或用途" count={`${skills.total} 个已发布 Skill`} filterParams={{ categoryId, tag }} />
+      <WorkspaceResults>
       <CatalogFilterControls contents={filterSource.items} filters={filters} pathname="/workspace/ai-skills" searchPlaceholder="搜索名称或用途" />
       {skills.items.length ? (
         <section className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
@@ -47,6 +48,7 @@ async function AISkillsPage({ searchParams }: { searchParams: Promise<{ search?:
           ))}
         </section>
       ) : <WorkspaceEmptyState className="mt-6 py-16 text-center">没有找到可访问的 AI Skill。</WorkspaceEmptyState>}
+      </WorkspaceResults>
     </main>
   );
 }

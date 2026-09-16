@@ -191,6 +191,20 @@ export class DraftsService {
     return this.serialize(draft);
   }
 
+  async changeAttachment(user: AuthenticatedUser, contentId: string, fileId: string, attach: boolean) {
+    const content = await this.findEditableDraft(user, contentId);
+    return this.prisma.$transaction(async (tx) => {
+      const locked = await tx.contentVersion.updateMany({ where: { id: content.draftVersion!.id, versionStatus: ContentStatus.DRAFT }, data: { versionStatus: ContentStatus.DRAFT } });
+      if (!locked.count) throw new ConflictException('The draft changed. Reload before editing attachments.');
+      const where = { entityType: AttachmentEntityType.VERSION, entityId: content.draftVersion!.id, usageType: AttachmentUsageType.ATTACHMENT, fileId };
+      if (!attach) { await tx.attachmentRelation.deleteMany({ where }); return { saved: true }; }
+      const file = await tx.fileAttachment.findFirst({ where: { id: fileId, organizationId: user.organizationId, uploadStatus: UploadStatus.READY, deletedAt: null } });
+      if (!file || (file.uploadedById !== user.id && !user.permissions.includes('content.edit_all'))) throw new BadRequestException('The attachment must be a ready file you can manage.');
+      if (!await tx.attachmentRelation.findFirst({ where })) await tx.attachmentRelation.create({ data: where });
+      return { saved: true };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }
+
   async setCover(user: AuthenticatedUser, contentId: string, fileId: string | null) {
     const content = await this.findEditableDraft(user, contentId);
     if (!['DESIGN_ASSET', 'AI_TOOL'].includes(content.contentType)) throw new BadRequestException('Only design assets and AI tools support a cover.');

@@ -1,5 +1,8 @@
+import { ContentPresence } from '@/components/workspace/content-presence';
+import { WorkspaceResults } from '@/components/workspace/navigation-cache';
 import { PublishedEdit } from '../published-edit';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
+import { WorkspaceFilterForm } from '@/components/workspace/workspace-filter-form';
 import { DeleteContentButton } from '@/components/workspace/delete-content-button';
 import { redirect } from 'next/navigation';
 import { ArrowRight, FilePenLine, Plus } from 'lucide-react';
@@ -83,12 +86,13 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
         </div>
       </header>
 
-      <form action="/workspace/contributions" method="get" className="workspace-filter-bar mt-6 flex flex-wrap items-center gap-2">
+      <WorkspaceFilterForm key={JSON.stringify(filters)} action="/workspace/contributions" method="get" className="workspace-filter-bar mt-6 flex flex-wrap items-center gap-2">
         <label className="min-w-52 flex-1"><span className="sr-only">搜索内容</span><Input name="search" type="search" defaultValue={filters.search ?? ''} placeholder="搜索标题或摘要" className="h-10" /></label>
         <NativeSelect aria-label="分类" name="categoryId" defaultValue={filters.categoryId ?? ''} className="h-10 min-w-36"><option value="">全部分类</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}<option value="uncategorized">未分类</option></NativeSelect>
         <NativeSelect aria-label="发布状态" name="status" defaultValue={filters.status ?? ''} className="h-10 min-w-36"><option value="">全部发布状态</option><option value="DRAFT">草稿</option><option value="PUBLISHED">已发布</option><option value="UNPUBLISHED">已下架</option><option value="ARCHIVED">已归档</option></NativeSelect>
         <Button type="submit" variant="outline" className="h-10">应用筛选</Button>{filtered ? <Button asChild variant="ghost" className="h-10"><Link href="/workspace/contributions">清除</Link></Button> : null}
-      </form>
+      </WorkspaceFilterForm>
+      <WorkspaceResults>
       <div className="mt-4 flex items-center justify-between text-sm text-white/45">
         <span>共 {visible.length} 项{filtered ? `，全部 ${contributions.total} 项` : '个人内容'}</span>
         {user.permissions.includes('content.edit_all') ? <Link href="/workspace/admin?tab=content" className="text-white/70 hover:text-white">管理全部内容 →</Link> : null}
@@ -107,7 +111,7 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
             const effectiveStatus = item.status;
             const versionNumber = item.draftVersion?.versionNumber ?? item.currentVersion?.versionNumber;
             return (
-              <Card key={item.id} data-clickable-card className="border-white/[.1] bg-[#111112] py-0 shadow-none">
+              <ContentPresence id={item.id} key={item.id}><Card data-clickable-card className="border-white/[.1] bg-[#111112] py-0 shadow-none">
                 <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] tracking-[0.1em] text-white/40">
@@ -133,7 +137,7 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card></ContentPresence>
             );
           })}
         </div>
@@ -143,6 +147,7 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
           <Button asChild className="mt-6"><Link href={filtered ? '/workspace/contributions' : '/workspace/submit'}>{filtered ? '清除筛选' : '创建第一项内容'}</Link></Button>
         </WorkspaceEmptyState>
       )}
+      </WorkspaceResults>
     </div>
   );
 }

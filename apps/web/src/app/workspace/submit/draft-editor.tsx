@@ -1,12 +1,15 @@
 'use client';
 
+import { useNavigationCache } from '@/components/workspace/navigation-cache';
+import { useUnsavedChanges } from '@/components/workspace/use-unsaved-changes';
+import { invalidateWorkspaceCache } from '@/components/workspace/cache-events';
 import { Send } from 'lucide-react';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import {
   autosaveDraftAction,
   publishDraftAction,
-  saveAndPreviewDraftAction,
+  saveDraftForPreviewAction,
   type ActionState,
 } from './actions';
 import { useRouter } from 'next/navigation';
@@ -51,13 +54,34 @@ export type Draft = {
 const initialState: ActionState = {};
 
 export function DraftEditor({ draft }: { draft: Draft }) {
-  const [state, action, pending] = useActionState(autosaveDraftAction, initialState);
+  const cache = useNavigationCache();
+  const [uploads, setUploads] = useState(0);
+  useEffect(() => {
+    const changed = (event: Event) => { const detail = (event as CustomEvent<{ id: string; pending: boolean }>).detail; if (detail.id === draft.id) setUploads(value => Math.max(0, value + (detail.pending ? 1 : -1))); };
+    window.addEventListener('workspace-upload', changed);
+    return () => window.removeEventListener('workspace-upload', changed);
+  }, [draft.id]);
+  const [dirty, setDirty] = useState(false);
+  const revision = useRef(0);
+  const revisionInput = useRef<HTMLInputElement>(null);
+  const [state, action, pending] = useActionState(async (previous: ActionState, data: FormData) => {
+    const result = await autosaveDraftAction(previous, data);
+    if (result.savedAt) {
+      if (Number(data.get('__editRevision')) === revision.current) setDirty(false);
+      invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']);
+    }
+    return result;
+  }, initialState);
   const [validation, setValidation] = useState<string[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const router = useRouter();
   const [publishState, publishAction, publishing] = useActionState(
-    publishDraftAction,
+    async (previous: ActionState, data: FormData) => {
+      const result = await publishDraftAction(previous, data);
+      if (result.publishedHref) { setDirty(false); invalidateWorkspaceCache(); if (result.publication) window.dispatchEvent(new CustomEvent('workspace-publication', { detail: result.publication })); cache?.begin(result.publishedHref); }
+      return result;
+    },
     initialState,
   );
   useEffect(() => {
@@ -65,10 +89,20 @@ export function DraftEditor({ draft }: { draft: Draft }) {
       router.replace(publishState.publishedHref);
     }
   }, [publishState.publishedHref, router]);
+  const [previewState, previewAction, previewing] = useActionState(async (previous: ActionState, data: FormData) => {
+    const result = await saveDraftForPreviewAction(previous, data);
+    if (result.previewHref) { setDirty(false); invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']); }
+    return result;
+  }, initialState);
+  useEffect(() => { if (previewState.previewHref) router.push(previewState.previewHref); }, [previewState.previewHref, router]);
   const published = Boolean(publishState.publishedHref);
+  useUnsavedChanges(!published && (dirty || pending || publishing || previewing));
   const scheduleAutosave = () => {
+    revision.current += 1;
+    if (revisionInput.current) revisionInput.current.value = String(revision.current);
+    setDirty(true);
     setValidation([]);
-    if (publishing) return;
+    if (publishing || previewing) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => formRef.current?.requestSubmit(), 900);
   };
@@ -83,9 +117,9 @@ export function DraftEditor({ draft }: { draft: Draft }) {
   );
   return (
     <div className="composer-workspace">
-      <form data-card-surface=""
+      <form data-card-surface="" data-managed-cache=""
         id={`content-editor-${draft.id}`}
-        inert={publishing || published}
+        inert={publishing || published || previewing}
         action={action}
         onResetCapture={(event) => {
           event.preventDefault();
@@ -97,6 +131,7 @@ export function DraftEditor({ draft }: { draft: Draft }) {
           clearScheduledSave();
           const submitter = (event.nativeEvent as SubmitEvent)
             .submitter as HTMLButtonElement | null;
+          if (submitter?.dataset.preview) invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']);
           if (submitter?.dataset.publish) {
             const missing = missingEditorFields(
               draft.contentType,
@@ -108,6 +143,8 @@ export function DraftEditor({ draft }: { draft: Draft }) {
         }}
         ref={formRef}
       >
+        <input name="__managedCache" type="hidden" value="true" />
+        <input ref={revisionInput} name="__editRevision" type="hidden" defaultValue="0" />
         <input name="id" type="hidden" value={draft.id} />
         <input name="contentType" type="hidden" value={draft.contentType} />
         <div className="composer-basics-heading flex flex-wrap items-end justify-between gap-4 border-b border-white/[.1] pb-5">
@@ -178,40 +215,44 @@ export function DraftEditor({ draft }: { draft: Draft }) {
       ) : null}
       <DraftAttachments attachments={draft.attachments} contentId={draft.id} />
 
+      {previewState.error ? <p role="alert" className="mt-4 text-sm text-destructive">{previewState.error}</p> : null}
+      {uploads > 0 ? <p role="status" className="mt-4 text-sm text-muted-foreground">文件正在处理，完成后可预览或发布；你可以继续编辑文字。</p> : null}
       <div className="composer-actions flex flex-wrap items-center justify-between gap-4 border-t border-white/[.1] pt-5">
         <p aria-live="polite" className="text-xs text-white/40">
           草稿 v{draft.draftVersion?.versionNumber ?? 1} ·{' '}
-          {pending ? '自动保存中…' : state.savedAt ? `已保存 ${state.savedAt}` : '输入后将自动保存'}
+          {pending ? '自动保存中…' : state.error ? '保存失败，请重试' : dirty ? '有未保存更改' : state.savedAt ? `已保存 ${state.savedAt}` : '输入后将自动保存'}
         </p>
         <div className="flex flex-wrap gap-2">
           <DeleteContentButton
             contentId={draft.id}
             title={draft.draftVersion?.title ?? draft.title}
             redirectTo="/workspace/contributions"
-            disabled={pending || publishing || published}
+            disabled={pending || publishing || published || previewing || uploads > 0}
             className="h-10 px-4"
             onOpen={clearScheduledSave}
           />
           <Button
             className="h-10 border-white/[.16] bg-transparent px-4 text-white hover:bg-white/[.08] hover:text-white"
             form={`content-editor-${draft.id}`}
-            formAction={saveAndPreviewDraftAction}
+            data-preview="true"
+            disabled={pending || publishing || published || previewing || uploads > 0}
+            formAction={previewAction}
             type="submit"
             variant="outline"
           >
-            预览草稿
+            {previewing ? '正在保存并打开…' : '预览草稿'}
           </Button>
           <Button
             variant="outline" size="default" className="h-10 px-5"
             form={`content-editor-${draft.id}`}
-            disabled={pending || publishing}
+            disabled={pending || publishing || previewing}
             type="submit"
           >
             {pending ? '保存中…' : '保存草稿'}
           </Button>
           <Button
             className="h-10 px-5"
-            disabled={pending || publishing}
+            disabled={pending || publishing || previewing || uploads > 0}
             form={`content-editor-${draft.id}`}
             data-publish="true"
             formAction={publishAction}

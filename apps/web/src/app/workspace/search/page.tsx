@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { authenticatedApiHeaders } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
-import { searchResultAction } from '../engagement-actions';
+import { SearchResultLink } from '@/components/workspace/search-result-link';
+import { WorkspaceFilterForm } from '@/components/workspace/workspace-filter-form';
+import { CachedWorkspacePage, WorkspaceResults } from '@/components/workspace/navigation-cache';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
 
-export default async function SearchPage({
+async function SearchPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
@@ -25,7 +27,7 @@ export default async function SearchPage({
   return (
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
       <WorkspacePageHero eyebrow="GLOBAL SEARCH" metric={result ? { value: result.total, label: '可访问结果' } : undefined} title="用一个关键词，找到可复用的团队经验。" />
-      <form className="workspace-filter-bar mt-6 flex max-w-3xl gap-2">
+      <WorkspaceFilterForm key={query} action="/workspace/search" className="workspace-filter-bar mt-6 flex max-w-3xl gap-2">
         <Input
           name="q"
           defaultValue={query}
@@ -36,7 +38,8 @@ export default async function SearchPage({
           <Search />
           搜索
         </Button>
-      </form>
+      </WorkspaceFilterForm>
+      <WorkspaceResults>
       {result ? (
         <section className="mt-6">
           <p className="mb-6 text-sm text-white/50">
@@ -47,20 +50,7 @@ export default async function SearchPage({
               {result.items.map((content) => (
                 <div className="relative" key={content.id}>
                   <ContentCard content={content} />
-                  <form action={searchResultAction} className="absolute inset-0">
-                    <input type="hidden" name="searchLogId" value={result.searchLogId} />
-                    <input type="hidden" name="contentId" value={content.id} />
-                    <input
-                      type="hidden"
-                      name="href"
-                      value={`/workspace/${content.contentType === 'DESIGN_ASSET' ? 'design-assets' : content.contentType === 'AI_SKILL' ? 'ai-skills' : content.contentType === 'AI_CASE' ? 'ai-cases' : content.contentType === 'AI_TOOL' ? 'ai-tools' : 'ai-projects'}/${content.slug}`}
-                    />
-                    <button
-                      aria-label={`打开 ${content.title}`}
-                      className="absolute inset-0"
-                      type="submit"
-                    />
-                  </form>
+                  <SearchResultLink searchLogId={result.searchLogId} contentId={content.id} title={content.title} href={`/workspace/${content.contentType === 'DESIGN_ASSET' ? 'design-assets' : content.contentType === 'AI_SKILL' ? 'ai-skills' : content.contentType === 'AI_CASE' ? 'ai-cases' : content.contentType === 'AI_TOOL' ? 'ai-tools' : 'ai-projects'}/${content.slug}`} />
                 </div>
               ))}
             </div>
@@ -75,6 +65,9 @@ export default async function SearchPage({
           输入关键词，在全部正式内容中搜索。结果会先按你的权限过滤。
         </WorkspaceEmptyState>
       )}
+      </WorkspaceResults>
     </main>
   );
 }
+
+export default async function CachedPage(props: Parameters<typeof SearchPage>[0]) { return <CachedWorkspacePage>{await SearchPage(props)}</CachedWorkspacePage>; }

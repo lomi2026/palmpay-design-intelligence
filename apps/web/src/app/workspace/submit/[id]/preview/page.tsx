@@ -1,5 +1,5 @@
 import { loadEditorDraft } from '@/lib/load-editor-draft';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { ApiError } from '@/lib/api';

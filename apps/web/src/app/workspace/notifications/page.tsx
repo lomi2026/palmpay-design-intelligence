@@ -1,4 +1,6 @@
-import Link from 'next/link';
+import { NotificationReadButton } from './read-button';
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, Bell } from 'lucide-react';
 
@@ -9,8 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-state';
 import {
-  markAllNotificationsReadAction,
-  markNotificationReadAction,
   openNotificationAction,
 } from './actions';
 import { notificationTarget } from './notification-target';
@@ -25,7 +25,7 @@ type Notification = {
   relatedReview: { id: string; content: { id: string } } | null;
 };
 
-export default async function NotificationsPage() {
+async function NotificationsPage() {
   const user = await loadCurrentUser();
   if (!user) redirect('/login');
   const notifications = await serverApiFetch<{ items: Notification[]; unreadCount: number }>(
@@ -44,16 +44,7 @@ export default async function NotificationsPage() {
         title="通知中心"
       >
         {notifications.unreadCount ? (
-          <form action={markAllNotificationsReadAction}>
-            <Button
-              className="border-white/[.16] bg-white/[.06] text-white hover:bg-white/[.12] hover:text-white"
-              size="sm"
-              type="submit"
-              variant="outline"
-            >
-              全部标记已读
-            </Button>
-          </form>
+          <NotificationReadButton />
         ) : null}
       </WorkspacePageHero>
 
@@ -77,17 +68,7 @@ export default async function NotificationsPage() {
                     </p>
                   </div>
                   {!notification.readAt ? (
-                    <form action={markNotificationReadAction} className="relative z-20 ml-auto">
-                      <input name="notificationId" type="hidden" value={notification.id} />
-                      <Button
-                        type="submit"
-                        size="sm"
-                        variant="ghost"
-                        className="text-white/65 hover:bg-white/10 hover:text-white"
-                      >
-                        标记已读
-                      </Button>
-                    </form>
+                    <NotificationReadButton id={notification.id} />
                   ) : null}
                 </CardHeader>
                 <CardContent className="pl-[3.75rem] text-sm leading-6 text-white/60">
@@ -124,3 +105,5 @@ export default async function NotificationsPage() {
     </main>
   );
 }
+
+export default async function CachedPage() { return <CachedWorkspacePage>{await NotificationsPage()}</CachedWorkspacePage>; }

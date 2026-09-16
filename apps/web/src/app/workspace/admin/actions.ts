@@ -18,7 +18,7 @@ async function saveEdit(
   operation = '保存',
 ): Promise<AdminSaveResult> {
   try {
-    await api(path, {
+    const saved = await api(path, {
       method,
       signal: AbortSignal.timeout(15_000),
       headers: { 'Content-Type': 'application/json' },
@@ -26,7 +26,7 @@ async function saveEdit(
     });
     // Return the write acknowledgement immediately. AdminEditForm refreshes the
     // view separately, outside the save action's pending lifecycle.
-    return { status: 'success', message: `${operation}成功` };
+    return { status: 'success', message: `${operation}成功`, refresh: method !== 'PATCH' || path.includes('/users/'), fields: saved && typeof saved === 'object' ? Object.fromEntries(Object.entries(saved).filter((entry): entry is [string, string] => typeof entry[1] === 'string')) : {} };
   } catch (error) {
     return {
       status: 'error',

@@ -37,19 +37,26 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 }
 
 export async function serverApiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const serverApiBaseUrl = process.env.API_BASE_URL ?? apiBaseUrl;
-  const response = await fetch(`${serverApiBaseUrl}${path}`, {
-    ...init,
-    cache: 'no-store',
-    signal: init?.signal ?? AbortSignal.timeout(15000),
-    headers: { Accept: 'application/json', ...init?.headers },
-  });
-
-  if (!response.ok) {
-    throw await apiError(response);
+  const started = performance.now();
+  let status = 0;
+  try {
+    const serverApiBaseUrl = process.env.API_BASE_URL ?? apiBaseUrl;
+    const response = await fetch(`${serverApiBaseUrl}${path}`, {
+      ...init,
+      cache: 'no-store',
+      signal: init?.signal ?? AbortSignal.timeout(15000),
+      headers: { Accept: 'application/json', ...init?.headers },
+    });
+    status = response.status;
+    if (!response.ok) throw await apiError(response);
+    return await response.json() as T;
+  } finally {
+    // Opt-in operational timing; omit identity, query strings, request bodies and tokens.
+    if (process.env.PERFORMANCE_TRACE === '1') console.info(JSON.stringify({
+      metric: 'workspace.api', resource: path.split('?')[0]?.split('/').slice(0, 3).join('/'),
+      method: init?.method ?? 'GET', status, durationMs: Math.round(performance.now() - started),
+    }));
   }
-
-  return response.json() as Promise<T>;
 }
 
 export async function optionalServerApiFetch<T>(

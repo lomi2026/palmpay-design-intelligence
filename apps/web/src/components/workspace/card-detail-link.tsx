@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from './workspace-data-link';
 
 // One native link covers the card; sibling actions sit above it, never inside it.
 export function CardDetailLink({ href, title }: { href: string; title: string }) {

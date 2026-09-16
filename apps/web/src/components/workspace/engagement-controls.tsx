@@ -1,17 +1,15 @@
 'use client';
 
-import { useFavoriteIds } from './favorite-context';
+import { useFavoriteIds, useFavoriteActions } from './favorite-context';
 import { Check, Copy, Heart, Link2, NotebookPen } from 'lucide-react';
-import { useActionState, useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
+
 import { Button } from '@/components/ui/button';
-import { favoriteAction, recordContentShareAction } from '@/app/workspace/engagement-actions';
+import { recordContentShareAction } from '@/app/workspace/engagement-actions';
 
 export function FavoriteControl({
   contentId,
-  returnTo,
-  active,
   size = 'sm',
 }: {
   contentId: string;
@@ -20,35 +18,19 @@ export function FavoriteControl({
   size?: 'sm' | 'md';
 }) {
   const favoriteIds = useFavoriteIds();
-  const isActive = active ?? favoriteIds.includes(contentId);
-  const [, action, pending] = useActionState(
-    async (_state: void | undefined, formData: FormData) => {
-      await favoriteAction(formData);
-    },
-    undefined,
-  );
-  return (
-    <form action={action} className="shrink-0">
-      <input type="hidden" name="contentId" value={contentId} />
-      <input type="hidden" name="returnTo" value={returnTo} />
-      <input type="hidden" name="active" value={String(isActive)} />
-      <Button
-        type="submit"
-        variant="outline"
-        size={size}
-        disabled={pending}
-        aria-pressed={isActive}
-        aria-busy={pending}
-        className="favorite-control rounded-[12px] px-3 text-[12px]"
-      >
-        <Heart className={isActive ? 'fill-current' : ''} />
-        {isActive ? '取消收藏' : '收藏'}
-      </Button>
-    </form>
-  );
+  const favorites = useFavoriteActions();
+  const change = favorites?.changes[contentId];
+  const isActive = change?.active ?? favoriteIds.includes(contentId);
+  const pending = change?.pending ?? false;
+  return <div className="shrink-0">
+    <Button type="button" variant="outline" size={size} disabled={pending || !favorites} aria-pressed={isActive} aria-busy={pending} className="favorite-control rounded-[12px] px-3 text-[12px]" onClick={() => void favorites?.toggle(contentId, isActive)}>
+      <Heart className={isActive ? 'fill-current' : ''} />{isActive ? '取消收藏' : '收藏'}
+    </Button>
+    {change?.error ? <p role="alert" className="mt-1 max-w-48 text-xs text-destructive">{change.error}</p> : null}
+  </div>;
 }
 
-export function ContentEngagementLinks({ contentId }: { contentId: string }) {
+export function ContentEngagementLinks({ contentId, canonicalPath }: { contentId: string; canonicalPath: string }) {
   return (
     <div className="flex flex-wrap gap-2" aria-label="内容协作操作">
       <Button
@@ -73,13 +55,13 @@ export function ContentEngagementLinks({ contentId }: { contentId: string }) {
           关联内容
         </Link>
       </Button>
-      <ContentShareButton contentId={contentId} />
+      <ContentShareButton contentId={contentId} canonicalPath={canonicalPath} />
     </div>
   );
 }
 
-function ContentShareButton({ contentId }: { contentId: string }) {
-  const pathname = usePathname();
+function ContentShareButton({ contentId, canonicalPath }: { contentId: string; canonicalPath: string }) {
+  const pathname = canonicalPath;
   const [copied, setCopied] = useState(false);
 
   async function copyCanonicalLink() {

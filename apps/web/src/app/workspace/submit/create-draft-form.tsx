@@ -1,7 +1,10 @@
 'use client';
 
+import { invalidateWorkspaceCache } from '@/components/workspace/cache-events';
+import { useNavigationCache } from '@/components/workspace/navigation-cache';
+import { useUnsavedChanges } from '@/components/workspace/use-unsaved-changes';
 import { useActionState, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { CoverPicker } from '@/components/workspace/cover-picker';
 import { useRouter } from 'next/navigation';
 import { Plus, BriefcaseBusiness, FileText, Layers3, Sparkles, Wrench } from 'lucide-react';
@@ -36,14 +39,17 @@ export function CreateDraftForm({
   initialContentType?: ContentType;
 }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState(createDraftAction, initialState);
+  const begin = useNavigationCache()?.begin;
+  const [dirty, setDirty] = useState(false);
+  const [state, action, pending] = useActionState(async (previous: ActionState, data: FormData) => { const result = await createDraftAction(previous, data); if (result.id) { setDirty(false); invalidateWorkspaceCache(['/workspace', '/workspace/contributions', '/workspace/submit']); } return result; }, initialState);
+  useUnsavedChanges(dirty && !state.id);
   const [contentType, setContentType] = useState<ContentType>(initialContentType);
   useEffect(() => {
-    if (state.id && !state.error) router.replace(`/workspace/submit/${state.id}`);
-  }, [router, state.id, state.error]);
+    if (state.id && !state.error) { begin?.(`/workspace/submit/${state.id}`); router.replace(`/workspace/submit/${state.id}`); }
+  }, [router, state.id, state.error, begin]);
 
   return (
-    <form data-card-surface="" action={action} onResetCapture={(event) => { event.preventDefault(); event.stopPropagation(); }} className="composer-create mt-6 overflow-hidden rounded-[24px] border border-border bg-[var(--v9-panel)]">
+    <form data-managed-cache="" onInput={() => setDirty(true)} data-card-surface="" action={action} onResetCapture={(event) => { event.preventDefault(); event.stopPropagation(); }} className="composer-create mt-6 overflow-hidden rounded-[24px] border border-border bg-[var(--v9-panel)]">
       <section className="border-b border-border p-6 md:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="mt-2 text-[22px] font-semibold tracking-[-.04em] text-white">内容类型</h2></div></div>
         <input name="contentType" type="hidden" value={contentType} />

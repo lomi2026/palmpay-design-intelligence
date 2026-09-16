@@ -105,9 +105,8 @@ export class ContentService {
     });
     if (!content) throw new NotFoundException('Content not found.');
 
-    if (user) await this.engagement.recordContentView(user, content.id);
-
-    const attachments = await this.prisma.attachmentRelation.findMany({
+    // Access is confirmed above; independent reads and the view record can run together.
+    const [attachments] = await Promise.all([this.prisma.attachmentRelation.findMany({
       where: {
         OR: [
           { entityType: AttachmentEntityType.VERSION, entityId: content.currentVersionId! },
@@ -119,7 +118,7 @@ export class ContentService {
       },
       include: { file: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-    });
+    }), user ? this.engagement.recordContentView(user, content.id) : Promise.resolve()]);
 
     return {
       ...this.serializeContentFiles(content),

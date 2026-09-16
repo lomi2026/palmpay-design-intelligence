@@ -1,6 +1,6 @@
 import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { DashboardMotion, AnimatedNumber } from '@/components/workspace/dashboard-motion';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { CardDetailLink } from '@/components/workspace/card-detail-link';
 import { redirect } from 'next/navigation';
 import { ArrowDownRight, ArrowUpRight, BarChart3, SearchX } from 'lucide-react';

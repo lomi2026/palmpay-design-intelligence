@@ -1,6 +1,9 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { invalidateWorkspaceCache } from '@/components/workspace/cache-events';
+import { useNavigationCache } from '@/components/workspace/navigation-cache';
 import { useFormStatus } from 'react-dom';
 import { contentLifecycleAction, type ActionState } from './submit/actions';
 import { Button } from '@/components/ui/button';
@@ -18,9 +21,12 @@ function LifecycleButtons({ canArchive, canUnpublish }: { canArchive: boolean; c
 
 export function ContentLifecycle({ contentId, canArchive, canUnpublish }: { contentId: string; canArchive: boolean; canUnpublish: boolean }) {
   const [state, action] = useActionState(contentLifecycleAction, initialState);
+  const router = useRouter();
+  const begin = useNavigationCache()?.begin;
+  useEffect(() => { if (state.updatedStatus) { invalidateWorkspaceCache(); begin?.('/workspace/contributions'); router.replace('/workspace/contributions'); } }, [state.updatedStatus, begin, router]);
   if (!canArchive && !canUnpublish) return null;
-  return <form action={action} className="flex flex-col items-start gap-1.5">
-    <input name="id" type="hidden" value={contentId} />
+  return <form data-managed-cache="" action={action} className="flex flex-col items-start gap-1.5">
+    <input name="inline" type="hidden" value="true" /><input name="id" type="hidden" value={contentId} />
     <LifecycleButtons canArchive={canArchive} canUnpublish={canUnpublish} />
     {state.error ? <p role="alert" className="max-w-64 text-right text-[11px] text-[var(--v9-status-danger-text)]">{state.error}</p> : null}
   </form>;

@@ -77,6 +77,7 @@ export function NotificationBadge({ initialUnreadCount }: { initialUnreadCount: 
       void sync();
     };
     window.addEventListener('focus', refreshWhenVisible);
+    window.addEventListener('workspace-notifications-changed', refreshWhenVisible);
     document.addEventListener('visibilitychange', refreshWhenVisible);
 
     return () => {
@@ -84,6 +85,7 @@ export function NotificationBadge({ initialUnreadCount }: { initialUnreadCount: 
       clearTimer();
       controller?.abort();
       window.removeEventListener('focus', refreshWhenVisible);
+      window.removeEventListener('workspace-notifications-changed', refreshWhenVisible);
       document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
   }, [pathname]);

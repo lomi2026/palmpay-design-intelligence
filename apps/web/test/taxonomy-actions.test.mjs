@@ -69,7 +69,7 @@ test('published acknowledgement ends before the catalog navigation and prevents 
   const editor = readFileSync(new URL('../src/app/workspace/submit/draft-editor.tsx', import.meta.url), 'utf8');
   assert.match(editor, /router\.replace\(publishState\.publishedHref\)/);
   assert.doesNotMatch(editor, /router\.refresh\(\)/);
-  assert.match(editor, /inert=\{publishing \|\| published\}/);
+  assert.match(editor, /inert=\{publishing \|\| published \|\| previewing\}/);
   assert.match(editor, /发布成功，正在打开…/);
 });
 

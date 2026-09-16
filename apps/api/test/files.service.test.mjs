@@ -84,3 +84,11 @@ test('cover and case-evidence references also block physical file deletion', asy
     assert.deepEqual(calls.storageDeletes, []);
   }
 });
+
+test('completion retry acknowledges an already verified manageable file without storage writes', async () => {
+  const { service, calls } = fixture();
+  const result = await service.completeUpload(user, 'file-1');
+  assert.equal(result.file.id, 'file-1');
+  assert.equal(result.file.uploadStatus, 'READY');
+  assert.deepEqual(calls.storageDeletes, []);
+});

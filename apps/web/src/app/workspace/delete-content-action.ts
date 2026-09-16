@@ -29,6 +29,7 @@ export async function deleteContentAction(_: DeleteContentState, formData: FormD
   } catch (error) {
     return { error: userError(error, '删除未完成，请刷新后重试。') };
   }
+  if (formData.get('inline') === 'true') return { deleted: true };
   revalidatePath('/workspace', 'layout');
   if (returnTo) redirect(returnTo);
   return { deleted: true };

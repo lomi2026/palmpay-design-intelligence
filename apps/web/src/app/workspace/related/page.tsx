@@ -1,11 +1,12 @@
+import { EngagementForm } from '@/components/workspace/engagement-form';
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { RelatedPicker } from './related-picker';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { Button } from '@/components/ui/button';
 import { NativeSelect } from '@/components/ui/native-select';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
 import { serverApiFetch } from '@/lib/api';
 import type { ContentListResponse } from '@/lib/content-types';
-import { createRelationAction, removeRelationAction } from '../engagement-actions';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
 
 type Relations = {
@@ -31,7 +32,7 @@ const moduleFor = (type: string) =>
         ? 'ai-cases'
         : 'ai-projects';
 
-export default async function RelatedContentPage({
+async function RelatedContentPage({
   searchParams,
 }: {
   searchParams: Promise<{ contentId?: string; success?: string; error?: string }>;
@@ -65,8 +66,8 @@ export default async function RelatedContentPage({
       {error ? <p className="mt-4 rounded-xl border border-[var(--v9-status-danger-line)] bg-[var(--v9-status-danger-bg)] p-3 text-sm text-[var(--v9-status-danger-text)]">请选择关联目标。</p> : null}
       {contentId ? (
         <>
-          {canEdit ? <form data-card-surface=""
-            action={createRelationAction}
+          {canEdit ? <EngagementForm data-card-surface=""
+            kind="relation"
             className="mt-6 grid gap-4 rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 md:grid-cols-[1fr_180px_auto] md:items-end"
           >
             <input type="hidden" name="contentId" value={contentId} />
@@ -82,7 +83,7 @@ export default async function RelatedContentPage({
               <option value="DERIVED_FROM">衍生自</option>
             </NativeSelect>
             <Button type="submit">添加关联</Button>
-          </form> : null}
+          </EngagementForm> : null}
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <section data-card-surface="" className="rounded-2xl border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6">
               <h2 className="text-sm font-medium text-[var(--v9-text)]">此内容关联到</h2>
@@ -99,13 +100,13 @@ export default async function RelatedContentPage({
                       {relation.targetContent.title}
                       <span className="ml-2 text-xs text-[var(--v9-subtle)]">{relation.relationType}</span>
                     </Link>
-                    {canEdit ? <form action={removeRelationAction}>
+                    {canEdit ? <EngagementForm kind="remove-relation">
                       <input type="hidden" name="contentId" value={contentId} />
                       <input type="hidden" name="relationId" value={relation.id} />
                       <Button type="submit" variant="ghost" size="sm">
                         移除
                       </Button>
-                    </form> : null}
+                    </EngagementForm> : null}
                   </li>
                 ))}
               </ul>
@@ -136,3 +137,5 @@ export default async function RelatedContentPage({
     </main>
   );
 }
+
+export default async function CachedPage(props: Parameters<typeof RelatedContentPage>[0]) { return <CachedWorkspacePage cacheable={false}>{await RelatedContentPage(props)}</CachedWorkspacePage>; }

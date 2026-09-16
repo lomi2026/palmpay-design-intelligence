@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { WorkspaceDataLink } from './workspace-data-link';
 import { useWorkspaceProjectCount } from './favorite-context';
 import { useVisibleWorkspacePath } from './navigation-cache';

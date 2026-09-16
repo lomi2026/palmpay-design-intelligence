@@ -3,7 +3,7 @@ import { WorkspaceDataLink } from '@/components/workspace/workspace-data-link';
 import { FavoriteProvider } from '@/components/workspace/favorite-context';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { redirect } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';

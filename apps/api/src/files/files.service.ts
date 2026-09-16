@@ -81,6 +81,9 @@ export class FilesService {
 
   async completeUpload(user: AuthenticatedUser, fileId: string) {
     const file = await this.findManageableFile(user, fileId);
+    if (file.deletedAt) throw new NotFoundException('File not found.');
+    // A retry after a successful verification must not force another binary upload.
+    if (file.uploadStatus === UploadStatus.READY) return { file: this.serialize(file) };
     if (file.uploadStatus !== UploadStatus.UPLOADING) {
       throw new ConflictException('Only an uploading file can be completed.');
     }

@@ -1,5 +1,5 @@
 import { DeleteContentButton } from './delete-content-button';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink, MoreHorizontal } from 'lucide-react';
 import { authenticatedApiHeaders, loadCurrentUser } from '@/lib/auth';
@@ -40,17 +40,11 @@ export async function PublishedContentDetail({
       headers,
     });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 404) notFound();
+    if (error instanceof ApiError && [403, 404].includes(error.status)) notFound();
     throw error;
   }
   if (content.contentType !== type) notFound();
-  const [user, usage] = await Promise.all([
-    loadCurrentUser(),
-    serverApiFetch<{ usageCount: number; projectReferences: number; favoriteCount: number }>(
-      `/api/contents/${content.id}/usage-summary`,
-      { headers },
-    ),
-  ]);
+  const user = await loadCurrentUser();
   const canEdit = Boolean(
     user?.permissions.includes('content.edit_all') ||
     (user?.id === content.owner.id && user.permissions.includes('content.edit_own')),
@@ -90,7 +84,7 @@ export async function PublishedContentDetail({
               </Button>
             ) : null}
             <FavoriteControl size="md" contentId={content.id} returnTo={`/workspace/${route}/${slug}`} />
-            <ContentEngagementLinks contentId={content.id} />
+            <ContentEngagementLinks contentId={content.id} canonicalPath={`/workspace/${route}/${encodeURIComponent(content.slug)}`} />
             {canEdit ? <PublishedEdit contentId={content.id} /> : null}
             {canEdit || canArchive || canUnpublish ? (
               <details className="management-menu">
@@ -132,7 +126,7 @@ export async function PublishedContentDetail({
             </div>
           ))}
         </dl>
-        <UsageSummary summary={usage} />
+        <UsageSummary key={content.id} contentId={content.id} />
       </header>
       <ContentSections type={type} body={body} />
       <div className="detail-attachments">

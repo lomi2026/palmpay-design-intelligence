@@ -1,5 +1,5 @@
 import { DashboardMotion, AnimatedNumber } from '@/components/workspace/dashboard-motion';
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from '@/components/workspace/workspace-data-link';
 import { Button } from '@/components/ui/button';
 import styles from './studio-welcome.module.css';
 import {

@@ -54,23 +54,16 @@ export class EngagementService {
     const ids = await this.searchIds(user, keyword, input);
     const total = ids.length;
     const pageIds = ids.slice((input.page - 1) * input.pageSize, input.page * input.pageSize);
-    const records = pageIds.length
-      ? await this.prisma.content.findMany({ where: { id: { in: pageIds } }, include: cardInclude })
-      : [];
+    const [records, searchLog] = await Promise.all([
+      pageIds.length ? this.prisma.content.findMany({ where: { id: { in: pageIds } }, include: cardInclude }) : Promise.resolve([]),
+      this.prisma.searchLog.create({
+        data: { organizationId: user.organizationId, userId: user.id, keyword, normalizedKeyword, filters, resultCount: total },
+        select: { id: true },
+      }),
+      this.recordEvent(user, 'search_submit', undefined, { keyword, resultCount: total }),
+      total === 0 ? this.recordEvent(user, 'search_no_result', undefined, { keyword }) : Promise.resolve(),
+    ]);
     const byId = new Map(records.map((record) => [record.id, record]));
-    const searchLog = await this.prisma.searchLog.create({
-      data: {
-        organizationId: user.organizationId,
-        userId: user.id,
-        keyword,
-        normalizedKeyword,
-        filters,
-        resultCount: total,
-      },
-      select: { id: true },
-    });
-    await this.recordEvent(user, 'search_submit', undefined, { keyword, resultCount: total });
-    if (total === 0) await this.recordEvent(user, 'search_no_result', undefined, { keyword });
     return {
       items: pageIds.map((id) => this.serializeCard(byId.get(id)!)),
       page: input.page,

@@ -10,11 +10,15 @@ export function WorkspaceDataLink(props: ComponentProps<typeof Link>) {
   return <Link {...props} prefetch={false} onNavigate={(event) => {
     props.onNavigate?.(event);
     if (typeof props.href !== 'string') return;
-    cache?.begin(props.href);
+    const href = props.href;
+    if (!navigator.onLine) { event.preventDefault(); cache?.fail(() => { cache.begin(href); router.push(href); }); return; }
     const target = new URL(props.href, window.location.href);
     if (target.pathname === window.location.pathname && target.search === window.location.search) {
       event.preventDefault();
+      cache?.cancel();
       router.refresh();
+      return;
     }
+    cache?.begin(props.href);
   }}>{props.children}</Link>;
 }

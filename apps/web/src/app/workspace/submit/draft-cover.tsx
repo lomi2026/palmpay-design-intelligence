@@ -1,15 +1,34 @@
 'use client';
-import { useActionState, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Loader2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CoverPicker } from '@/components/workspace/cover-picker';
-import { uploadDraftAttachmentAction, removeDraftCoverAction, type AttachmentActionState } from './attachment-actions';
+import { removeDraftCoverAction } from './attachment-actions';
+import { useDraftUpload } from './use-draft-upload';
+import { useUnsavedChanges } from '@/components/workspace/use-unsaved-changes';
+import { invalidateWorkspaceCache } from '@/components/workspace/cache-events';
 export function DraftCover({ id, fileId }: { id: string; fileId: string | null }) {
-  const router = useRouter();
+  const [currentFile, setFile] = useState(fileId);
   const [selected, setSelected] = useState(false);
-  const [state, upload, pending] = useActionState<AttachmentActionState, FormData>(async (previous, data) => { const result = await uploadDraftAttachmentAction(previous, data); if (result.savedAt) setSelected(false); return result; }, {});
-  const [removed, remove, removing] = useActionState<AttachmentActionState, FormData>(async (previous, data) => { const result = await removeDraftCoverAction(previous, data); if (result.savedAt) setSelected(false); return result; }, {});
-  useEffect(() => { if (state.savedAt || removed.savedAt) router.refresh(); }, [state.savedAt, removed.savedAt, router]);
-  return <section data-card-surface="" className="mt-6 space-y-5 rounded-[24px] border border-border bg-card p-6 sm:p-6"><h2 className="text-lg font-semibold">封面图片 <span className="ml-1 text-sm font-normal text-muted-foreground">选填</span></h2><form action={upload} className="space-y-4" onResetCapture={(event) => event.preventDefault()}><input type="hidden" name="id" value={id} /><input type="hidden" name="cover" value="true" /><CoverPicker key={`${fileId}-${state.savedAt}-${removed.savedAt}`} name="file" fileId={fileId} disabled={pending || removing} onSelected={setSelected} /><div className="flex items-center justify-end gap-3"><span aria-live="polite" className="mr-auto text-xs text-muted-foreground">{pending ? '正在上传封面…' : state.savedAt ? '封面已保存，发布后生效' : ''}</span><Button disabled={pending || removing || !selected}>{pending ? <Loader2 className="size-4 animate-spin" /> : null}{pending ? '上传中…' : '保存封面'}</Button></div></form>{fileId ? <form action={remove}><input type="hidden" name="id" value={id} /><Button size="sm" variant="ghost" className="text-destructive" disabled={pending || removing}><Trash2 className="size-4" />{removing ? '移除中…' : '移除当前封面'}</Button></form> : null}{state.error || removed.error ? <p role="alert" className="text-sm text-destructive">{state.error || removed.error}</p> : null}</section>;
+  const [revision, setRevision] = useState(0);
+  const [removing, setRemoving] = useState(false);
+  const [error, setError] = useState('');
+  const task = useDraftUpload();
+  useUnsavedChanges(selected || task.pending);
+  return <section data-card-surface="" className="mt-6 space-y-5 rounded-3xl bg-card p-6"><h2 className="text-lg font-semibold">封面图片 <span className="text-sm font-normal text-muted-foreground">选填</span></h2>
+    <form data-managed-cache="" className="space-y-4" onSubmit={async event => {
+      event.preventDefault(); setError(''); const result = await task.upload(new FormData(event.currentTarget));
+      if (result.savedAt) { setFile(result.coverFile ?? null); setSelected(false); setRevision(value => value + 1); }
+    }}>
+      <input type="hidden" name="id" value={id} /><input type="hidden" name="cover" value="true" />
+      <CoverPicker key={revision} name="file" fileId={currentFile} disabled={task.pending || removing} onSelected={setSelected} />
+      <div className="flex items-center justify-end gap-3"><span aria-live="polite" className="mr-auto text-xs text-muted-foreground">{task.stage}</span><Button disabled={task.pending || removing || !selected}>{task.pending ? '上传中…' : task.error ? '重试上传' : '保存封面'}</Button></div>
+      {task.progress !== null && task.pending ? <progress className="w-full" aria-label="封面上传进度" max={100} value={task.progress} /> : null}
+    </form>
+    {currentFile ? <Button type="button" size="sm" variant="ghost" className="text-destructive" disabled={task.pending || removing} onClick={async () => {
+      setRemoving(true); setError(''); const data = new FormData(); data.set('id', id);
+      try { const result = await removeDraftCoverAction({}, data); if (result.error) setError(result.error); else { setFile(null); setSelected(false); setRevision(value => value + 1); invalidateWorkspaceCache(['/workspace/contributions']); } } catch { setError('移除失败，请重试。'); } finally { setRemoving(false); }
+    }}><Trash2 className="size-4" />{removing ? '移除中…' : '移除当前封面'}</Button> : null}
+    {error || task.error ? <p role="alert" className="text-sm text-destructive">{error || task.error}</p> : null}
+  </section>;
 }

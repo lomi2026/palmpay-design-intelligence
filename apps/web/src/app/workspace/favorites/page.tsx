@@ -1,3 +1,4 @@
+import { FavoritePresence } from '@/components/workspace/favorite-context';
 import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { ContentCard } from '@/components/content-card';
 import { FavoriteControl } from '@/components/workspace/engagement-controls';
@@ -45,12 +46,12 @@ function FavoriteList({ result }: { result: { items: FavoriteItem[] } }) {
       {result.items.length ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {result.items.map(({ content }) => (
-            <div key={content.id}>
+            <FavoritePresence id={content.id} key={content.id}><div>
               <ContentCard content={content} />
               <div className="mt-2">
                 <FavoriteControl contentId={content.id} active returnTo="/workspace/favorites" />
               </div>
-            </div>
+            </div></FavoritePresence>
           ))}
         </div>
       ) : (

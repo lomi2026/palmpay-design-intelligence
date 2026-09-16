@@ -5,10 +5,10 @@ import test from 'node:test';
 import ts from 'typescript';
 const source=readFileSync(new URL('../src/app/api/workspace-session/route.ts',import.meta.url),'utf8');
 async function request(user){
- const module={exports:{}};
+ const routeModule={exports:{}};
  const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
- runInNewContext(code,{module,exports:module.exports,Response,require:()=>({loadCurrentUser:async()=>{if(user instanceof Error)throw user;return user;}})});
- return module.exports.GET();
+ runInNewContext(code,{module:routeModule,exports:routeModule.exports,Response,require:()=>({loadCurrentUser:async()=>{if(user instanceof Error)throw user;return user;}})});
+ return routeModule.exports.GET();
 }
 test('session scope separates accounts, organizations and permissions without caching',async()=>{
  const a=await request({id:'a',organizationId:'org',permissions:['b','a']});

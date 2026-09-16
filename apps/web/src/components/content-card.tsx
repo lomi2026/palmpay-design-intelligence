@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from './workspace/workspace-data-link';
 import type { ContentCard as ContentCardData } from '@/lib/content-types';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 

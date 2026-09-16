@@ -60,6 +60,16 @@ export class DraftsController {
     return this.drafts.setCover(user, id, body.fileId ?? null);
   }
 
+  @Post(':id/attachments/:fileId')
+  attach(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Param('fileId') fileId: string) {
+    return this.drafts.changeAttachment(user, id, fileId, true);
+  }
+
+  @Delete(':id/attachments/:fileId')
+  detach(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Param('fileId') fileId: string) {
+    return this.drafts.changeAttachment(user, id, fileId, false);
+  }
+
   @Delete(':id')
   delete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.drafts.delete(user, id);

@@ -1,9 +1,10 @@
 'use client';
 
-import Link from 'next/link';
+import { WorkspaceDataLink as Link } from './workspace-data-link';
 import { AnimatedNumber } from './dashboard-motion';
 import { ArrowUpRight, SlidersHorizontal, Sparkles } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,11 +71,20 @@ function priorityLabel(priority: string) {
 }
 
 export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) {
-  const [filters, setFilters] = useState<Record<FilterKey, string>>({
-    domain: '全部领域',
-    value: '全部价值',
-    stage: '全部阶段',
-  });
+  const search = useSearchParams();
+  const filters = useMemo<Record<FilterKey, string>>(() => ({
+    domain: search.get('portfolioDomain') ?? '全部领域',
+    value: search.get('portfolioValue') ?? '全部价值',
+    stage: search.get('portfolioStage') ?? '全部阶段',
+  }), [search]);
+  function setFilters(values: Record<FilterKey, string>) {
+    const url = new URL(window.location.href);
+    for (const [key, value] of Object.entries(values)) {
+      const name = 'portfolio' + key[0]!.toUpperCase() + key.slice(1);
+      if (value.startsWith('全部')) url.searchParams.delete(name); else url.searchParams.set(name, value);
+    }
+    window.history.replaceState(null, '', url.pathname + url.search);
+  }
 
   const options = useMemo(() => ({
     domain: ['全部领域', ...Array.from(new Set(projects.map(projectDomain)))],
@@ -90,7 +100,7 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
   }), [filters, projects]);
 
   function setFilter(type: FilterKey, value: string) {
-    setFilters((current) => ({ ...current, [type]: value }));
+    setFilters({ ...filters, [type]: value });
   }
 
   const hasFilters = Object.values(filters).some((value) => !value.startsWith('全部'));
