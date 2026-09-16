@@ -13,5 +13,5 @@ export function WorkspaceDataLink(props: ComponentProps<typeof Link>) {
       event.preventDefault();
       router.refresh();
     }
-  }} />;
+  }}>{props.children}</Link>;
 }

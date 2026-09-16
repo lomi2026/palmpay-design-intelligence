@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AnimatedNumber } from './dashboard-motion';
 import { ArrowUpRight, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -107,14 +108,14 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
 
   return (
     <section className="mt-6">
-      <section className="py-7 md:py-8" aria-labelledby="portfolio-overview-title">
+      <section className="pb-7 md:pb-8" aria-labelledby="portfolio-overview-title">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="text-[24px] font-semibold tracking-[-.045em] text-white md:text-[30px]" id="portfolio-overview-title">项目探索组合</h2>
           </div>
 
         </div>
-        <div data-card-surface="" className="mt-6 grid gap-px overflow-hidden rounded-[16px] border border-white/[.1] bg-white/[.1] sm:grid-cols-2 lg:grid-cols-5">
+        <div data-card-surface="" className="mt-3 grid gap-px overflow-hidden rounded-[16px] border border-white/[.1] bg-white/[.1] sm:grid-cols-2 lg:grid-cols-5">
           {[
             ['探索项目', projects.length, '已发布项目总数'],
             ['可进入验证', stageCounts.ready, '可立项或试点中'],
@@ -124,7 +125,7 @@ export function AIProjectPortfolio({ projects }: { projects: AIProjectCard[] }) 
           ].map(([label, value, caption]) => (
             <div className="min-w-0 bg-[#101011] px-4 py-4" key={label}>
               <p className="text-[10px] font-semibold tracking-[.1em] text-white/42">{label}</p>
-              <p className="mt-2 text-[28px] font-semibold leading-none tracking-[-.055em] text-white">{value}</p>
+              <p className="mt-2 text-[28px] font-semibold leading-none tracking-[-.055em] text-white"><AnimatedNumber id={String(label)} value={Number(value)} /></p>
               <p className="mt-2 truncate text-[10px] text-white/42" title={String(caption)}>{caption}</p>
             </div>
           ))}

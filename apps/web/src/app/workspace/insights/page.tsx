@@ -1,3 +1,4 @@
+import { DashboardMotion, AnimatedNumber } from '@/components/workspace/dashboard-motion';
 import Link from 'next/link';
 import { CardDetailLink } from '@/components/workspace/card-detail-link';
 import { redirect } from 'next/navigation';
@@ -81,16 +82,16 @@ export default async function InsightsPage() {
   const contentHref = user.permissions.includes('content.edit_all') ? '/workspace/admin?tab=content' : '/workspace/search';
 
   return (
-    <main className="mx-auto min-h-full w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <DashboardMotion className="mx-auto min-h-full w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <section data-card-surface="" className="workspace-page-card flex flex-col justify-between gap-6 rounded-3xl bg-card p-6 md:flex-row md:items-end">
         <div><h1 className="mt-3 text-[34px] font-semibold tracking-[-.055em] text-white sm:text-[44px]">数据洞察</h1><p className="mt-3 max-w-3xl text-sm leading-7 text-white/55">从内容分布、搜索需求和使用行为中发现团队需要的能力，为设计资产与 AI 实践的持续完善提供依据。</p></div>
         <Badge className="h-7 w-fit rounded-full border-white/[.12] bg-white/[.035] px-3 text-[11px] text-white/65" variant="outline">正式行为事件 · {insights.periodDays} 天</Badge>
       </section>
 
       <section className="content-metric-cards mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <article data-clickable-card="" data-card-surface="" className="relative isolate rounded-[16px] border border-white/[.1] bg-white/[.03] p-6"><CardDetailLink href={contentHref} title="正式目录内容" /><span className="grid size-9 place-items-center rounded-xl bg-white/[.06]"><BarChart3 className="size-4 text-white/70" /></span><strong className="mt-6 block text-[37px] font-semibold leading-none tracking-[-.06em] text-white">{contentTotal}</strong><p className="mt-2 text-[13px] font-medium text-white">正式目录内容</p><p className="mt-1 text-[11px] text-white/45">按当前内容类型分布汇总</p></article>
-        <article data-clickable-card="" data-card-surface="" className="relative isolate rounded-[16px] border border-white/[.1] bg-white/[.03] p-6"><CardDetailLink href="#top-searches" title="有效搜索信号" /><span className="grid size-9 place-items-center rounded-xl bg-white/[.06]"><ArrowUpRight className="size-4 text-white/70" /></span><strong className="mt-6 block text-[37px] font-semibold leading-none tracking-[-.06em] text-white">{topSearchTotal}</strong><p className="mt-2 text-[13px] font-medium text-white">有效搜索信号</p><p className="mt-1 text-[11px] text-white/45">可用于发现高频能力需求</p></article>
-        <article data-clickable-card="" data-card-surface="" className="relative isolate rounded-[16px] border border-white/[.1] bg-white/[.03] p-6"><CardDetailLink href="#no-result-searches" title="无结果搜索" /><span className="grid size-9 place-items-center rounded-xl bg-white/[.06]"><SearchX className="size-4 text-white/70" /></span><strong className="mt-6 block text-[37px] font-semibold leading-none tracking-[-.06em] text-white">{noResultTotal}</strong><p className="mt-2 text-[13px] font-medium text-white">无结果搜索</p><p className="mt-1 text-[11px] text-white/45">提示目录和标签可能存在缺口</p></article>
+        <article data-clickable-card="" data-card-surface="" className="relative isolate rounded-[16px] border border-white/[.1] bg-white/[.03] p-6"><CardDetailLink href={contentHref} title="正式目录内容" /><span className="grid size-9 place-items-center rounded-xl bg-white/[.06]"><BarChart3 className="size-4 text-white/70" /></span><strong className="mt-6 block text-[37px] font-semibold leading-none tracking-[-.06em] text-white"><AnimatedNumber id="contentTotal" value={contentTotal} /></strong><p className="mt-2 text-[13px] font-medium text-white">正式目录内容</p><p className="mt-1 text-[11px] text-white/45">按当前内容类型分布汇总</p></article>
+        <article data-clickable-card="" data-card-surface="" className="relative isolate rounded-[16px] border border-white/[.1] bg-white/[.03] p-6"><CardDetailLink href="#top-searches" title="有效搜索信号" /><span className="grid size-9 place-items-center rounded-xl bg-white/[.06]"><ArrowUpRight className="size-4 text-white/70" /></span><strong className="mt-6 block text-[37px] font-semibold leading-none tracking-[-.06em] text-white"><AnimatedNumber id="topSearchTotal" value={topSearchTotal} /></strong><p className="mt-2 text-[13px] font-medium text-white">有效搜索信号</p><p className="mt-1 text-[11px] text-white/45">可用于发现高频能力需求</p></article>
+        <article data-clickable-card="" data-card-surface="" className="relative isolate rounded-[16px] border border-white/[.1] bg-white/[.03] p-6"><CardDetailLink href="#no-result-searches" title="无结果搜索" /><span className="grid size-9 place-items-center rounded-xl bg-white/[.06]"><SearchX className="size-4 text-white/70" /></span><strong className="mt-6 block text-[37px] font-semibold leading-none tracking-[-.06em] text-white"><AnimatedNumber id="noResultTotal" value={noResultTotal} /></strong><p className="mt-2 text-[13px] font-medium text-white">无结果搜索</p><p className="mt-1 text-[11px] text-white/45">提示目录和标签可能存在缺口</p></article>
       </section>
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
@@ -105,6 +106,6 @@ export default async function InsightsPage() {
       </section>
 
       <section data-clickable-card="" data-card-surface="" className="relative isolate mt-6 rounded-[24px] border border-white/[.1] bg-[#111112] p-6 sm:p-6"><CardDetailLink href={contentHref} title="管理长期未更新内容" /><h2 className="text-[21px] font-semibold tracking-[-.035em] text-white">长期未更新内容</h2>{insights.staleContent.length ? <ul className="mt-6 divide-y divide-white/[.1] border-y border-white/[.1]">{insights.staleContent.map((item) => <li className="flex flex-col justify-between gap-2 py-3.5 text-[13px] sm:flex-row sm:items-center" key={item.id}><div><Link className="relative z-20 font-medium text-white hover:underline" href={`/workspace/search?q=${encodeURIComponent(item.title)}`} prefetch={false}>{item.title}</Link><span className="ml-2 text-[11px] text-white/45">{contentTypeLabel(item.contentType)}</span></div><time className="text-[11px] text-white/45">最后更新：{new Intl.DateTimeFormat('zh-CN').format(new Date(item.updatedAt))}</time></li>)}</ul> : <p className="mt-6 rounded-xl border border-dashed border-white/[.12] px-4 py-5 text-[12px] text-white/45">暂无需要关注的长期未更新内容。</p>}</section>
-    </main>
+    </DashboardMotion>
   );
 }
