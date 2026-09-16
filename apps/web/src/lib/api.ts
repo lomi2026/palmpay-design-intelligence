@@ -25,6 +25,7 @@ async function apiError(response: Response) {
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...init,
+    cache: 'no-store',
     headers: { Accept: 'application/json', ...init?.headers },
   });
 

@@ -25,6 +25,7 @@ export async function developmentLogin(formData: FormData) {
   }
 
   const cookieStore = await cookies();
+  cookieStore.delete(TEST_SESSION_COOKIE);
   cookieStore.set(DEVELOPMENT_USER_COOKIE, email, {
     httpOnly: true,
     sameSite: 'lax',

@@ -129,9 +129,9 @@ export class DraftsService {
     if (!this.canEditContent(user, content.ownerId)) {
       throw new ForbiddenException('You cannot edit this content.');
     }
-    if (content.status !== ContentStatus.PUBLISHED || !content.currentVersion) {
+    if (!new Set<ContentStatus>([ContentStatus.PUBLISHED, ContentStatus.ARCHIVED, ContentStatus.UNPUBLISHED]).has(content.status) || !content.currentVersion) {
       throw new ConflictException(
-        'Only published content with a current version can create an edit draft.',
+        'Only published, archived or unpublished content with a current version can create an edit draft.',
       );
     }
     const publishedVersion = content.currentVersion;
@@ -253,7 +253,7 @@ export class DraftsService {
       throw new ConflictException('Only a draft version can be published.');
     }
     if (
-      !new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.PUBLISHED]).has(content.status)
+      !new Set<ContentStatus>([ContentStatus.DRAFT, ContentStatus.PUBLISHED, ContentStatus.ARCHIVED, ContentStatus.UNPUBLISHED]).has(content.status)
     ) {
       throw new ConflictException('This content cannot be published in its current state.');
     }
@@ -302,6 +302,7 @@ export class DraftsService {
           currentVersionId: content.draftVersion!.id,
           draftVersionId: null,
           status: ContentStatus.PUBLISHED,
+          archivedAt: null,
           title: content.draftVersion!.title,
           summary: content.draftVersion!.summary,
           publishedAt: now,
@@ -352,7 +353,7 @@ export class DraftsService {
   }
 
   async archive(user: AuthenticatedUser, contentId: string) {
-    const content = await this.findLifecycleContent(user, contentId);
+    const content = await this.findLifecycleContent(user, contentId, true);
     if (
       !new Set<ContentStatus>([ContentStatus.PUBLISHED, ContentStatus.UNPUBLISHED]).has(
         content.status,
@@ -536,6 +537,8 @@ export class DraftsService {
       !new Set<ContentStatus>([
         ContentStatus.DRAFT,
         ContentStatus.PUBLISHED,
+        ContentStatus.ARCHIVED,
+        ContentStatus.UNPUBLISHED,
       ]).has(content.status)
     ) {
       throw new ConflictException('This content cannot be edited in its current state.');
@@ -543,13 +546,13 @@ export class DraftsService {
     return content;
   }
 
-  private async findLifecycleContent(user: AuthenticatedUser, contentId: string) {
+  private async findLifecycleContent(user: AuthenticatedUser, contentId: string, allowDraft = false) {
     const content = await this.prisma.content.findFirst({
       where: { id: contentId, organizationId: user.organizationId, deletedAt: null },
       include: { draftVersion: true },
     });
     if (!content) throw new NotFoundException('Content was not found.');
-    if (content.draftVersion) {
+    if (content.draftVersion && !allowDraft) {
       throw new ConflictException(
         'Content with an active draft cannot change lifecycle state.',
       );

@@ -112,18 +112,22 @@ export async function saveAndPreviewDraftAction(formData: FormData) {
 }
 
 export async function contentLifecycleAction(_: ActionState, formData: FormData): Promise<ActionState> {
-  const id = String(formData.get('id') ?? '');
+  const id = String(formData.get('id') ?? '').trim();
   const operation = String(formData.get('operation') ?? '');
-  if (!new Set(['unpublish', 'archive']).has(operation)) return { error: '无效的内容生命周期操作。' };
+  if (!id || !new Set(['unpublish', 'archive']).has(operation)) return { error: '无效的内容生命周期操作。' };
   try {
-    await serverApiFetch(`/api/content-drafts/${id}/${operation}`, {
+    const updated = await serverApiFetch<{ status: string }>(`/api/content-drafts/${encodeURIComponent(id)}/${operation}`, {
       method: 'POST',
       headers: await authenticatedApiHeaders(),
     });
-    return { savedAt: operation === 'unpublish' ? '内容已下架。' : '内容已归档。' };
+    if (updated.status !== (operation === 'archive' ? 'ARCHIVED' : 'UNPUBLISHED')) {
+      return { error: '内容状态尚未更新成功，请刷新后重试。' };
+    }
   } catch (error) {
     return { error: userError(error, '内容状态更新失败。') };
   }
+  revalidatePath('/workspace', 'layout');
+  redirect('/workspace/contributions');
 }
 
 export async function publishDraftAction(_: ActionState, formData: FormData): Promise<ActionState> {

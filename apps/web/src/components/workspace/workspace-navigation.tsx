@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { WorkspaceDataLink } from './workspace-data-link';
+import { useWorkspaceProjectCount } from './favorite-context';
 import { usePathname } from 'next/navigation';
 import { type MouseEventHandler } from 'react';
 import {
@@ -30,7 +32,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { shouldPrefetchWorkspaceRoute } from './workspace-route-policy';
 
 type NavigationCapabilities = {
   canAnalyze: boolean;
@@ -104,9 +105,8 @@ function WorkspaceNavigationLink({
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }) {
   return (
-    <Link
+    <WorkspaceDataLink
       href={item.href}
-      prefetch={shouldPrefetchWorkspaceRoute(item.href)}
       aria-current={active ? 'page' : undefined}
       onClick={onClick}
       className={cn(
@@ -123,15 +123,16 @@ function WorkspaceNavigationLink({
           {item.badge}
         </Badge>
       ) : null}
-    </Link>
+    </WorkspaceDataLink>
   );
 }
 
 function NavigationLinks({ closeOnNavigate = false, ...props }: NavigationProps & { closeOnNavigate?: boolean }) {
   const pathname = usePathname();
+  const projectCount = useWorkspaceProjectCount(props.projectCount);
   return (
     <div className="space-y-6">
-      {navigationGroups(props).map((group) => (
+      {navigationGroups({ ...props, projectCount }).map((group) => (
         <section key={group.label}>
           <p className="mb-2 px-2 text-[11px] text-[var(--v9-subtle)]">{group.label}</p>
           <nav className="space-y-1" aria-label={group.label}>

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { CardDetailLink } from './card-detail-link';
 import { useMemo } from 'react';
 import { AssetImage } from './asset-image';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,14 +65,14 @@ export function DesignAssetsCatalog({
             const legacy = getLegacyBody(content.currentVersion?.body).legacy;
             const updatedDate = formatUpdated(content.updatedAt);
             return (
-              <Card className="gap-0 overflow-hidden border-[var(--v9-line)] bg-[var(--v9-panel)] py-0 shadow-none transition hover:border-[var(--v9-line-strong)]" key={content.id}>
-                {view === 'grid' ? <Link className="block border-b border-[var(--v9-line)]" aria-label={`打开 ${content.title}`} href={`/workspace/design-assets/${content.slug}`}><AssetImage fileId={content.coverFile?.id} title={content.title} /></Link> : null}
+              <Card className="relative isolate gap-0 overflow-hidden border-[var(--v9-line)] bg-[var(--v9-panel)] py-0 shadow-none transition hover:border-[var(--v9-line-strong)]" key={content.id}><CardDetailLink href={`/workspace/design-assets/${content.slug}`} title={content.title} />
+                {view === 'grid' ? <div className="block border-b border-[var(--v9-line)]"><AssetImage fileId={content.coverFile?.id} title={content.title} /></div> : null}
                 <CardHeader className="p-4">
                   <div className="flex items-center justify-between gap-3 text-xs">
                     {view === 'list' ? <div className="flex min-w-0 items-center gap-1.5 text-[var(--v9-subtle)]"><span className="truncate">{content.category?.name ?? '未分类'}</span><span aria-hidden="true">·</span><span>{content.assetDetail?.platforms[0] ?? '全平台'}</span></div> : null}
-                    <FavoriteControl contentId={content.id} returnTo="/workspace/design-assets" />
+                    <div className="relative z-20 inline-flex"><FavoriteControl contentId={content.id} returnTo="/workspace/design-assets" /></div>
                   </div>
-                  <CardTitle className="mt-3 text-base"><Link href={`/workspace/design-assets/${content.slug}`}>{content.title}</Link></CardTitle>
+                  <CardTitle className="mt-3 text-base">{content.title}</CardTitle>
                   <p className="mt-2 line-clamp-2 min-h-10 text-sm text-[var(--v9-muted)]">{content.summary}</p>
                 </CardHeader>
 

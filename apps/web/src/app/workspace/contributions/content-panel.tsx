@@ -1,3 +1,4 @@
+import { PublishedEdit } from '../published-edit';
 import Link from 'next/link';
 import { DeleteContentButton } from '@/components/workspace/delete-content-button';
 import { redirect } from 'next/navigation';
@@ -45,6 +46,7 @@ const detailSegments: Record<string, string> = {
 };
 
 function contributionAction(item: Contribution) {
+  if (item.status === 'ARCHIVED' || item.status === 'UNPUBLISHED') return null;
   const draftStatus = item.draftVersion?.versionStatus;
   if (draftStatus === 'DRAFT') {
     return { href: `/workspace/submit/${item.id}`, label: '继续编辑', icon: FilePenLine };
@@ -68,7 +70,7 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
   const visible = filterContributions(contributions.items, filters);
   const categories = Array.from(new Map(contributions.items.flatMap((item) => item.category ? [[item.category.id, item.category] as const] : [])).values());
   const filtered = Boolean(filters.search?.trim() || filters.categoryId || filters.status);
-  const drafts = contributions.items.filter((item) => (item.draftVersion?.versionStatus ?? item.status) === 'DRAFT').length;
+  const drafts = contributions.items.filter((item) => ['DRAFT', 'PUBLISHED'].includes(item.status) && (item.draftVersion?.versionStatus ?? item.status) === 'DRAFT').length;
   const published = contributions.items.filter((item) => item.status === 'PUBLISHED').length;
 
   return (
@@ -121,6 +123,7 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
                   <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
                     <WorkspaceStatusBadge status={effectiveStatus} />{item.status === 'PUBLISHED' && item.draftVersion ? <span className="text-xs text-muted-foreground">有未发布修改</span> : null}
                     {user.permissions.includes('content.edit_own') || user.permissions.includes('content.edit_all') ? <DeleteContentButton contentId={item.id} title={item.title} /> : null}
+                    {['ARCHIVED', 'UNPUBLISHED'].includes(item.status) && (user.permissions.includes('content.edit_own') || user.permissions.includes('content.edit_all')) ? <PublishedEdit contentId={item.id} label="继续编辑" /> : null}
                     {permittedAction ? (
                       <Button asChild variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.07] hover:text-white">
                         <Link href={permittedAction.href}><permittedAction.icon className="size-4" /> {permittedAction.label}</Link>

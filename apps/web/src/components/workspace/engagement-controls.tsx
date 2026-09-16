@@ -35,7 +35,9 @@ export function FavoriteControl({
         variant="outline"
         size="sm"
         disabled={pending}
-        className="h-9 rounded-[10px] border-white/[.14] bg-black/[.16] px-3 text-[12px] text-white/85 hover:bg-white/[.08] hover:text-white"
+        aria-pressed={isActive}
+        aria-busy={pending}
+        className="favorite-control h-9 rounded-[10px] px-3 text-[12px]"
       >
         <Heart className={isActive ? 'fill-current' : ''} />
         {isActive ? '取消收藏' : '收藏'}

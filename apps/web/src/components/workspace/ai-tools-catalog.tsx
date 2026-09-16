@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { CardDetailLink } from './card-detail-link';
 import { AssetImage } from './asset-image';
 import { Wrench } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -16,9 +16,9 @@ export function AIToolsCatalog({ contents, platform, view }: { contents: AITool[
   return <section>
 
     {items.length ? <div className={cn('mt-6 grid gap-4', view === 'grid' ? 'md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1')}>
-      {items.map((item) => <Card key={item.id} className="gap-0 overflow-hidden border-[var(--v9-line)] bg-[var(--v9-panel)] py-0 shadow-none transition hover:border-[var(--v9-line-strong)]">
-        {view === 'grid' ? <Link href={`/workspace/ai-tools/${item.slug}`} aria-label={`打开 ${item.title}`} className="block border-b border-[var(--v9-line)]"><AssetImage fileId={item.coverFile?.id} title={item.title} /></Link> : null}
-        <CardHeader className="p-4"><div className="flex items-center justify-between"><FavoriteControl contentId={item.id} returnTo="/workspace/ai-tools" /></div><CardTitle className="mt-3 text-base"><Link href={`/workspace/ai-tools/${item.slug}`}>{item.title}</Link></CardTitle><p className="mt-2 line-clamp-2 min-h-10 text-sm text-[var(--v9-muted)]">{item.summary}</p></CardHeader>
+      {items.map((item) => <Card key={item.id} className="relative isolate gap-0 overflow-hidden border-[var(--v9-line)] bg-[var(--v9-panel)] py-0 shadow-none transition hover:border-[var(--v9-line-strong)]"><CardDetailLink href={`/workspace/ai-tools/${item.slug}`} title={item.title} />
+        {view === 'grid' ? <div className="block border-b border-[var(--v9-line)]"><AssetImage fileId={item.coverFile?.id} title={item.title} /></div> : null}
+        <CardHeader className="p-4"><div className="flex items-center justify-between"><div className="relative z-20 inline-flex"><FavoriteControl contentId={item.id} returnTo="/workspace/ai-tools" /></div></div><CardTitle className="mt-3 text-base">{item.title}</CardTitle><p className="mt-2 line-clamp-2 min-h-10 text-sm text-[var(--v9-muted)]">{item.summary}</p></CardHeader>
 
         <CardFooter className="mx-4 flex justify-between border-t border-[var(--v9-line)] bg-transparent px-0 py-4 text-xs text-[var(--v9-subtle)]"><span>{item.toolDetail?.vendor ?? item.owner.name}</span><span>{item.toolDetail?.pricingModel}</span></CardFooter>
       </Card>)}

@@ -11,15 +11,8 @@ type WorkspaceRouteWarmerProps = {
 };
 
 /**
- * The workspace is an authenticated, data-backed application, not a static
- * website. Its most common destinations are nevertheless a small and stable
- * set. Warm their complete router payload after the shell is interactive so a
- * normal menu switch reads from Next's client router cache instead of waiting
- * for a Vercel -> Render request.
- *
- * This deliberately excludes catalog detail records and search results because
- * their cardinality is unbounded, plus personal routes such as recent views
- * whose value depends on an immediately preceding action.
+ * Route policy excludes all data-backed workspace destinations. Keep the
+ * scheduler compatible with future static destinations without warming live data.
  */
 export function WorkspaceRouteWarmer({
   canAnalyze,

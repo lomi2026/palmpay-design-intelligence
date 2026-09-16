@@ -1,6 +1,7 @@
 'use client';
+import { WorkspaceDataLink } from './workspace-data-link';
 
-import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -13,6 +14,7 @@ import {
 type NotificationCountResponse = { unreadCount: number };
 
 export function NotificationBadge({ initialUnreadCount }: { initialUnreadCount: number }) {
+  const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
 
   useEffect(() => {
@@ -84,10 +86,10 @@ export function NotificationBadge({ initialUnreadCount }: { initialUnreadCount: 
       window.removeEventListener('focus', refreshWhenVisible);
       document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
-  }, []);
+  }, [pathname]);
 
   return (
-    <Link
+    <WorkspaceDataLink
       href="/workspace/notifications"
       aria-label={unreadCount ? `通知中心，${unreadCount} 条未读通知` : '通知中心'}
       className="relative grid size-10 place-items-center rounded-[10px] border border-border bg-background text-foreground hover:bg-muted hover:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50"
@@ -98,6 +100,6 @@ export function NotificationBadge({ initialUnreadCount }: { initialUnreadCount: 
           {unreadCount > 99 ? '99+' : unreadCount}
         </span>
       ) : null}
-    </Link>
+    </WorkspaceDataLink>
   );
 }

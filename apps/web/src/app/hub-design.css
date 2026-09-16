@@ -1451,3 +1451,18 @@ html:not(.dark) .workspace-shell .workspace-filter-bar :is(
 html:not(.dark) .workspace-shell button[aria-label='全局搜索'] {
   background-color: var(--card) !important;
 }
+
+/* Independent card action, with shared light/dark semantic feedback. */
+.workspace-shell button.favorite-control {
+  background-color: var(--secondary);
+  color: var(--text-secondary);
+  border-color: var(--border);
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+.workspace-shell button.favorite-control:hover:not(:disabled),
+.workspace-shell button.favorite-control:focus-visible {
+  background-color: var(--muted);
+  color: var(--foreground);
+  border-color: var(--input);
+  cursor: pointer;
+}

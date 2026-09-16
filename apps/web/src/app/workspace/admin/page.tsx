@@ -1,3 +1,4 @@
+import { WorkspaceDataLink } from '@/components/workspace/workspace-data-link';
 import { DeleteUserButton } from './delete-user-button';
 import { DeleteContentButton } from '@/components/workspace/delete-content-button';
 import { redirect } from 'next/navigation';
@@ -194,9 +195,7 @@ export default async function AdminPage({
     <main className="mx-auto max-w-[1440px] px-5 py-8 md:px-8 md:py-10">
       <AdminFeedback />
       <WorkspacePageHero eyebrow="PLATFORM ADMINISTRATION" metric={heroMetric} title="管理中心" description="内容、分类、团队、账号、权限与审计均通过正式组织范围 API 管理；页面不会绕过当前账号的授权边界。" />
-      {/* All seven management views are intentionally full-prefetched after this
-          page is visible. They are a compact, finite set, so tab changes use
-          the client router cache instead of blocking on a cross-region read. */}
+      {/* Reload the data and shared shell when changing management sections. */}
       <nav className="mt-6 flex flex-wrap gap-2">
         {adminTabs.map(([key, label]) => (
           <Button
@@ -210,9 +209,9 @@ export default async function AdminPage({
                 : 'border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white'
             }
           >
-            <Link aria-current={tab === key ? 'page' : undefined} href={`/workspace/admin?tab=${key}`} prefetch>
+            <WorkspaceDataLink aria-current={tab === key ? 'page' : undefined} href={`/workspace/admin?tab=${key}`}>
               {label}
-            </Link>
+            </WorkspaceDataLink>
           </Button>
         ))}
       </nav>

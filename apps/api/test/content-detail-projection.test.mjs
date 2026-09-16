@@ -206,7 +206,7 @@ test('upserts all five detail models and updates the same row on a second public
   }
 });
 
-test('autosave preserves the published detail and publish switches it inside the promotion transaction', async () => {
+for (const initialStatus of ['PUBLISHED', 'ARCHIVED', 'UNPUBLISHED']) test(`editing ${initialStatus} preserves visibility until publication`, async () => {
   const contentId = 'published-content-id';
   const user = {
     id: 'publisher-id',
@@ -232,7 +232,7 @@ test('autosave preserves the published detail and publish switches it inside the
     contentType: 'DESIGN_ASSET',
     organizationId: user.organizationId,
     ownerId: user.id,
-    status: 'PUBLISHED',
+    status: initialStatus,
     draftVersionId: draftVersion.id,
     draftVersion,
   };
@@ -245,7 +245,7 @@ test('autosave preserves the published detail and publish switches it inside the
     contentTag: { deleteMany: async () => ({ count: 0 }) },
     content: {
       update: async ({ data }) => ({ ...content, ...data }),
-      updateMany: async () => ({ count: 1 }),
+      updateMany: async ({data}) => { assert.equal(data.status,'PUBLISHED'); assert.equal(data.archivedAt,null); return {count:1}; },
       findUniqueOrThrow: async () => ({ ...content, currentVersion: draftVersion }),
       findMany: async () => [],
     },
@@ -295,6 +295,7 @@ test('autosave preserves the published detail and publish switches it inside the
   });
   assert.equal(publishedDetail.assetType, 'PUBLISHED_STANDARD');
   assert.equal(detailUpsertCount, 0);
+  assert.equal(content.status, initialStatus);
 
   content = { ...content, draftVersion };
   await service.publish(user, contentId, {
