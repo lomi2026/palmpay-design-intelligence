@@ -107,7 +107,7 @@ export async function MyContentPanel({ filters = {} }: { filters?: ContributionF
             const effectiveStatus = item.status;
             const versionNumber = item.draftVersion?.versionNumber ?? item.currentVersion?.versionNumber;
             return (
-              <Card key={item.id} className="border-white/[.1] bg-[#111112] py-0 shadow-none transition hover:border-white/[.2] hover:bg-white/[.035]">
+              <Card key={item.id} data-clickable-card className="border-white/[.1] bg-[#111112] py-0 shadow-none">
                 <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] tracking-[0.1em] text-white/40">
