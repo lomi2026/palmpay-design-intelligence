@@ -1,10 +1,15 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useNavigationCache } from '@/components/workspace/navigation-cache';
 import { RotateCcw, TriangleAlert } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
 export default function WorkspaceError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const cache = useNavigationCache();
+  const fail = cache?.fail;
+  useEffect(() => fail?.(reset), [fail, reset]);
   return (
     <main className="grid min-h-[calc(100vh-4rem)] place-items-center bg-[var(--v9-bg)] px-5 py-12">
       <section data-card-surface="" className="w-full max-w-2xl overflow-hidden rounded-[24px] border border-[var(--v9-line)] bg-[var(--v9-panel)] p-6 text-center md:p-11">

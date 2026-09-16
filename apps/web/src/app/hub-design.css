@@ -1515,14 +1515,14 @@ form:has([data-slot='input']:not([type='hidden']), [data-slot='select-trigger'])
 }
 
 /* Workspace gutters are measured from the content pane, outside the sidebar. */
-.workspace-shell.v9-source-home > div > main {
+.workspace-shell.v9-source-home main {
   width: 100%;
   max-width: none;
   margin-inline: 0;
   padding-inline: 20px;
 }
 @media (min-width: 768px) {
-  .workspace-shell.v9-source-home > div > main,
+  .workspace-shell.v9-source-home main,
   .workspace-shell > div > header {
     padding-inline: 40px;
   }

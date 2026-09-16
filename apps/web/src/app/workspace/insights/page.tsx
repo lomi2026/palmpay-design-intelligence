@@ -1,3 +1,4 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { DashboardMotion, AnimatedNumber } from '@/components/workspace/dashboard-motion';
 import Link from 'next/link';
 import { CardDetailLink } from '@/components/workspace/card-detail-link';
@@ -69,7 +70,7 @@ function MetricList({
   );
 }
 
-export default async function InsightsPage() {
+async function InsightsPage() {
   const user = await loadCurrentUser();
   if (!user?.permissions.includes('analytics.read')) redirect('/unauthorized');
   const insights = await serverApiFetch<Insights>('/api/analytics/insights', {
@@ -108,4 +109,8 @@ export default async function InsightsPage() {
       <section data-clickable-card="" data-card-surface="" className="relative isolate mt-6 rounded-[24px] border border-white/[.1] bg-[#111112] p-6 sm:p-6"><CardDetailLink href={contentHref} title="管理长期未更新内容" /><h2 className="text-[21px] font-semibold tracking-[-.035em] text-white">长期未更新内容</h2>{insights.staleContent.length ? <ul className="mt-6 divide-y divide-white/[.1] border-y border-white/[.1]">{insights.staleContent.map((item) => <li className="flex flex-col justify-between gap-2 py-3.5 text-[13px] sm:flex-row sm:items-center" key={item.id}><div><Link className="relative z-20 font-medium text-white hover:underline" href={`/workspace/search?q=${encodeURIComponent(item.title)}`} prefetch={false}>{item.title}</Link><span className="ml-2 text-[11px] text-white/45">{contentTypeLabel(item.contentType)}</span></div><time className="text-[11px] text-white/45">最后更新：{new Intl.DateTimeFormat('zh-CN').format(new Date(item.updatedAt))}</time></li>)}</ul> : <p className="mt-6 rounded-xl border border-dashed border-white/[.12] px-4 py-5 text-[12px] text-white/45">暂无需要关注的长期未更新内容。</p>}</section>
     </DashboardMotion>
   );
+}
+
+export default async function CachedPage() {
+  return <CachedWorkspacePage>{await InsightsPage()}</CachedWorkspacePage>;
 }

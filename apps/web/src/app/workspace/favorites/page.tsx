@@ -1,3 +1,4 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { ContentCard } from '@/components/content-card';
 import { FavoriteControl } from '@/components/workspace/engagement-controls';
 import { WorkspacePageHero } from '@/components/workspace/workspace-page-hero';
@@ -11,7 +12,7 @@ import { PersonalTabs } from './personal-tabs';
 type FavoriteItem = { createdAt: string; content: ContentCardData };
 type RecentItem = { viewCount: number; lastViewedAt: string; content: ContentCardData };
 
-export default async function FavoritesPage({ searchParams }: {
+async function FavoritesPage({ searchParams }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
   const activeTab = (await searchParams).tab === 'recent' ? 'recent' : 'favorites';
@@ -83,4 +84,8 @@ function RecentList({ result }: { result: { items: RecentItem[] } }) {
       )}
     </>
   );
+}
+
+export default async function CachedPage(props: Parameters<typeof FavoritesPage>[0]) {
+  return <CachedWorkspacePage>{await FavoritesPage(props)}</CachedWorkspacePage>;
 }

@@ -1,3 +1,4 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { DashboardMotion, AnimatedNumber } from '@/components/workspace/dashboard-motion';
 import Link from 'next/link';
 import { CardDetailLink } from '@/components/workspace/card-detail-link';
@@ -31,7 +32,7 @@ const contentMetrics: Array<[keyof Overview, string, string, string]> = [
   ['publishedCases', 'AI 案例', '含人工判断与验证依据', '/workspace/ai-cases'],
 ];
 
-export default async function OverviewPage() {
+async function OverviewPage() {
   const user = await loadCurrentUser();
   if (!user?.permissions.includes('analytics.read')) redirect('/unauthorized');
   const overview = await serverApiFetch<Overview>('/api/analytics/overview', {
@@ -109,4 +110,8 @@ export default async function OverviewPage() {
 
     </DashboardMotion>
   );
+}
+
+export default async function CachedPage() {
+  return <CachedWorkspacePage>{await OverviewPage()}</CachedWorkspacePage>;
 }

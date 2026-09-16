@@ -1,3 +1,4 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { CardDetailLink } from '@/components/workspace/card-detail-link';
 import { FavoriteControl } from '@/components/workspace/engagement-controls';
 import { ArrowRight } from 'lucide-react';
@@ -12,7 +13,7 @@ import { WorkspaceEmptyState } from '@/components/workspace/workspace-empty-stat
 type SkillCard = ContentCard & { skillDetail?: { applicableRoles: string[] } | null };
 type SkillListResponse = Omit<ContentListResponse, 'items'> & { items: SkillCard[] };
 
-export default async function AISkillsPage({ searchParams }: { searchParams: Promise<{ search?: string; categoryId?: string; tag?: string; verificationStatus?: string }> }) {
+async function AISkillsPage({ searchParams }: { searchParams: Promise<{ search?: string; categoryId?: string; tag?: string; verificationStatus?: string }> }) {
   const { search = '', categoryId, tag } = await searchParams;
   const filters = { search: search.trim() || undefined, categoryId, tag };
   const query = new URLSearchParams({ type: 'AI_SKILL', pageSize: '100' });
@@ -48,4 +49,8 @@ export default async function AISkillsPage({ searchParams }: { searchParams: Pro
       ) : <WorkspaceEmptyState className="mt-6 py-16 text-center">没有找到可访问的 AI Skill。</WorkspaceEmptyState>}
     </main>
   );
+}
+
+export default async function CachedPage(props: Parameters<typeof AISkillsPage>[0]) {
+  return <CachedWorkspacePage>{await AISkillsPage(props)}</CachedWorkspacePage>;
 }

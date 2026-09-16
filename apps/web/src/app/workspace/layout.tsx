@@ -1,3 +1,4 @@
+import { NavigationCacheProvider, NavigationCacheOutlet } from '@/components/workspace/navigation-cache';
 import { WorkspaceDataLink } from '@/components/workspace/workspace-data-link';
 import { FavoriteProvider } from '@/components/workspace/favorite-context';
 import Image from 'next/image';
@@ -66,7 +67,7 @@ export default async function WorkspaceLayout({ children }: Readonly<{ children:
   };
 
   return (
-    <FavoriteProvider ids={favorites.items.map(item=>item.content.id)} projectCount={projects.total}><div className="workspace-shell v9-source-home min-h-screen bg-[var(--v9-bg)] text-[var(--v9-text)]">
+    <NavigationCacheProvider key={JSON.stringify([user.id, user.organizationId, [...user.permissions].sort()])} scope={JSON.stringify([user.id, user.organizationId, [...user.permissions].sort()])}><FavoriteProvider ids={favorites.items.map(item=>item.content.id)} projectCount={projects.total}><div className="workspace-shell v9-source-home min-h-screen bg-[var(--v9-bg)] text-[var(--v9-text)]">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[224px] border-r border-[var(--v9-line)] bg-[var(--v9-sidebar)] md:flex md:flex-col">
         <Link href="/" className="flex h-16 items-center gap-3 border-b border-white/[.11] px-5"><Image src="/brand/palmpay-logo.svg" alt="PalmPay Design" width={31} height={31} className="size-[31px] object-contain" /><span className="text-[13px] font-bold">PalmPay Design</span></Link>
         <div className="flex-1 overflow-y-auto p-2.5">
@@ -76,8 +77,8 @@ export default async function WorkspaceLayout({ children }: Readonly<{ children:
       </aside>
       <div className="md:pl-[224px]">
         <header className="sticky top-0 z-20 flex h-16 items-center border-b border-[var(--v9-line)] bg-[color-mix(in_srgb,var(--v9-bg)_95%,transparent)] px-4 backdrop-blur-xl md:px-8"><WorkspaceMobileNavigation {...navigationProps} /><WorkspaceBreadcrumb /><WorkspaceSearchShortcut /><div className="ml-auto flex items-center gap-2"><Button asChild variant="outline" size="icon-sm" className="size-10 rounded-[12px] border-border bg-background text-foreground hover:bg-muted hover:text-foreground"><WorkspaceDataLink href="/workspace/favorites" aria-label="收藏与浏览" title="收藏与浏览"><Heart className="size-4" /></WorkspaceDataLink></Button><V9ThemeToggle /><NotificationBadge initialUnreadCount={notifications.unreadCount} key={`notifications-${notifications.unreadCount}`} /><WorkspaceAccountMenu email={user.email} name={user.name} roleLabel={roleLabel} /></div></header>
-        {children}
+        <NavigationCacheOutlet>{children}</NavigationCacheOutlet>
       </div>
-    </div></FavoriteProvider>
+    </div></FavoriteProvider></NavigationCacheProvider>
   );
 }

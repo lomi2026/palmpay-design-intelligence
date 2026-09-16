@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { WorkspaceDataLink } from './workspace-data-link';
 import { useWorkspaceProjectCount } from './favorite-context';
-import { usePathname } from 'next/navigation';
+import { useVisibleWorkspacePath } from './navigation-cache';
 import { type MouseEventHandler } from 'react';
 import {
   BarChart3,
@@ -128,7 +128,7 @@ function WorkspaceNavigationLink({
 }
 
 function NavigationLinks({ closeOnNavigate = false, ...props }: NavigationProps & { closeOnNavigate?: boolean }) {
-  const pathname = usePathname();
+  const pathname = useVisibleWorkspacePath();
   const projectCount = useWorkspaceProjectCount(props.projectCount);
   return (
     <div className="space-y-6">
@@ -192,7 +192,7 @@ const routeLabels: Array<[string, string]> = [
 ];
 
 export function WorkspaceBreadcrumb() {
-  const pathname = usePathname();
+  const pathname = useVisibleWorkspacePath();
   const label = pathname === '/workspace'
     ? '工作台'
     : routeLabels.find(([href]) => pathname === href || pathname.startsWith(`${href}/`))?.[1] ?? '工作台';

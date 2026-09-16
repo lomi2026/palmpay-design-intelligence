@@ -1,3 +1,4 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { WorkspaceDataLink } from '@/components/workspace/workspace-data-link';
 import { AddTeamDialog } from './add-team-dialog';
 import { AddUserDialog } from './add-user-dialog';
@@ -104,7 +105,7 @@ const modules: Record<string, string> = {
   AI_TOOL: 'ai-tools',
 };
 
-export default async function AdminPage({
+async function AdminPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string; categoryId?: string; tagId?: string; page?: string }>;
@@ -486,4 +487,8 @@ export default async function AdminPage({
       ) : null}
     </main>
   );
+}
+
+export default async function CachedPage(props: Parameters<typeof AdminPage>[0]) {
+  return <CachedWorkspacePage>{await AdminPage(props)}</CachedWorkspacePage>;
 }

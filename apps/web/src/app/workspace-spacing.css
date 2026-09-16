@@ -9,7 +9,7 @@
   --space-page: 32px;
   --space-gutter: 40px;
 }
-.workspace-shell > div > main {
+.workspace-shell main {
   width: 100%;
   padding: var(--space-page) !important;
   padding-inline: var(--space-gutter) !important;
@@ -59,7 +59,7 @@ html[data-design='studio'] .workspace-shell .detail-hero,
 .workspace-shell main td { padding: 16px; }
 @media (max-width: 767px) {
   .workspace-shell { --space-page: 16px; --space-gutter: 20px; --space-card: 16px; --space-section: 16px; }
-  .workspace-shell > div > main { padding-bottom: 32px !important; }
+  .workspace-shell main { padding-bottom: 32px !important; }
   .workspace-shell .workspace-filter-bar > label:first-child { flex-basis: 100%; min-width: 0; }
   .workspace-shell .detail-metadata { gap: 16px; }
   .workspace-shell .editor-field-grid { gap: 16px; }

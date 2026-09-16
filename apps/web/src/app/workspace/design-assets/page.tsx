@@ -1,3 +1,4 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { CatalogPageHeader } from '@/components/workspace/catalog-page-header';
 import Link from 'next/link';
 import { Grid2X2, LayoutList, Plus } from 'lucide-react';
@@ -20,7 +21,7 @@ function isPlatform(value: string | undefined): value is Platform {
   return platforms.includes(value as Platform);
 }
 
-export default async function DesignAssetsPage({
+async function DesignAssetsPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -91,4 +92,8 @@ export default async function DesignAssetsPage({
       <DesignAssetsCatalog contents={contents.items} platform={platform} view={view} />
     </main>
   );
+}
+
+export default async function CachedPage(props: Parameters<typeof DesignAssetsPage>[0]) {
+  return <CachedWorkspacePage>{await DesignAssetsPage(props)}</CachedWorkspacePage>;
 }

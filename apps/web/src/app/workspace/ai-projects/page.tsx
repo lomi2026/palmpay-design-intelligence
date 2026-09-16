@@ -1,3 +1,4 @@
+import { CachedWorkspacePage } from '@/components/workspace/navigation-cache';
 import { CatalogPageHeader } from '@/components/workspace/catalog-page-header';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -10,7 +11,7 @@ import { CatalogFilterControls } from '@/components/workspace/catalog-filter-con
 
 type AIProjectListResponse = Omit<ContentListResponse, 'items'> & { items: AIProjectCard[] };
 
-export default async function AIProjectsPage({ searchParams }: { searchParams: Promise<{ search?: string; categoryId?: string; tag?: string; verificationStatus?: string }> }) {
+async function AIProjectsPage({ searchParams }: { searchParams: Promise<{ search?: string; categoryId?: string; tag?: string; verificationStatus?: string }> }) {
   const { search = '', categoryId, tag } = await searchParams;
   const filters = { search: search.trim() || undefined, categoryId, tag };
   const currentUser = await loadCurrentUser();
@@ -32,4 +33,8 @@ export default async function AIProjectsPage({ searchParams }: { searchParams: P
       ) : <section className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center"><h2 className="text-base font-medium text-white">没有找到可访问的 AI 项目</h2><p className="mt-2 text-sm text-white/45">{search ? '请尝试缩短关键词或清除搜索条件。' : '项目发布后会显示在这里。'}</p></section>}
     </main>
   );
+}
+
+export default async function CachedPage(props: Parameters<typeof AIProjectsPage>[0]) {
+  return <CachedWorkspacePage>{await AIProjectsPage(props)}</CachedWorkspacePage>;
 }
