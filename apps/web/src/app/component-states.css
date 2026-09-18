@@ -56,6 +56,22 @@
     color: var(--primary-foreground) !important;
     border-color: var(--primary) !important;
   }
+  .workspace-shell button.favorite-control[aria-pressed='true'] {
+    background-color: var(--secondary) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border) !important;
+  }
+  .workspace-shell button.favorite-control[aria-pressed='true']:hover:not(:disabled),
+  .workspace-shell button.favorite-control[aria-pressed='true']:focus-visible {
+    background-color: var(--muted) !important;
+    color: var(--foreground) !important;
+    border-color: var(--input) !important;
+  }
+  .workspace-shell button.favorite-control[aria-pressed='true'] svg {
+    color: #111 !important;
+    fill: #111 !important;
+    stroke: #111 !important;
+  }
   :is([data-slot='input'], [data-slot='textarea'], [data-slot='select-trigger'], [data-variant], [data-slot='tabs-trigger'], [data-card-link]):focus-visible {
     outline: 2px solid var(--control-focus) !important;
     outline-offset: 2px !important;

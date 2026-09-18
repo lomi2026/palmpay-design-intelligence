@@ -1473,7 +1473,6 @@ html:not(.dark) .workspace-shell button[aria-label='全局搜索'] {
   border-color: var(--input);
   cursor: pointer;
 }
-
 /* Dark information surfaces use fixed levels instead of translucent stacking. */
 html.dark .v9-source-home :is(article, section, header, div, aside)[data-card-surface],
 html.dark .v9-source-home [data-slot='card'] {

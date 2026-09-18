@@ -118,15 +118,46 @@ export class GovernanceService {
   }
 
   async createTag(user: AuthenticatedUser, input: CreateTagDto) {
-    const normalizedName = input.name.trim().toLocaleLowerCase('zh-CN');
+    const name = input.name.trim();
+    const normalizedName = name.toLocaleLowerCase('zh-CN');
+    const contentTypes = [...new Set(input.contentTypes ?? [])];
+    const existing = await this.prisma.tag.findFirst({
+      where: { organizationId: user.organizationId, normalizedName },
+    });
+
+    if (existing) {
+      if (!existing.deletedAt) throw new ConflictException('Tag already exists.');
+      const restored = await this.prisma.tag.update({
+        where: { id: existing.id },
+        data: {
+          name,
+          normalizedName,
+          contentTypes,
+          status: TagStatus.ACTIVE,
+          mergedToId: null,
+          deletedAt: null,
+        },
+      });
+      await this.audit.write({
+        organizationId: user.organizationId,
+        actorId: user.id,
+        action: 'taxonomy.tag.restore',
+        entityType: 'tag',
+        entityId: restored.id,
+        beforeData: existing,
+        afterData: restored,
+      });
+      return restored;
+    }
+
     try {
       const created = await this.prisma.tag.create({
         data: {
           organizationId: user.organizationId,
-          name: input.name.trim(),
+          name,
           normalizedName,
-          contentTypes: [...new Set(input.contentTypes ?? [])],
-          status: TagStatus.DISABLED,
+          contentTypes,
+          status: TagStatus.ACTIVE,
         },
       });
       await this.audit.write({

@@ -53,12 +53,23 @@ export async function PublishedContentDetail({
   const canArchive = user?.permissions.includes('content.archive') ?? false;
   const canUnpublish = user?.permissions.includes('content.unpublish') ?? false;
   const body = contentBody(content as unknown as Record<string, unknown>);
-  const website = readableValue(body.websiteUrl);
-  let safeWebsite = false;
-  try {
-    const u = new URL(website);
-    safeWebsite = ['http:', 'https:'].includes(u.protocol) && !u.username && !u.password;
-  } catch {}
+  const externalUrl = (value: unknown) => {
+    const candidate = Array.isArray(value) ? value.find((item) => safeExternalUrl(item)) : value;
+    return safeExternalUrl(candidate);
+  };
+  const safeExternalUrl = (value: unknown) => {
+    const url = readableValue(value);
+    if (!url) return null;
+    try {
+      const parsed = new URL(url);
+      return ['http:', 'https:'].includes(parsed.protocol) && !parsed.username && !parsed.password ? url : null;
+    } catch {
+      return null;
+    }
+  };
+  const toolUrl = externalUrl(body.websiteUrl);
+  const assetUrl = externalUrl(body.resourceLinks);
+  const caseUrl = externalUrl(body.caseUrl) ?? externalUrl((body.source as Record<string, unknown> | undefined)?.baselineUrl);
   return (
     <main className="detail-page unified-detail-page" data-content-type={type}>
       <Link className="back-link" href={`/workspace/${route}`}>
@@ -76,11 +87,27 @@ export async function PublishedContentDetail({
           <h1>{content.title}</h1>
           {content.summary ? <p className="detail-summary">{content.summary}</p> : null}
           <div className="detail-toolbar">
-            {type === 'AI_TOOL' && safeWebsite ? (
+            {type === 'AI_TOOL' && toolUrl ? (
               <Button asChild>
-                <a href={website} target="_blank" rel="noopener noreferrer">
+                <a href={toolUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink size={15} aria-hidden="true" />
                   打开工具
+                </a>
+              </Button>
+            ) : null}
+            {type === 'DESIGN_ASSET' && assetUrl ? (
+              <Button asChild>
+                <a href={assetUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink size={15} aria-hidden="true" />
+                  打开链接
+                </a>
+              </Button>
+            ) : null}
+            {type === 'AI_CASE' && caseUrl ? (
+              <Button asChild>
+                <a href={caseUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink size={15} aria-hidden="true" />
+                  打开案例
                 </a>
               </Button>
             ) : null}

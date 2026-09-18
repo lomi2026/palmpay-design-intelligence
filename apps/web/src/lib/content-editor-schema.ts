@@ -312,6 +312,13 @@ export const editorSections: Record<ContentType, EditorSection[]> = {
       description: '交代情境、问题及原有工作方式。',
       fields: [
         {
+          name: 'caseUrl',
+          label: '案例链接',
+          kind: 'text',
+          required: false,
+          placeholder: 'https://…',
+        },
+        {
           name: 'background',
           label: '案例背景',
           kind: 'textarea',

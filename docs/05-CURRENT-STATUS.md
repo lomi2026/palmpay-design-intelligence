@@ -1,3 +1,18 @@
+## 2026-09-18 PPCB 原测试镜像已晋级生产
+
+- 经用户明确授权，将已通过 PPCB 测试健康检查的 `REL-MU55VOKM-791F9CE9F6` 直接晋级生产；复用同一不可变镜像，未重新构建或上传源码。
+- 生产版本为 `v202609180639`（`REL-MU6L9329-23EF8B846F`），入口为 `https://ppcloudebase.palmpay-inc.com/apps/palmpay-design-hub-builder/`。发布后平台确认 `PUBLIC_READY`，2/2 实例 Ready、Available，均无重启。
+- 本次只发布原测试版本：未导入 AI 项目库或其他历史数据，未改动生产 R2 配置、原托管服务或既有附件。`f610d99` 的测试数据初始化源码构建仍失败，未重试、未提交新的 PPCB Issue。
+- 生产登录阻塞已定位：PPCB 网关已授予 Owner 访问，但运行时未配置 `PPCB_INTERNAL_SECRET`，应用前端转发身份到 API 时得到 401。该 Secret 必须由 Owner 在 Portal 的“运行时配置”中填写；保存后需重新部署同一已通过测试的镜像，不能通过 MCP 获取或写入明文。
+
+## 2026-09-17 PPCB 恢复 Node.js 24 并重发测试（尚未成功）
+
+- 按用户要求，在独立发布分支 `codex/ppcb-deployment` 恢复 Node.js >=24 和 `node:24-bookworm-slim`，保留 OpenSSL 依赖；提交 `3bd8c6a`。本目录的 09-16 正式版本和原线上网站未改动。
+- 实时平台 HEALTHY；此前 PPCB-1019～1023 均已 RESOLVED。Node.js 24 镜像、私有 OSS 业务文件 API、安全运行时配置均已提供。应用尚未接入新存储，旧数据/附件未迁移，R2 未停用。
+- 两次源码预检通过，使用 large 档重发测试；构建均在 Dockerfile 解析阶段报第4行 unknown instruction 单引号。第二次已改为单行安装命令，实际上传文件第4行是正常 RUN 且没有独立引号指令。疑似平台构建准备/配置改写问题，已提交 PPCB-1028（ISSUE-MU4ZJZG9-D0F23CABA7），具体原因待平台比对转换后文件。日志工具找不到对应 Pod，状态快照保留失败日志。
+- 最终构建 `BUILD-MU4ZHZD2-797CEDC4EA`，revision `REV-MU4ZHZD2-991262EB5D`，源码 SHA-256 `ea67b6eb21bd5077ee2126cd18d6c1190889e8bb551194c69c70bfcd40136139`。应用仍 DRAFT，无成功测试运行或生产发布。重试前需查询实时处理结果并下载核验最新纳管源码。
+- 本次按用户指定回滚原 PPCB 发布分支；该分支业务基线仍为 09-15 `c20ab96`，未自动覆盖本目录 09-16 的 `193f8ea`/`5d8277b` 新增功能。后续正式迁移必须先合并核验最新业务改动，并补齐 09-15 备份之后的数据与附件变化。
+
 ## 2026-09-16 本轮界面与管理优化已上线
 
 版本 `5d8277b9048ffbe1e847828f115afd4b3ca2bcc8` 已同步 main 与 codex/v1-project-handoff。Vercel Production `6481012165`、Render API `6480998961` 均成功。正式 API 健康 200，授权目录接口返回真实浏览次数，正式项目页返回 200 并展示筛选与浏览统计。发布包含 tags.content_types 兼容迁移；未复制本地业务数据。此条覆盖下方本轮未发布记录。
